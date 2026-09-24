@@ -9,7 +9,7 @@
   "plugins": [
     {
       "name": "team-workflow",
-      "description": "Shared project memory, an on-demand agent team and an end-of-task report that asks before applying changes.",
+      "description": "Shared project memory, on-demand teams of 20 specialist agents and an end-of-task report that asks before applying changes.",
       "source": "./",
       "category": "productivity"
     }

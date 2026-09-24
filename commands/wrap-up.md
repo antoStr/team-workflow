@@ -10,4 +10,6 @@ Use the team-workflow skill to close this session.
 3. Record the lessons that would have saved time under "Known traps" in the area card, and
    the structural decisions in `DECISIONS.md`.
 4. Run memcheck and set the resume point in `STATE.md`.
-5. Give the end-of-task report, including what is left for the next session.
+5. Propose a commit of the work and of the memory (AskUserQuestion); commit only after the
+   user agrees, and push only if they ask for it.
+6. Give the end-of-task report, including what is left for the next session.

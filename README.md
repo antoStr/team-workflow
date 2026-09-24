@@ -15,28 +15,37 @@ report a fine lavoro che chiede prima di applicare modifiche non richieste.
   arrivano solo quando serve davvero una decisione.
 - **Controlli**: `memcheck.py` verifica lunghezze, segreti e percorsi citati, anche in CI.
 
-## Il team
+## I team
 
-| Agente | Modello | Quando interviene |
+Venti agenti specializzati, organizzati in team. Un team e' un menu, non una squadra da
+lanciare tutta insieme: l'orchestratore propone i ruoli che servono al compito, tu scegli chi
+costruisce e chi controlla, e partono solo quelli.
+
+| Team | Chi costruisce | Chi controlla |
 |---|---|---|
-| architect | opus, effort alto | scelte strutturali: nuovi moduli, modello dati, API, refactor trasversali |
-| backend-dev | sonnet | codice server, CLI, librerie e dati |
-| frontend-dev | sonnet | interfaccia accessibile e responsive |
-| tester | sonnet | ogni modifica non banale; per i bug scrive prima il test che fallisce |
-| code-reviewer | sonnet | modifiche medie e grandi, prima del merge |
-| security-reviewer | opus, effort alto | autenticazione, input, rete, segreti, crittografia, dipendenze |
-| release-manager | sonnet | pipeline, versione, tag e note; pubblica solo dopo il tuo ok |
-| doc-keeper | haiku | aggiorna memoria e documentazione dal diff |
+| product | product-manager, ui-ux-designer | market-researcher, architect |
+| frontend | frontend-dev, ui-ux-designer | accessibility-specialist, e2e-tester, performance-engineer, code-reviewer |
+| backend | backend-dev, database-engineer | tester, security-reviewer, performance-engineer, code-reviewer |
+| fullstack | backend-dev, frontend-dev, database-engineer | tester, e2e-tester, code-reviewer, security-reviewer |
+| data | data-analyst, database-engineer | tester |
+| marketing | market-researcher, marketing-strategist | product-manager, ui-ux-designer |
+| quality | nessuno | tester, e2e-tester, code-reviewer, security-reviewer, accessibility-specialist, performance-engineer |
+| release | release-manager, devops-engineer | tester, technical-writer |
+| maintenance | refactor-specialist | tester, code-reviewer, performance-engineer |
+| docs | technical-writer, doc-keeper | nessuno |
+| architecture | architect | database-engineer, security-reviewer, performance-engineer, devops-engineer |
 
-L'orchestratore puo' alzare il modello per il singolo compito (opus per concorrenza,
-sicurezza, rischio di perdita di dati) o abbassarlo (haiku per lavori meccanici).
-Chi scrive il codice non lo approva mai da solo: lo verifica il tester.
+Modelli: architect e security-reviewer su opus con effort alto (dove un errore costa caro),
+doc-keeper su haiku (lavoro meccanico), tutti gli altri su sonnet. L'orchestratore puo'
+alzare o abbassare il modello per il singolo compito. Chi scrive il codice non lo approva mai
+da solo. Ruoli, modelli e permessi di ogni agente: `skills/team-workflow/TEAMS.md`.
 
 ## Comandi
 
 | Comando | Cosa fa |
 |---|---|
 | `/team-workflow:init` | crea `docs/memory` e la compila leggendo il codice |
+| `/team-workflow:team <team> <compito>` | chiama un team (frontend, backend, data, marketing...) |
 | `/team-workflow:feature <cosa>` | nuova funzionalita' con il team |
 | `/team-workflow:fix <bug>` | test che fallisce, correzione della causa, verifica |
 | `/team-workflow:review [range]` | test, review del codice e della sicurezza, un solo verdetto |
