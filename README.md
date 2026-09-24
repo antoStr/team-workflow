@@ -1,8 +1,17 @@
 # team-workflow
 
-Plugin per Claude Code che organizza il lavoro su un progetto come un piccolo team: una
-memoria di progetto condivisa, agenti specializzati che intervengono solo quando servono, e un
-report a fine lavoro che chiede prima di applicare modifiche non richieste.
+Plugin per **Claude Code** e **agy (Antigravity)** che organizza il lavoro su un progetto come
+un piccolo team: una memoria di progetto condivisa, agenti specializzati che intervengono solo
+quando servono, e un report a fine lavoro che chiede prima di applicare modifiche non richieste.
+
+| Funzione | Claude Code | agy |
+|---|---|---|
+| Memoria letta a ogni sessione | hook all'avvio | regole `AGENTS.md` |
+| Promemoria per aggiornare `STATE.md` | hook Stop | hook Stop |
+| Comandi (`init`, `team`, `docs`, `dashboard`...) | `/team-workflow:<nome>` | skill con lo stesso nome |
+| 20 agenti come sub-agenti nativi | si' | no (agy offre solo i suoi): partono come worker |
+| Wizard con modello, effort e stima dei costi | si' (domande a scelta) | si' (elenchi numerati) |
+| Token misurati nella dashboard | sessioni e sub-agenti | solo i worker |
 
 ## Cosa fa
 
@@ -52,6 +61,7 @@ da solo. Ruoli, modelli e permessi di ogni agente: `skills/team-workflow/TEAMS.m
 | `/team-workflow:ship [versione]` | rilascio, solo dopo la tua approvazione |
 | `/team-workflow:wrap-up` | chiude la sessione: memoria, lezioni apprese, punto di ripresa |
 | `/team-workflow:dashboard [giorni\|latest]` | token e costi per agente, modello e sessione |
+| `/team-workflow:docs [architettura\|onboarding\|changelog\|readme]` | documentazione per le persone ricavata dalla memoria, verificata sul codice |
 
 ## Wizard di assegnazione
 
@@ -94,18 +104,20 @@ sviluppo.
 
 ## Installazione
 
-Requisiti: Claude Code, `git` e `python3`.
+Requisiti: Claude Code e/o agy, `git` e `python3`. Claude Code:
 
 ```bash
 claude plugin marketplace add ~/Workspace/team-workflow
 claude plugin install team-workflow@team-workflow
 ```
 
-Per provarlo senza installarlo: `claude --plugin-dir ~/Workspace/team-workflow`.
+Per provarlo senza installarlo: `claude --plugin-dir ~/Workspace/team-workflow`. Per agy vedi la
+sezione [agy (Antigravity)](#agy-antigravity).
 
 ## Primo uso in un progetto
 
-1. Apri Claude Code nel repository e lancia `/team-workflow:init`.
+1. Apri Claude Code nel repository e lancia `/team-workflow:init` (in agy: chiedi la skill
+   `init`).
 2. Il comando crea `docs/memory`, rileva i comandi di build e test (Go, Node, Rust, Python,
    Maven, Gradle) e aggiunge un rimando in `AGENTS.md` (e in `GEMINI.md` o `CLAUDE.md` se ci
    sono), cosi' anche Gemini, Codex e Cursor leggono la stessa memoria.

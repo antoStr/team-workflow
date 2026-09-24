@@ -87,6 +87,8 @@ Never accept an agent's claim without evidence: read the diff and rerun the key 
   then it publishes.
 - `/team-workflow:wrap-up`: memory updated, lessons and decisions recorded, resume point set.
 - `/team-workflow:dashboard [days|latest]`: tokens and cost by agent, model and session.
+- `/team-workflow:docs [architecture|onboarding|changelog|readme]`: `technical-writer` turns the
+  memory into documentation for people, every fact checked against the code.
 
 ## 6. Definition of done
 

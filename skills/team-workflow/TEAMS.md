@@ -42,7 +42,7 @@ results and keeps the memory.
 | `code-reviewer` | sonnet | quality review | nothing |
 | `security-reviewer` | opus, high effort | security review from input to impact | nothing |
 | `release-manager` | sonnet | pipeline, version, tag, notes, publication | release files |
-| `technical-writer` | sonnet | README, guides, API docs, release notes | documentation |
+| `technical-writer` | sonnet | README, guides, API docs, release notes, docs from the memory | documentation |
 | `doc-keeper` | haiku | project memory from the diff | `docs/memory` |
 | `data-analyst` | sonnet | spreadsheets and data: cleaning, statistics, charts, report | analysis outputs |
 | `market-researcher` | sonnet | competitors, customers, market size, with sources | research report |
