@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "team-workflow",
+  "description": "Team workflow for Claude Code: shared project memory, an agent team and an end-of-task report.",
+  "owner": {
+    "name": "antoStr",
+    "email": "antostr.dev@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "team-workflow",
+      "description": "Shared project memory, an on-demand agent team and an end-of-task report that asks before applying changes.",
+      "source": "./",
+      "category": "productivity"
+    }
+  ]
+}

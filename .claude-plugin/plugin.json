@@ -1,0 +1,10 @@
+{
+  "name": "team-workflow",
+  "version": "0.1.0",
+  "description": "Shared project memory read at every session, an on-demand agent team (architect, backend, frontend, tester, release) led by the main session, and an end-of-task report that asks before applying changes.",
+  "author": {
+    "name": "antoStr",
+    "email": "antostr.dev@gmail.com"
+  },
+  "keywords": ["memory", "team", "agents", "workflow", "report"]
+}

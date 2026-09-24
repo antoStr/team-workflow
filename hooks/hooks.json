@@ -1,0 +1,28 @@
+{
+  "description": "team-workflow: load the project memory at session start; ask for a memory update when files changed after docs/memory/STATE.md.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/skills/team-workflow/scripts/session_start.py\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/skills/team-workflow/scripts/stop_check.py\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
