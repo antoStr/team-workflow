@@ -51,6 +51,43 @@ da solo. Ruoli, modelli e permessi di ogni agente: `skills/team-workflow/TEAMS.m
 | `/team-workflow:review [range]` | test, review del codice e della sicurezza, un solo verdetto |
 | `/team-workflow:ship [versione]` | rilascio, solo dopo la tua approvazione |
 | `/team-workflow:wrap-up` | chiude la sessione: memoria, lezioni apprese, punto di ripresa |
+| `/team-workflow:dashboard [giorni\|latest]` | token e costi per agente, modello e sessione |
+
+## Wizard di assegnazione
+
+Ogni volta che partono degli agenti (team, feature, fix, review, rilascio) il wizard chiede,
+per ciascuno: su cosa lavora, come, con quale modello e con quale effort, mostrando per ogni
+modello la stima di token e costo. Alla fine un tabellone riassume tutto con il totale e parte
+solo con il tuo ok. Scrivi "defaults" per la versione rapida.
+
+- **Stime**: `scripts/estimate.py`, tarate su esecuzioni reali; dopo due esecuzioni di un ruolo
+  nel progetto usa la mediana della sua storia.
+- **Avvio nativo** (predefinito): sub-agente di Claude Code con il modello scelto; l'effort e'
+  quello della definizione dell'agente.
+- **Avvio worker**: `scripts/run_worker.py` esegue `claude -p` o `agy -p` con modello ed effort
+  esatti e registra i token in `~/.team-workflow/ledger/`. Sola lettura, salvo tuo consenso.
+
+## Dashboard dei consumi
+
+`/team-workflow:dashboard` (o `scripts/dashboard.py --root . --html`) mostra costo ai prezzi di
+listino API, token, quota letta dalla cache, consumi per agente, modello e sessione, salute della
+memoria e catalogo degli agenti; la pagina HTML e' autonoma, anche in tema scuro. I prezzi stanno
+in `skills/team-workflow/pricing.json` (data e fonte indicate, modificabili). Con un abbonamento
+i costi indicano consumo, non una fattura.
+
+## agy (Antigravity)
+
+```bash
+python3 ~/Workspace/team-workflow/skills/team-workflow/scripts/install_agy.py   # tutti i progetti
+python3 .../install_agy.py --workspace /percorso/repo                              # un solo progetto
+```
+
+Crea il plugin agy (`~/.gemini/config/plugins/team-workflow/`) con la skill, i comandi (agy li
+trasforma in skill), le regole che portano la memoria e gli hook nel formato di agy. Limiti di
+agy ad oggi: convalida i 20 agenti ma non li offre come sub-agenti (solo i suoi `self` e
+`research`), e registra i token solo per le esecuzioni headless. Per questo su agy i ruoli
+partono come worker (modello ed effort esatti, consumi misurati) oppure come sub-agente `self`
+con il ruolo come istruzioni. Dopo ogni modifica al plugin, rilancia `install_agy.py`.
 
 Non e' obbligatorio usarli: basta chiedere normalmente, la skill si attiva sul lavoro di
 sviluppo.

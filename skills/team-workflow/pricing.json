@@ -1,0 +1,24 @@
+{
+  "updated": "2026-06-24",
+  "source": "Claude API reference (cached 2026-06-24); live prices: https://platform.claude.com/docs/en/about-claude/pricing",
+  "unit": "USD per million tokens",
+  "notes": "Cache writes cost 1.25x input (5-minute TTL) or 2x input (1-hour TTL); cache reads cost 0.1x input unless cache_read is listed. Models missing here (for example the Gemini models in agy, which run on a subscription quota) show tokens without a price: add them here to price them.",
+  "aliases": {
+    "fable": "claude-fable-5-1",
+    "opus": "claude-opus-5-5",
+    "sonnet": "claude-sonnet-5",
+    "haiku": "claude-haiku-4-5"
+  },
+  "models": {
+    "claude-fable-5-1": {"input": 10, "output": 50, "cache_read": 0.25, "effort": ["low", "medium", "high", "xhigh", "max"]},
+    "claude-fable-5": {"input": 10, "output": 50, "cache_read": 1.0, "effort": ["low", "medium", "high", "xhigh", "max"]},
+    "claude-opus-5-5": {"input": 4, "output": 20, "cache_read": 0.2, "effort": ["low", "medium", "high", "xhigh", "max"]},
+    "claude-opus-5": {"input": 5, "output": 25, "effort": ["low", "medium", "high", "xhigh", "max"]},
+    "claude-opus-4-8": {"input": 5, "output": 25, "effort": ["low", "medium", "high", "xhigh", "max"]},
+    "claude-opus-4-7": {"input": 5, "output": 25, "effort": ["low", "medium", "high", "xhigh", "max"]},
+    "claude-opus-4-6": {"input": 5, "output": 25, "effort": ["low", "medium", "high", "max"]},
+    "claude-sonnet-5": {"input": 2, "output": 10, "effort": ["low", "medium", "high", "xhigh", "max"]},
+    "claude-sonnet-4-6": {"input": 3, "output": 15, "effort": ["low", "medium", "high", "max"]},
+    "claude-haiku-4-5": {"input": 1, "output": 5, "effort": []}
+  }
+}

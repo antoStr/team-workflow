@@ -34,12 +34,9 @@ The scripts named below live in the `scripts/` folder next to this file; the tea
 | Whole area | "call the frontend team", data study, market analysis | the team in `TEAMS.md` |
 | Release | version, tag, publish | `release-manager`, after the `tester` approved |
 
-From small tasks up, propose the team with AskUserQuestion: `multiSelect: true`, at most four
-options per question (ask "Who builds?" and "Who checks?" separately when needed), the roles
-this task needs first and marked "(Recommended)", one line each on what the role will do. The
-user can also write their own answer. Skip the question for trivial tasks and when the user
-already named the team. Without AskUserQuestion (other tools), give numbered options and "or
-write your own".
+Before spawning any agent, run the assignment wizard in `WIZARD.md`: roles, then for each agent
+what it works on, how, model and effort with the estimated cost, then one board to confirm.
+Skip it only for trivial tasks you do yourself; "defaults" gives the short version.
 
 ## 3. The agents and how smart they are
 
@@ -89,6 +86,7 @@ Never accept an agent's claim without evidence: read the diff and rerun the key 
 - `/team-workflow:ship [version]`: `release-manager` runs the pipeline; the user approves;
   then it publishes.
 - `/team-workflow:wrap-up`: memory updated, lessons and decisions recorded, resume point set.
+- `/team-workflow:dashboard [days|latest]`: tokens and cost by agent, model and session.
 
 ## 6. Definition of done
 
@@ -127,8 +125,18 @@ When files changed (the Stop hook reminds you if `STATE.md` is older than the la
 
 Set `TEAM_WORKFLOW_STOP_CHECK=0` in the environment to turn the Stop reminder off.
 
-## 9. Other tools
+## 9. Claude Code and agy
 
-`init_memory.py` adds a pointer block to `AGENTS.md` (and to `GEMINI.md` or `CLAUDE.md` when
-they exist), so Gemini, Codex or Cursor read the same memory and follow the same report
-protocol, without the team agents.
+- **Claude Code**: agents are `team-workflow:<role>`; commands are `/team-workflow:<name>`; the
+  hooks load the memory at session start and check `STATE.md` at the end of a turn.
+- **agy (Antigravity)**: install with `python3 <skill>/scripts/install_agy.py`. agy turns the
+  commands into skills; the memory comes through the `AGENTS.md` rules and the Stop hook checks
+  `STATE.md`. agy validates the plugin's agents but does not offer them as subagents yet (only
+  its own `self` and `research`): launch a role as a worker, `run_worker.py --harness agy`,
+  which also gives an exact model and effort and measured usage, or brief a `self` subagent
+  with `agents/<role>.md`. Ask with numbered options instead of AskUserQuestion.
+- `init_memory.py` also adds the memory pointer to `AGENTS.md` (and `GEMINI.md` or `CLAUDE.md`
+  when they exist), so any other tool reads the same memory.
+
+Scripts: `estimate.py` (cost before launch), `run_worker.py` (exact model and effort, usage
+recorded), `dashboard.py` (usage after), `memcheck.py`, `init_memory.py`, `install_agy.py`.

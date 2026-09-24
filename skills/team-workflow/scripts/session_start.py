@@ -8,7 +8,8 @@ for the Stop hook (stop_check.py).
 import json
 import os
 
-from common import MEMORY_DIR, dirty_paths, git, read_hook_input, repo_root, snapshot_path
+from common import (MEMORY_DIR, dirty_paths, git, is_agy, read_hook_input, repo_root, session_id,
+                    snapshot_path)
 
 MAX_CHARS = 12000  # INDEX + STATE within their limits stay far below this
 PROTOCOL = ("team-workflow: follow the team-workflow skill. Read the area card before coding, "
@@ -48,9 +49,12 @@ def main():
     if not root:
         return
     try:
-        save_snapshot(root, data.get("session_id"))
+        save_snapshot(root, session_id(data))
     except OSError:
         pass  # the Stop hook then looks at the working tree alone
+    if is_agy(data):  # PreInvocation in agy: the memory arrives through the AGENTS.md rules
+        print("{}")
+        return
     print(json.dumps({"hookSpecificOutput": {"hookEventName": "SessionStart",
                                              "additionalContext": memory_context(root)}}))
 

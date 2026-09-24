@@ -27,10 +27,41 @@ def git(root, *args):
     return out.stdout if out.returncode == 0 else None
 
 
+def is_agy(data):
+    """agy (Antigravity) hook payloads use camelCase keys and list the workspace paths."""
+    return "conversationId" in data or "workspacePaths" in data
+
+
+def session_id(data):
+    return data.get("session_id") or data.get("conversationId")
+
+
+def ancestor_dirs(levels=3):
+    """Working folders of the parent processes (Linux /proc). agy runs hooks from the plugin
+    folder and, in print mode, sends no workspace path: its own folder is the repository."""
+    pid, dirs = os.getppid(), []
+    for _ in range(levels):
+        try:
+            dirs.append(os.readlink(f"/proc/{pid}/cwd"))
+            with open(f"/proc/{pid}/stat", encoding="utf-8") as f:
+                pid = int(f.read().rsplit(")", 1)[1].split()[1])
+        except (OSError, ValueError, IndexError):
+            break
+    return dirs
+
+
 def repo_root(data):
-    start = data.get("cwd") or os.environ.get("CLAUDE_PROJECT_DIR") or os.getcwd()
-    out = git(start, "rev-parse", "--show-toplevel")
-    return out.strip() if out else None
+    """Claude Code: the session's folder. agy: its workspaces, else the folder of the agy
+    process that runs the hook. None outside a git repository."""
+    if is_agy(data):
+        candidates = [*(data.get("workspacePaths") or []), *ancestor_dirs(), os.getcwd()]
+    else:
+        candidates = [data.get("cwd") or os.environ.get("CLAUDE_PROJECT_DIR") or os.getcwd()]
+    for start in filter(None, candidates):
+        out = git(start, "rev-parse", "--show-toplevel")
+        if out:
+            return out.strip()
+    return None
 
 
 def dirty_paths(root):

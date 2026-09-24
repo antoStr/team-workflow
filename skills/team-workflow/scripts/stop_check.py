@@ -7,7 +7,8 @@ never blocks twice in a row (stop_hook_active) and is off with TEAM_WORKFLOW_STO
 import json
 import os
 
-from common import MEMORY_DIR, dirty_paths, git, read_hook_input, repo_root, snapshot_path
+from common import (MEMORY_DIR, dirty_paths, git, is_agy, read_hook_input, repo_root, session_id,
+                    snapshot_path)
 
 STATE = f"{MEMORY_DIR}/STATE.md"
 REASON = ("team-workflow: files changed after docs/memory/STATE.md was last updated. Before "
@@ -31,13 +32,15 @@ def newest_mtime(root, paths):
 
 
 def decide(data):
-    if data.get("stop_hook_active") or os.environ.get("TEAM_WORKFLOW_STOP_CHECK") == "0":
+    """Claude Code: {"decision": "block"}; agy: {"decision": "continue"}; None lets it stop."""
+    again = data.get("stop_hook_active") or (data.get("executionNum") or 0) > 0  # agy counts from 0
+    if again or os.environ.get("TEAM_WORKFLOW_STOP_CHECK") == "0":
         return None
     root = repo_root(data)
     if not root or not os.path.isfile(os.path.join(root, STATE)):
         return None
     try:
-        with open(snapshot_path(data.get("session_id")), encoding="utf-8") as f:
+        with open(snapshot_path(session_id(data)), encoding="utf-8") as f:
             snap = json.load(f)
     except (OSError, ValueError):
         snap = {}
@@ -45,9 +48,23 @@ def decide(data):
     work = [p for p in changed if not p.startswith(MEMORY_DIR + "/")]
     if not work:
         return None
-    if STATE in changed and os.path.getmtime(os.path.join(root, STATE)) >= newest_mtime(root, work):
+    newest = newest_mtime(root, work)
+    if STATE in changed and os.path.getmtime(os.path.join(root, STATE)) >= newest:
         return None
-    return {"decision": "block", "reason": REASON}
+    # Ask once per state of the files, whatever the tool's own loop counter does.
+    mark, fingerprint = snapshot_path(session_id(data)) + ".asked", f"{sorted(work)}|{newest}"
+    try:
+        with open(mark, encoding="utf-8") as f:
+            if f.read() == fingerprint:
+                return None
+    except OSError:
+        pass
+    try:
+        with open(mark, "w", encoding="utf-8") as f:
+            f.write(fingerprint)
+    except OSError:
+        pass
+    return {"decision": "continue" if is_agy(data) else "block", "reason": REASON}
 
 
 def main():
