@@ -88,16 +88,18 @@ i costi indicano consumo, non una fattura.
 ## agy (Antigravity)
 
 ```bash
-python3 ~/Workspace/team-workflow/skills/team-workflow/scripts/install_agy.py   # tutti i progetti
-python3 .../install_agy.py --workspace /percorso/repo                              # un solo progetto
+agy plugin install https://github.com/antoStr/team-workflow   # oppure il percorso locale del repo
+agy plugin uninstall team-workflow                            # prima di reinstallare una nuova versione
+python3 skills/team-workflow/scripts/install_agy.py --workspace /percorso/repo   # un solo progetto
 ```
 
-Crea il plugin agy (`~/.gemini/config/plugins/team-workflow/`) con la skill, i comandi (agy li
+Il repository e' anche un plugin agy (`plugin.json`, `hooks.json` e `rules/` nella radice, che
+Claude Code ignora). agy lo installa in `~/.gemini/config/plugins/team-workflow/` con la skill, i comandi (agy li
 trasforma in skill), le regole che portano la memoria e gli hook nel formato di agy. Limiti di
 agy ad oggi: convalida i 20 agenti ma non li offre come sub-agenti (solo i suoi `self` e
 `research`), e registra i token solo per le esecuzioni headless. Per questo su agy i ruoli
 partono come worker (modello ed effort esatti, consumi misurati) oppure come sub-agente `self`
-con il ruolo come istruzioni. Dopo ogni modifica al plugin, rilancia `install_agy.py`.
+con il ruolo come istruzioni.
 
 Non e' obbligatorio usarli: basta chiedere normalmente, la skill si attiva sul lavoro di
 sviluppo.
