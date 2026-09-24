@@ -1,6 +1,8 @@
 ---
+name: feature
 description: Build a feature with the team - plan, choose the agents, implement, verify, review, report
 argument-hint: "<what to build>"
+disable-model-invocation: true
 ---
 
 Use the team-workflow skill to build this feature: $ARGUMENTS

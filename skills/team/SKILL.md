@@ -1,6 +1,8 @@
 ---
+name: team
 description: Assemble a team (product, frontend, backend, fullstack, data, marketing, quality, release, maintenance, docs, architecture) for a task
 argument-hint: "<team> <task>"
+disable-model-invocation: true
 ---
 
 Use the team-workflow skill. Read `TEAMS.md` in the skill's folder, then assemble a team for:

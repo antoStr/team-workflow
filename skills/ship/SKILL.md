@@ -1,6 +1,8 @@
 ---
+name: ship
 description: Release verified work - run the pipeline, prepare version, commit, tag and notes, publish after approval
 argument-hint: "[version or notes]"
+disable-model-invocation: true
 ---
 
 Use the team-workflow skill to release: $ARGUMENTS

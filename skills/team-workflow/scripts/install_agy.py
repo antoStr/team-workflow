@@ -6,9 +6,9 @@ The repository itself is an agy plugin: the usual install is
 for one project only (--workspace) or to copy just the files agy needs.
 
 agy discovers plugins in its customization roots: ~/.gemini/config/plugins/<name>/ for every
-project, <repository>/.agents/plugins/<name>/ for one. agy reads the Claude Code agents and
-commands as they are (it turns commands into skills); what differs is the manifest, the rules
-file and the hooks, whose events and payloads are agy's own (PreInvocation, Stop).
+project, <repository>/.agents/plugins/<name>/ for one. agy loads skills/<name>/SKILL.md (the
+workflows are skills, so both harnesses read them), rules/, hooks.json and plugin.json; it does
+not load agents/ as subagents, which are copied for workers to brief from.
 
     python3 install_agy.py [--workspace REPOSITORY | --dest DIR]
 """
@@ -37,9 +37,9 @@ def build(dest):
         if not ours(dest):
             raise SystemExit(f"{dest} exists and is not a team-workflow plugin: not touching it")
         shutil.rmtree(dest)  # a previous build of this same plugin
-    shutil.copytree(SKILL, os.path.join(dest, "skills", NAME),
+    shutil.copytree(os.path.join(PLUGIN, "skills"), os.path.join(dest, "skills"),
                     ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
-    for part in ("agents", "commands", "rules"):  # agy reads Claude Code agents, commands -> skills
+    for part in ("agents", "rules"):
         shutil.copytree(os.path.join(PLUGIN, part), os.path.join(dest, part))
     for name in ("plugin.json", "hooks.json"):  # agy's manifest and hooks, kept at the repo root
         shutil.copy(os.path.join(PLUGIN, name), dest)

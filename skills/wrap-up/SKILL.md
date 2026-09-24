@@ -1,5 +1,7 @@
 ---
+name: wrap-up
 description: Close the session - update the project memory, record lessons and decisions, report what is left
+disable-model-invocation: true
 ---
 
 Use the team-workflow skill to close this session.

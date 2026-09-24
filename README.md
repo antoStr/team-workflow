@@ -94,8 +94,8 @@ python3 skills/team-workflow/scripts/install_agy.py --workspace /percorso/repo  
 ```
 
 Il repository e' anche un plugin agy (`plugin.json`, `hooks.json` e `rules/` nella radice, che
-Claude Code ignora). agy lo installa in `~/.gemini/config/plugins/team-workflow/` con la skill, i comandi (agy li
-trasforma in skill), le regole che portano la memoria e gli hook nel formato di agy. Limiti di
+Claude Code ignora). agy lo installa in `~/.gemini/config/plugins/team-workflow/` con le skill
+(`team-workflow` e un workflow per skill in `skills/<nome>/`: `init`, `team`, `feature`, ...), le regole che portano la memoria e gli hook nel formato di agy. Limiti di
 agy ad oggi: convalida i 20 agenti ma non li offre come sub-agenti (solo i suoi `self` e
 `research`), e registra i token solo per le esecuzioni headless. Per questo su agy i ruoli
 partono come worker (modello ed effort esatti, consumi misurati) oppure come sub-agente `self`
@@ -148,5 +148,5 @@ citati che nel repository non esistono.
 
 ```bash
 python3 -m unittest discover -s tests
-for p in .claude-plugin/plugin.json agents commands skills; do claude plugin validate "$p" --strict; done
+for p in .claude-plugin/plugin.json agents skills; do claude plugin validate "$p" --strict; done
 ```

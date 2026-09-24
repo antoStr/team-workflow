@@ -1,6 +1,8 @@
 ---
+name: dashboard
 description: Token and cost dashboard of this repository - by agent, model and session, with memory health
 argument-hint: "[days | latest]"
+disable-model-invocation: true
 ---
 
 Use the team-workflow skill to show the usage dashboard: $ARGUMENTS

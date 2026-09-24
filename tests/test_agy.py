@@ -64,8 +64,11 @@ class AgyPluginTest(unittest.TestCase):
                 self.assertEqual(sorted(json.load(f)["team-workflow"]), ["PreInvocation", "Stop"])
             self.assertTrue(os.path.isfile(os.path.join(dest, "rules", "AGENTS.md")))
             self.assertTrue(os.path.isfile(os.path.join(dest, "agents", "tester.md")))
-            self.assertTrue(os.path.isfile(os.path.join(dest, "commands", "team.md")))
-            self.assertEqual(os.listdir(os.path.join(dest, "skills")), ["team-workflow"])
+            skills = os.path.join(dest, "skills")
+            self.assertIn("team-workflow", os.listdir(skills))
+            for name in ("init", "team", "wrap-up"):  # agy loads only skills/<name>/SKILL.md
+                with open(os.path.join(skills, name, "SKILL.md"), encoding="utf-8") as f:
+                    self.assertIn(f"name: {name}\n", f.read())
             self.assertEqual(self.build(dest).returncode, 0)  # rebuilding replaces its own output
 
     def test_never_replaces_a_foreign_folder(self):

@@ -73,7 +73,7 @@ Agents start with an empty context and know only what you send.
 
 Never accept an agent's claim without evidence: read the diff and rerun the key command.
 
-## 5. Workflows (also available as commands)
+## 5. Workflows (also available as skills)
 
 - `/team-workflow:init`: create `docs/memory` and fill it from the code.
 - `/team-workflow:team <team> <task>`: assemble a team from `TEAMS.md` for a task.
@@ -132,8 +132,8 @@ Set `TEAM_WORKFLOW_STOP_CHECK=0` in the environment to turn the Stop reminder of
 - **Claude Code**: agents are `team-workflow:<role>`; commands are `/team-workflow:<name>`; the
   hooks load the memory at session start and check `STATE.md` at the end of a turn.
 - **agy (Antigravity)**: install with `agy plugin install <repository url or path>` (one
-  project only: `python3 <skill>/scripts/install_agy.py --workspace <repo>`). agy turns the
-  commands into skills; the memory comes through the `AGENTS.md` rules and the Stop hook checks
+  project only: `python3 <skill>/scripts/install_agy.py --workspace <repo>`). Each workflow is
+  its own skill (`skills/<name>/SKILL.md`); the memory comes through the `AGENTS.md` rules and the Stop hook checks
   `STATE.md`. agy validates the plugin's agents but does not offer them as subagents yet (only
   its own `self` and `research`): launch a role as a worker, `run_worker.py --harness agy`,
   which also gives an exact model and effort and measured usage, or brief a `self` subagent

@@ -1,6 +1,8 @@
 ---
+name: init
 description: Set up the shared project memory (docs/memory) in this repository and fill it from the code
 argument-hint: "[notes about the project]"
+disable-model-invocation: true
 ---
 
 Use the team-workflow skill to set up the project memory of this repository.

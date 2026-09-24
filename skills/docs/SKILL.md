@@ -1,6 +1,8 @@
 ---
+name: docs
 description: Write or refresh documentation for people from the project memory - architecture, onboarding, changelog, README - with every fact checked against the code
 argument-hint: "[architecture | onboarding | changelog | readme | all]"
+disable-model-invocation: true
 ---
 
 Use the team-workflow skill to write documentation from the project memory: $ARGUMENTS
