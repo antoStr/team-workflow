@@ -37,6 +37,9 @@ The scripts named below live in the `scripts/` folder next to this file; the tea
 Before spawning any agent, run the assignment wizard in `WIZARD.md`: roles, then for each agent
 what it works on, how, model and effort with the estimated cost, then one board to confirm.
 Skip it only for trivial tasks you do yourself; "defaults" gives the short version.
+A detailed brief pasted by the user is input for the agents' briefs, not a reason to work
+alone: size the task all the same. In agy, whose own routine asks you to choose between working
+solo and delegating, choose delegation for every size above trivial.
 
 ## 3. The agents and how smart they are
 
