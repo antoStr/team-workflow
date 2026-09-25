@@ -233,7 +233,13 @@ agy plugin install https://github.com/antoStr/team-workflow
 
 Riavvia la sessione dopo l'aggiornamento. Dalla 0.6.0 gli agenti di Claude Code si chiamano come il
 ruolo (`tester`, non piu' `team-workflow:tester`) e vengono scritti in `~/.claude/agents/` alla
-prima sessione in un repository git; `/team-workflow:doctor` controlla che sia tutto a posto.
+prima sessione in un repository git: Claude Code li carica dalla sessione successiva (un avviso te
+lo ricorda; nel frattempo l'orchestratore usa `general-purpose` con le istruzioni del ruolo).
+`/team-workflow:doctor` controlla che sia tutto a posto.
+
+Con ECC installato in un progetto per agy, i suoi agenti con lo stesso nome (`architect`,
+`code-reviewer`, `security-reviewer` e i revisori dei linguaggi) sostituiscono i nostri in quel
+progetto: `doctor` e `addons add ecc` li elencano. In Claude Code non succede (i suoi sono `ecc:*`).
 
 ## Impostazioni
 

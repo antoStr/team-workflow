@@ -222,7 +222,13 @@ def agy_apply(action, name, entry, root):
         verb = ["uninstall"] if action == "remove" else ["install", "--profile", "minimal",
                                                          "--target", "antigravity"]
         ok, out = run("npx", "-y", f"ecc-universal@{version}", *verb, cwd=root)
-        return ok, f"$ npx ecc-universal@{version} {' '.join(verb)}  (in {root})\n{out}"
+        log = f"$ npx ecc-universal@{version} {' '.join(verb)}  (in {root})\n{out}"
+        import roles
+        shadow = roles.shadowed("agy", root) if ok and action != "remove" else []
+        if shadow:
+            log += ("\nnote: in this project agy now uses ECC's agents instead of team-workflow's for: "
+                    + ", ".join(shadow))
+        return ok, log
     source = (f"https://github.com/{entry['repo']}" if kind == "plugin"
               else f"{entry['plugin']}@{entry['marketplace']}")
     log = []

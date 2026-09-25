@@ -85,6 +85,10 @@ def checks(root=None):
         if r["skipped"]:
             add("warn", f"{app} agents", "files not written by team-workflow shadow these roles: "
                                          + ", ".join(r["skipped"]))
+        project = roles.shadowed(app, root, config)
+        if project:
+            add("warn", f"{app} agents", "in this repository, project agents with the same name "
+                "replace these roles (for example ECC's): " + ", ".join(project))
 
     for name, entry in addons.chosen(config).items():
         for app in entry.get("apps", addons.APPS):

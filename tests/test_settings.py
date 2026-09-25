@@ -93,6 +93,18 @@ class NoModelCommandTest(ScriptTest):
         self.assertIn('team-workflow settings: wizard="full"', context)
 
 
+class FirstSessionTest(ScriptTest):
+    def test_first_session_writes_agents_and_asks_for_a_restart(self):
+        self.init_memory()
+        hook = {"cwd": self.root, "session_id": "first"}
+        first = json.loads(self.run_script("session_start.py", hook=hook).stdout)
+        self.assertIn("restart Claude Code", first["systemMessage"])
+        self.assertIn("general-purpose", first["hookSpecificOutput"]["additionalContext"])
+        self.assertTrue(os.path.isfile(os.path.join(self.tmp, ".claude", "agents", "tester.md")))
+        second = json.loads(self.run_script("session_start.py", hook=dict(hook, session_id="second")).stdout)
+        self.assertNotIn("systemMessage", second)
+
+
 class AgySubagentTest(unittest.TestCase):
     def setUp(self):
         tmp = tempfile.TemporaryDirectory()

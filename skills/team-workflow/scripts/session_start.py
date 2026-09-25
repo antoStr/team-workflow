@@ -60,9 +60,11 @@ def main():
         pass  # the Stop hook then looks at the working tree alone
     config = settings.load(root)
     app = "agy" if is_agy(data) else "claude"
+    changed = []
     if app == "claude" or (data.get("invocationNum") or 0) <= 1:
         try:
-            roles.sync(app, config=config, root=root)
+            r = roles.sync(app, config=config, root=root)
+            changed = r["written"] + r["removed"]
         except (OSError, ValueError):
             pass  # the agents stay as they were; `tw.py agents sync` rewrites them by hand
     if app == "agy":  # PreInvocation in agy: the memory arrives through the AGENTS.md rules
@@ -73,11 +75,19 @@ def main():
     if missing:
         context += (f"\nteam-workflow: this repository uses {', '.join(missing)}; their reviewer and "
                     "build-fixer packs are off (offer: tw.py agents enable auto).")
-    out = {"hookSpecificOutput": {"hookEventName": "SessionStart", "additionalContext": context}}
+    notes = []
+    if changed:  # Claude Code loaded its agents before this hook wrote them
+        context += (f"\nteam-workflow: these agents were written or changed now and load from the next "
+                    f"session: {', '.join(changed)}. In this session launch them as general-purpose "
+                    "with `tw.py agents show <role>` as their instructions.")
+        notes.append(f"team-workflow: {len(changed)} agents updated; restart Claude Code to use them.")
     newer = update_plugin.newer_version() if config["update_check"] else None
     if newer:
-        out["systemMessage"] = (f"team-workflow {newer} is available (installed "
-                                f"{update_plugin.own_version()}): /team-workflow:update-plugin")
+        notes.append(f"team-workflow {newer} is available (installed "
+                     f"{update_plugin.own_version()}): /team-workflow:update-plugin")
+    out = {"hookSpecificOutput": {"hookEventName": "SessionStart", "additionalContext": context}}
+    if notes:
+        out["systemMessage"] = " ".join(notes)
     print(json.dumps(out))
 
 

@@ -260,6 +260,24 @@ def sync(app, config=None, root=None, dest=None, dry_run=False):
     return result
 
 
+def shadowed(app, root, config=None):
+    """Enabled roles that a project-level agent with the same name, not written by us, replaces
+    in this repository (<root>/.claude/agents or <root>/.agents/agents): the app prefers it."""
+    if not root:
+        return []
+    config = config or settings.load(root)
+    folder = native_dir(app, root)
+    found = []
+    for role, info in catalog(root).items():
+        path = os.path.join(folder, role + ".md")
+        if (os.path.isfile(path) and is_enabled(config, role, info["pack"])
+                and plan(config, role, app)["type"] == "custom"):
+            with open(path, encoding="utf-8", errors="replace") as f:
+                if not ours(f.read()):
+                    found.append(role)
+    return found
+
+
 def table(config, root=None):
     """Rows for `tw.py agents`: role, pack, on/off, then type/model/effort per app."""
     rows = []
