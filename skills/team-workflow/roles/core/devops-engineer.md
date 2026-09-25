@@ -1,7 +1,6 @@
 ---
 name: devops-engineer
 description: Use this agent for build, delivery and operations: CI/CD pipelines, containers, infrastructure as code, deployments and environments, secrets management, logging, monitoring and alerts, and reliability (backups, rollbacks, incident runbooks). Typical triggers include a failing or slow pipeline, a new service to deploy, a Dockerfile or workflow to write, missing monitoring, or a release that needs a safe rollout. See "When to invoke" in the agent body.
-model: sonnet
 color: orange
 ---
 

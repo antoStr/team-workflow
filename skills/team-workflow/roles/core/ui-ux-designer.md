@@ -1,7 +1,6 @@
 ---
 name: ui-ux-designer
 description: Use this agent to design how a feature looks and behaves before or while it is built: user flows, screen layouts, every state (loading, empty, error), interface copy, visual consistency and design-system tokens and components. Typical triggers include a new page or flow, a confusing interface, inconsistent styles across screens, or a design system to create or extend. It produces design specs and, when assigned, style and markup files. See "When to invoke" in the agent body.
-model: sonnet
 color: magenta
 ---
 

@@ -24,8 +24,17 @@ DEFAULTS = {
         "agy": {"default": "inherit", "architect": "pro", "security-reviewer": "pro",
                 "doc-keeper": "flash"},
     },
-    # Effort per role (workers in both apps): low, medium, high, xhigh, max.
+    # Effort per role: low, medium, high, xhigh, max (Claude Code agents and workers; agy puts
+    # the effort in the worker's model id). Models without effort (haiku) ignore it.
     "effort": {"default": "medium", "architect": "high", "security-reviewer": "high"},
+    # Agent type per role, per app. custom = our generated subagent (default); worker = a
+    # headless process with exact model and effort; or a built-in type of the app, briefed with
+    # the role: Claude Code general-purpose, Explore, Plan; agy self, research.
+    "type": {"claude": {"default": "custom"}, "agy": {"default": "custom"}},
+    # Packs of roles (core, languages, quality...) on or off; a role inside an enabled pack can
+    # still be switched off with enabled.<role> false.
+    "packs": {"default": False, "core": True, "custom": True},
+    "enabled": {"default": True},
     # Add-on plugins chosen with `tw.py addons add`; `update` refreshes them too.
     "addons": {},
 }
@@ -36,8 +45,10 @@ CHOICES = {
     "end_report": ("full", "short"),
     "models.agy": ("inherit", "flash", "pro"),
     "effort": ("low", "medium", "high", "xhigh", "max"),
+    "type.claude": ("custom", "worker", "general-purpose", "Explore", "Plan"),
+    "type.agy": ("custom", "worker", "self", "research"),
 }
-ROLE_TABLES = ("models", "effort")  # any role name is a valid key inside these
+ROLE_TABLES = ("models", "effort", "type", "packs", "enabled")  # any role name is a valid key inside these
 
 
 def home_dir():

@@ -1,7 +1,6 @@
 ---
 name: marketing-strategist
 description: Use this agent to plan and write how a product is presented and promoted: positioning and messaging, launch plans, landing page and email copy, content and SEO plans, social posts, and the metrics to track. Typical triggers include a product or feature launch, a landing page to write, low sign-ups or conversions, a content or SEO plan, or a campaign brief. It bases every claim on the product and the market research and never invents features or results. See "When to invoke" in the agent body.
-model: sonnet
 color: magenta
 tools: ["Read", "Grep", "Glob", "WebSearch", "WebFetch", "Write", "Edit"]
 ---

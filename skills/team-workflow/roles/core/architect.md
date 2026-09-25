@@ -1,8 +1,6 @@
 ---
 name: architect
 description: Use this agent when a task needs a structural decision before code is written: a new module or service, a change to the data model or a public API, a cross-cutting refactor, or a choice between libraries or patterns. It is read-only and returns options with trade-offs, a recommendation and a decision record. Do not use it for bug fixes or for changes that stay inside one existing area. See "When to invoke" in the agent body.
-model: opus
-effort: high
 color: blue
 tools: ["Read", "Grep", "Glob"]
 ---

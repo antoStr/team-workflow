@@ -1,7 +1,6 @@
 ---
 name: release-manager
 description: Use this agent to take verified work to a merge or a release: it runs the full pipeline from PLAYBOOKS.md, checks CI, prepares version, commit message, tag and release notes, and publishes only when the user approved it. Typical triggers include "prepare the release", "run the pipeline", "is it ready to ship", or the end of a task the tester approved. See "When to invoke" in the agent body.
-model: sonnet
 color: orange
 tools: ["Read", "Grep", "Glob", "Bash", "Edit"]
 ---

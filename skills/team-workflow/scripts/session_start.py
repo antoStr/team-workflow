@@ -4,12 +4,13 @@
 Prints nothing outside a git repository. In a repository without docs/memory it adds a
 one-line hint, so the agent can offer to create it. It also records the repository state
 for the Stop hook (stop_check.py), adds the settings that differ from the defaults, and tells
-the user (not the model) when a newer version is out. In agy it also keeps the roles current
-as agy subagents (~/.gemini/config/agents).
+the user (not the model) when a newer version is out. It keeps the enabled roles current as
+native agents of the app (~/.claude/agents, ~/.gemini/config/agents), from the settings.
 """
 import json
 import os
 
+import roles
 import settings
 import update_plugin
 
@@ -58,13 +59,13 @@ def main():
     except OSError:
         pass  # the Stop hook then looks at the working tree alone
     config = settings.load(root)
-    if is_agy(data):  # PreInvocation in agy: the memory arrives through the AGENTS.md rules
-        if (data.get("invocationNum") or 0) <= 1:
-            try:
-                import install_agy
-                install_agy.sync_agents(install_agy.agents_dir(), config=config)
-            except (OSError, ValueError):
-                pass  # the roles stay as they were; `tw.py agents` rewrites them by hand
+    app = "agy" if is_agy(data) else "claude"
+    if app == "claude" or (data.get("invocationNum") or 0) <= 1:
+        try:
+            roles.sync(app, config=config, root=root)
+        except (OSError, ValueError):
+            pass  # the agents stay as they were; `tw.py agents sync` rewrites them by hand
+    if app == "agy":  # PreInvocation in agy: the memory arrives through the AGENTS.md rules
         print("{}")
         return
     out = {"hookSpecificOutput": {"hookEventName": "SessionStart",

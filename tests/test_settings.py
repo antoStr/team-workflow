@@ -94,11 +94,18 @@ class NoModelCommandTest(ScriptTest):
 
 
 class AgySubagentTest(unittest.TestCase):
+    def setUp(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        patcher = mock.patch.dict(os.environ, {"HOME": tmp.name})
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
     def test_every_role_becomes_a_valid_agy_agent(self):
         with tempfile.TemporaryDirectory() as dest:
             config = settings._merge(settings.DEFAULTS, {"models": {"agy": {"tester": "flash"}}})
             roles = install_agy.sync_agents(dest, config=config)
-            self.assertEqual(len(roles), len(glob.glob(os.path.join(REPO, "agents", "*.md"))))
+            self.assertEqual(len(roles), len(glob.glob(os.path.join(REPO, "skills", "team-workflow", "roles", "core", "*.md"))))
             for path in glob.glob(os.path.join(dest, "*.md")):
                 with open(path, encoding="utf-8") as f:
                     head = f.read().split("---\n")[1]

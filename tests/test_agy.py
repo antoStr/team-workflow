@@ -63,7 +63,7 @@ class AgyPluginTest(unittest.TestCase):
             with open(os.path.join(dest, "hooks.json"), encoding="utf-8") as f:
                 self.assertEqual(sorted(json.load(f)["team-workflow"]), ["PreInvocation", "Stop"])
             self.assertTrue(os.path.isfile(os.path.join(dest, "rules", "AGENTS.md")))
-            self.assertTrue(os.path.isfile(os.path.join(dest, "agents", "tester.md")))
+            self.assertTrue(os.path.isfile(os.path.join(dest, "skills", "team-workflow", "roles", "core", "tester.md")))
             skills = os.path.join(dest, "skills")
             self.assertIn("team-workflow", os.listdir(skills))
             for name in ("setup-memory", "call-team", "end-session"):  # agy loads only skills/<name>/SKILL.md

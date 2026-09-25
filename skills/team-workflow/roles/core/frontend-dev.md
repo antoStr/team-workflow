@@ -1,7 +1,6 @@
 ---
 name: frontend-dev
 description: Use this agent to implement or fix user interface code once the task is clear: pages, components, styles, client-side state, forms and their calls to the backend. It writes production-quality, accessible and responsive UI with tests, only in the files it is assigned. Do not use it for server-side logic or for structural choices that are still open. See "When to invoke" in the agent body.
-model: sonnet
 color: magenta
 ---
 

@@ -1,7 +1,6 @@
 ---
 name: e2e-tester
 description: Use this agent to test complete user flows end to end, in a real browser or through the real interfaces: sign-up, checkout, forms, navigation, uploads and their error paths, at desktop and phone widths. Typical triggers include a finished UI feature, a flow that broke in production, a release candidate, or a request for browser tests (Playwright or the project's tool). It writes end-to-end tests only and never fixes application code. See "When to invoke" in the agent body.
-model: sonnet
 color: yellow
 ---
 

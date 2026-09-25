@@ -1,7 +1,6 @@
 ---
 name: market-researcher
 description: Use this agent to research a market with sources: competitors with their features and prices, target customers and personas, market size and trends, positioning gaps and demand signals. Typical triggers include validating a product idea, a competitor analysis, a pricing decision, a pitch or business plan, or understanding who the users are. It cites every source and separates facts from estimates. See "When to invoke" in the agent body.
-model: sonnet
 color: blue
 tools: ["Read", "Grep", "Glob", "WebSearch", "WebFetch", "Write"]
 ---

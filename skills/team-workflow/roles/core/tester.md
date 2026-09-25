@@ -1,7 +1,6 @@
 ---
 name: tester
 description: Use this agent after code was written or changed, to verify it independently before it is accepted: it runs the project checks, tests the new behavior and its edge cases, checks every claim in the author's report, adds missing tests and sends failures back to the author with a reproduction. Also use it first on a bug, to turn the report into a failing regression test. Use it for every non-trivial change, including work done by another AI or tool, and before every release. It never fixes production code. See "When to invoke" in the agent body.
-model: sonnet
 color: yellow
 ---
 

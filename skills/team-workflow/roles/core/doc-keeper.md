@@ -1,7 +1,6 @@
 ---
 name: doc-keeper
 description: Use this agent to bring the project memory and documentation in line with the code after a change: it reads the diff, updates docs/memory (STATE.md, area cards, MAP.md, PLAYBOOKS.md) and user docs only where they describe what changed, checks every fact against the code and runs memcheck. Typical triggers include the end of a session with code changes, a wrap-up request, or a module that the map does not list yet. See "When to invoke" in the agent body.
-model: haiku
 color: purple
 tools: ["Read", "Grep", "Glob", "Edit", "Write", "Bash"]
 ---

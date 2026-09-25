@@ -1,7 +1,6 @@
 ---
 name: technical-writer
 description: Use this agent to write or fix the documentation people read: README, installation and usage guides, API references, tutorials, changelogs and release notes, and doc comments for public interfaces. It also turns the shared project memory (docs/memory - map, area cards, decisions, playbooks, state) into documentation for people, such as an architecture overview, an onboarding guide or a changelog. Typical triggers include a new feature users must learn, an outdated README, an API without reference docs, onboarding for new developers, release notes, or "write the docs from the memory". It checks every fact, command and example against the code. See "When to invoke" in the agent body.
-model: sonnet
 color: green
 tools: ["Read", "Grep", "Glob", "Write", "Edit", "Bash"]
 ---

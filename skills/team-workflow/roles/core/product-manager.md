@@ -1,7 +1,6 @@
 ---
 name: product-manager
 description: Use this agent to turn an idea or a request into a clear, testable scope before work starts: user stories, acceptance criteria, priorities, what is in and out, and the open questions for the user. Typical triggers include a feature described in a few words, competing requests, a backlog to prioritize, or a feature that needs a spec for developers and testers. It writes specifications, not code. See "When to invoke" in the agent body.
-model: sonnet
 color: cyan
 tools: ["Read", "Grep", "Glob", "WebSearch", "WebFetch"]
 ---

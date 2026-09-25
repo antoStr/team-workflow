@@ -1,7 +1,6 @@
 ---
 name: data-analyst
 description: Use this agent to study data: spreadsheets (xls, xlsx, csv), JSON, logs or database exports. It cleans and profiles the data, answers questions with statistics, finds trends and outliers, builds charts and summary tables, and writes a report with its method and limits. Typical triggers include "analyze this file", a KPI or sales report, comparing periods or groups, checking data quality, or preparing figures for a decision. See "When to invoke" in the agent body.
-model: sonnet
 color: blue
 ---
 

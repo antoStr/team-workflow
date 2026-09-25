@@ -11,24 +11,20 @@ decides that. Tools that need a permission prompt are denied in headless mode.
 import argparse
 import json
 import os
-import re
 import subprocess
 import sys
 import time
 
+import roles
 from usage import cost_usd, ledger_path, load_pricing, resolve_model, total_tokens
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-AGENTS_DIR = os.path.join(HERE, "..", "..", "..", "agents")  # plugin root, in Claude Code and agy
 
-
-def role_prompt(role):
-    """System prompt of a role: the body of agents/<role>.md."""
-    path = os.path.join(AGENTS_DIR, role + ".md")
-    if not os.path.isfile(path):
-        raise SystemExit(f"unknown role {role!r}")
-    with open(path, encoding="utf-8") as f:
-        return re.sub(r"\A---\n.*?\n---\n", "", f.read(), flags=re.S).strip()
+def role_prompt(role, root=None):
+    """System prompt of a role: the body of its role file (plugin, user or project)."""
+    try:
+        return roles.load(role, root)[1]
+    except ValueError as e:
+        raise SystemExit(str(e))
 
 
 def build_command(harness, model, effort, prompt, allow_edits):
@@ -86,7 +82,7 @@ def main():
             task = f.read()
     if not task.strip():
         raise SystemExit("an assignment is required (--task or --task-file)")
-    prompt = (f"{role_prompt(args.role)}\n\n## Your assignment\n\n{task.strip()}\n\n"
+    prompt = (f"{role_prompt(args.role, args.root)}\n\n## Your assignment\n\n{task.strip()}\n\n"
               "Read docs/memory/INDEX.md first when it exists. "
               "Answer in the language the assignment is written in.")
     root = os.path.abspath(args.root)

@@ -6,7 +6,11 @@
     tw.py settings set KEY VALUE [--project]
     tw.py settings reset KEY [--project]
     tw.py models                           models and efforts each app offers
-    tw.py agents                           rewrite the agy subagents from the plugin's roles
+    tw.py agents [list]                    roles with pack, on/off, type, model, effort per app
+    tw.py agents set ROLE model=M effort=E type=T [--app claude|agy] [--project]
+    tw.py agents enable|disable ROLE|PACK  switch a role or a whole pack
+    tw.py agents new ROLE                  your own role (or an override) to edit
+    tw.py agents sync                      rewrite the native agents of both apps
     tw.py addons [list]                    add-on plugins (caveman, ponytail, ecc, any other)
     tw.py addons add NAME|owner/repo|plugin@marketplace [--app claude|agy]
     tw.py addons remove NAME
@@ -24,7 +28,7 @@ import subprocess
 import sys
 
 import addons
-import install_agy
+import roles
 import settings
 import update_plugin
 from usage import load_pricing
@@ -68,9 +72,10 @@ def cmd_settings(args):
             raise SystemExit(str(e))
         path = settings.save(args.key, value, root if args.project else None)
         print(f"{args.key} = {json.dumps(value) if value is not None else '(default)'}  ->  {path}")
-        if args.key.startswith("models.agy") and shutil.which("agy"):
-            changed = install_agy.sync_agents(install_agy.agents_dir())
-            print(f"agy subagents refreshed: {', '.join(changed) or 'none changed'}")
+        if args.key.split(".")[0] in settings.ROLE_TABLES:
+            for app in roles.APPS:
+                roles.sync(app, root=root)
+            print("agents rewritten in Claude Code and agy")
         return
     user = dict(settings.flatten(settings._read(settings.user_file())))
     project = dict(settings.flatten(settings._read(settings.project_file(root)))) if root else {}
@@ -107,10 +112,68 @@ def cmd_models(_args):
 
 
 def cmd_agents(args):
-    dest = install_agy.agents_dir(args.workspace)
-    changed = install_agy.sync_agents(dest)
-    print(f"{dest}: {', '.join(changed) or 'all roles already current'}")
-    print("Restart agy to load new subagents.")
+    root = repo_root()
+    config = settings.load(root)
+    action, rest = args.action, args.rest
+    if action == "list":
+        rows = [("role", "pack", "on", "Claude Code: type model effort", "agy: type model")]
+        rows += roles.table(config, root)
+        widths = [max(len(r[i]) for r in rows) for i in range(4)]
+        for r in rows:
+            print("  ".join(c.ljust(w) for c, w in zip(r, widths)) + "  " + r[4])
+        print("\nchange: agents set ROLE model=opus effort=high type=custom [--app claude|agy]")
+        print("         agents enable|disable ROLE|PACK, agents new ROLE, agents sync")
+        print("types: claude " + " | ".join(settings.CHOICES["type.claude"])
+              + "; agy " + " | ".join(settings.CHOICES["type.agy"]))
+        return
+    if action == "sync":
+        for app in roles.APPS:
+            dest = roles.native_dir(app, args.workspace)
+            r = roles.sync(app, root=root, dest=dest)
+            print(f"{app} ({dest}): written {len(r['written'])}, removed {len(r['removed'])}"
+                  + (f", not ours so left alone: {', '.join(r['skipped'])}" if r["skipped"] else ""))
+        print("Restart the app to load new or changed agents.")
+        return
+    if not rest:
+        raise SystemExit(f"usage: agents {action} ROLE ...")
+    name, target = rest[0], (root if args.project else None)
+    try:
+        if action == "new":
+            print(f"edit {roles.new_role(name, target)}, then: agents sync")
+            return
+        catalog = roles.catalog(root)
+        packs = {i["pack"] for i in catalog.values()}
+        if action in ("enable", "disable"):
+            on = "true" if action == "enable" else "false"
+            key = f"packs.{name}" if name in packs and name not in catalog else f"enabled.{name}"
+            if key.startswith("enabled.") and name not in catalog:
+                raise ValueError(f"no role or pack named {name!r}; packs: {', '.join(sorted(packs))}")
+            changes = [(key, settings.parse_value(key, on))]
+        else:  # set
+            if name not in catalog:
+                raise ValueError(f"unknown role {name!r}")
+            changes = []
+            apps = (args.app,) if args.app else roles.APPS
+            for pair in rest[1:]:
+                field, _, value = pair.partition("=")
+                if field == "effort":
+                    changes.append((f"effort.{name}", settings.parse_value(f"effort.{name}", value)))
+                elif field in ("model", "type"):
+                    table = "models" if field == "model" else "type"
+                    for app in apps:
+                        key = f"{table}.{app}.{name}"
+                        changes.append((key, settings.parse_value(key, value)))
+                else:
+                    raise ValueError(f"unknown field {field!r}: use model=, effort=, type=")
+            if not changes:
+                raise ValueError("nothing to set: agents set ROLE model=... effort=... type=...")
+    except ValueError as e:
+        raise SystemExit(str(e))
+    for key, value in changes:
+        print(f"{key} = {json.dumps(value)}  ->  {settings.save(key, value, target)}")
+    for app in roles.APPS:
+        roles.sync(app, root=root)
+    print("agents rewritten in Claude Code and agy; restart the app to load them.")
 
 
 def cmd_install_cli(_args):
@@ -158,8 +221,13 @@ def main(argv=None):
     st.add_argument("--project", action="store_true", help="this repository only")
     st.add_argument("--json", action="store_true")
     sub.add_parser("models", help="models and efforts each app offers")
-    ag = sub.add_parser("agents", help="rewrite the agy subagents")
-    ag.add_argument("--workspace", help="write them into <repository>/.agents/agents instead")
+    ag = sub.add_parser("agents", help="roles: list, set type/model/effort, enable, new, sync")
+    ag.add_argument("action", nargs="?", default="list",
+                    choices=("list", "set", "enable", "disable", "new", "sync"))
+    ag.add_argument("rest", nargs="*", help="ROLE [model=... effort=... type=...]")
+    ag.add_argument("--app", choices=roles.APPS, help="set: only this app")
+    ag.add_argument("--project", action="store_true", help="this repository only")
+    ag.add_argument("--workspace", help="sync: write into <repository>/.claude and .agents")
     ad = sub.add_parser("addons", help="add-on plugins in Claude Code and agy")
     ad.add_argument("action", nargs="?", choices=("list", "add", "remove", "update"), default="list")
     ad.add_argument("name", nargs="?")

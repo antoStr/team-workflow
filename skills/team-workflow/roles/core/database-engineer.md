@@ -1,7 +1,6 @@
 ---
 name: database-engineer
 description: Use this agent for anything that touches how data is stored: schema design, migrations, indexes, query performance, transactions and locking, data integrity, backups and restores, and the choice of a database. Typical triggers include a new table or collection, a slow query, a migration on existing data, a data model review, or any change that risks losing data. It writes migrations and queries with a rollback plan. See "When to invoke" in the agent body.
-model: sonnet
 color: green
 ---
 

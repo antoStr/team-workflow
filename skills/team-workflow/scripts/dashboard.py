@@ -6,19 +6,18 @@ HTML page.
     python3 dashboard.py --root . [--days 30] [--session latest] [--html [FILE]] [--open] [--json]
 """
 import argparse
-import glob
 import html
 import json
 import os
-import re
 import time
 import webbrowser
 
 import memcheck
+import roles
+import settings
 from usage import KEYS, all_runs, cost_usd, load_pricing, project_slug, total_tokens
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-AGENTS_DIR = os.path.join(HERE, "..", "..", "..", "agents")  # plugin root, in Claude Code and agy
 T = {
     "en": dict(title="Team workflow dashboard", period="Period", days="last {} days", all="all time",
                cost="Cost (API rates)", tokens="Tokens", calls="API calls", hit="Read from cache",
@@ -61,14 +60,15 @@ def aggregate(rows, key):
     return sorted(groups.items(), key=lambda kv: -kv[1]["tokens"])
 
 
-def catalog():
-    agents = []
-    for path in sorted(glob.glob(os.path.join(AGENTS_DIR, "*.md"))):
-        with open(path, encoding="utf-8") as f:
-            head = f.read(1500)
-        field = lambda name: (re.search(rf"^{name}:\s*(\S+)", head, re.M) or [None, ""])[1]
-        agents.append((os.path.basename(path)[:-3], field("model"), field("effort") or "-"))
-    return agents
+def catalog(root=None):
+    """(role, Claude Code model, effort) of every enabled role, from the settings."""
+    config = settings.load(root)
+    rows = []
+    for role, info in roles.catalog(root).items():
+        if roles.is_enabled(config, role, info["pack"]):
+            p = roles.plan(config, role, "claude")
+            rows.append((role, p["model"], p["effort"] if roles.efforts(p["model"]) != [] else "-"))
+    return rows
 
 
 def build(root, days=None, session=None, home=None, pricing=None):
@@ -93,7 +93,7 @@ def build(root, days=None, session=None, home=None, pricing=None):
             "by_model": aggregate(rows, lambda r: r["model"]),
             "sessions": sorted(aggregate(rows, lambda r: r["session"]), key=lambda kv: kv[1]["start"],
                                reverse=True)[:15],
-            "memory": (len(errors), len(warnings)) if has_memory else None, "catalog": catalog()}
+            "memory": (len(errors), len(warnings)) if has_memory else None, "catalog": catalog(root)}
 
 
 def fmt_tokens(n):

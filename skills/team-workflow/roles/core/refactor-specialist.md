@@ -1,7 +1,6 @@
 ---
 name: refactor-specialist
 description: Use this agent to improve the structure of existing code without changing what it does: refactoring large files and functions, removing duplication and dead code, cleaning up after a feature, untangling dependencies, and preparing code to scale (concurrency, data growth, clear module boundaries). Typical triggers include code that is hard to change, a file or function that grew too big, repeated logic, leftovers and unused dependencies, or a module that must handle much more load or data. See "When to invoke" in the agent body.
-model: sonnet
 color: cyan
 ---
 
