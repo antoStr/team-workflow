@@ -23,6 +23,13 @@ import settings
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROLES_DIR = os.path.normpath(os.path.join(HERE, "..", "roles"))
 MARK = "<!-- team-workflow agent: generated from its role file; change it with `tw.py agents` -->"
+OLD_MARKS = ("<!-- team-workflow agent: regenerated from the plugin",)  # written by 0.5.0
+
+
+def ours(text):
+    """True when team-workflow wrote this agent file (this version or an older one)."""
+    return MARK in text or any(m in text for m in OLD_MARKS)
+
 AGY_TOOLS = {"Read": ["view_file"], "Grep": ["grep_search"], "Glob": ["find_by_name", "list_dir"],
              "Bash": ["run_command"], "Edit": ["replace_file_content"], "Write": ["write_to_file"],
              "WebSearch": ["search_web"], "WebFetch": ["read_url_content"]}
@@ -189,12 +196,14 @@ def native_dir(app, workspace=None):
     return os.path.join(base, "agents")
 
 
-def sync(app, config=None, root=None, dest=None):
+def sync(app, config=None, root=None, dest=None, dry_run=False):
     """Write the native files of one app; returns {"written", "removed", "skipped"}.
-    A file with the same name that team-workflow did not write is never touched."""
+    A file with the same name that team-workflow did not write is never touched.
+    With dry_run nothing changes: the result says what a sync would do."""
     config = config or settings.load(root)
     dest = dest or native_dir(app)
-    os.makedirs(dest, exist_ok=True)
+    if not dry_run:
+        os.makedirs(dest, exist_ok=True)
     result = {"written": [], "removed": [], "skipped": []}
     roles = catalog(root)
     for role, info in roles.items():
@@ -204,27 +213,30 @@ def sync(app, config=None, root=None, dest=None):
                 old = f.read()
         except OSError:
             old = None
-        if old is not None and MARK not in old:
+        if old is not None and not ours(old):
             result["skipped"].append(role)
             continue
         p = plan(config, role, app)
         if not is_enabled(config, role, info["pack"]) or p["type"] != "custom":
             if old is not None:
-                os.remove(path)
+                if not dry_run:
+                    os.remove(path)
                 result["removed"].append(role)
             continue
         meta, body = parse(read(info))
         text = native_text(app, role, meta, body, p)
         if text != old:
-            with open(path, "w", encoding="utf-8") as f:
-                f.write(text)
+            if not dry_run:
+                with open(path, "w", encoding="utf-8") as f:
+                    f.write(text)
             result["written"].append(role)
-    for name in os.listdir(dest):  # ours, for roles that no longer exist
+    for name in os.listdir(dest) if os.path.isdir(dest) else []:  # ours, for vanished roles
         path = os.path.join(dest, name)
         if name.endswith(".md") and name[:-3] not in roles and os.path.isfile(path):
             with open(path, encoding="utf-8") as f:
-                if MARK in f.read():
-                    os.remove(path)
+                if ours(f.read()):
+                    if not dry_run:
+                        os.remove(path)
                     result["removed"].append(name[:-3])
     return result
 
@@ -239,7 +251,7 @@ def table(config, root=None):
         rows.append((role, info["pack"] + origin,
                      "on" if is_enabled(config, role, info["pack"]) else "off",
                      f"{c['type']} {c['model']} {effort}", f"{a['type']} {a['model']}"))
-    return rows
+    return sorted(rows, key=lambda r: (r[1] != "core", r[2] == "off", r[1], r[0]))
 
 
 TEMPLATE = """---

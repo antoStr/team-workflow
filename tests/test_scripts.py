@@ -32,13 +32,13 @@ class ScriptTest(unittest.TestCase):
     def git(self, *args):
         subprocess.run(["git", "-C", self.root, *args], check=True, capture_output=True)
 
-    def run_script(self, name, *args, hook=None, env=None):
+    def run_script(self, name, *args, hook=None, env=None, cwd=None):
         e = dict(os.environ, TMPDIR=self.tmp, TEMP=self.tmp, TMP=self.tmp, HOME=self.tmp,
                  **(env or {}))
         e.pop("CLAUDE_PROJECT_DIR", None)
         return subprocess.run([sys.executable, os.path.join(SCRIPTS, name), *args],
                               input=json.dumps(hook) if hook is not None else "",
-                              capture_output=True, text=True, env=e, timeout=60)
+                              capture_output=True, text=True, env=e, timeout=60, cwd=cwd)
 
     def write(self, rel, text, mtime=None):
         path = os.path.join(self.root, rel)

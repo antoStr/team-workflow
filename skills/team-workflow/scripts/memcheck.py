@@ -20,6 +20,9 @@ SECRETS = {
     "GitHub token": re.compile(r"\b(?:gh[pousr]_[A-Za-z0-9]{36,}|github_pat_[A-Za-z0-9_]{40,})"),
     "Slack token": re.compile(r"\bxox[abprs]-[A-Za-z0-9-]{10,}"),
     "API key": re.compile(r"\bsk-(?:ant-|proj-)?[A-Za-z0-9_-]{32,}"),
+    "Google API key": re.compile(r"\bAIza[0-9A-Za-z_-]{35}\b"),
+    "Stripe live key": re.compile(r"\b[rs]k_live_[0-9A-Za-z]{20,}"),
+    "npm token": re.compile(r"\bnpm_[A-Za-z0-9]{36}\b"),
 }
 PATH_REF = re.compile(r"`([^`\s]+/[^`\s]*)`")
 DOMAIN = re.compile(r"^[a-z0-9-]+(?:\.[a-z0-9-]+)+$")

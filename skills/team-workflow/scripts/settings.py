@@ -39,6 +39,25 @@ DEFAULTS = {
     "addons": {},
 }
 
+# Presets that change several settings at once (`tw.py profile <name>`); balanced restores the
+# defaults of every key a profile touches.
+PROFILES = {
+    "budget": {"wizard": "quick", "max_agents": 2, "models.claude.default": "haiku",
+               "models.claude.architect": "sonnet", "models.claude.security-reviewer": "sonnet",
+               "models.agy.default": "flash", "effort.default": "low", "end_report": "short"},
+    "fast": {"wizard": "off", "max_agents": 2, "effort.default": "low", "end_report": "short"},
+    "balanced": {},
+    "thorough": {"wizard": "full", "max_agents": 6, "models.claude.default": "opus",
+                 "models.agy.default": "pro", "effort.default": "high", "packs.quality": True,
+                 "auto_security_review": True},
+    "security": {"auto_security_review": True, "packs.quality": True, "worker_edits": False,
+                 "models.claude.security-reviewer": "opus", "effort.security-reviewer": "max",
+                 "models.agy.security-reviewer": "pro"},
+    "research": {"packs.planning": True, "effort.market-researcher": "high",
+                 "effort.data-analyst": "high", "effort.code-explorer": "high",
+                 "type.claude.code-explorer": "Explore"},
+}
+
 CHOICES = {
     "wizard": ("quick", "full", "off"),
     "launch": ("native", "worker"),
@@ -133,6 +152,25 @@ def save(key, value, root=None):
         json.dump(data, f, indent=2)
         f.write("\n")
     return path
+
+
+def default_of(key):
+    """The built-in value of a dotted key, or None."""
+    return dict(flatten(DEFAULTS)).get(key)
+
+
+def apply_profile(name, root=None):
+    """Save a profile's values (or, for balanced, the defaults they replace); returns the changes."""
+    if name not in PROFILES:
+        raise ValueError(f"profiles: {', '.join(PROFILES)}")
+    if name == "balanced":
+        keys = sorted({k for p in PROFILES.values() for k in p})
+        changes = [(k, None) for k in keys]
+    else:
+        changes = list(PROFILES[name].items())
+    for key, value in changes:
+        save(key, value, root)
+    return changes
 
 
 def flatten(data, prefix=""):

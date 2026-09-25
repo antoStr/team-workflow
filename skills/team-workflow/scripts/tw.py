@@ -15,10 +15,17 @@
     tw.py addons add NAME|owner/repo|plugin@marketplace [--app claude|agy]
     tw.py addons remove NAME
     tw.py addons update [NAME]
+    tw.py profile [NAME] [--project]       presets: budget, fast, balanced, thorough, security, research
+    tw.py audit [--strict] [--json]        security scan of settings, hooks, MCP, agents, skills
+    tw.py doctor [--fix]                   health check and repair of the installation
+    tw.py uninstall [--all]                remove what team-workflow wrote outside the plugins
+    tw.py learn [--max N] [--json]         habits of this repository from its git history
+    tw.py ci-init                          GitHub Actions workflow: memory and audit on every PR
     tw.py install-cli                      add a `team-workflow` command to ~/.local/bin
 
-In Claude Code, /team-workflow:update-plugin, /team-workflow:settings and /team-workflow:models
-are answered by a hook that runs this script. In agy, use its bash mode: !team-workflow update.
+In Claude Code, /team-workflow:<command> for update-plugin, settings, models, agents, addons,
+profile, audit and doctor is answered by a hook that runs this script, with no tokens. In agy,
+use its bash mode: !team-workflow <command>.
 """
 import argparse
 import json
@@ -28,6 +35,9 @@ import subprocess
 import sys
 
 import addons
+import audit
+import doctor
+import learn
 import roles
 import settings
 import update_plugin
@@ -189,6 +199,95 @@ def cmd_agents(args):
     print("agents rewritten in Claude Code and agy; restart the app to load them.")
 
 
+def cmd_profile(args):
+    root = repo_root()
+    if not args.name:
+        for name, values in settings.PROFILES.items():
+            print(f"{name:<9} " + (", ".join(f"{k}={json.dumps(v)}" for k, v in values.items())
+                                  or "the defaults of every key the other profiles change"))
+        print("\napply: profile NAME [--project]")
+        return
+    try:
+        changes = settings.apply_profile(args.name, root if args.project else None)
+    except ValueError as e:
+        raise SystemExit(str(e))
+    for key, value in changes:
+        print(f"{key} = {json.dumps(value) if value is not None else '(default)'}")
+    for app in roles.APPS:
+        roles.sync(app, root=root)
+    print(f"profile {args.name} applied" + (" to this repository" if args.project else ""))
+
+
+def cmd_audit(args):
+    findings, scanned = audit.audit(repo_root())
+    print(json.dumps(findings, indent=2) if args.json else audit.report(findings, scanned))
+    if args.strict and any(f["severity"] in ("critical", "high") for f in findings):
+        raise SystemExit(1)
+
+
+def cmd_doctor(args):
+    root = repo_root()
+    if args.fix:
+        print("\n".join(doctor.repair(root)) + "\n")
+    results = doctor.checks(root)
+    for status, area, message in results:
+        print(f"[{status.upper():4}] {area}: {message}")
+    if any(s == "fail" for s, _, _ in results):
+        raise SystemExit(1)
+
+
+def cmd_uninstall(args):
+    print("\n".join(doctor.uninstall(args.all)))
+
+
+def cmd_learn(args):
+    data = learn.analyze(repo_root() or os.getcwd(), args.max)
+    print(json.dumps(data, indent=2) if args.json else learn.report(data))
+
+
+CI_WORKFLOW = """name: team-workflow
+
+on:
+  pull_request:
+  push:
+    branches: [{branch}]
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Get team-workflow {version}
+        run: git clone --depth 1 --branch v{version} https://github.com/antoStr/team-workflow /tmp/team-workflow
+      - name: Project memory (docs/memory)
+        if: hashFiles('docs/memory/INDEX.md') != ''
+        run: python3 /tmp/team-workflow/skills/team-workflow/scripts/memcheck.py --root . --strict
+      - name: Agent configuration audit (settings, hooks, MCP, agents, skills)
+        run: python3 /tmp/team-workflow/skills/team-workflow/scripts/tw.py audit --strict
+      # Add the project's own checks from docs/memory/PLAYBOOKS.md here (build, lint, tests).
+"""
+
+
+def cmd_ci_init(_args):
+    root = repo_root()
+    if not root:
+        raise SystemExit("ci-init needs a git repository")
+    path = os.path.join(root, ".github", "workflows", "team-workflow.yml")
+    if os.path.exists(path):
+        raise SystemExit(f"{path} exists: edit it or remove it first")
+    head = subprocess.run(["git", "-C", root, "symbolic-ref", "--short", "refs/remotes/origin/HEAD"],
+                          capture_output=True, text=True).stdout.strip()
+    branch = head.split("/", 1)[1] if "/" in head else "main"
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(CI_WORKFLOW.format(branch=branch, version=update_plugin.own_version() or "0.0.0"))
+    print(f"written {path}: memory and agent-config audit on every pull request and push to {branch}")
+    print("add the project's build and tests from PLAYBOOKS.md, then commit it")
+
+
 def cmd_install_cli(_args):
     path = os.path.join(os.path.expanduser("~"), ".local", "bin", "team-workflow")
     os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -245,6 +344,20 @@ def main(argv=None):
     ad.add_argument("action", nargs="?", choices=("list", "add", "remove", "update"), default="list")
     ad.add_argument("name", nargs="?")
     ad.add_argument("--app", choices=addons.APPS, help="only this app")
+    pr = sub.add_parser("profile", help="presets that change several settings")
+    pr.add_argument("name", nargs="?")
+    pr.add_argument("--project", action="store_true", help="this repository only")
+    au = sub.add_parser("audit", help="security scan of the agent setup")
+    au.add_argument("--strict", action="store_true", help="exit 1 on critical or high findings")
+    au.add_argument("--json", action="store_true")
+    do = sub.add_parser("doctor", help="health check of the installation")
+    do.add_argument("--fix", action="store_true", help="repair what can be repaired")
+    un = sub.add_parser("uninstall", help="remove what team-workflow wrote outside the plugins")
+    un.add_argument("--all", action="store_true", help="also ~/.team-workflow (settings, ledger)")
+    le = sub.add_parser("learn", help="habits of this repository from its git history")
+    le.add_argument("--max", type=int, default=2000)
+    le.add_argument("--json", action="store_true")
+    sub.add_parser("ci-init", help="GitHub Actions workflow for memory and audit checks")
     sub.add_parser("install-cli", help="add a team-workflow command to ~/.local/bin")
     args = ap.parse_args(argv)
     if args.command == "update":
@@ -265,7 +378,8 @@ def main(argv=None):
     elif args.command == "agents":
         cmd_agents(args)
     else:
-        cmd_install_cli(args)
+        {"profile": cmd_profile, "audit": cmd_audit, "doctor": cmd_doctor, "uninstall": cmd_uninstall,
+         "learn": cmd_learn, "ci-init": cmd_ci_init, "install-cli": cmd_install_cli}[args.command](args)
 
 
 if __name__ == "__main__":
