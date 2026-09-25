@@ -4,6 +4,40 @@ Run it every time you are about to spawn one or more agents: a team, a feature, 
 review, a release, or a direct request. It turns "call the team" into one precise brief per
 agent, with the model, the effort and the expected cost agreed before anything starts.
 
+## Session setup (first team-workflow task of every conversation)
+
+When the setting `session_wizard` is true (the default), before the first agent of a
+conversation is launched, agree with the user which agents this conversation uses and how,
+among what the app offers right now. Do it once; later tasks in the same conversation reuse
+it and go straight to the board. Skip it when the user says "defaults" or "skip setup".
+
+1. Run `python3 <skill>/scripts/tw.py options --app <claude|agy|opencode> --json` for the app
+   you run in. It lists the presets, the enabled roles with their current type, model and
+   effort, the models and efforts the app offers to native agents and to workers, and in agy
+   the session model that `inherit` means.
+2. One call, single choice: the **preset** for this conversation: "Keep my settings
+   (Recommended)", `budget`, `fast`, `thorough`, `security`, `research`.
+3. One call, multi-select: the **roles** this conversation will use ("Who builds?", "Who
+   checks?", the enabled roles the likely work needs first); mention packs that are off when
+   the repository needs them (`languages_here`).
+4. For the chosen roles, one call with up to four single-choice questions, grouped when several
+   roles share a choice: **model** and **effort**, only values from step 1, each option saying
+   how it runs:
+   - Claude Code: any model through the Agent tool's `model` parameter (native); an effort
+     different from the agent file's runs as a worker in this conversation.
+   - agy: `inherit` = the session model (say which, for example `gemini-3.8-flash-high`),
+     `flash`, `pro` (native, the tier is in the agent file); any other exact model id from
+     `agy models` runs as a worker. Note that `pro` is Gemini 3.1 Pro, older than the 3.8
+     flash models.
+   - OpenCode: the agent file's model and variant (native); any other `provider/model` or
+     variant runs as a worker.
+5. Show the session board (one block per role: type, model, effort, native or worker) and ask,
+   single choice: "Use for this conversation (Recommended)", "Use and save as my defaults",
+   "Use and save for this project", "Change". Saving runs `tw.py agents set <role> model=...
+   effort=... [--app <app>] [--project]` (and `tw.py profile <name>` for a preset); native
+   agents pick saved changes up after the app restarts, so for this conversation keep the
+   worker launch where step 4 said so.
+
 ## 0. Settings and the models on offer
 
 The user's settings decide how much you ask. In Claude Code the non-default ones are in your

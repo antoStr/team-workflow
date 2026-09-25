@@ -130,7 +130,7 @@ class AgySubagentTest(unittest.TestCase):
             with open(os.path.join(dest, "architect.md")) as f:
                 text = f.read()
             self.assertIn('tools: ["view_file", "grep_search", "find_by_name", "list_dir"]', text)
-            self.assertIn("\nmodel: pro\n", text)
+            self.assertIn("\nmodel: inherit\n", text)  # the session model: pro is older
             self.assertEqual(install_agy.sync_agents(dest, config=config), [])  # already current
 
     def test_leaves_a_foreign_agent_alone(self):

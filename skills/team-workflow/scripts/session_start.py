@@ -87,6 +87,10 @@ def main():
                     "build-fixer packs are off (offer: tw.py agents enable auto).")
     notes = []
     name, builtin = APP_NAMES[app]
+    if config.get("session_wizard", True):
+        context += (f"\nteam-workflow: session setup is on. Before the first agent of this "
+                    f"conversation, run the session setup in WIZARD.md (tw.py options --app {app} "
+                    "--json): preset, roles, model and effort per role.")
     if app == "opencode":
         context += "\n" + OPENCODE_NOTES
     if changed:  # the app loaded its agents before this hook wrote them

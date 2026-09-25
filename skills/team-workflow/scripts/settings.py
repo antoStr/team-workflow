@@ -9,6 +9,9 @@ DEFAULTS = {
     # agents the user wants to change; full = every question for every agent; off = no wizard,
     # launch with the recommended choices.
     "wizard": "quick",
+    # At the first team-workflow task of every conversation: choose preset, roles, model and
+    # effort per role among what the app offers now, for this conversation or as new defaults.
+    "session_wizard": True,
     "max_agents": 4,               # largest team proposed without asking
     "launch": "native",            # native subagents, or headless workers (exact model/effort)
     "worker_edits": False,         # workers may change files without asking each time
@@ -22,8 +25,7 @@ DEFAULTS = {
     "models": {
         "claude": {"default": "sonnet", "architect": "opus", "security-reviewer": "opus",
                    "doc-keeper": "haiku"},
-        "agy": {"default": "inherit", "architect": "pro", "security-reviewer": "pro",
-                "doc-keeper": "flash"},
+        "agy": {"default": "inherit"},  # the session's model (/model); pro is Gemini 3.1 Pro
         "opencode": {"default": "inherit"},
     },
     # Effort per role: low, medium, high, xhigh, max (Claude Code agents and workers; agy puts
@@ -53,11 +55,9 @@ PROFILES = {
     "fast": {"wizard": "off", "max_agents": 2, "effort.default": "low", "end_report": "short"},
     "balanced": {},
     "thorough": {"wizard": "full", "max_agents": 6, "models.claude.default": "opus",
-                 "models.agy.default": "pro", "effort.default": "high", "packs.quality": True,
-                 "auto_security_review": True},
+                 "effort.default": "high", "packs.quality": True, "auto_security_review": True},
     "security": {"auto_security_review": True, "packs.quality": True, "worker_edits": False,
-                 "models.claude.security-reviewer": "opus", "effort.security-reviewer": "max",
-                 "models.agy.security-reviewer": "pro"},
+                 "models.claude.security-reviewer": "opus", "effort.security-reviewer": "max"},
     "research": {"packs.planning": True, "effort.market-researcher": "high",
                  "effort.data-analyst": "high", "effort.code-explorer": "high",
                  "type.claude.code-explorer": "Explore"},

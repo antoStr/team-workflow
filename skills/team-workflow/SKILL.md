@@ -34,9 +34,11 @@ The scripts named below live in the `scripts/` folder next to this file; the tea
 | Whole area | "call the frontend team", data study, market analysis | the team in `TEAMS.md` |
 | Release | version, tag, publish | `release-manager`, after the `tester` approved |
 
-Before spawning any agent, run the assignment wizard in `WIZARD.md`: roles, then the board with
-model, effort and estimated cost per agent, with questions as deep as the `wizard` setting
-asks. Skip it only for trivial tasks you do yourself.
+Before spawning any agent, run the assignment wizard in `WIZARD.md`: at the first team-workflow
+task of a conversation the session setup (preset, roles, model and effort per role among what
+the app offers now), then for each task the board with model, effort and estimated cost per
+agent, with questions as deep as the `wizard` setting asks. Skip it only for trivial tasks you
+do yourself.
 A detailed brief pasted by the user is input for the agents' briefs, not a reason to work
 alone: size the task all the same. In agy, whose own routine asks you to choose between working
 solo and delegating, choose delegation for every size above trivial.

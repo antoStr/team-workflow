@@ -23,6 +23,7 @@
     tw.py learn [--max N] [--json]         habits of this repository from its git history
     tw.py ci-init                          GitHub Actions workflow: memory and audit on every PR
     tw.py agy-update [NAME...]             what `agy plugin update` would be: reinstall from source
+    tw.py options [--app A] [--json]       what the session wizard can offer in an app now
     tw.py install-opencode [--workspace R] install team-workflow into OpenCode
     tw.py install-cli [--no-shell]         `team-workflow` command, and `agy plugin update` in the shell
 
@@ -222,6 +223,69 @@ def cmd_agents(args):
     for app in roles.installed_apps():
         roles.sync(app, root=root)
     print("agents rewritten in " + ", ".join(roles.installed_apps()) + "; restart the app to load them.")
+
+
+def app_options(app, root=None):
+    """What the session wizard may offer in one app, right now."""
+    config = settings.load(root)
+    pricing = load_pricing()
+    catalog = roles.catalog(root)
+    enabled = [r for r, i in catalog.items() if roles.is_enabled(config, r, i["pack"])]
+    out = {"app": app, "settings": {"wizard": config["wizard"], "max_agents": config["max_agents"],
+                                    "launch": config["launch"]},
+           "presets": {k: v for k, v in settings.PROFILES.items()},
+           "types": list(settings.CHOICES[f"type.{app}"]),
+           "roles": {r: dict(roles.plan(config, r, app), pack=catalog[r]["pack"]) for r in enabled},
+           "packs_off": sorted({i["pack"] for r, i in catalog.items() if r not in enabled}),
+           "languages_here": roles.detect(root) if root else []}
+    if app == "claude":
+        out["native"] = {"models": list(pricing.get("aliases", {})),
+                         "efforts": {a: pricing["models"].get(m, {}).get("effort", []) for a, m in
+                                     pricing.get("aliases", {}).items()},
+                         "per_launch": "the Agent tool's model parameter changes the model for one "
+                                       "launch; the effort is fixed in the agent file"}
+        out["worker"] = {"models": list(pricing.get("aliases", {})) + ["<full model id>"],
+                         "efforts": ["low", "medium", "high", "xhigh", "max"]}
+    elif app == "agy":
+        session = effort = None
+        if shutil.which("agy"):
+            m = subprocess.run(["agy", "-p", "/model"], capture_output=True, text=True, timeout=30)
+            session = (m.stdout.split("\t")[0].strip() or None) if m.returncode == 0 else None
+            e = subprocess.run(["agy", "-p", "/effort"], capture_output=True, text=True, timeout=30)
+            effort = e.stdout.strip() or None if e.returncode == 0 else None
+        ids = []
+        if shutil.which("agy"):
+            m = subprocess.run(["agy", "models"], capture_output=True, text=True, timeout=30)
+            ids = [line.split("\t")[0] for line in m.stdout.splitlines() if "\t" in line]
+        out["native"] = {"models": ["inherit", "flash", "pro"], "session_model": session,
+                         "session_effort": effort,
+                         "per_launch": "invoke_subagent has no model: a subagent uses its file's tier; "
+                                       "inherit = the session model (change it with /model)"}
+        out["worker"] = {"models": ids, "efforts": "part of the model id (-low, -medium, -high)"}
+    else:
+        ids = []
+        if shutil.which("opencode"):
+            m = subprocess.run(["opencode", "models"], capture_output=True, text=True, timeout=60)
+            ids = [line.strip() for line in m.stdout.splitlines() if "/" in line]
+        out["native"] = {"models": ["inherit"] + ids, "efforts": "the model's variants (e.g. low, high, max)",
+                         "per_launch": "the task tool has no model: a subagent uses its file's model "
+                                       "and variant; inherit = the model of the calling agent"}
+        out["worker"] = {"models": ids, "efforts": "--variant, the model's variants"}
+    return out
+
+
+def cmd_options(args):
+    app = args.app or os.environ.get("TEAM_WORKFLOW_APP") or "claude"
+    data = app_options(app, repo_root())
+    if args.json:
+        print(json.dumps(data, indent=1))
+        return
+    print(f"{app}: native models {', '.join(data['native']['models'][:12])}"
+          + (f" (session model {data['native'].get('session_model')})" if data["native"].get("session_model") else ""))
+    print(f"workers: {', '.join(data['worker']['models'][:12]) or '-'}")
+    for role, p in data["roles"].items():
+        print(f"  {role:<26} {p['type']:<8} {p['model']:<22} {p['effort']}")
+    print("presets: " + ", ".join(data["presets"]))
 
 
 def cmd_profile(args):
@@ -449,6 +513,9 @@ def main(argv=None):
     le.add_argument("--max", type=int, default=2000)
     le.add_argument("--json", action="store_true")
     sub.add_parser("ci-init", help="GitHub Actions workflow for memory and audit checks")
+    op = sub.add_parser("options", help="what the session wizard can offer in an app")
+    op.add_argument("--app", choices=roles.APPS)
+    op.add_argument("--json", action="store_true")
     io = sub.add_parser("install-opencode", help="install team-workflow into OpenCode")
     io.add_argument("--workspace", help="this repository only (.opencode)")
     au2 = sub.add_parser("agy-update", help="agy plugin update: reinstall agy plugins from their source")
@@ -476,7 +543,8 @@ def main(argv=None):
     else:
         {"profile": cmd_profile, "audit": cmd_audit, "doctor": cmd_doctor, "uninstall": cmd_uninstall,
          "learn": cmd_learn, "ci-init": cmd_ci_init, "install-cli": cmd_install_cli,
-         "agy-update": cmd_agy_update, "install-opencode": cmd_install_opencode}[args.command](args)
+         "agy-update": cmd_agy_update, "install-opencode": cmd_install_opencode,
+         "options": cmd_options}[args.command](args)
 
 
 if __name__ == "__main__":
