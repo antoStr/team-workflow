@@ -12,10 +12,12 @@ import os
 import re
 import shutil
 import subprocess
+import time
 
 NAME = "team-workflow"
 REPO = "https://github.com/antoStr/team-workflow"
 AGY_DIR = os.path.join(os.path.expanduser("~"), ".gemini", "config", "plugins", NAME)
+PLUGIN = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".."))
 
 
 def run(*cmd, timeout=180):
@@ -35,6 +37,48 @@ def latest_tag(ls_remote):
     """Highest X.Y.Z among the vX.Y.Z tags printed by `git ls-remote --tags`."""
     tags = re.findall(r"refs/tags/v(\d+\.\d+\.\d+)$", ls_remote, re.M)
     return max(tags, key=vkey) if tags else None
+
+
+def fetch_latest(timeout=30):
+    code, out = run("git", "ls-remote", "--tags", "--refs", REPO, timeout=timeout)
+    return latest_tag(out) if code == 0 else None
+
+
+def own_version():
+    """Version of the plugin this script belongs to."""
+    for rel in (os.path.join(".claude-plugin", "plugin.json"), "plugin.json"):
+        try:
+            with open(os.path.join(PLUGIN, rel), encoding="utf-8") as f:
+                version = json.load(f).get("version")
+        except (OSError, ValueError):
+            continue
+        if version:
+            return version
+    return None
+
+
+def newer_version(max_age=86400):
+    """The latest version when it is newer than this plugin, asking GitHub at most once a day
+    (~/.team-workflow/update-check.json); None otherwise or on any error."""
+    cache = os.path.join(os.path.expanduser("~"), ".team-workflow", "update-check.json")
+    try:
+        with open(cache, encoding="utf-8") as f:
+            data = json.load(f)
+    except (OSError, ValueError):
+        data = {}
+    if time.time() - data.get("checked", 0) > max_age:
+        data = {"checked": time.time(), "latest": fetch_latest(timeout=3)}
+        try:
+            os.makedirs(os.path.dirname(cache), exist_ok=True)
+            with open(cache, "w", encoding="utf-8") as f:
+                json.dump(data, f)
+        except OSError:
+            pass
+    latest, mine = data.get("latest"), own_version()
+    try:
+        return latest if latest and mine and vkey(latest) > vkey(mine) else None
+    except ValueError:
+        return None
 
 
 def claude_version(plugin_list):
@@ -65,7 +109,9 @@ def update(harness, source):
         steps = [("claude", "plugin", "marketplace", "update", NAME),
                  ("claude", "plugin", "update", f"{NAME}@{NAME}")]
     else:
-        steps = [("agy", "plugin", "uninstall", NAME), ("agy", "plugin", "install", source)]
+        steps = [("agy", "plugin", "uninstall", NAME), ("agy", "plugin", "install", source),
+                 ("python3", os.path.join(AGY_DIR, "skills", NAME, "scripts", "install_agy.py"),
+                  "--agents-only")]  # the new version's roles, as agy subagents
     log = []
     for cmd in steps:
         code, out = run(*cmd)
@@ -77,15 +123,14 @@ def update(harness, source):
     return True, "\n".join(log)
 
 
-def main():
+def main(argv=None):
     ap = argparse.ArgumentParser(description="Check and update the installed team-workflow plugin.")
     ap.add_argument("--check", action="store_true", help="only show installed and latest versions")
     ap.add_argument("--harness", choices=("claude", "agy", "all"), default="all")
     ap.add_argument("--source", default=REPO, help="what agy installs from (default: GitHub)")
-    args = ap.parse_args()
+    args = ap.parse_args(argv)
 
-    code, out = run("git", "ls-remote", "--tags", "--refs", REPO, timeout=30)
-    latest = latest_tag(out) if code == 0 else None
+    latest = fetch_latest()
     print(f"latest: {latest or 'unknown (no network?)'}")
     failed = False
     for harness in (("claude", "agy") if args.harness == "all" else (args.harness,)):

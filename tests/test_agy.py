@@ -44,7 +44,7 @@ class AgyHooksTest(ScriptTest):
         launcher = (f"import subprocess, sys; subprocess.run([sys.executable, {hook!r}], "
                     f"cwd={plugin_dir!r}, input={payload!r}, text=True)")
         subprocess.run([sys.executable, "-c", launcher], cwd=self.root, capture_output=True,
-                       env=dict(os.environ, TMPDIR=self.tmp), timeout=60)
+                       env=dict(os.environ, TMPDIR=self.tmp, HOME=self.tmp), timeout=60)
         self.assertTrue(os.path.exists(os.path.join(self.tmp, "team-workflow-agy-proc.json")))
 
 

@@ -2,10 +2,13 @@
 """Stop hook: ask for a memory update when files changed after docs/memory/STATE.md.
 
 It looks at the changes of this session (working tree, and commits since SessionStart),
-never blocks twice in a row (stop_hook_active) and is off with TEAM_WORKFLOW_STOP_CHECK=0.
+never blocks twice in a row (stop_hook_active) and is off with the setting stop_check=false
+(or TEAM_WORKFLOW_STOP_CHECK=0).
 """
 import json
 import os
+
+import settings
 
 from common import (MEMORY_DIR, dirty_paths, git, is_agy, read_hook_input, repo_root, session_id,
                     snapshot_path)
@@ -37,7 +40,7 @@ def decide(data):
     if again or os.environ.get("TEAM_WORKFLOW_STOP_CHECK") == "0":
         return None
     root = repo_root(data)
-    if not root or not os.path.isfile(os.path.join(root, STATE)):
+    if not root or not os.path.isfile(os.path.join(root, STATE)) or not settings.load(root)["stop_check"]:
         return None
     try:
         with open(snapshot_path(session_id(data)), encoding="utf-8") as f:

@@ -34,23 +34,33 @@ The scripts named below live in the `scripts/` folder next to this file; the tea
 | Whole area | "call the frontend team", data study, market analysis | the team in `TEAMS.md` |
 | Release | version, tag, publish | `release-manager`, after the `tester` approved |
 
-Before spawning any agent, run the assignment wizard in `WIZARD.md`: roles, then for each agent
-what it works on, how, model and effort with the estimated cost, then one board to confirm.
-Skip it only for trivial tasks you do yourself; "defaults" gives the short version.
+Before spawning any agent, run the assignment wizard in `WIZARD.md`: roles, then the board with
+model, effort and estimated cost per agent, with questions as deep as the `wizard` setting
+asks. Skip it only for trivial tasks you do yourself.
 A detailed brief pasted by the user is input for the agents' briefs, not a reason to work
 alone: size the task all the same. In agy, whose own routine asks you to choose between working
 solo and delegating, choose delegation for every size above trivial.
 
 ## 3. The agents and how smart they are
 
-`TEAMS.md` lists all twenty agents with their team, role, model and what they may write.
-Defaults: `architect` and `security-reviewer` run on opus with high effort, `doc-keeper` on
-haiku, everyone else on sonnet.
+`TEAMS.md` lists all twenty agents with their team, role and what they may write. The model
+and effort of each role come from the settings (`models.<app>.<role>`, `effort.<role>`):
+by default `architect` and `security-reviewer` run on the strongest model with high effort
+(opus in Claude Code, pro in agy), `doc-keeper` on the lightest (haiku, flash), everyone else
+on sonnet in Claude Code and on the session's model in agy.
 
-Match the model to the work and override it per call with the Agent tool's `model` parameter:
-go up to `opus` for concurrency, security, possible data loss, architecture, or a bug that
-survived two attempts; go down to `haiku` for mechanical work (renames, boilerplate, doc
-updates). Spend the big models where a mistake is expensive, not by default.
+Match the model to the work, among the models the app offers (`WIZARD.md`, step 0): go up for
+concurrency, security, possible data loss, architecture, or a bug that survived two attempts;
+go down for mechanical work (renames, boilerplate, doc updates). Spend the big models where a
+mistake is expensive, not by default.
+
+### Settings
+
+Every behavior above can be changed by the user: `tw.py settings` shows them, `tw.py settings
+set <key> <value> [--project]` changes them (user file `~/.team-workflow/settings.json`,
+project file `.team-workflow.json`). Follow them: `wizard`, `max_agents`, `launch`,
+`worker_edits`, `auto_security_review`, `end_report` (short: done, verified, decisions only),
+`update_check`, `stop_check`, `models`, `effort`.
 
 ## 4. Plan and dispatch
 
@@ -92,8 +102,9 @@ Never accept an agent's claim without evidence: read the diff and rerun the key 
 - `/team-workflow:usage-costs [days|latest]`: tokens and cost by agent, model and session.
 - `/team-workflow:write-docs [architecture|onboarding|changelog|readme]`: `technical-writer` turns the
   memory into documentation for people, every fact checked against the code.
-- `/team-workflow:update-plugin [check]`: update this plugin in Claude Code and agy, or only
-  show the installed and latest versions.
+- `/team-workflow:update-plugin [check]`, `/team-workflow:settings [set <key> <value>]`,
+  `/team-workflow:models`: answered by `tw.py` without the model in Claude Code (a hook); in agy
+  the user runs them in bash mode (`!team-workflow update`), or you run `tw.py` for them.
 
 ## 6. Definition of done
 
@@ -130,7 +141,8 @@ When files changed (the Stop hook reminds you if `STATE.md` is older than the la
 - Facts only, checked against the code. Keep every file under its limit, then run
   `python3 <this skill's folder>/scripts/memcheck.py --root <repository root>`.
 
-Set `TEAM_WORKFLOW_STOP_CHECK=0` in the environment to turn the Stop reminder off.
+The setting `stop_check` (or `TEAM_WORKFLOW_STOP_CHECK=0` in the environment) turns the Stop
+reminder off.
 
 ## 9. Claude Code and agy
 
@@ -138,15 +150,17 @@ Set `TEAM_WORKFLOW_STOP_CHECK=0` in the environment to turn the Stop reminder of
   hooks load the memory at session start and check `STATE.md` at the end of a turn.
 - **agy (Antigravity)**: install with `agy plugin install <repository url or path>` (one
   project only: `python3 <skill>/scripts/install_agy.py --workspace <repo>`). Each workflow is
-  its own skill (`skills/<name>/SKILL.md`); the memory comes through the `AGENTS.md` rules and the Stop hook checks
-  `STATE.md`. agy validates the plugin's agents but does not offer them as subagents yet (only
-  its own `self` and `research`): launch a role as a worker, `run_worker.py --harness agy`,
-  which also gives an exact model and effort and measured usage, or brief a `self` subagent
-  with `agents/<role>.md`. Ask with agy's `ask_question` tool wherever this skill says
-  AskUserQuestion; `is_multi_select: true` only for questions with several answers.
+  its own skill (`skills/<name>/SKILL.md`); the memory comes through the `AGENTS.md` rules and
+  the Stop hook checks `STATE.md`. agy does not take a plugin's agents as subagents, so the
+  plugin writes the twenty roles in agy's format to `~/.gemini/config/agents/` (at every
+  session, and with `tw.py agents`): launch them with `invoke_subagent`, `TypeName` = the role.
+  Workers (`run_worker.py --harness agy`) give an exact model id and measured usage. Ask with
+  agy's `ask_question` tool wherever this skill says AskUserQuestion; `is_multi_select: true`
+  only for questions with several answers.
 - `init_memory.py` also adds the memory pointer to `AGENTS.md` (and `GEMINI.md` or `CLAUDE.md`
   when they exist), so any other tool reads the same memory.
 
 Scripts: `estimate.py` (cost before launch), `run_worker.py` (exact model and effort, usage
 recorded), `dashboard.py` (usage after), `memcheck.py`, `init_memory.py`, `install_agy.py`,
-`update_plugin.py`.
+`update_plugin.py`, `tw.py` (settings, models, update and the agy
+subagents, without the model).

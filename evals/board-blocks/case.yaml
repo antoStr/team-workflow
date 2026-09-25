@@ -1,0 +1,27 @@
+schema_version: "1.0"
+name: board-blocks
+description: The assignment board is one block per agent with a total, and the go is a single-choice question.
+execution:
+  max_turns: 14
+  allowed_tools: [Read, Glob, Grep, Skill, AskUserQuestion, Bash]
+  prompt: |
+    Use the team-workflow skill. backend-dev and tester, on their default models, fix the
+    rounding bug in src/billing/totals.py. The checkout is not available to you: do not look
+    for the files. Show me the assignment board and ask for the go.
+runs: 3
+graders:
+  - type: tool_used
+    name: no agent before the go
+    tool: Agent
+    min: 0
+    max: 0
+  - type: llm
+    name: board in blocks, single-choice go
+    focus: last_message
+    criteria: |
+      The agent shows an assignment board with one block per agent (a numbered entry with
+      model, effort, launch and estimate on its first line, then "works on" and "how" lines)
+      and a "Total" line below it. Then it asks for the go as one question with a single
+      answer among start, change an agent and cancel (with a question tool, or in plain text
+      when there is none). Fail if the board is a markdown table with many columns, if there
+      is no total line, or if the go is offered as checkboxes or as several questions.

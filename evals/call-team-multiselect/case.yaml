@@ -1,0 +1,32 @@
+schema_version: "1.0"
+name: call-team-multiselect
+description: call-team proposes roles from several teams in a multi-select question and launches nothing before the answer.
+execution:
+  max_turns: 12
+  allowed_tools: [Read, Glob, Grep, Skill, AskUserQuestion]
+  prompt: |
+    /team-workflow:call-team add a CSV export to the orders page: a Django endpoint in
+    app/orders/views.py, a React button in web/src/orders/OrdersPage.tsx, and tests.
+    This checkout is not available to you: do not look for the files, assume they exist and
+    go straight to choosing the team with me.
+runs: 3
+graders:
+  - type: tool_used
+    name: no agent before the answer
+    tool: Agent
+    min: 0
+    max: 0
+  - type: regex
+    name: no fake checkboxes
+    target: last_message
+    pattern: '\[ \]'
+    match: not_contains
+  - type: llm
+    name: roles as a multiple choice
+    focus: last_message
+    criteria: |
+      The agent asks which roles to use and lets the user pick several at once: with the
+      AskUserQuestion tool and multiSelect true, or, when no question tool exists, with a
+      numbered list that says several roles can be chosen. The roles come from more than one
+      team (for example backend-dev, frontend-dev and tester). Fail if it launches agents
+      without asking, or if it asks for a single role only.

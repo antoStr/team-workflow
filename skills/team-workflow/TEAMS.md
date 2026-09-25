@@ -48,8 +48,10 @@ results and keeps the memory.
 | `market-researcher` | sonnet | competitors, customers, market size, with sources | research report |
 | `marketing-strategist` | sonnet | positioning, launch, copy, SEO, metrics | marketing copy |
 
-Override the model per call when the task is unusually risky (up to `opus`) or mechanical
-(down to `haiku`).
+The Model column is the Claude Code default; agy runs the opus roles on `pro`, haiku on
+`flash` and the rest on the session's model. The user changes any of them in the settings
+(`models.<app>.<role>`). Override the model per call when the task is unusually risky or
+mechanical, among the models the app offers.
 
 ## Asking the user
 

@@ -64,7 +64,7 @@ class WorkerTest(unittest.TestCase):
         self.assertIn("--mode accept-edits", stdout)
         self.assertIn("-p=", stdout)
         self.assertEqual((rec["harness"], rec["usage"]["output"], rec["usage"]["cache_read"]), ("agy", 25, 400))
-        self.assertIsNone(rec["cost_usd"])  # Gemini models have no price in the table
+        self.assertAlmostEqual(rec["cost_usd"], 0.00087375)  # priced as gemini-3.8-flash: -high is the effort
 
 
 if __name__ == "__main__":

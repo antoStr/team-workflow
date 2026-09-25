@@ -25,12 +25,16 @@ class ScriptTest(unittest.TestCase):
         self.git("config", "user.email", "test@example.com")
         self.git("config", "user.name", "test")
         self.git("config", "commit.gpgsign", "false")
+        os.makedirs(os.path.join(self.tmp, ".team-workflow"))  # HOME of the scripts: no network
+        with open(os.path.join(self.tmp, ".team-workflow", "settings.json"), "w") as f:
+            json.dump({"update_check": False}, f)
 
     def git(self, *args):
         subprocess.run(["git", "-C", self.root, *args], check=True, capture_output=True)
 
     def run_script(self, name, *args, hook=None, env=None):
-        e = dict(os.environ, TMPDIR=self.tmp, TEMP=self.tmp, TMP=self.tmp, **(env or {}))
+        e = dict(os.environ, TMPDIR=self.tmp, TEMP=self.tmp, TMP=self.tmp, HOME=self.tmp,
+                 **(env or {}))
         e.pop("CLAUDE_PROJECT_DIR", None)
         return subprocess.run([sys.executable, os.path.join(SCRIPTS, name), *args],
                               input=json.dumps(hook) if hook is not None else "",

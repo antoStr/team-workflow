@@ -1,5 +1,5 @@
 {
-  "description": "team-workflow: load the project memory at session start; ask for a memory update when files changed after docs/memory/STATE.md.",
+  "description": "team-workflow: load the project memory at session start; answer the settings, models and update-plugin commands without the model; ask for a memory update when files changed after docs/memory/STATE.md.",
   "hooks": {
     "SessionStart": [
       {
@@ -20,6 +20,17 @@
             "type": "command",
             "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/skills/team-workflow/scripts/stop_check.py\"",
             "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/skills/team-workflow/scripts/prompt_command.py\"",
+            "timeout": 300
           }
         ]
       }

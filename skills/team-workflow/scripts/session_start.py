@@ -3,10 +3,15 @@
 
 Prints nothing outside a git repository. In a repository without docs/memory it adds a
 one-line hint, so the agent can offer to create it. It also records the repository state
-for the Stop hook (stop_check.py).
+for the Stop hook (stop_check.py), adds the settings that differ from the defaults, and tells
+the user (not the model) when a newer version is out. In agy it also keeps the roles current
+as agy subagents (~/.gemini/config/agents).
 """
 import json
 import os
+
+import settings
+import update_plugin
 
 from common import (MEMORY_DIR, dirty_paths, git, is_agy, read_hook_input, repo_root, session_id,
                     snapshot_path)
@@ -52,11 +57,24 @@ def main():
         save_snapshot(root, session_id(data))
     except OSError:
         pass  # the Stop hook then looks at the working tree alone
+    config = settings.load(root)
     if is_agy(data):  # PreInvocation in agy: the memory arrives through the AGENTS.md rules
+        if (data.get("invocationNum") or 0) <= 1:
+            try:
+                import install_agy
+                install_agy.sync_agents(install_agy.agents_dir(), config=config)
+            except (OSError, ValueError):
+                pass  # the roles stay as they were; `tw.py agents` rewrites them by hand
         print("{}")
         return
-    print(json.dumps({"hookSpecificOutput": {"hookEventName": "SessionStart",
-                                             "additionalContext": memory_context(root)}}))
+    out = {"hookSpecificOutput": {"hookEventName": "SessionStart",
+                                  "additionalContext": memory_context(root) + "\n\n"
+                                  + settings.summary(config)}}
+    newer = update_plugin.newer_version() if config["update_check"] else None
+    if newer:
+        out["systemMessage"] = (f"team-workflow {newer} is available (installed "
+                                f"{update_plugin.own_version()}): /team-workflow:update-plugin")
+    print(json.dumps(out))
 
 
 if __name__ == "__main__":

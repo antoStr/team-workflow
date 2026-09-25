@@ -27,13 +27,15 @@ def cost_usd(usage, model, pricing):
     """Cost of a usage dict in USD, or None when the model has no price in the table."""
     model = resolve_model(model, pricing)
     prices = pricing.get("models", {})
-    p = prices.get(model) or prices.get(re.sub(r"-\d{8}$", "", model))  # dated ids: -20251001
+    p = (prices.get(model) or prices.get(re.sub(r"-\d{8}$", "", model))  # dated ids: -20251001
+         or prices.get(re.sub(r"-(high|medium|low|thinking)$", "", model)))  # agy ids
     if not p:
         return None
     inp = p["input"]
     read = p.get("cache_read", inp * 0.1)
-    return (usage.get("input", 0) * inp + usage.get("cache_write_5m", 0) * inp * 1.25
-            + usage.get("cache_write_1h", 0) * inp * 2 + usage.get("cache_read", 0) * read
+    w5m, w1h = (p["cache_write"],) * 2 if "cache_write" in p else (inp * 1.25, inp * 2)
+    return (usage.get("input", 0) * inp + usage.get("cache_write_5m", 0) * w5m
+            + usage.get("cache_write_1h", 0) * w1h + usage.get("cache_read", 0) * read
             + usage.get("output", 0) * p["output"]) / 1e6
 
 
