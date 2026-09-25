@@ -47,10 +47,14 @@ def checks(root=None):
         add("ok", "python", sys.version.split()[0])
 
     newer = update_plugin.newer_version()
-    for app in ("claude", "agy"):
+    for app in ("claude", "agy", "opencode"):
+        version = update_plugin.installed(app)
+        if app == "opencode" and version is None:
+            if shutil.which("opencode"):
+                add("warn", app, "team-workflow is not installed in OpenCode: tw.py install-opencode")
+            continue
         if not shutil.which(app):
             continue
-        version = update_plugin.installed(app)
         if version is None:
             add("warn", app, "team-workflow is not installed in this app")
         elif newer and version != newer:

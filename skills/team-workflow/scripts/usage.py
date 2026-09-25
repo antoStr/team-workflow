@@ -27,6 +27,7 @@ def cost_usd(usage, model, pricing):
     """Cost of a usage dict in USD, or None when the model has no price in the table."""
     model = resolve_model(model, pricing)
     prices = pricing.get("models", {})
+    model = model.split("/", 1)[-1]  # OpenCode ids: provider/model
     p = (prices.get(model) or prices.get(re.sub(r"-\d{8}$", "", model))  # dated ids: -20251001
          or prices.get(re.sub(r"-(high|medium|low|thinking)$", "", model)))  # agy ids
     if not p:
@@ -150,6 +151,57 @@ def ledger_runs(root, since=None, home=None):
     return rows
 
 
+def opencode_db(home=None):
+    return os.path.join(home or os.path.expanduser("~"), ".local", "share", "opencode", "opencode.db")
+
+
+def opencode_runs(root, since=None, home=None):
+    """One row per (session, agent, model) of this repository in OpenCode (its SQLite store)."""
+    path = opencode_db(home)
+    if not os.path.isfile(path):
+        return []
+    import sqlite3
+    try:
+        db = sqlite3.connect(f"file:{path}?mode=ro", uri=True, timeout=2)
+        sessions = db.execute("select id, parent_id, directory from session").fetchall()
+        messages = db.execute("select session_id, time_created, data from message").fetchall()
+    except sqlite3.Error:
+        return []
+    root = os.path.abspath(root)
+    here = {sid: parent for sid, parent, d in sessions
+            if d and (os.path.abspath(d) == root or os.path.abspath(d).startswith(root + os.sep))}
+    groups = {}
+    for sid, created, raw in messages:
+        if sid not in here or (since and created / 1000 < since):
+            continue
+        try:
+            msg = json.loads(raw)
+        except ValueError:
+            continue
+        if msg.get("role") != "assistant" or not msg.get("tokens"):
+            continue
+        t, cache = msg["tokens"], msg["tokens"].get("cache") or {}
+        model = f"{msg.get('providerID', '')}/{msg.get('modelID', '')}".strip("/")
+        agent = msg.get("agent") or "main"
+        if not here[sid] and agent in ("build", "plan"):
+            agent = "main"  # the session the user talks to
+        key = (here[sid] or sid, sid, agent, model)
+        row = groups.setdefault(key, dict(dict.fromkeys(KEYS, 0), cost_reported=0.0, first=created,
+                                          last=created))
+        row["input"] += t.get("input", 0)
+        row["output"] += t.get("output", 0) + t.get("reasoning", 0)
+        row["cache_read"] += cache.get("read", 0)
+        row["cache_write_5m"] += cache.get("write", 0)
+        row["calls"] += 1
+        row["cost_reported"] += msg.get("cost") or 0
+        row["first"], row["last"] = min(row["first"], created), max(row["last"], created)
+    stamp = lambda ms: time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(ms / 1000))
+    return [dict({k: row[k] for k in KEYS}, harness="opencode", session=session, agent=agent,
+                 description="", model=model, start=stamp(row["first"]), end=stamp(row["last"]),
+                 cost_reported=row["cost_reported"], opencode_session=sid)
+            for (session, sid, agent, model), row in groups.items()]
+
+
 def all_runs(root, days=None, home=None):
     """Claude Code runs plus worker runs, each counted once."""
     since = time.time() - days * 86400 if days else None
@@ -160,5 +212,12 @@ def all_runs(root, days=None, home=None):
         if r["agent"] == "main" and r["session"] in roles:
             r["agent"], r["harness"] = roles[r["session"]]["agent"], "claude-cli"
             r["effort"] = roles[r["session"]].get("effort")
-    return rows + [w for w in workers if w["harness"] != "claude-cli" or w["session"] not in
-                   {r["session"] for r in rows}]
+    opencode = opencode_runs(root, since, home)
+    worker_sessions = {w["session"]: w for w in workers if w["harness"] == "opencode"}
+    for r in opencode:  # an opencode run worker is a session of its own: label it with the role
+        w = worker_sessions.get(r["opencode_session"])
+        if w:
+            r["agent"], r["effort"] = w["agent"], w.get("effort")
+    seen = {r["session"] for r in rows} | {r["opencode_session"] for r in opencode}
+    return rows + opencode + [w for w in workers if w["harness"] not in ("claude-cli", "opencode")
+                              or w["session"] not in seen]

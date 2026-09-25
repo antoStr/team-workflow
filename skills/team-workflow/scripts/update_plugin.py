@@ -95,7 +95,21 @@ def agy_version():
         return None
 
 
+def opencode_payload():
+    return os.path.join(os.path.expanduser("~"), ".config", "opencode", "skills", NAME)
+
+
+def opencode_version():
+    try:
+        with open(os.path.join(opencode_payload(), "VERSION"), encoding="utf-8") as f:
+            return f.read().strip()
+    except OSError:
+        return None
+
+
 def installed(harness):
+    if harness == "opencode":
+        return opencode_version()
     if not shutil.which(harness):
         return None
     if harness == "claude":
@@ -103,22 +117,41 @@ def installed(harness):
     return agy_version()
 
 
+def update_opencode():
+    """Reinstall into OpenCode from the source it was installed from (a folder or a git URL)."""
+    try:
+        with open(os.path.join(opencode_payload(), ".source"), encoding="utf-8") as f:
+            source = f.read().strip()
+    except OSError:
+        source = REPO
+    if os.path.isdir(source):
+        code, out = run("python3", os.path.join(source, "skills", NAME, "scripts", "install_opencode.py"),
+                        "--source", source)
+        return code == 0, out
+    tmp = os.path.join(os.path.expanduser("~"), ".team-workflow", "opencode-update")
+    shutil.rmtree(tmp, ignore_errors=True)
+    code, out = run("git", "clone", "-q", "--depth", "1", source, tmp)
+    if code:
+        return False, f"cannot fetch {source}, nothing changed\n{out}"
+    code, out = run("python3", os.path.join(tmp, "skills", NAME, "scripts", "install_opencode.py"),
+                    "--source", source)
+    shutil.rmtree(tmp, ignore_errors=True)
+    return code == 0, out
+
+
 def update(harness, source):
     """Run the update steps; (ok, log)."""
-    if harness == "claude":
-        steps = [("claude", "plugin", "marketplace", "update", NAME),
-                 ("claude", "plugin", "update", f"{NAME}@{NAME}")]
-    else:
-        steps = [("agy", "plugin", "uninstall", NAME), ("agy", "plugin", "install", source),
-                 ("python3", os.path.join(AGY_DIR, "skills", NAME, "scripts", "install_agy.py"),
-                  "--agents-only")]  # the new version's roles, as agy subagents
+    if harness == "opencode":
+        return update_opencode()
+    if harness == "agy":  # safe path: source checked first, previous version restored on failure
+        return agy_update([NAME])
+    steps = [("claude", "plugin", "marketplace", "update", NAME),
+             ("claude", "plugin", "update", f"{NAME}@{NAME}")]
     log = []
     for cmd in steps:
         code, out = run(*cmd)
         log.append(f"$ {' '.join(cmd)}\n{out}")
         if code:
-            if cmd[-2:] == ("install", source):
-                log.append(f"agy install failed: the plugin is uninstalled. Retry: agy plugin install {source}")
             return False, "\n".join(log)
     return True, "\n".join(log)
 
@@ -187,14 +220,14 @@ def agy_update(names=None):
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Check and update the installed team-workflow plugin.")
     ap.add_argument("--check", action="store_true", help="only show installed and latest versions")
-    ap.add_argument("--harness", choices=("claude", "agy", "all"), default="all")
+    ap.add_argument("--harness", choices=("claude", "agy", "opencode", "all"), default="all")
     ap.add_argument("--source", default=REPO, help="what agy installs from (default: GitHub)")
     args = ap.parse_args(argv)
 
     latest = fetch_latest()
     print(f"latest: {latest or 'unknown (no network?)'}")
     failed = False
-    for harness in (("claude", "agy") if args.harness == "all" else (args.harness,)):
+    for harness in (("claude", "agy", "opencode") if args.harness == "all" else (args.harness,)):
         before = installed(harness)
         if before is None:
             print(f"{harness}: not installed")

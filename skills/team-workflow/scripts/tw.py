@@ -23,6 +23,7 @@
     tw.py learn [--max N] [--json]         habits of this repository from its git history
     tw.py ci-init                          GitHub Actions workflow: memory and audit on every PR
     tw.py agy-update [NAME...]             what `agy plugin update` would be: reinstall from source
+    tw.py install-opencode [--workspace R] install team-workflow into OpenCode
     tw.py install-cli [--no-shell]         `team-workflow` command, and `agy plugin update` in the shell
 
 In Claude Code, /team-workflow:<command> for update-plugin, settings, models, agents, addons,
@@ -47,7 +48,7 @@ from usage import load_pricing
 
 EFFORTS = ("low", "medium", "high", "xhigh", "max")
 LAUNCHER = '''#!/usr/bin/env python3
-"""team-workflow launcher: runs tw.py from the installed plugin (Claude Code first, then agy)."""
+"""team-workflow launcher: runs tw.py from the installed plugin (Claude Code, agy, OpenCode)."""
 import json, os, sys
 home = os.path.expanduser("~")
 paths = []
@@ -58,11 +59,12 @@ try:
 except (OSError, ValueError, KeyError, AttributeError):
     pass
 paths.append(os.path.join(home, ".gemini", "config", "plugins", "team-workflow"))
+paths.append(os.path.join(home, ".config", "opencode"))  # skills/team-workflow lives there
 for p in paths:
     tw = os.path.join(p, "skills", "team-workflow", "scripts", "tw.py")
     if os.path.isfile(tw):
         os.execv(sys.executable, [sys.executable, tw, *sys.argv[1:]])
-sys.exit("team-workflow: plugin not found in Claude Code or agy")
+sys.exit("team-workflow: plugin not found in Claude Code, agy or OpenCode")
 '''
 
 
@@ -121,6 +123,13 @@ def cmd_models(_args):
         print("agy workers (exact model, effort in the name): " + (", ".join(ids) or "agy models failed"))
     else:
         print("agy: not installed")
+    if shutil.which("opencode"):
+        out = subprocess.run(["opencode", "models"], capture_output=True, text=True, timeout=60)
+        ids = [line.strip() for line in out.stdout.splitlines() if "/" in line]
+        print("OpenCode subagents and workers: inherit, or provider/model: " + (", ".join(ids) or "opencode models failed"))
+        print("  effort: the model's variants (for example low, high, max), written as the agent's variant")
+    else:
+        print("OpenCode: not installed")
 
 
 def cmd_agents(args):
@@ -360,6 +369,13 @@ def cmd_install_cli(args):
             print(f"added `agy plugin update [name...]` to {full} (open a new terminal to use it)")
 
 
+def cmd_install_opencode(args):
+    import install_opencode
+    result = install_opencode.install(args.workspace)
+    print(f"installed in OpenCode: {result['payload']}; {result['commands']} commands, the plugin, "
+          f"{len(result['agents'])} agents written or refreshed. Restart OpenCode.")
+
+
 def cmd_agy_update(args):
     ok, log = update_plugin.agy_update(args.names)
     names = args.names or []
@@ -433,6 +449,8 @@ def main(argv=None):
     le.add_argument("--max", type=int, default=2000)
     le.add_argument("--json", action="store_true")
     sub.add_parser("ci-init", help="GitHub Actions workflow for memory and audit checks")
+    io = sub.add_parser("install-opencode", help="install team-workflow into OpenCode")
+    io.add_argument("--workspace", help="this repository only (.opencode)")
     au2 = sub.add_parser("agy-update", help="agy plugin update: reinstall agy plugins from their source")
     au2.add_argument("names", nargs="*", help="plugins to update (default: all)")
     ic = sub.add_parser("install-cli", help="add team-workflow to ~/.local/bin and `agy plugin update`")
@@ -458,7 +476,7 @@ def main(argv=None):
     else:
         {"profile": cmd_profile, "audit": cmd_audit, "doctor": cmd_doctor, "uninstall": cmd_uninstall,
          "learn": cmd_learn, "ci-init": cmd_ci_init, "install-cli": cmd_install_cli,
-         "agy-update": cmd_agy_update}[args.command](args)
+         "agy-update": cmd_agy_update, "install-opencode": cmd_install_opencode}[args.command](args)
 
 
 if __name__ == "__main__":

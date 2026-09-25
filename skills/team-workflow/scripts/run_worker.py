@@ -28,6 +28,14 @@ def role_prompt(role, root=None):
 
 
 def build_command(harness, model, effort, prompt, allow_edits):
+    if harness == "opencode":  # read-only through the plan agent; build may edit
+        cmd = [os.environ.get("TEAM_WORKFLOW_OPENCODE_BIN", "opencode"), "run", "--format", "json",
+               "-m", model, "--agent", "build" if allow_edits else "plan"]
+        if allow_edits:
+            cmd.append("--auto")
+        if effort:
+            cmd += ["--variant", effort]
+        return cmd + [prompt]
     if harness == "claude":
         cmd = [os.environ.get("TEAM_WORKFLOW_CLAUDE_BIN", "claude"), "-p", prompt,
                "--output-format", "json", "--model", model,
@@ -42,8 +50,42 @@ def build_command(harness, model, effort, prompt, allow_edits):
     return cmd
 
 
+def opencode_events(stdout):
+    """OpenCode's --format json prints one event per line."""
+    events = []
+    for line in stdout.splitlines():
+        try:
+            events.append(json.loads(line))
+        except ValueError:
+            continue
+    return {"events": events}
+
+
 def normalize(harness, data):
     """(usage, text, session, reported cost, ok, model) from the CLI's JSON output."""
+    if harness == "opencode":
+        usage = dict.fromkeys(("input", "cache_write_5m", "cache_write_1h", "cache_read", "output",
+                               "calls"), 0)
+        texts, cost, session, ok = [], None, "", True
+        for e in data.get("events", []):
+            part = e.get("part") or {}
+            session = session or e.get("sessionID", "")
+            if e.get("type") == "text":
+                texts.append(part.get("text", ""))
+            elif e.get("type") == "step_finish":
+                t = part.get("tokens") or {}
+                cache = t.get("cache") or {}
+                usage["input"] += t.get("input", 0)
+                usage["output"] += t.get("output", 0) + t.get("reasoning", 0)
+                usage["cache_read"] += cache.get("read", 0)
+                usage["cache_write_5m"] += cache.get("write", 0)
+                usage["calls"] += 1
+                if part.get("cost") is not None:
+                    cost = (cost or 0) + part["cost"]
+            elif e.get("type") == "error":
+                ok = False
+                texts.append("error: " + json.dumps(e.get("error", {}))[:500])
+        return usage, "\n".join(texts), session, cost, ok and bool(texts), None
     u = data.get("usage") or {}
     if harness == "claude":
         split = u.get("cache_creation") or {}
@@ -66,7 +108,7 @@ def normalize(harness, data):
 
 def main():
     ap = argparse.ArgumentParser(description="Run an agent headless and record its token usage.")
-    ap.add_argument("--harness", choices=("claude", "agy"), required=True)
+    ap.add_argument("--harness", choices=("claude", "agy", "opencode"), required=True)
     ap.add_argument("--role", required=True)
     ap.add_argument("--model", required=True, help="alias (sonnet, opus...) or model id")
     ap.add_argument("--effort", default="")
@@ -88,9 +130,10 @@ def main():
     root = os.path.abspath(args.root)
     started = time.time()
     proc = subprocess.run(build_command(args.harness, args.model, args.effort, prompt, args.allow_edits),
-                          cwd=root, capture_output=True, text=True, timeout=args.timeout)
+                          cwd=root, capture_output=True, text=True, timeout=args.timeout,
+                          stdin=subprocess.DEVNULL)  # opencode run waits on an open stdin
     try:
-        data = json.loads(proc.stdout)
+        data = opencode_events(proc.stdout) if args.harness == "opencode" else json.loads(proc.stdout)
     except ValueError:
         sys.stdout.write(proc.stdout + proc.stderr)
         raise SystemExit(f"{args.harness} did not return JSON (exit {proc.returncode})")
@@ -99,7 +142,7 @@ def main():
     model = model or resolve_model(args.model, pricing)
     if cost is None:
         cost = cost_usd(usage, model, pricing)
-    record = {"ts": started, "harness": "claude-cli" if args.harness == "claude" else "agy",
+    record = {"ts": started, "harness": {"claude": "claude-cli"}.get(args.harness, args.harness),
               "role": args.role, "model": model, "effort": args.effort, "task": task.strip()[:200],
               "usage": usage, "cost_usd": cost, "session": session, "ok": ok,
               "duration_s": round(time.time() - started, 1)}
