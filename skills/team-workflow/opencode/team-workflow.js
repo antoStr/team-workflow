@@ -9,6 +9,7 @@ const SCRIPTS = "__SCRIPTS__";
 const NO_MODEL = {
   "update-plugin": "update", settings: "settings", models: "models", addons: "addons",
   agents: "agents", profile: "profile", audit: "audit", doctor: "doctor", "ci-init": "ci-init",
+  options: "options",
 };
 
 function words(text) {

@@ -1,20 +1,19 @@
 # team-workflow
 
-Plugin per **Claude Code** e **agy (Antigravity)** che organizza il lavoro su un progetto come
+Plugin per **Claude Code**, **agy (Antigravity)** e **OpenCode** che organizza il lavoro su un progetto come
 un piccolo team: una memoria di progetto condivisa, agenti specializzati che intervengono solo
 quando servono, e un report a fine lavoro che chiede prima di applicare modifiche non richieste.
 
-| Funzione | Claude Code | agy |
-|---|---|---|
-| Memoria letta a ogni sessione | hook all'avvio | regole `AGENTS.md` |
-| Promemoria per aggiornare `STATE.md` | hook Stop | hook Stop |
-| Comandi (`setup-memory`, `call-team`, `write-docs`, `usage-costs`...) | `/team-workflow:<nome>` | skill con lo stesso nome |
-| Agenti nativi: 20 del core + pack opzionali + i tuoi | `~/.claude/agents/<ruolo>.md` | `~/.gemini/config/agents/<ruolo>.md` (`invoke_subagent`) |
-| Tipo, modello ed effort per ruolo e per app | si' | si' |
-| Wizard con modello, effort e stima dei costi | si' (domande a scelta) | si' (`ask_question`, anche a scelta multipla) |
-| Token misurati nella dashboard | sessioni e sub-agenti | solo i worker |
-| Comandi senza token (impostazioni, agenti, add-on, audit, doctor...) | `/team-workflow:<comando>` | `!team-workflow <comando>` |
-| Add-on: caveman, ponytail, ECC o qualsiasi plugin | marketplace | plugin, skill o installer di ECC |
+| Funzione | Claude Code | agy | OpenCode |
+|---|---|---|---|
+| Memoria letta a ogni sessione | hook all'avvio | regole `AGENTS.md` | plugin (prompt di sistema) |
+| Promemoria per aggiornare `STATE.md` | hook Stop | hook Stop | plugin (`session.idle`) |
+| Comandi (`setup-memory`, `call-team`, `write-docs`, `usage-costs`...) | `/team-workflow:<nome>` | skill con lo stesso nome | `/team-workflow:<nome>` |
+| Agenti nativi: 20 del core + pack opzionali + i tuoi | `~/.claude/agents/` | `~/.gemini/config/agents/` (`invoke_subagent`) | `~/.config/opencode/agents/` (task) |
+| Wizard a inizio conversazione: preset, agenti, modello ed effort tra quelli offerti | si' | si' | si' |
+| Token misurati nella dashboard | sessioni e sub-agenti | solo i worker | sessioni, sub-agenti e worker |
+| Comandi senza token (impostazioni, agenti, add-on, audit, doctor...) | `/team-workflow:<comando>` | `!team-workflow <comando>` | `/team-workflow:<comando>` e `!team-workflow <comando>` |
+| Add-on: caveman, ponytail, ECC o qualsiasi plugin | marketplace | plugin, skill o installer di ECC | skill, plugin in `opencode.json` o installer di ECC |
 
 ## Cosa fa
 
@@ -113,6 +112,7 @@ modalita' bash, `!team-workflow <comando>`):
 | `/team-workflow:agents [...]` | ruoli, pack, tipo, modello ed effort per ruolo e per app, ruoli tuoi |
 | `/team-workflow:profile [nome]` | preset: `budget`, `fast`, `balanced`, `thorough`, `security`, `research` |
 | `/team-workflow:models` | modelli ed effort che ogni app offre |
+| `/team-workflow:options` | cosa puo' proporre il wizard di inizio conversazione in questa app, adesso |
 | `/team-workflow:addons [add\|remove\|update <nome>]` | plugin aggiuntivi in entrambe le app |
 | `/team-workflow:audit [--strict]` | sicurezza della configurazione degli agenti |
 | `/team-workflow:doctor [--fix]` | stato dell'installazione e riparazione |
@@ -152,21 +152,32 @@ funzioni equivalenti:
 
 ## Wizard di assegnazione
 
-Ogni volta che partono degli agenti (team, feature, fix, review, rilascio) scegli i ruoli
+**A inizio conversazione** (impostazione `session_wizard`, attiva di default), al primo compito
+che usa gli agenti, il wizard chiede: il preset, gli agenti da usare (anche piu' di uno), e per
+ciascuno modello ed effort tra quelli che la tua app offre in quel momento (`team-workflow
+options` li mostra). In agy `inherit` e' il modello della sessione (per esempio
+`gemini-3.8-flash-high`): i sotto-agenti di agy accettano solo `inherit`, `flash` o `pro`
+(Gemini 3.1 Pro, piu' vecchio), quindi un modello esatto diverso gira come worker; lo stesso in
+OpenCode per un modello o una variante diversi da quelli del file dell'agente, e in Claude Code
+per un effort diverso. Alla fine scegli se usare le scelte solo in questa conversazione o
+salvarle come predefinite (per tutti i progetti o per questo).
+
+Poi, ogni volta che partono degli agenti (team, feature, fix, review, rilascio) scegli i ruoli
 (anche piu' di uno alla volta), poi un riepilogo con un blocco per agente mostra su cosa lavora,
 come, modello, effort, stima di token e costo, e il totale; parte solo con il tuo ok. Con
 `wizard: quick` (predefinito) le domande arrivano solo per gli agenti che vuoi cambiare; con
 `full` per tutti; con `off` nessuna. I modelli proposti sono solo quelli che l'app offre:
 haiku, sonnet, opus, fable in Claude Code; `inherit`, `flash`, `pro` per i sub-agenti di agy e
-gli id di `agy models` (es. `gemini-3.8-flash-high`) per i worker.
+gli id di `agy models` (es. `gemini-3.8-flash-high`) per i worker; in OpenCode `inherit` o un
+`provider/modello` di `opencode models`, con la variante come effort.
 
 - **Stime**: `scripts/estimate.py`, tarate su esecuzioni reali; dopo due esecuzioni di un ruolo
   nel progetto usa la mediana della sua storia.
 - **Avvio nativo** (predefinito): l'agente generato per il ruolo, con modello ed effort delle
   impostazioni (in Claude Code `subagent_type: "<ruolo>"`, in agy `invoke_subagent`), oppure il
   tipo integrato che hai scelto per quel ruolo.
-- **Avvio worker**: `scripts/run_worker.py` esegue `claude -p` o `agy -p` con modello ed effort
-  esatti e registra i token in `~/.team-workflow/ledger/`. Sola lettura, salvo tuo consenso.
+- **Avvio worker**: `scripts/run_worker.py` esegue `claude -p`, `agy -p` o `opencode run` con
+  modello ed effort esatti e registra i token in `~/.team-workflow/ledger/`. Sola lettura, salvo tuo consenso.
 
 ## Dashboard dei consumi
 
@@ -207,6 +218,23 @@ per i worker (`run_worker.py --harness agy`).
 
 Non e' obbligatorio usarli: basta chiedere normalmente, la skill si attiva sul lavoro di
 sviluppo.
+
+## OpenCode
+
+```bash
+python3 ~/Workspace/team-workflow/skills/team-workflow/scripts/install_opencode.py   # dalla copia del repository
+team-workflow install-opencode                                                      # oppure con il comando team-workflow
+```
+
+Scrive in `~/.config/opencode/`: lo skill `team-workflow` (con script, ruoli e wizard), i
+comandi `/team-workflow:<nome>`, gli agenti dei ruoli attivi e il plugin `team-workflow.js`.
+Il plugin mette memoria e impostazioni nel prompt di sistema, risponde a `settings`, `agents`,
+`profile`, `models`, `addons`, `audit`, `doctor`, `ci-init` e `update-plugin` senza il modello
+(0 token) e, a fine turno, chiede di aggiornare `STATE.md` quando i file sono cambiati.
+L'orchestratore lancia i ruoli con lo strumento task e fa le domande con lo strumento
+`question`. `/team-workflow:update-plugin` (o `team-workflow update`) aggiorna anche OpenCode;
+`install_opencode.py --uninstall` toglie solo i file scritti da team-workflow. OpenCode legge
+anche le skill in `~/.claude/skills` e `~/.agents/skills`.
 
 ## Installazione
 
@@ -258,6 +286,7 @@ repository (`.team-workflow.json`); `settings reset <chiave>` torna al valore pr
 
 | Chiave | Predefinito | Cosa decide |
 |---|---|---|
+| `session_wizard` | `true` | a inizio conversazione chiede preset, agenti, modello ed effort tra quelli offerti dall'app |
 | `wizard` | `quick` | `quick`: riepilogo con le scelte consigliate, domande solo per chi vuoi cambiare; `full`: tutte le domande; `off`: nessuna |
 | `max_agents` | `4` | quanti agenti propone al massimo senza chiedere |
 | `launch` | `native` | `native` (sub-agenti dell'app) o `worker` (processi headless con modello ed effort esatti) |
@@ -267,7 +296,8 @@ repository (`.team-workflow.json`); `settings reset <chiave>` torna al valore pr
 | `update_check` | `true` | avviso di nuova versione all'avvio |
 | `stop_check` | `true` | promemoria per aggiornare `STATE.md` |
 | `models.claude.<ruolo>` | sonnet (architect e security-reviewer opus, doc-keeper haiku) | modello in Claude Code |
-| `models.agy.<ruolo>` | inherit (architect e security-reviewer pro, doc-keeper flash) | modello dei sub-agenti agy |
+| `models.agy.<ruolo>` | inherit (il modello della sessione) | modello dei sub-agenti agy: inherit, flash o pro |
+| `models.opencode.<ruolo>` | inherit | modello dei sotto-agenti OpenCode: inherit o `provider/modello` |
 | `effort.<ruolo>` | medium (architect e security-reviewer high) | effort degli agenti di Claude Code e dei worker |
 | `type.<app>.<ruolo>` | `custom` | tipo di agente (vedi [I team e gli agenti](#i-team-e-gli-agenti)) |
 | `packs.<pack>` | solo `core` | pack di ruoli accesi |

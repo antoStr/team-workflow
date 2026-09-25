@@ -158,7 +158,7 @@ When files changed (the Stop hook reminds you if `STATE.md` is older than the la
 The setting `stop_check` (or `TEAM_WORKFLOW_STOP_CHECK=0` in the environment) turns the Stop
 reminder off.
 
-## 9. Claude Code and agy
+## 9. Claude Code, agy and OpenCode
 
 - **Claude Code**: agents are the generated `<role>` agents (`subagent_type: "<role>"`);
   commands are `/team-workflow:<name>`; the hooks load the memory and write the agents at
@@ -174,10 +174,18 @@ reminder off.
   Workers (`run_worker.py --harness agy`) give an exact model id and measured usage. Ask with
   agy's `ask_question` tool wherever this skill says AskUserQuestion; `is_multi_select: true`
   only for questions with several answers.
+- **OpenCode**: install with `python3 <skill>/scripts/install_opencode.py` (or `tw.py
+  install-opencode`); it writes the team-workflow skill, the `/team-workflow:<name>` commands,
+  the enabled roles as subagents (`~/.config/opencode/agents/`) and a plugin that puts the
+  memory and settings into the system prompt, answers the `tw.py` commands without the model
+  and asks for the `STATE.md` update when a turn ends. Launch roles with the task tool,
+  `subagent_type` = the role; ask with the `question` tool (`multiple: true` only for roles);
+  workers: `run_worker.py --harness opencode`. The user runs `tw.py` commands in shell mode
+  (`!team-workflow <command>`) too.
 - `init_memory.py` also adds the memory pointer to `AGENTS.md` (and `GEMINI.md` or `CLAUDE.md`
   when they exist), so any other tool reads the same memory.
 
 Scripts: `estimate.py` (cost before launch), `run_worker.py` (exact model and effort, usage
 recorded), `dashboard.py` (usage after), `memcheck.py`, `init_memory.py`, `install_agy.py`,
-`update_plugin.py`, `tw.py` (every command without the model), `roles.py` (roles, packs and the
+`update_plugin.py`, `install_opencode.py`, `tw.py` (every command without the model), `roles.py` (roles, packs and the
 native agents), `addons.py`, `audit.py`, `doctor.py`, `learn.py`.

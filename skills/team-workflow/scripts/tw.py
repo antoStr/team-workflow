@@ -69,8 +69,22 @@ sys.exit("team-workflow: plugin not found in Claude Code, agy or OpenCode")
 '''
 
 
+def output(cmd, timeout=60):
+    """stdout of a command, or "" when it cannot run or fails."""
+    try:
+        out = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, stdin=subprocess.DEVNULL)
+    except (OSError, subprocess.SubprocessError):
+        return ""
+    return out.stdout if out.returncode == 0 else ""
+
+
 def repo_root():
-    out = subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True)
+    """The git repository around the working folder, or None (no git, not a repository)."""
+    try:
+        out = subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True,
+                             timeout=10)
+    except (OSError, subprocess.SubprocessError):
+        return None
     return out.stdout.strip() if out.returncode == 0 else None
 
 
@@ -119,14 +133,12 @@ def cmd_models(_args):
         print(f"  {alias:<7} {mid:<18} effort: {', '.join(efforts) or 'none'}")
     print("agy native subagents: model inherit (the session's model), flash or pro")
     if shutil.which("agy"):
-        out = subprocess.run(["agy", "models"], capture_output=True, text=True, timeout=30)
-        ids = [line.split("\t")[0] for line in out.stdout.splitlines() if "\t" in line]
+        ids = [line.split("\t")[0] for line in output(["agy", "models"]).splitlines() if "\t" in line]
         print("agy workers (exact model, effort in the name): " + (", ".join(ids) or "agy models failed"))
     else:
         print("agy: not installed")
     if shutil.which("opencode"):
-        out = subprocess.run(["opencode", "models"], capture_output=True, text=True, timeout=60)
-        ids = [line.strip() for line in out.stdout.splitlines() if "/" in line]
+        ids = [line.strip() for line in output(["opencode", "models"]).splitlines() if "/" in line]
         print("OpenCode subagents and workers: inherit, or provider/model: " + (", ".join(ids) or "opencode models failed"))
         print("  effort: the model's variants (for example low, high, max), written as the agent's variant")
     else:
@@ -249,24 +261,18 @@ def app_options(app, root=None):
     elif app == "agy":
         session = effort = None
         if shutil.which("agy"):
-            m = subprocess.run(["agy", "-p", "/model"], capture_output=True, text=True, timeout=30)
-            session = (m.stdout.split("\t")[0].strip() or None) if m.returncode == 0 else None
-            e = subprocess.run(["agy", "-p", "/effort"], capture_output=True, text=True, timeout=30)
-            effort = e.stdout.strip() or None if e.returncode == 0 else None
-        ids = []
-        if shutil.which("agy"):
-            m = subprocess.run(["agy", "models"], capture_output=True, text=True, timeout=30)
-            ids = [line.split("\t")[0] for line in m.stdout.splitlines() if "\t" in line]
+            session = output(["agy", "-p", "/model"]).split("\t")[0].strip() or None
+            effort = output(["agy", "-p", "/effort"]).strip() or None
+        ids = [line.split("\t")[0] for line in output(["agy", "models"]).splitlines() if "\t" in line] \
+            if shutil.which("agy") else []
         out["native"] = {"models": ["inherit", "flash", "pro"], "session_model": session,
                          "session_effort": effort,
                          "per_launch": "invoke_subagent has no model: a subagent uses its file's tier; "
                                        "inherit = the session model (change it with /model)"}
         out["worker"] = {"models": ids, "efforts": "part of the model id (-low, -medium, -high)"}
     else:
-        ids = []
-        if shutil.which("opencode"):
-            m = subprocess.run(["opencode", "models"], capture_output=True, text=True, timeout=60)
-            ids = [line.strip() for line in m.stdout.splitlines() if "/" in line]
+        ids = [line.strip() for line in output(["opencode", "models"]).splitlines() if "/" in line] \
+            if shutil.which("opencode") else []
         out["native"] = {"models": ["inherit"] + ids, "efforts": "the model's variants (e.g. low, high, max)",
                          "per_launch": "the task tool has no model: a subagent uses its file's model "
                                        "and variant; inherit = the model of the calling agent"}
@@ -366,8 +372,7 @@ def cmd_ci_init(_args):
     path = os.path.join(root, ".github", "workflows", "team-workflow.yml")
     if os.path.exists(path):
         raise SystemExit(f"{path} exists: edit it or remove it first")
-    head = subprocess.run(["git", "-C", root, "symbolic-ref", "--short", "refs/remotes/origin/HEAD"],
-                          capture_output=True, text=True).stdout.strip()
+    head = output(["git", "-C", root, "symbolic-ref", "--short", "refs/remotes/origin/HEAD"]).strip()
     branch = head.split("/", 1)[1] if "/" in head else "main"
     os.makedirs(os.path.dirname(path), exist_ok=True)
     vendor = os.path.join(root, ".github", "team-workflow")
