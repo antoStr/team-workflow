@@ -7,6 +7,10 @@
     tw.py settings reset KEY [--project]
     tw.py models                           models and efforts each app offers
     tw.py agents                           rewrite the agy subagents from the plugin's roles
+    tw.py addons [list]                    add-on plugins (caveman, ponytail, ecc, any other)
+    tw.py addons add NAME|owner/repo|plugin@marketplace [--app claude|agy]
+    tw.py addons remove NAME
+    tw.py addons update [NAME]
     tw.py install-cli                      add a `team-workflow` command to ~/.local/bin
 
 In Claude Code, /team-workflow:update-plugin, /team-workflow:settings and /team-workflow:models
@@ -19,6 +23,7 @@ import shutil
 import subprocess
 import sys
 
+import addons
 import install_agy
 import settings
 import update_plugin
@@ -119,6 +124,27 @@ def cmd_install_cli(_args):
         print(f"{os.path.dirname(path)} is not in PATH: add it to your shell profile")
 
 
+def cmd_addons(args):
+    root = repo_root()
+    if args.action == "list":
+        print("\n".join(addons.status_lines(root)))
+        print("\n* = chosen, updated with `update`. add: addons add caveman | owner/repo | plugin@marketplace")
+        return
+    if not args.name and args.action != "update":
+        raise SystemExit(f"usage: addons {args.action} NAME")
+    try:
+        if args.action == "update" and not args.name:
+            ok, log = addons.update_all(root)
+        else:
+            apps = (args.app,) if args.app else addons.APPS
+            ok, log = addons.apply(args.action, args.name, apps, root)
+    except ValueError as e:
+        raise SystemExit(str(e))
+    print(log)
+    if not ok:
+        raise SystemExit(1)
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="team-workflow", description=__doc__.split("\n")[0])
     sub = ap.add_subparsers(dest="command", required=True)
@@ -134,14 +160,27 @@ def main(argv=None):
     sub.add_parser("models", help="models and efforts each app offers")
     ag = sub.add_parser("agents", help="rewrite the agy subagents")
     ag.add_argument("--workspace", help="write them into <repository>/.agents/agents instead")
+    ad = sub.add_parser("addons", help="add-on plugins in Claude Code and agy")
+    ad.add_argument("action", nargs="?", choices=("list", "add", "remove", "update"), default="list")
+    ad.add_argument("name", nargs="?")
+    ad.add_argument("--app", choices=addons.APPS, help="only this app")
     sub.add_parser("install-cli", help="add a team-workflow command to ~/.local/bin")
     args = ap.parse_args(argv)
     if args.command == "update":
-        update_plugin.main(["--check"] if args.check or args.check_word else [])
+        check = args.check or args.check_word
+        try:
+            update_plugin.main(["--check"] if check else [])
+        except SystemExit as e:
+            if e.code:
+                print("team-workflow update failed")
+        if not check:
+            print(addons.update_all(repo_root())[1])
     elif args.command == "settings":
         cmd_settings(args)
     elif args.command == "models":
         cmd_models(args)
+    elif args.command == "addons":
+        cmd_addons(args)
     elif args.command == "agents":
         cmd_agents(args)
     else:

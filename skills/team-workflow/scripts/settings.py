@@ -26,6 +26,8 @@ DEFAULTS = {
     },
     # Effort per role (workers in both apps): low, medium, high, xhigh, max.
     "effort": {"default": "medium", "architect": "high", "security-reviewer": "high"},
+    # Add-on plugins chosen with `tw.py addons add`; `update` refreshes them too.
+    "addons": {},
 }
 
 CHOICES = {
@@ -133,5 +135,8 @@ def flatten(data, prefix=""):
 def summary(data):
     """One line with the settings that differ from the defaults, for the session context."""
     defaults = dict(flatten(DEFAULTS))
-    changed = [f"{k}={json.dumps(v)}" for k, v in flatten(data) if defaults.get(k, object()) != v]
+    changed = [f"{k}={json.dumps(v)}" for k, v in flatten(data)
+               if not k.startswith("addons.") and defaults.get(k, object()) != v]
+    if data.get("addons"):
+        changed.append("addons=" + ",".join(data["addons"]))
     return "team-workflow settings: " + (", ".join(changed) if changed else "defaults")
