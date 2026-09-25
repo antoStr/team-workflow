@@ -9,7 +9,9 @@
   independent roles in one call.
 - Ask the user with the `ask_question` tool: `is_multi_select: true` only when several answers
   make sense (which roles), single choice otherwise.
-- The user's settings: `python3 <team-workflow skill folder>/scripts/tw.py settings --json`.
+- The user's settings: `python3 <team-workflow skill folder>/scripts/tw.py settings --json`;
+  the roles with their type and model: `tw.py agents`. A role whose type is a built-in
+  (`self`, `research`) is launched as that type with `tw.py agents show <role>` as its brief.
 - End every task with a report: done, verified with evidence, findings, decisions. Ask before
   applying anything the user did not request.
 - When files change, update `docs/memory/STATE.md`.

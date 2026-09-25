@@ -16,16 +16,19 @@ context ("team-workflow settings: ..."); elsewhere read them with
   showing the board. The user saying "defaults" (or "veloce") means `quick` for this run.
 - `max_agents`: propose at most this many agents unless the user asks for more.
 - `launch`, `worker_edits`, `auto_security_review`, `end_report`: as named.
-- `models.<app>.<role>` and `effort.<role>`: the recommended model and effort of each role
-  (`default` for the others).
+- `models.<app>.<role>`, `effort.<role>` and `type.<app>.<role>`: the recommended model,
+  effort and agent type of each role (`default` for the others); `packs.<pack>` and
+  `enabled.<role>`: which roles exist at all. Propose only enabled roles; when the task needs
+  a role whose pack is off (a language reviewer, the quality pack), say which pack to enable.
 
 Offer only models and efforts the app really has (`tw.py models` lists them):
 
 - **Claude Code**: `haiku`, `sonnet`, `opus`, `fable` (or a full model id); effort `low`,
-  `medium`, `high`, `xhigh`, `max`, but a native subagent runs at the effort of its agent file,
-  so a different effort means a worker. Haiku has no effort.
-- **agy native subagent**: `inherit` (the session's model), `flash` or `pro`; it is set in the
-  role's agy agent file (`models.agy.<role>`, then `tw.py agents`), not per launch.
+  `medium`, `high`, `xhigh`, `max` where the model supports it (haiku has none). A custom
+  agent runs at the effort of its generated file: to change it for good, `tw.py agents set
+  <role> effort=<e>`; for one run only, use a worker.
+- **agy custom subagent**: `inherit` (the session's model), `flash` or `pro`, set per role
+  (`tw.py agents set <role> model=pro --app agy`), not per launch.
 - **agy worker**: any id from `agy models` (for example `gemini-3.8-flash-high`,
   `gemini-3.1-pro-low`, `claude-sonnet-4-6`); the effort is part of the id.
 
@@ -86,24 +89,28 @@ Total ~3.7M tokens, $1.70
 ## 4. Launch
 
 Write the agreed "what" and "how" into each brief, with the owned files, the output format and
-the boundaries (SKILL.md, section 4).
+the boundaries (SKILL.md, section 4). How each agent starts depends on its type in the
+settings (`type.<app>.<role>`, shown by `tw.py agents`):
 
-- **Native** (default, setting `launch`):
-  - Claude Code: the Agent tool with `subagent_type: team-workflow:<role>` and
-    `model: <choice>`.
-  - agy: `invoke_subagent` with `TypeName: "<role>"` (the plugin keeps the roles in
-    `~/.gemini/config/agents/` as agy subagents), `Role` a short job title and `Prompt` the
-    brief; several independent agents go in one call and run in parallel. If a role is not in
-    the subagent list, run `python3 <skill>/scripts/tw.py agents`, tell the user to restart agy,
-    and meanwhile launch it as a worker.
-- **Worker**: when the user wants an exact model or effort the native launch cannot give, or
-  measured usage in agy:
+- **custom** (default): the generated agent named after the role, with the model and effort
+  of the settings.
+  - Claude Code: the Agent tool with `subagent_type: "<role>"` (for example `"tester"`); add
+    `model` only when the user chose a different model for this run.
+  - agy: `invoke_subagent` with `TypeName: "<role>"`, `Role` a short job title and `Prompt` the
+    brief; independent agents go in one call and run in parallel.
+  If the role is not in the app's agent list (first session after an install or a settings
+  change), run `python3 <skill>/scripts/tw.py agents sync`, tell the user to restart the app,
+  and for now launch it as a built-in type briefed with the role.
+- **built-in** (`general-purpose`, `Explore`, `Plan` in Claude Code; `self`, `research` in
+  agy): launch that type and put the role's instructions first in the prompt; get them with
+  `python3 <skill>/scripts/tw.py agents show <role>`.
+- **worker**: an exact model and effort, or measured usage in agy:
 
   `python3 <skill>/scripts/run_worker.py --harness claude|agy --role <role> --model <model> --effort <effort> --root <repository> --task-file <brief.md> [--allow-edits]`
 
   Workers are read-only unless the user agreed to `--allow-edits` for that agent (or the
   setting `worker_edits` is true). Tools that need a permission prompt are denied in headless
-  runs, so roles that must run tests or builds are better launched natively.
+  runs, so roles that must run tests or builds are better launched as custom agents.
 
 ## 5. After the run
 

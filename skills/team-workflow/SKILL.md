@@ -43,8 +43,12 @@ solo and delegating, choose delegation for every size above trivial.
 
 ## 3. The agents and how smart they are
 
-`TEAMS.md` lists all twenty agents with their team, role and what they may write. The model
-and effort of each role come from the settings (`models.<app>.<role>`, `effort.<role>`):
+`TEAMS.md` lists the roles: twenty in the core pack, and optional packs the user switches on
+(a reviewer and a build fixer for each of 13 languages; quality, planning, ML, open source,
+agent setup, SEO), plus any role the user writes. The plugin writes every enabled role as a
+native agent of the app (`~/.claude/agents/<role>.md`, `~/.gemini/config/agents/<role>.md`).
+Type, model and effort of each role come from the settings (`type.<app>.<role>`,
+`models.<app>.<role>`, `effort.<role>`):
 by default `architect` and `security-reviewer` run on the strongest model with high effort
 (opus in Claude Code, pro in agy), `doc-keeper` on the lightest (haiku, flash), everyone else
 on sonnet in Claude Code and on the session's model in agy.
@@ -58,9 +62,12 @@ mistake is expensive, not by default.
 
 Every behavior above can be changed by the user: `tw.py settings` shows them, `tw.py settings
 set <key> <value> [--project]` changes them (user file `~/.team-workflow/settings.json`,
-project file `.team-workflow.json`). Follow them: `wizard`, `max_agents`, `launch`,
-`worker_edits`, `auto_security_review`, `end_report` (short: done, verified, decisions only),
-`update_check`, `stop_check`, `models`, `effort`.
+project file `.team-workflow.json`); `tw.py agents` changes roles, `tw.py profile` applies a
+preset (budget, fast, balanced, thorough, security, research). Follow them: `wizard`,
+`max_agents`, `launch`, `worker_edits`, `auto_security_review`, `end_report` (short: done,
+verified, decisions only), `update_check`, `stop_check`, `models`, `effort`, `type`, `packs`,
+`enabled`, `addons`. When the session context says the repository's languages have packs that
+are off, offer `tw.py agents enable auto` once.
 
 ## 4. Plan and dispatch
 
@@ -102,9 +109,14 @@ Never accept an agent's claim without evidence: read the diff and rerun the key 
 - `/team-workflow:usage-costs [days|latest]`: tokens and cost by agent, model and session.
 - `/team-workflow:write-docs [architecture|onboarding|changelog|readme]`: `technical-writer` turns the
   memory into documentation for people, every fact checked against the code.
-- `/team-workflow:update-plugin [check]`, `/team-workflow:settings [set <key> <value>]`,
-  `/team-workflow:models`: answered by `tw.py` without the model in Claude Code (a hook); in agy
-  the user runs them in bash mode (`!team-workflow update`), or you run `tw.py` for them.
+- `/team-workflow:learn-history`: hotspots, bug-prone files, coupling and conventions from git,
+  turned into memory or a project skill with the user's approval.
+- Commands answered by `tw.py` without the model in Claude Code (a hook), and in agy with bash
+  mode (`!team-workflow <command>`); run `tw.py` yourself only when the user asks you to:
+  `update-plugin [check]`, `settings`, `models`, `agents` (list, show, set, enable, disable,
+  new, sync), `addons` (caveman, ponytail, ECC or any plugin, in both apps), `profile`,
+  `audit` (secrets, permissions, hooks, MCP, prompt injection in the agent setup), `doctor
+  [--fix]`, `ci-init` (GitHub Actions checks on every pull request).
 
 ## 6. Definition of done
 
@@ -146,14 +158,17 @@ reminder off.
 
 ## 9. Claude Code and agy
 
-- **Claude Code**: agents are `team-workflow:<role>`; commands are `/team-workflow:<name>`; the
-  hooks load the memory at session start and check `STATE.md` at the end of a turn.
+- **Claude Code**: agents are the generated `<role>` agents (`subagent_type: "<role>"`);
+  commands are `/team-workflow:<name>`; the hooks load the memory and write the agents at
+  session start, answer the `tw.py` commands without the model, and check `STATE.md` at the
+  end of a turn.
 - **agy (Antigravity)**: install with `agy plugin install <repository url or path>` (one
   project only: `python3 <skill>/scripts/install_agy.py --workspace <repo>`). Each workflow is
   its own skill (`skills/<name>/SKILL.md`); the memory comes through the `AGENTS.md` rules and
   the Stop hook checks `STATE.md`. agy does not take a plugin's agents as subagents, so the
-  plugin writes the twenty roles in agy's format to `~/.gemini/config/agents/` (at every
-  session, and with `tw.py agents`): launch them with `invoke_subagent`, `TypeName` = the role.
+  plugin writes the enabled roles in agy's format to `~/.gemini/config/agents/` (at every
+  session, and with `tw.py agents sync`): launch them with `invoke_subagent`, `TypeName` = the
+  role.
   Workers (`run_worker.py --harness agy`) give an exact model id and measured usage. Ask with
   agy's `ask_question` tool wherever this skill says AskUserQuestion; `is_multi_select: true`
   only for questions with several answers.
@@ -162,5 +177,5 @@ reminder off.
 
 Scripts: `estimate.py` (cost before launch), `run_worker.py` (exact model and effort, usage
 recorded), `dashboard.py` (usage after), `memcheck.py`, `init_memory.py`, `install_agy.py`,
-`update_plugin.py`, `tw.py` (settings, models, update and the agy
-subagents, without the model).
+`update_plugin.py`, `tw.py` (every command without the model), `roles.py` (roles, packs and the
+native agents), `addons.py`, `audit.py`, `doctor.py`, `learn.py`.

@@ -9,6 +9,7 @@
     tw.py agents [list]                    roles with pack, on/off, type, model, effort per app
     tw.py agents set ROLE model=M effort=E type=T [--app claude|agy] [--project]
     tw.py agents enable|disable ROLE|PACK  switch a role or a whole pack
+    tw.py agents show ROLE                 the full instructions of a role
     tw.py agents new ROLE                  your own role (or an override) to edit
     tw.py agents sync                      rewrite the native agents of both apps
     tw.py addons [list]                    add-on plugins (caveman, ponytail, ecc, any other)
@@ -156,6 +157,10 @@ def cmd_agents(args):
     try:
         if action == "new":
             print(f"edit {roles.new_role(name, target)}, then: agents sync")
+            return
+        if action == "show":
+            meta, body = roles.load(name, root)
+            print(f"# {name}\n\n{meta.get('description', '')}\n\n{body}")
             return
         catalog = roles.catalog(root)
         packs = {i["pack"] for i in catalog.values()}
@@ -335,7 +340,7 @@ def main(argv=None):
     sub.add_parser("models", help="models and efforts each app offers")
     ag = sub.add_parser("agents", help="roles: list, set type/model/effort, enable, new, sync")
     ag.add_argument("action", nargs="?", default="list",
-                    choices=("list", "set", "enable", "disable", "new", "sync"))
+                    choices=("list", "show", "set", "enable", "disable", "new", "sync"))
     ag.add_argument("rest", nargs="*", help="ROLE [model=... effort=... type=...]")
     ag.add_argument("--app", choices=roles.APPS, help="set: only this app")
     ag.add_argument("--project", action="store_true", help="this repository only")

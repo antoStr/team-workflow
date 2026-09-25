@@ -8,50 +8,72 @@ spend it where parallel work or an independent check pays back.
 
 | Team | Build | Check |
 |---|---|---|
-| product | `product-manager`, `ui-ux-designer` | `market-researcher`, `architect` |
-| frontend | `frontend-dev`, `ui-ux-designer` | `accessibility-specialist`, `e2e-tester`, `performance-engineer`, `code-reviewer` |
-| backend | `backend-dev`, `database-engineer` | `tester`, `security-reviewer`, `performance-engineer`, `code-reviewer` |
-| fullstack | `backend-dev`, `frontend-dev`, `database-engineer` | `tester`, `e2e-tester`, `code-reviewer`, `security-reviewer` |
-| data | `data-analyst`, `database-engineer` | `tester` (for scripts that ship) |
-| marketing | `market-researcher`, `marketing-strategist` | `product-manager`, `ui-ux-designer` |
-| quality | none | `tester`, `e2e-tester`, `code-reviewer`, `security-reviewer`, `accessibility-specialist`, `performance-engineer` |
-| release | `release-manager`, `devops-engineer` | `tester`, `technical-writer` (notes and docs) |
-| maintenance | `refactor-specialist` | `tester`, `code-reviewer`, `performance-engineer` |
+| product | `product-manager`, `ui-ux-designer`, `planner` | `market-researcher`, `architect` |
+| frontend | `frontend-dev`, `ui-ux-designer` | `accessibility-specialist`, `e2e-tester`, `performance-engineer`, `code-reviewer`, `typescript-reviewer` |
+| backend | `backend-dev`, `database-engineer` | `tester`, `security-reviewer`, `performance-engineer`, `code-reviewer`, `<lang>-reviewer` |
+| fullstack | `backend-dev`, `frontend-dev`, `database-engineer` | `tester`, `e2e-tester`, `code-reviewer`, `security-reviewer`, `<lang>-reviewer` |
+| data | `data-analyst`, `database-engineer` | `tester` (for scripts that ship), `ml-reviewer`, `rag-reviewer` |
+| marketing | `market-researcher`, `marketing-strategist`, `seo-specialist` | `product-manager`, `ui-ux-designer` |
+| quality | none | `tester`, `e2e-tester`, `code-reviewer`, `security-reviewer`, `accessibility-specialist`, `performance-engineer`, `silent-failure-hunter`, `type-design-reviewer`, `test-coverage-reviewer` |
+| release | `release-manager`, `devops-engineer` | `tester`, `technical-writer` (notes and docs), `open-source-sanitizer` (public releases) |
+| maintenance | `refactor-specialist`, `<lang>-build-fixer` | `tester`, `code-reviewer`, `performance-engineer` |
 | docs | `technical-writer`, `doc-keeper` | none |
-| architecture | `architect` | `database-engineer`, `security-reviewer`, `performance-engineer`, `devops-engineer` |
+| architecture | `architect`, `code-explorer`, `planner` | `database-engineer`, `security-reviewer`, `performance-engineer`, `devops-engineer` |
+| agent setup | `harness-optimizer` | `security-reviewer` |
+
+Roles outside the core come from packs the user switches on (`tw.py agents enable <pack>`, or
+`auto` for the languages of the repository). Propose a pack role only when its pack is on; when
+it is off and the task needs it, say which pack to enable. `<lang>` is the repository's
+language: `go`, `rust`, `python`, `typescript`, `java`, `kotlin`, `cpp`, `csharp`, `swift`,
+`dart`, `php`, `ruby`, `fsharp`.
 
 The main session is always the orchestrator and scrum master: it plans, briefs, merges the
 results and keeps the memory.
 
 ## All agents
 
-| Agent | Model | Role | Writes |
-|---|---|---|---|
-| `product-manager` | sonnet | scope, user stories, acceptance criteria, priorities | specs only |
-| `architect` | opus, high effort | structural options and decision records | nothing |
-| `ui-ux-designer` | sonnet | flows, screens, states, design system | specs; styles when assigned |
-| `frontend-dev` | sonnet | UI code with tests | assigned files |
-| `backend-dev` | sonnet | server, CLI, library and data code with tests | assigned files |
-| `database-engineer` | sonnet | schema, migrations, queries, integrity | migrations and queries |
-| `devops-engineer` | sonnet | CI/CD, containers, infrastructure, monitoring | pipeline and infra files |
-| `performance-engineer` | sonnet | profiling, benchmarks, load tests | optimizations with numbers |
-| `refactor-specialist` | sonnet | refactoring, cleanup, structure for scale | assigned files, same behavior |
-| `tester` | sonnet | failing test first, independent verification | tests only |
-| `e2e-tester` | sonnet | end-to-end user flows in a browser | end-to-end tests only |
-| `accessibility-specialist` | sonnet | WCAG 2.2 AA audit | report; fixes when assigned |
-| `code-reviewer` | sonnet | quality review | nothing |
-| `security-reviewer` | opus, high effort | security review from input to impact | nothing |
-| `release-manager` | sonnet | pipeline, version, tag, notes, publication | release files |
-| `technical-writer` | sonnet | README, guides, API docs, release notes, docs from the memory | documentation |
-| `doc-keeper` | haiku | project memory from the diff | `docs/memory` |
-| `data-analyst` | sonnet | spreadsheets and data: cleaning, statistics, charts, report | analysis outputs |
-| `market-researcher` | sonnet | competitors, customers, market size, with sources | research report |
-| `marketing-strategist` | sonnet | positioning, launch, copy, SEO, metrics | marketing copy |
+The core pack is always on; model, effort and agent type of every role come from the settings
+(`tw.py agents` shows them per app). By default `architect` and `security-reviewer` use the
+strongest model with high effort, `doc-keeper` the lightest, the rest the standard model.
 
-The Model column is the Claude Code default; agy runs the opus roles on `pro`, haiku on
-`flash` and the rest on the session's model. The user changes any of them in the settings
-(`models.<app>.<role>`). Override the model per call when the task is unusually risky or
-mechanical, among the models the app offers.
+| Agent | Pack | Role | Writes |
+|---|---|---|---|
+| `product-manager` | core | scope, user stories, acceptance criteria, priorities | specs only |
+| `architect` | core | structural options and decision records | nothing |
+| `ui-ux-designer` | core | flows, screens, states, design system | specs; styles when assigned |
+| `frontend-dev` | core | UI code with tests | assigned files |
+| `backend-dev` | core | server, CLI, library and data code with tests | assigned files |
+| `database-engineer` | core | schema, migrations, queries, integrity | migrations and queries |
+| `devops-engineer` | core | CI/CD, containers, infrastructure, monitoring | pipeline and infra files |
+| `performance-engineer` | core | profiling, benchmarks, load tests | optimizations with numbers |
+| `refactor-specialist` | core | refactoring, cleanup, structure for scale | assigned files, same behavior |
+| `tester` | core | failing test first, independent verification | tests only |
+| `e2e-tester` | core | end-to-end user flows in a browser | end-to-end tests only |
+| `accessibility-specialist` | core | WCAG 2.2 AA audit | report; fixes when assigned |
+| `code-reviewer` | core | quality review | nothing |
+| `security-reviewer` | core | security review from input to impact, including LLM features | nothing |
+| `release-manager` | core | pipeline, version, tag, notes, publication | release files |
+| `technical-writer` | core | README, guides, API docs, release notes, docs from the memory | documentation |
+| `doc-keeper` | core | project memory from the diff | `docs/memory` |
+| `data-analyst` | core | spreadsheets and data: cleaning, statistics, charts, report | analysis outputs |
+| `market-researcher` | core | competitors, customers, market size, with sources | research report |
+| `marketing-strategist` | core | positioning, launch, copy, SEO, metrics | marketing copy |
+| `<lang>-reviewer` | `<lang>` | idiom, safety and correctness of one language, with its tools | nothing |
+| `<lang>-build-fixer` | `<lang>` | smallest fix for a red build, type check or dependency error | assigned files |
+| `silent-failure-hunter` | quality | swallowed errors, hiding fallbacks, missing timeouts | nothing |
+| `type-design-reviewer` | quality | invariants and illegal states in types and schemas | nothing |
+| `test-coverage-reviewer` | quality | whether the tests would catch the bugs that matter | nothing |
+| `planner` | planning | step-by-step implementation plan with owners and tests | plans |
+| `code-explorer` | planning | traces how an existing feature works | nothing |
+| `ml-reviewer` | ml | data, training, evaluation, serving and monitoring of models | nothing |
+| `rag-reviewer` | ml | ingestion, retrieval, grounding, injection and evaluation of RAG | nothing |
+| `open-source-sanitizer` | opensource | secrets, personal data and internal references before publishing | nothing |
+| `harness-optimizer` | harness | agent setup: permissions, hooks, MCP, context and cost | proposals |
+| `seo-specialist` | growth | technical and on-page SEO, structured data, Core Web Vitals | report; fixes when assigned |
+
+The user can add roles or override one (`tw.py agents new <role>`) and choose, per role and per
+app, the agent type: `custom` (the generated agent), `worker`, or a built-in type briefed with
+the role (Claude Code `general-purpose`, `Explore`, `Plan`; agy `self`, `research`).
 
 ## Asking the user
 
