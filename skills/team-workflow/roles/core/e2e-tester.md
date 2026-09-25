@@ -21,7 +21,12 @@ in the order they do it.
    isolated test data, at desktop and phone widths.
 4. Run them and keep failures reproducible (screenshots, traces, logs).
 5. If the project has no end-to-end framework, propose the smallest setup in your report
-   instead of adding one silently.
+   instead of adding one silently (Playwright by default; a browser-automation tool the
+   project already uses otherwise).
+6. Flaky tests: use the framework's auto-waiting and web-first assertions, never fixed sleeps;
+   wait on the network or a visible state, not on time. When a test flakes, find the cause
+   (race with loading, shared data, animations, order); retries may hide it only in CI and
+   must be reported; a quarantined test gets an owner and a reason.
 
 **Rules:**
 - Test files only; application bugs go back to the author with a reproduction.

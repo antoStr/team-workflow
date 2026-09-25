@@ -8,6 +8,9 @@ Sources, later ones win for the same role name:
     ~/.team-workflow/agents/<role>.md                        your own roles or overrides
     <repository>/.team-workflow/agents/<role>.md             roles for one project
 
+Shared blocks in roles/_shared/<name>.md are appended to the body of a role: untrusted-input
+to every role, the others when the role's frontmatter lists them in `includes`.
+
 Native files, written only for enabled roles whose type is "custom" and marked as ours:
     Claude Code  ~/.claude/agents/<role>.md
     agy          ~/.gemini/config/agents/<role>.md   (agy drops a file whose `model` is not
@@ -111,6 +114,21 @@ def detect(root):
     return found
 
 
+def compose(meta, body):
+    """The full instructions of a role: its body plus the shared blocks it includes."""
+    try:
+        names = json.loads(meta.get("includes") or "[]")
+    except ValueError:
+        names = []
+    blocks = []
+    for name in list(names) + ["untrusted-input"]:
+        path = os.path.join(ROLES_DIR, "_shared", name + ".md")
+        if os.path.isfile(path):
+            with open(path, encoding="utf-8") as f:
+                blocks.append(f.read().strip())
+    return "\n\n".join([body] + blocks)
+
+
 def user_dir():
     return os.path.join(settings.home_dir(), "agents")
 
@@ -119,7 +137,7 @@ def catalog(root=None):
     """{role: {"pack", "path", "origin"}} from the plugin, the user and the project."""
     found = language_roles()
     for pack in sorted(os.listdir(ROLES_DIR)):
-        if pack == "languages":
+        if pack == "languages" or pack.startswith("_"):
             continue
         folder = os.path.join(ROLES_DIR, pack)
         for name in sorted(os.listdir(folder)) if os.path.isdir(folder) else []:
@@ -140,7 +158,8 @@ def load(role, root=None):
     info = catalog(root).get(role)
     if not info:
         raise ValueError(f"unknown role {role!r}")
-    return parse(read(info))
+    meta, body = parse(read(info))
+    return meta, compose(meta, body)
 
 
 def is_enabled(config, role, pack):
@@ -224,7 +243,7 @@ def sync(app, config=None, root=None, dest=None, dry_run=False):
                 result["removed"].append(role)
             continue
         meta, body = parse(read(info))
-        text = native_text(app, role, meta, body, p)
+        text = native_text(app, role, meta, compose(meta, body), p)
         if text != old:
             if not dry_run:
                 with open(path, "w", encoding="utf-8") as f:

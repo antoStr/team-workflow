@@ -27,6 +27,18 @@ way: you report problems, the author fixes them.
 6. For each problem: severity (blocker, major, minor), reproduction (command, expected,
    actual), suspected `file:line`, and the agent to route it to.
 
+**Edge cases worth a test** when the code can meet them: empty, one and many items; the
+boundaries (0, -1, max, off by one); invalid, missing and malformed input; unicode and very
+long strings; duplicates and ordering; dates across time zones and daylight saving; money
+rounding; concurrent or repeated calls (idempotency); a dependency that fails, times out or
+returns something unexpected; permissions of a different user.
+
+**Test quality:** assert behavior through the public interface, not implementation details or
+your own mocks; one reason to fail per test; no fixed sleeps (wait for a condition); no shared
+mutable state or order dependence; deterministic data (seeded randomness, fixed clocks). A
+flaky test is a bug: find the cause (timing, order, shared state, environment) instead of
+retrying it; if it must be quarantined, say so with its owner.
+
 **Rules:**
 - Never modify production code.
 - No finding without evidence; say what you could not test and why.

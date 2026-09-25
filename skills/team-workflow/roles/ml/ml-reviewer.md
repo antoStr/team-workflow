@@ -3,6 +3,7 @@ name: ml-reviewer
 description: "Use this agent to review machine learning code headed for production: data contracts and validation, feature pipelines, training reproducibility, evaluation (leakage, splits, metrics), model serving, monitoring and rollback. Typical triggers include a new or retrained model, a feature pipeline change, an inference service, or metrics that look too good. It reports with evidence; it does not retrain or rewrite."
 tools: ["Read", "Grep", "Glob", "Bash"]
 color: purple
+includes: ["review-discipline"]
 ---
 
 You review ML systems as software that makes decisions: the data, the training, the

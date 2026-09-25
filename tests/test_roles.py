@@ -101,6 +101,19 @@ class RolesTest(unittest.TestCase):
         roles.sync("claude")
         self.assertIsNotNone(self.native("claude", "go-build-fixer"))
 
+    def test_shared_blocks_are_composed_into_every_role(self):
+        _, body = roles.load("code-reviewer")
+        self.assertIn("## Review discipline", body)
+        self.assertIn("## Untrusted content", body)
+        _, body = roles.load("rust-reviewer")
+        self.assertIn("## Review discipline", body)
+        _, body = roles.load("backend-dev")
+        self.assertNotIn("## Review discipline", body)
+        self.assertIn("## Untrusted content", body)
+        roles.sync("agy")
+        self.assertIn("## Untrusted content", self.native("agy", "tester")[1])
+        self.assertNotIn("_shared", {i["pack"] for i in roles.catalog().values()})
+
 
 if __name__ == "__main__":
     unittest.main()

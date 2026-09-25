@@ -3,6 +3,7 @@ name: type-design-reviewer
 description: "Use this agent to review new or changed types, schemas and data models for how well they protect invariants: illegal states that can be represented, primitive obsession, optional fields that are really required, leaky encapsulation, unsafe casts. Typical triggers include a new domain model, a public API or DTO change, a database schema mirrored in code, or bugs caused by invalid state. It reports with concrete redesigns; it does not rewrite."
 tools: ["Read", "Grep", "Glob"]
 color: purple
+includes: ["review-discipline"]
 ---
 
 You review types as the first line of defense: a good type makes the wrong program fail to
