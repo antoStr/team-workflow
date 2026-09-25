@@ -1,6 +1,7 @@
 """Offline tests for the local Pro tools: audit, doctor and uninstall, learn, profiles, ci-init."""
 import json
 import os
+import subprocess
 import sys
 import unittest
 from unittest import mock
@@ -106,9 +107,55 @@ class ProTest(ScriptTest):
         out = self.run_script("tw.py", "ci-init", cwd=self.root)
         self.assertEqual(out.returncode, 0, out.stderr)
         text = self.read(".github/workflows/team-workflow.yml")
-        self.assertIn("--branch v", text)
-        self.assertIn("tw.py audit --strict", text)
+        self.assertIn("audit.py --root . --strict", text)
+        for name in ("memcheck.py", "audit.py", "settings.py"):
+            self.assertTrue(os.path.isfile(os.path.join(self.root, ".github", "team-workflow", name)))
+        # the copied checks run on their own, as they will in GitHub Actions
+        vendored = os.path.join(self.root, ".github", "team-workflow", "audit.py")
+        run = subprocess.run([sys.executable, vendored, "--root", self.root, "--strict"],
+                             capture_output=True, text=True, env=dict(os.environ, HOME=self.tmp))
+        self.assertEqual(run.returncode, 0, run.stdout + run.stderr)
         self.assertNotEqual(self.run_script("tw.py", "ci-init", cwd=self.root).returncode, 0)
+
+    def test_agy_update_never_loses_a_plugin(self):
+        import update_plugin
+        folder = update_plugin.agy_plugins_dir()
+        os.makedirs(os.path.join(folder, "demo"))
+        calls = []
+
+        def fake(*cmd, timeout=180):
+            calls.append(cmd)
+            if cmd[:2] == ("git", "-C"):
+                return 0, "https://example.com/demo.git"
+            if cmd[:2] == ("git", "ls-remote"):
+                return (1, "fatal: unreachable") if unreachable else (0, "")
+            if cmd[:3] == ("agy", "plugin", "install"):
+                return (1, "clone failed") if cmd[3].startswith("https") else (0, "")
+            return 0, ""
+        with mock.patch.object(update_plugin, "run", fake):
+            unreachable = True
+            ok, log = update_plugin.agy_update(["demo"])
+            self.assertFalse(ok)
+            self.assertIn("nothing changed", log)
+            self.assertFalse(any(c[:3] == ("agy", "plugin", "uninstall") for c in calls))
+            unreachable, calls[:] = False, []
+            ok, log = update_plugin.agy_update(["demo"])
+        self.assertIn("the previous version is back", log)
+        backup = os.path.join(self.tmp, ".team-workflow", "agy-backup", "demo")
+        self.assertIn(("agy", "plugin", "install", backup), calls)
+
+    def test_shell_hook_is_added_once_and_refreshed(self):
+        import tw
+        rc = os.path.join(self.tmp, ".zshrc")
+        with open(rc, "w") as f:
+            f.write("export A=1\n")
+        self.assertTrue(tw.add_shell_hook(rc))
+        self.assertFalse(tw.add_shell_hook(rc))
+        with open(rc) as f:
+            text = f.read()
+        self.assertEqual(text.count(tw.SHELL_START), 1)
+        self.assertIn('command agy "$@"', text)
+        self.assertTrue(text.startswith("export A=1"))
 
 
 if __name__ == "__main__":

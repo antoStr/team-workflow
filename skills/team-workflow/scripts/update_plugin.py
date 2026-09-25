@@ -123,6 +123,67 @@ def update(harness, source):
     return True, "\n".join(log)
 
 
+def agy_plugins_dir():
+    return os.path.join(os.path.expanduser("~"), ".gemini", "config", "plugins")
+
+
+def agy_source(name):
+    """Where agy installed a plugin from: the origin of its clone, or None."""
+    code, out = run("git", "-C", os.path.join(agy_plugins_dir(), name), "remote", "get-url", "origin",
+                    timeout=10)
+    return out.strip() if code == 0 and out.strip() else None
+
+
+def agy_update(names=None):
+    """`agy plugin update`: reinstall each plugin from where it came from. Returns (ok, log)."""
+    folder = agy_plugins_dir()
+    installed_names = sorted(n for n in os.listdir(folder) if os.path.isdir(os.path.join(folder, n))) \
+        if os.path.isdir(folder) else []
+    names = names or installed_names
+    ok_all, log = True, []
+    for name in names:
+        if name not in installed_names:
+            log.append(f"{name}: not installed in agy ({', '.join(installed_names) or 'none'})")
+            ok_all = False
+            continue
+        source = agy_source(name)
+        if not source:
+            log.append(f"{name}: agy did not keep its source; reinstall it once with "
+                       f"agy plugin install <url or path>")
+            ok_all = False
+            continue
+        if not os.path.isdir(source):  # check the source answers before removing anything
+            code, out = run("git", "ls-remote", "--heads", source, timeout=60)
+            if code:
+                log.append(f"{name}: {source} cannot be reached, nothing changed\n{out.splitlines()[-1] if out else ''}")
+                ok_all = False
+                continue
+        backup = os.path.join(os.path.expanduser("~"), ".team-workflow", "agy-backup", name)
+        shutil.rmtree(backup, ignore_errors=True)
+        shutil.copytree(os.path.join(folder, name), backup, symlinks=True)
+        code, out = run("agy", "plugin", "uninstall", name)
+        if code:
+            log.append(f"{name}: uninstall failed, nothing changed\n{out}")
+            ok_all = False
+            continue
+        code, out = run("agy", "plugin", "install", source)
+        if code:
+            restored, _ = run("agy", "plugin", "install", backup)
+            log.append(f"{name}: install from {source} failed; "
+                       + ("the previous version is back" if restored == 0 else
+                          f"restore it with: agy plugin install {backup}") + f"\n{out}")
+            ok_all = False
+            continue
+        shutil.rmtree(backup, ignore_errors=True)
+        log.append(f"{name}: reinstalled from {source}")
+        if name == NAME:  # the new version's roles, as agy subagents
+            script = os.path.join(folder, NAME, "skills", NAME, "scripts", "install_agy.py")
+            code, out = run("python3", script, "--agents-only")
+            log.append(out if out else "agents refreshed")
+    log.append("Restart agy to load the updates.")
+    return ok_all, "\n".join(log)
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Check and update the installed team-workflow plugin.")
     ap.add_argument("--check", action="store_true", help="only show installed and latest versions")

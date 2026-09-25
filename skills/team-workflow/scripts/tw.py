@@ -22,7 +22,8 @@
     tw.py uninstall [--all]                remove what team-workflow wrote outside the plugins
     tw.py learn [--max N] [--json]         habits of this repository from its git history
     tw.py ci-init                          GitHub Actions workflow: memory and audit on every PR
-    tw.py install-cli                      add a `team-workflow` command to ~/.local/bin
+    tw.py agy-update [NAME...]             what `agy plugin update` would be: reinstall from source
+    tw.py install-cli [--no-shell]         `team-workflow` command, and `agy plugin update` in the shell
 
 In Claude Code, /team-workflow:<command> for update-plugin, settings, models, agents, addons,
 profile, audit and doctor is answered by a hook that runs this script, with no tokens. In agy,
@@ -265,13 +266,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Get team-workflow {version}
-        run: git clone --depth 1 --branch v{version} https://github.com/antoStr/team-workflow /tmp/team-workflow
+      # The checks come from team-workflow {version}, copied into .github/team-workflow/.
       - name: Project memory (docs/memory)
         if: hashFiles('docs/memory/INDEX.md') != ''
-        run: python3 /tmp/team-workflow/skills/team-workflow/scripts/memcheck.py --root . --strict
+        run: python3 .github/team-workflow/memcheck.py --root . --strict
       - name: Agent configuration audit (settings, hooks, MCP, agents, skills)
-        run: python3 /tmp/team-workflow/skills/team-workflow/scripts/tw.py audit --strict
+        run: python3 .github/team-workflow/audit.py --root . --strict
       # Add the project's own checks from docs/memory/PLAYBOOKS.md here (build, lint, tests).
 """
 
@@ -287,13 +287,53 @@ def cmd_ci_init(_args):
                           capture_output=True, text=True).stdout.strip()
     branch = head.split("/", 1)[1] if "/" in head else "main"
     os.makedirs(os.path.dirname(path), exist_ok=True)
+    vendor = os.path.join(root, ".github", "team-workflow")
+    os.makedirs(vendor, exist_ok=True)
+    here = os.path.dirname(os.path.abspath(__file__))
+    for name in ("memcheck.py", "audit.py", "settings.py"):  # what the two checks import
+        shutil.copy(os.path.join(here, name), vendor)
     with open(path, "w", encoding="utf-8") as f:
         f.write(CI_WORKFLOW.format(branch=branch, version=update_plugin.own_version() or "0.0.0"))
-    print(f"written {path}: memory and agent-config audit on every pull request and push to {branch}")
+    print(f"written {path} and .github/team-workflow/ (the check scripts): memory and agent-config "
+          f"audit on every pull request and push to {branch}")
     print("add the project's build and tests from PLAYBOOKS.md, then commit it")
 
 
-def cmd_install_cli(_args):
+SHELL_START, SHELL_END = "# >>> team-workflow: agy plugin update >>>", "# <<< team-workflow <<<"
+SHELL_HOOK = f"""{SHELL_START}
+# agy has no `plugin update`: this adds it (any plugin, reinstalled from its source) and passes
+# every other command to agy unchanged. Remove the block to undo.
+agy() {{
+  if [ "$1" = plugin -o "$1" = plugins ] && [ "$2" = update ]; then
+    shift 2; team-workflow agy-update "$@"
+  else
+    command agy "$@"
+  fi
+}}
+{SHELL_END}
+"""
+
+
+def add_shell_hook(rc):
+    """Add (or refresh) the agy function in a shell rc file; returns True when it changed."""
+    try:
+        with open(rc, encoding="utf-8") as f:
+            text = f.read()
+    except OSError:
+        return False
+    if SHELL_START in text:
+        start, end = text.index(SHELL_START), text.index(SHELL_END) + len(SHELL_END)
+        new = text[:start] + SHELL_HOOK.rstrip("\n") + text[end:]
+    else:
+        new = text.rstrip("\n") + "\n\n" + SHELL_HOOK
+    if new == text:
+        return False
+    with open(rc, "w", encoding="utf-8") as f:
+        f.write(new)
+    return True
+
+
+def cmd_install_cli(args):
     path = os.path.join(os.path.expanduser("~"), ".local", "bin", "team-workflow")
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
@@ -302,6 +342,26 @@ def cmd_install_cli(_args):
     print(f"written {path}: run `team-workflow update`, `team-workflow settings`...")
     if os.path.dirname(path) not in os.environ.get("PATH", "").split(os.pathsep):
         print(f"{os.path.dirname(path)} is not in PATH: add it to your shell profile")
+    if getattr(args, "no_shell", False):
+        return
+    for rc in (".zshrc", ".bashrc"):
+        full = os.path.join(os.path.expanduser("~"), rc)
+        if add_shell_hook(full):
+            print(f"added `agy plugin update [name...]` to {full} (open a new terminal to use it)")
+
+
+def cmd_agy_update(args):
+    ok, log = update_plugin.agy_update(args.names)
+    names = args.names or []
+    if not names or any(n in addons.chosen() for n in names):  # add-ons copied as skills
+        for name, entry in addons.chosen().items():
+            if entry.get("agy") == "skills" and (not names or name in names):
+                done, out = addons.copy_skills(name, entry)
+                log += f"\n{name} (skills): {out}"
+                ok &= done
+    print(log)
+    if not ok:
+        raise SystemExit(1)
 
 
 def cmd_addons(args):
@@ -363,7 +423,10 @@ def main(argv=None):
     le.add_argument("--max", type=int, default=2000)
     le.add_argument("--json", action="store_true")
     sub.add_parser("ci-init", help="GitHub Actions workflow for memory and audit checks")
-    sub.add_parser("install-cli", help="add a team-workflow command to ~/.local/bin")
+    au2 = sub.add_parser("agy-update", help="agy plugin update: reinstall agy plugins from their source")
+    au2.add_argument("names", nargs="*", help="plugins to update (default: all)")
+    ic = sub.add_parser("install-cli", help="add team-workflow to ~/.local/bin and `agy plugin update`")
+    ic.add_argument("--no-shell", action="store_true", help="do not add the agy function to .zshrc/.bashrc")
     args = ap.parse_args(argv)
     if args.command == "update":
         check = args.check or args.check_word
@@ -384,7 +447,8 @@ def main(argv=None):
         cmd_agents(args)
     else:
         {"profile": cmd_profile, "audit": cmd_audit, "doctor": cmd_doctor, "uninstall": cmd_uninstall,
-         "learn": cmd_learn, "ci-init": cmd_ci_init, "install-cli": cmd_install_cli}[args.command](args)
+         "learn": cmd_learn, "ci-init": cmd_ci_init, "install-cli": cmd_install_cli,
+         "agy-update": cmd_agy_update}[args.command](args)
 
 
 if __name__ == "__main__":

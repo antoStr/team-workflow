@@ -213,6 +213,19 @@ def audit(root=None):
     return unique, len(files)
 
 
+def main():
+    import argparse
+    import sys
+    ap = argparse.ArgumentParser(description="Security audit of the AI agent setup.")
+    ap.add_argument("--root", default=".")
+    ap.add_argument("--strict", action="store_true", help="exit 1 on critical or high findings")
+    args = ap.parse_args()
+    findings, scanned = audit(os.path.abspath(args.root))
+    print(report(findings, scanned))
+    if args.strict and any(f["severity"] in ("critical", "high") for f in findings):
+        sys.exit(1)
+
+
 def report(findings, scanned):
     if not findings:
         return f"audit: {scanned} files scanned, no findings"
@@ -220,3 +233,7 @@ def report(findings, scanned):
     for f in findings:
         lines.append(f"[{f['severity'].upper()}] {f['file']}: {f['what']}\n    fix: {f['fix']}")
     return "\n".join(lines)
+
+
+if __name__ == "__main__":
+    main()

@@ -180,9 +180,18 @@ i costi indicano consumo, non una fattura.
 
 ```bash
 agy plugin install https://github.com/antoStr/team-workflow   # oppure il percorso locale del repo
-agy plugin uninstall team-workflow                            # prima di reinstallare una nuova versione
+python3 ~/.gemini/config/plugins/team-workflow/skills/team-workflow/scripts/tw.py install-cli
+# da qui in poi, in un nuovo terminale:
+agy plugin update team-workflow     # o `agy plugin update` per tutti i plugin, o `agy plugin update ponytail`
 python3 skills/team-workflow/scripts/install_agy.py --workspace /percorso/repo   # un solo progetto
 ```
+
+agy non ha `plugin update`: `install-cli` crea il comando `team-workflow` in `~/.local/bin` e
+aggiunge a `~/.zshrc` e `~/.bashrc` una funzione `agy` che gestisce solo `agy plugin update
+[nome...]` e passa ogni altro comando ad agy invariato (per toglierla, cancella il blocco
+`team-workflow` dal file; `install-cli --no-shell` non la aggiunge). L'aggiornamento vale per
+qualsiasi plugin: lo reinstalla dall'origine da cui agy l'aveva clonato, controlla prima che
+l'origine risponda e, se la reinstallazione fallisce, rimette la versione precedente.
 
 Il repository e' anche un plugin agy (`plugin.json`, `hooks.json` e `rules/` nella radice, che
 Claude Code ignora). agy lo installa in `~/.gemini/config/plugins/team-workflow/` con le skill
@@ -226,9 +235,8 @@ Da terminale: `python3 skills/team-workflow/scripts/tw.py update [check]`. A man
 # Claude Code (oppure attiva l'auto-update del marketplace in /plugin → Marketplaces)
 claude plugin marketplace update team-workflow
 claude plugin update team-workflow@team-workflow
-# agy (non ha un comando update)
-agy plugin uninstall team-workflow
-agy plugin install https://github.com/antoStr/team-workflow
+# agy, dopo `tw.py install-cli` (vedi la sezione agy)
+agy plugin update team-workflow
 ```
 
 Riavvia la sessione dopo l'aggiornamento. Dalla 0.6.0 gli agenti di Claude Code si chiamano come il
@@ -291,9 +299,10 @@ Una memoria gia' esistente mantiene la sua lingua.
 
 ## Controlli in CI
 
-`/team-workflow:ci-init` scrive `.github/workflows/team-workflow.yml`: a ogni pull request e push
-esegue memcheck (se c'e' `docs/memory`) e l'audit della configurazione degli agenti, con la
-versione di team-workflow fissata. A mano:
+`/team-workflow:ci-init` scrive `.github/workflows/team-workflow.yml` e copia in
+`.github/team-workflow/` i tre script dei controlli (cosi' la CI non deve scaricare il plugin):
+a ogni pull request e push esegue memcheck (se c'e' `docs/memory`) e l'audit della
+configurazione degli agenti. A mano:
 
 ```bash
 python3 <cartella del plugin>/skills/team-workflow/scripts/memcheck.py --root . --strict
