@@ -68,9 +68,12 @@ def main():
     if app == "agy":  # PreInvocation in agy: the memory arrives through the AGENTS.md rules
         print("{}")
         return
-    out = {"hookSpecificOutput": {"hookEventName": "SessionStart",
-                                  "additionalContext": memory_context(root) + "\n\n"
-                                  + settings.summary(config)}}
+    context = memory_context(root) + "\n\n" + settings.summary(config)
+    missing = [s for s in roles.detect(root) if not roles.is_enabled(config, "", s)]
+    if missing:
+        context += (f"\nteam-workflow: this repository uses {', '.join(missing)}; their reviewer and "
+                    "build-fixer packs are off (offer: tw.py agents enable auto).")
+    out = {"hookSpecificOutput": {"hookEventName": "SessionStart", "additionalContext": context}}
     newer = update_plugin.newer_version() if config["update_check"] else None
     if newer:
         out["systemMessage"] = (f"team-workflow {newer} is available (installed "

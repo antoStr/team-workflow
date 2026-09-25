@@ -78,6 +78,29 @@ class RolesTest(unittest.TestCase):
         with open(os.path.join(dest, "tester.md")) as f:
             self.assertIn("mine", f.read())
 
+    def test_language_packs_expand_detect_and_switch_on(self):
+        catalog = roles.catalog()
+        langs = roles.languages()
+        self.assertGreaterEqual(len(langs), 10)
+        for slug in langs:
+            for kind in ("reviewer", "build-fixer"):
+                meta, body = roles.parse(roles.read(catalog[f"{slug}-{kind}"]))
+                self.assertNotRegex(meta["description"] + body,
+                                    r"\{(language|files|focus|triggers|checklist|build|tools)\}")
+                self.assertTrue(roles.sections(body).get("Tools"), slug)
+        meta, body = roles.load("go-reviewer")
+        self.assertIn("Go changes", meta["description"])
+        self.assertIn("errors.Is/As", body)
+        repo = os.path.join(self.home, "repo")
+        os.makedirs(os.path.join(repo, "web"))
+        open(os.path.join(repo, "go.mod"), "w").close()
+        open(os.path.join(repo, "web", "package.json"), "w").close()
+        self.assertEqual(roles.detect(repo), ["go", "typescript"])
+        self.assertIsNone(roles.sync("claude") and self.native("claude", "go-reviewer"))
+        settings.save("packs.go", True)
+        roles.sync("claude")
+        self.assertIsNotNone(self.native("claude", "go-build-fixer"))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -121,8 +121,14 @@ def cmd_agents(args):
         widths = [max(len(r[i]) for r in rows) for i in range(4)]
         for r in rows:
             print("  ".join(c.ljust(w) for c, w in zip(r, widths)) + "  " + r[4])
+        packs = sorted({i["pack"] for i in roles.catalog(root).values()})
+        on = [p for p in packs if roles.is_enabled(config, "", p)]
+        print(f"\npacks on: {', '.join(on)}")
+        print(f"packs off: {', '.join(p for p in packs if p not in on)}")
+        if root:
+            print(f"languages of this repository: {', '.join(roles.detect(root)) or 'none detected'}")
         print("\nchange: agents set ROLE model=opus effort=high type=custom [--app claude|agy]")
-        print("         agents enable|disable ROLE|PACK, agents new ROLE, agents sync")
+        print("         agents enable|disable ROLE|PACK|auto|languages, agents new ROLE, agents sync")
         print("types: claude " + " | ".join(settings.CHOICES["type.claude"])
               + "; agy " + " | ".join(settings.CHOICES["type.agy"]))
         return
@@ -145,10 +151,17 @@ def cmd_agents(args):
         packs = {i["pack"] for i in catalog.values()}
         if action in ("enable", "disable"):
             on = "true" if action == "enable" else "false"
-            key = f"packs.{name}" if name in packs and name not in catalog else f"enabled.{name}"
-            if key.startswith("enabled.") and name not in catalog:
+            if name in ("auto", "languages"):
+                slugs = roles.detect(root or os.getcwd()) if name == "auto" else list(roles.languages())
+                if not slugs:
+                    raise ValueError("no language of this repository has a pack")
+                changes = [(f"packs.{s}", settings.parse_value(f"packs.{s}", on)) for s in slugs]
+            elif name in packs and name not in catalog:
+                changes = [(f"packs.{name}", settings.parse_value(f"packs.{name}", on))]
+            elif name in catalog:
+                changes = [(f"enabled.{name}", settings.parse_value(f"enabled.{name}", on))]
+            else:
                 raise ValueError(f"no role or pack named {name!r}; packs: {', '.join(sorted(packs))}")
-            changes = [(key, settings.parse_value(key, on))]
         else:  # set
             if name not in catalog:
                 raise ValueError(f"unknown role {name!r}")

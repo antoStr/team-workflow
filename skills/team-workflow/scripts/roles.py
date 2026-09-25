@@ -3,6 +3,8 @@ app loads, written from the settings (type, model and effort per role and per ap
 
 Sources, later ones win for the same role name:
     <plugin>/skills/team-workflow/roles/<pack>/<role>.md   core and the optional packs
+    <plugin>/skills/team-workflow/roles/languages/<lang>.md one pack per language: with the
+        _reviewer.md and _build-fixer.md templates it gives <lang>-reviewer, <lang>-build-fixer
     ~/.team-workflow/agents/<role>.md                        your own roles or overrides
     <repository>/.team-workflow/agents/<role>.md             roles for one project
 
@@ -11,6 +13,7 @@ Native files, written only for enabled roles whose type is "custom" and marked a
     agy          ~/.gemini/config/agents/<role>.md   (agy drops a file whose `model` is not
                  inherit, flash or pro, or whose description has an unquoted ": ")
 """
+import glob
 import json
 import os
 import re
@@ -42,14 +45,75 @@ def parse(text):
     return meta, m.group(2).strip()
 
 
+def read(info):
+    """Text of a catalog entry: its file, or the text expanded from a language template."""
+    if "text" in info:
+        return info["text"]
+    with open(info["path"], encoding="utf-8") as f:
+        return f.read()
+
+
+def sections(body):
+    """{"Heading": text} for the `## Heading` sections of a body."""
+    parts = re.split(r"^## (.+)$", body, flags=re.M)
+    return {parts[i].strip(): parts[i + 1].strip() for i in range(1, len(parts) - 1, 2)}
+
+
+def languages():
+    """{slug: (frontmatter, sections)} of the language packs."""
+    folder = os.path.join(ROLES_DIR, "languages")
+    found = {}
+    for name in sorted(os.listdir(folder)) if os.path.isdir(folder) else []:
+        if name.endswith(".md") and not name.startswith("_"):
+            with open(os.path.join(folder, name), encoding="utf-8") as f:
+                meta, body = parse(f.read())
+            found[name[:-3]] = (meta, sections(body))
+    return found
+
+
+def language_roles():
+    """{role: entry} for <lang>-reviewer and <lang>-build-fixer of every language."""
+    folder = os.path.join(ROLES_DIR, "languages")
+    templates = {}
+    for kind in ("reviewer", "build-fixer"):
+        path = os.path.join(folder, f"_{kind}.md")
+        if os.path.isfile(path):
+            with open(path, encoding="utf-8") as f:
+                templates[kind] = f.read()
+    found = {}
+    for slug, (meta, parts) in languages().items():
+        values = dict(meta, checklist=parts.get("Checklist", ""), build=parts.get("Build", ""),
+                      tools=parts.get("Tools", ""))
+        for kind, template in templates.items():
+            text = re.sub(r"\{(\w+)\}", lambda m: str(values.get(m.group(1), m.group(0))), template)
+            found[f"{slug}-{kind}"] = {"pack": slug, "origin": "plugin", "text": text}
+    return found
+
+
+def detect(root):
+    """Language packs whose marker files are in the repository root or one folder below."""
+    found = []
+    for slug, (meta, _) in languages().items():
+        try:
+            markers = json.loads(meta.get("detect") or "[]")
+        except ValueError:
+            markers = []
+        if any(glob.glob(os.path.join(root, m)) or glob.glob(os.path.join(root, "*", m))
+               for m in markers):
+            found.append(slug)
+    return found
+
+
 def user_dir():
     return os.path.join(settings.home_dir(), "agents")
 
 
 def catalog(root=None):
     """{role: {"pack", "path", "origin"}} from the plugin, the user and the project."""
-    found = {}
+    found = language_roles()
     for pack in sorted(os.listdir(ROLES_DIR)):
+        if pack == "languages":
+            continue
         folder = os.path.join(ROLES_DIR, pack)
         for name in sorted(os.listdir(folder)) if os.path.isdir(folder) else []:
             if name.endswith(".md"):
@@ -69,8 +133,7 @@ def load(role, root=None):
     info = catalog(root).get(role)
     if not info:
         raise ValueError(f"unknown role {role!r}")
-    with open(info["path"], encoding="utf-8") as f:
-        return parse(f.read())
+    return parse(read(info))
 
 
 def is_enabled(config, role, pack):
@@ -150,8 +213,7 @@ def sync(app, config=None, root=None, dest=None):
                 os.remove(path)
                 result["removed"].append(role)
             continue
-        with open(info["path"], encoding="utf-8") as f:
-            meta, body = parse(f.read())
+        meta, body = parse(read(info))
         text = native_text(app, role, meta, body, p)
         if text != old:
             with open(path, "w", encoding="utf-8") as f:
@@ -217,8 +279,7 @@ def new_role(role, root=None):
     os.makedirs(folder, exist_ok=True)
     info = catalog().get(role)
     if info:  # an override starts from the current role
-        with open(info["path"], encoding="utf-8") as f:
-            text = f.read()
+        text = read(info)
     else:
         text = TEMPLATE.format(role=role)
     with open(path, "w", encoding="utf-8") as f:
