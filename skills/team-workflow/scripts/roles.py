@@ -36,7 +36,17 @@ def ours(text):
 AGY_TOOLS = {"Read": ["view_file"], "Grep": ["grep_search"], "Glob": ["find_by_name", "list_dir"],
              "Bash": ["run_command"], "Edit": ["replace_file_content"], "Write": ["write_to_file"],
              "WebSearch": ["search_web"], "WebFetch": ["read_url_content"]}
-APPS = ("claude", "agy")
+APPS = ("claude", "agy", "opencode")
+COLORS = {"red": "#E5484D", "orange": "#F76B15", "yellow": "#FFC53D", "green": "#46A758",
+          "cyan": "#00A2C7", "blue": "#3E63DD", "purple": "#8E4EC6", "pink": "#D6409F"}
+
+
+def installed_apps():
+    """The apps present on this machine (their command, or their config folder)."""
+    import shutil
+    config = {"claude": ("~/.claude",), "agy": ("~/.gemini",), "opencode": ("~/.config/opencode",)}
+    return [a for a in APPS if shutil.which(a) or any(os.path.isdir(os.path.expanduser(p))
+                                                      for p in config[a])]
 
 
 def parse(text):
@@ -198,10 +208,23 @@ def native_text(app, role, meta, body, p):
             lines.append(f"tools: {json.dumps(tools)}")
         if meta.get("color"):
             lines.append(f"color: {meta['color']}")
-    else:
+    elif app == "agy":
         lines.append(f"model: {p['model']}")
         if tools:
             lines.append(f"tools: {json.dumps([t for n in tools for t in AGY_TOOLS.get(n, [])])}")
+    else:  # OpenCode: a subagent; no model means the model of the agent that calls it
+        lines.append("mode: subagent")
+        if p["model"] and p["model"] != "inherit":
+            lines.append(f"model: {p['model']}")
+        if p["effort"] and p["effort"] != "medium":
+            lines.append(f"variant: {p['effort']}")
+        if meta.get("color") in COLORS:
+            lines.append(f'color: "{COLORS[meta["color"]]}"')
+        if tools:
+            lines += ["permission:",
+                      f"  edit: {'allow' if {'Edit', 'Write'} & set(tools) else 'deny'}",
+                      f"  bash: {'allow' if 'Bash' in tools else 'deny'}",
+                      f"  webfetch: {'allow' if 'WebFetch' in tools else 'deny'}"]
     return "\n".join(lines + ["---", MARK, "", body, ""])
 
 
@@ -209,6 +232,9 @@ def native_dir(app, workspace=None):
     if app == "claude":
         base = os.path.join(workspace, ".claude") if workspace else os.path.join(
             os.path.expanduser("~"), ".claude")
+    elif app == "opencode":
+        base = os.path.join(workspace, ".opencode") if workspace else os.path.join(
+            os.path.expanduser("~"), ".config", "opencode")
     else:
         base = os.path.join(workspace, ".agents") if workspace else os.path.join(
             os.path.expanduser("~"), ".gemini", "config")
@@ -282,12 +308,13 @@ def table(config, root=None):
     """Rows for `tw.py agents`: role, pack, on/off, then type/model/effort per app."""
     rows = []
     for role, info in catalog(root).items():
-        c, a = plan(config, role, "claude"), plan(config, role, "agy")
+        c, a, o = (plan(config, role, app) for app in APPS)
         effort = c["effort"] if efforts(c["model"]) != [] else "-"
         origin = "" if info["origin"] == "plugin" else f" ({info['origin']})"
         rows.append((role, info["pack"] + origin,
                      "on" if is_enabled(config, role, info["pack"]) else "off",
-                     f"{c['type']} {c['model']} {effort}", f"{a['type']} {a['model']}"))
+                     f"{c['type']} {c['model']} {effort}", f"{a['type']} {a['model']}",
+                     f"{o['type']} {o['model']}" + (f" {o['effort']}" if o["effort"] != "medium" else "")))
     return sorted(rows, key=lambda r: (r[1] != "core", r[2] == "off", r[1], r[0]))
 
 

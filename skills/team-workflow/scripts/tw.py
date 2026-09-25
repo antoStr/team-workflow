@@ -85,9 +85,9 @@ def cmd_settings(args):
         path = settings.save(args.key, value, root if args.project else None)
         print(f"{args.key} = {json.dumps(value) if value is not None else '(default)'}  ->  {path}")
         if args.key.split(".")[0] in settings.ROLE_TABLES:
-            for app in roles.APPS:
+            for app in roles.installed_apps():
                 roles.sync(app, root=root)
-            print("agents rewritten in Claude Code and agy")
+            print("agents rewritten in " + ", ".join(roles.installed_apps()))
         return
     user = dict(settings.flatten(settings._read(settings.user_file())))
     project = dict(settings.flatten(settings._read(settings.project_file(root)))) if root else {}
@@ -128,11 +128,12 @@ def cmd_agents(args):
     config = settings.load(root)
     action, rest = args.action, args.rest
     if action == "list":
-        rows = [("role", "pack", "on", "Claude Code: type model effort", "agy: type model")]
+        rows = [("role", "pack", "on", "Claude Code: type model effort", "agy: type model",
+                 "OpenCode: type model variant")]
         rows += roles.table(config, root)
-        widths = [max(len(r[i]) for r in rows) for i in range(4)]
+        widths = [max(len(r[i]) for r in rows) for i in range(5)]
         for r in rows:
-            print("  ".join(c.ljust(w) for c, w in zip(r, widths)) + "  " + r[4])
+            print("  ".join(c.ljust(w) for c, w in zip(r, widths)) + "  " + r[5])
         packs = sorted({i["pack"] for i in roles.catalog(root).values()})
         on = [p for p in packs if roles.is_enabled(config, "", p)]
         print(f"\npacks on: {', '.join(on)}")
@@ -141,11 +142,11 @@ def cmd_agents(args):
             print(f"languages of this repository: {', '.join(roles.detect(root)) or 'none detected'}")
         print("\nchange: agents set ROLE model=opus effort=high type=custom [--app claude|agy]")
         print("         agents enable|disable ROLE|PACK|auto|languages, agents new ROLE, agents sync")
-        print("types: claude " + " | ".join(settings.CHOICES["type.claude"])
-              + "; agy " + " | ".join(settings.CHOICES["type.agy"]))
+        print("types: " + "; ".join(f"{app} " + " | ".join(settings.CHOICES[f"type.{app}"])
+                                    for app in roles.APPS))
         return
     if action == "sync":
-        for app in roles.APPS:
+        for app in roles.installed_apps() if not args.workspace else roles.APPS:
             dest = roles.native_dir(app, args.workspace)
             r = roles.sync(app, root=root, dest=dest)
             print(f"{app} ({dest}): written {len(r['written'])}, removed {len(r['removed'])}"
@@ -188,10 +189,19 @@ def cmd_agents(args):
                 if field == "effort":
                     changes.append((f"effort.{name}", settings.parse_value(f"effort.{name}", value)))
                 elif field in ("model", "type"):
+                    # without --app, the value goes to every app that accepts it (a Claude
+                    # model name is not an agy tier nor an OpenCode provider/model)
                     table = "models" if field == "model" else "type"
+                    accepted, errors = [], []
                     for app in apps:
                         key = f"{table}.{app}.{name}"
-                        changes.append((key, settings.parse_value(key, value)))
+                        try:
+                            accepted.append((key, settings.parse_value(key, value)))
+                        except ValueError as err:
+                            errors.append(str(err))
+                    if not accepted or (args.app and errors):
+                        raise ValueError("; ".join(errors))
+                    changes += accepted
                 else:
                     raise ValueError(f"unknown field {field!r}: use model=, effort=, type=")
             if not changes:
@@ -200,9 +210,9 @@ def cmd_agents(args):
         raise SystemExit(str(e))
     for key, value in changes:
         print(f"{key} = {json.dumps(value)}  ->  {settings.save(key, value, target)}")
-    for app in roles.APPS:
+    for app in roles.installed_apps():
         roles.sync(app, root=root)
-    print("agents rewritten in Claude Code and agy; restart the app to load them.")
+    print("agents rewritten in " + ", ".join(roles.installed_apps()) + "; restart the app to load them.")
 
 
 def cmd_profile(args):
@@ -219,7 +229,7 @@ def cmd_profile(args):
         raise SystemExit(str(e))
     for key, value in changes:
         print(f"{key} = {json.dumps(value) if value is not None else '(default)'}")
-    for app in roles.APPS:
+    for app in roles.installed_apps():
         roles.sync(app, root=root)
     print(f"profile {args.name} applied" + (" to this repository" if args.project else ""))
 

@@ -17,20 +17,25 @@ DEFAULTS = {
     "update_check": True,          # tell at session start when a new version is out (daily)
     "stop_check": True,            # remind to update docs/memory/STATE.md at the end of a turn
     # Model per role, per app. Claude Code: haiku, sonnet, opus, fable or a model id.
-    # agy subagents: inherit (the session's model), flash or pro. "default" covers the rest.
+    # agy subagents: inherit (the session's model), flash or pro. OpenCode: inherit or
+    # provider/model from `opencode models`. "default" covers the roles not listed.
     "models": {
         "claude": {"default": "sonnet", "architect": "opus", "security-reviewer": "opus",
                    "doc-keeper": "haiku"},
         "agy": {"default": "inherit", "architect": "pro", "security-reviewer": "pro",
                 "doc-keeper": "flash"},
+        "opencode": {"default": "inherit"},
     },
     # Effort per role: low, medium, high, xhigh, max (Claude Code agents and workers; agy puts
-    # the effort in the worker's model id). Models without effort (haiku) ignore it.
+    # the effort in the worker's model id; OpenCode writes it as the agent's variant, except
+    # medium). Models without effort (haiku) ignore it.
     "effort": {"default": "medium", "architect": "high", "security-reviewer": "high"},
     # Agent type per role, per app. custom = our generated subagent (default); worker = a
     # headless process with exact model and effort; or a built-in type of the app, briefed with
-    # the role: Claude Code general-purpose, Explore, Plan; agy self, research.
-    "type": {"claude": {"default": "custom"}, "agy": {"default": "custom"}},
+    # the role: Claude Code general-purpose, Explore, Plan; agy self, research; OpenCode
+    # general, explore.
+    "type": {"claude": {"default": "custom"}, "agy": {"default": "custom"},
+             "opencode": {"default": "custom"}},
     # Packs of roles (core, languages, quality...) on or off; a role inside an enabled pack can
     # still be switched off with enabled.<role> false.
     "packs": {"default": False, "core": True, "custom": True},
@@ -66,6 +71,7 @@ CHOICES = {
     "effort": ("low", "medium", "high", "xhigh", "max"),
     "type.claude": ("custom", "worker", "general-purpose", "Explore", "Plan"),
     "type.agy": ("custom", "worker", "self", "research"),
+    "type.opencode": ("custom", "worker", "general", "explore"),
 }
 ROLE_TABLES = ("models", "effort", "type", "packs", "enabled")  # any role name is a valid key inside these
 
@@ -132,6 +138,8 @@ def parse_value(key, text):
     for prefix, allowed in CHOICES.items():
         if (key == prefix or key.startswith(prefix + ".")) and value not in allowed:
             raise ValueError(f"{key} is one of: {', '.join(allowed)}")
+    if key.startswith("models.opencode.") and value != "inherit" and "/" not in value:
+        raise ValueError(f"{key} is inherit or provider/model (see `opencode models`)")
     return value
 
 

@@ -72,9 +72,7 @@ def checks(root=None):
             f"{path}: " + (f"invalid keys {', '.join(bad)} (tw.py doctor --fix)" if bad else "valid"))
 
     config = settings.load(root)
-    for app in roles.APPS:
-        if not shutil.which(app):
-            continue
+    for app in roles.installed_apps():
         r = roles.sync(app, config=config, root=root, dry_run=True)
         stale = r["written"] + r["removed"]
         if stale:
@@ -120,11 +118,10 @@ def repair(root=None):
         for key in invalid_settings(path) if os.path.isfile(path) else []:
             settings.save(key, None, target)
             done.append(f"removed invalid setting {key} from {path}")
-    for app in roles.APPS:
-        if shutil.which(app):
-            r = roles.sync(app, root=root)
-            if r["written"] or r["removed"]:
-                done.append(f"{app}: {len(r['written'])} agents written, {len(r['removed'])} removed")
+    for app in roles.installed_apps():
+        r = roles.sync(app, root=root)
+        if r["written"] or r["removed"]:
+            done.append(f"{app}: {len(r['written'])} agents written, {len(r['removed'])} removed")
     return done or ["nothing to repair"]
 
 
