@@ -1,5 +1,5 @@
 ---
-name: review
+name: review-changes
 description: Independent review of the current changes - tests, code quality and security, with one verdict
 argument-hint: "[commit range, PR number or files; default: uncommitted and unpushed changes]"
 disable-model-invocation: true

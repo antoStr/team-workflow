@@ -1,5 +1,5 @@
 ---
-name: docs
+name: write-docs
 description: Write or refresh documentation for people from the project memory - architecture, onboarding, changelog, README - with every fact checked against the code
 argument-hint: "[architecture | onboarding | changelog | readme | all]"
 disable-model-invocation: true
@@ -8,9 +8,9 @@ disable-model-invocation: true
 Use the team-workflow skill to write documentation from the project memory: $ARGUMENTS
 
 1. Read `docs/memory` (INDEX, STATE, MAP, the area cards, DECISIONS, PLAYBOOKS, ACCESS). If it
-   is missing, offer `/team-workflow:init` first; if it looks outdated, have `doc-keeper` fix it
+   is missing, offer `/team-workflow:setup-memory` first; if it looks outdated, have `doc-keeper` fix it
    before writing anything from it.
-2. Agree what to write, where and in which language (AskUserQuestion; numbered options in agy):
+2. Agree what to write, where and in which language (AskUserQuestion; `ask_question` in agy):
    architecture overview (for example `docs/ARCHITECTURE.md`), onboarding or contributing guide,
    changelog from `STATE.md` and `git log`, README sections. Existing files are updated, not
    replaced.

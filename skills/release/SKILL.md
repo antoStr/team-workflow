@@ -1,5 +1,5 @@
 ---
-name: ship
+name: release
 description: Release verified work - run the pipeline, prepare version, commit, tag and notes, publish after approval
 argument-hint: "[version or notes]"
 disable-model-invocation: true
@@ -7,7 +7,7 @@ disable-model-invocation: true
 
 Use the team-workflow skill to release: $ARGUMENTS
 
-1. The changes need the tester's `APPROVED` verdict; without it, run `/team-workflow:review`
+1. The changes need the tester's `APPROVED` verdict; without it, run `/team-workflow:review-changes`
    first.
 2. `release-manager` runs the pipeline from `PLAYBOOKS.md` and prepares version, commit, tag
    and notes.

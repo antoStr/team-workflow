@@ -1,5 +1,5 @@
 ---
-name: fix
+name: fix-bug
 description: Fix a bug the safe way - reproduce it as a failing test first, then fix, verify and report
 argument-hint: "<bug description or issue link>"
 disable-model-invocation: true

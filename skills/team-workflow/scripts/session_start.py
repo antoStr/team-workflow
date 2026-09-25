@@ -21,7 +21,7 @@ def memory_context(root):
     mem = os.path.join(root, MEMORY_DIR)
     if not os.path.isfile(os.path.join(mem, "INDEX.md")):
         return ("team-workflow: this repository has no docs/memory. If the user starts "
-                "development work, offer to create it (/team-workflow:init).")
+                "development work, offer to create it (/team-workflow:setup-memory).")
     parts = [PROTOCOL]
     for name in ("INDEX.md", "STATE.md"):
         path = os.path.join(mem, name)

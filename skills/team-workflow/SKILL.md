@@ -20,7 +20,7 @@ The scripts named below live in the `scripts/` folder next to this file; the tea
 - The SessionStart hook injects `docs/memory/INDEX.md` and `docs/memory/STATE.md`. If they are
   not in your context, read them. Then read the area card for the task (`MAP.md` names it).
 - Read only the code the card points to. Long documents are for grep, never for reading whole.
-- No `docs/memory` yet? Offer `/team-workflow:init` and wait for the user's yes.
+- No `docs/memory` yet? Offer `/team-workflow:setup-memory` and wait for the user's yes.
 
 ## 2. Size the task and choose the team
 
@@ -78,19 +78,19 @@ Never accept an agent's claim without evidence: read the diff and rerun the key 
 
 ## 5. Workflows (also available as skills)
 
-- `/team-workflow:init`: create `docs/memory` and fill it from the code.
-- `/team-workflow:team <team> <task>`: assemble a team from `TEAMS.md` for a task.
-- `/team-workflow:feature <what>`: `architect` if structural, then builders, `tester`,
+- `/team-workflow:setup-memory`: create `docs/memory` and fill it from the code.
+- `/team-workflow:call-team [team] <task>`: describe the task, pick several roles from any team.
+- `/team-workflow:new-feature <what>`: `architect` if structural, then builders, `tester`,
   reviewers, report.
-- `/team-workflow:fix <bug>`: `tester` reproduces it as a failing test, a developer fixes the
+- `/team-workflow:fix-bug <bug>`: `tester` reproduces it as a failing test, a developer fixes the
   root cause, `tester` verifies, the lesson goes under "Known traps".
-- `/team-workflow:review [range]`: `tester`, `code-reviewer` and, when relevant,
+- `/team-workflow:review-changes [range]`: `tester`, `code-reviewer` and, when relevant,
   `security-reviewer` in parallel; one merged verdict; the user picks what to fix.
-- `/team-workflow:ship [version]`: `release-manager` runs the pipeline; the user approves;
+- `/team-workflow:release [version]`: `release-manager` runs the pipeline; the user approves;
   then it publishes.
-- `/team-workflow:wrap-up`: memory updated, lessons and decisions recorded, resume point set.
-- `/team-workflow:dashboard [days|latest]`: tokens and cost by agent, model and session.
-- `/team-workflow:docs [architecture|onboarding|changelog|readme]`: `technical-writer` turns the
+- `/team-workflow:end-session`: memory updated, lessons and decisions recorded, resume point set.
+- `/team-workflow:usage-costs [days|latest]`: tokens and cost by agent, model and session.
+- `/team-workflow:write-docs [architecture|onboarding|changelog|readme]`: `technical-writer` turns the
   memory into documentation for people, every fact checked against the code.
 
 ## 6. Definition of done
@@ -140,7 +140,8 @@ Set `TEAM_WORKFLOW_STOP_CHECK=0` in the environment to turn the Stop reminder of
   `STATE.md`. agy validates the plugin's agents but does not offer them as subagents yet (only
   its own `self` and `research`): launch a role as a worker, `run_worker.py --harness agy`,
   which also gives an exact model and effort and measured usage, or brief a `self` subagent
-  with `agents/<role>.md`. Ask with numbered options instead of AskUserQuestion.
+  with `agents/<role>.md`. Ask with agy's `ask_question` tool wherever this skill says
+  AskUserQuestion; `is_multi_select: true` only for questions with several answers.
 - `init_memory.py` also adds the memory pointer to `AGENTS.md` (and `GEMINI.md` or `CLAUDE.md`
   when they exist), so any other tool reads the same memory.
 

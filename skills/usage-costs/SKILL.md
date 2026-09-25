@@ -1,5 +1,5 @@
 ---
-name: dashboard
+name: usage-costs
 description: Token and cost dashboard of this repository - by agent, model and session, with memory health
 argument-hint: "[days | latest]"
 disable-model-invocation: true

@@ -53,10 +53,11 @@ Override the model per call when the task is unusually risky (up to `opus`) or m
 
 ## Asking the user
 
-AskUserQuestion shows at most four options per question, so ask two questions for a team:
-"Who builds?" (Build column) and "Who checks?" (Check column), `multiSelect: true`, the roles
-this task needs first and marked "(Recommended)". Leave out the roles the task does not need;
-the user can name others in their free-text answer.
+A team is not fixed: the roles can come from several teams. AskUserQuestion (agy:
+`ask_question`) shows at most four options per question, so ask two multi-select questions in
+one call: "Who builds?" (Build column) and "Who checks?" (Check column), the roles this task
+needs first and marked "(Recommended)". Leave out the roles the task does not need; the user
+can name others in their free-text answer.
 
 ## Running a team
 

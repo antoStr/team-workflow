@@ -8,9 +8,9 @@ quando servono, e un report a fine lavoro che chiede prima di applicare modifich
 |---|---|---|
 | Memoria letta a ogni sessione | hook all'avvio | regole `AGENTS.md` |
 | Promemoria per aggiornare `STATE.md` | hook Stop | hook Stop |
-| Comandi (`init`, `team`, `docs`, `dashboard`...) | `/team-workflow:<nome>` | skill con lo stesso nome |
+| Comandi (`setup-memory`, `call-team`, `write-docs`, `usage-costs`...) | `/team-workflow:<nome>` | skill con lo stesso nome |
 | 20 agenti come sub-agenti nativi | si' | no (agy offre solo i suoi): partono come worker |
-| Wizard con modello, effort e stima dei costi | si' (domande a scelta) | si' (elenchi numerati) |
+| Wizard con modello, effort e stima dei costi | si' (domande a scelta) | si' (`ask_question`, anche a scelta multipla) |
 | Token misurati nella dashboard | sessioni e sub-agenti | solo i worker |
 
 ## Cosa fa
@@ -53,21 +53,21 @@ da solo. Ruoli, modelli e permessi di ogni agente: `skills/team-workflow/TEAMS.m
 
 | Comando | Cosa fa |
 |---|---|
-| `/team-workflow:init` | crea `docs/memory` e la compila leggendo il codice |
-| `/team-workflow:team <team> <compito>` | chiama un team (frontend, backend, data, marketing...) |
-| `/team-workflow:feature <cosa>` | nuova funzionalita' con il team |
-| `/team-workflow:fix <bug>` | test che fallisce, correzione della causa, verifica |
-| `/team-workflow:review [range]` | test, review del codice e della sicurezza, un solo verdetto |
-| `/team-workflow:ship [versione]` | rilascio, solo dopo la tua approvazione |
-| `/team-workflow:wrap-up` | chiude la sessione: memoria, lezioni apprese, punto di ripresa |
-| `/team-workflow:dashboard [giorni\|latest]` | token e costi per agente, modello e sessione |
-| `/team-workflow:docs [architettura\|onboarding\|changelog\|readme]` | documentazione per le persone ricavata dalla memoria, verificata sul codice |
+| `/team-workflow:setup-memory` | crea `docs/memory` e la compila leggendo il codice |
+| `/team-workflow:call-team [team] <compito>` | descrivi il compito e scegli le figure (anche piu' di una); il team (frontend, backend, data...) e' facoltativo |
+| `/team-workflow:new-feature <cosa>` | nuova funzionalita' con il team |
+| `/team-workflow:fix-bug <bug>` | test che fallisce, correzione della causa, verifica |
+| `/team-workflow:review-changes [range]` | test, review del codice e della sicurezza, un solo verdetto |
+| `/team-workflow:release [versione]` | rilascio, solo dopo la tua approvazione |
+| `/team-workflow:end-session` | chiude la sessione: memoria, lezioni apprese, punto di ripresa |
+| `/team-workflow:usage-costs [giorni\|latest]` | token e costi per agente, modello e sessione |
+| `/team-workflow:write-docs [architettura\|onboarding\|changelog\|readme]` | documentazione per le persone ricavata dalla memoria, verificata sul codice |
 
 ## Wizard di assegnazione
 
 Ogni volta che partono degli agenti (team, feature, fix, review, rilascio) il wizard chiede,
 per ciascuno: su cosa lavora, come, con quale modello e con quale effort, mostrando per ogni
-modello la stima di token e costo. Alla fine un tabellone riassume tutto con il totale e parte
+modello la stima di token e costo. Alla fine un riepilogo (un blocco per agente) mostra il totale e parte
 solo con il tuo ok. Scrivi "defaults" per la versione rapida.
 
 - **Stime**: `scripts/estimate.py`, tarate su esecuzioni reali; dopo due esecuzioni di un ruolo
@@ -79,7 +79,7 @@ solo con il tuo ok. Scrivi "defaults" per la versione rapida.
 
 ## Dashboard dei consumi
 
-`/team-workflow:dashboard` (o `scripts/dashboard.py --root . --html`) mostra costo ai prezzi di
+`/team-workflow:usage-costs` (o `scripts/dashboard.py --root . --html`) mostra costo ai prezzi di
 listino API, token, quota letta dalla cache, consumi per agente, modello e sessione, salute della
 memoria e catalogo degli agenti; la pagina HTML e' autonoma, anche in tema scuro. I prezzi stanno
 in `skills/team-workflow/pricing.json` (data e fonte indicate, modificabili). Con un abbonamento
@@ -95,7 +95,7 @@ python3 skills/team-workflow/scripts/install_agy.py --workspace /percorso/repo  
 
 Il repository e' anche un plugin agy (`plugin.json`, `hooks.json` e `rules/` nella radice, che
 Claude Code ignora). agy lo installa in `~/.gemini/config/plugins/team-workflow/` con le skill
-(`team-workflow` e un workflow per skill in `skills/<nome>/`: `init`, `team`, `feature`, ...), le regole che portano la memoria e gli hook nel formato di agy. Limiti di
+(`team-workflow` e un workflow per skill in `skills/<nome>/`: `setup-memory`, `call-team`, `new-feature`, ...), le regole che portano la memoria e gli hook nel formato di agy. Limiti di
 agy ad oggi: convalida i 20 agenti ma non li offre come sub-agenti (solo i suoi `self` e
 `research`), e registra i token solo per le esecuzioni headless. Per questo su agy i ruoli
 partono come worker (modello ed effort esatti, consumi misurati) oppure come sub-agente `self`
@@ -109,17 +109,36 @@ sviluppo.
 Requisiti: Claude Code e/o agy, `git` e `python3`. Claude Code:
 
 ```bash
-claude plugin marketplace add ~/Workspace/team-workflow
+claude plugin marketplace add antoStr/team-workflow   # oppure il percorso locale del repo
 claude plugin install team-workflow@team-workflow
 ```
 
 Per provarlo senza installarlo: `claude --plugin-dir ~/Workspace/team-workflow`. Per agy vedi la
 sezione [agy (Antigravity)](#agy-antigravity).
 
+### Aggiornare
+
+La versione installata si vede con `claude plugin list` (o `/plugin`) e in agy con
+`agy plugin list`; l'ultima e' in `.claude-plugin/plugin.json` e nei tag `vX.Y.Z` del repository
+(su GitHub: Watch → Custom → Releases per ricevere un avviso).
+
+```bash
+# Claude Code (oppure attiva l'auto-update del marketplace in /plugin → Marketplaces)
+claude plugin marketplace update team-workflow
+claude plugin update team-workflow@team-workflow
+# agy (non ha un comando update)
+agy plugin uninstall team-workflow
+agy plugin install https://github.com/antoStr/team-workflow
+```
+
+Riavvia la sessione dopo l'aggiornamento. Dalla 0.4.0 i comandi hanno nomi nuovi (`setup-memory`,
+`call-team`, `new-feature`, `fix-bug`, `review-changes`, `release`, `end-session`, `usage-costs`,
+`write-docs`).
+
 ## Primo uso in un progetto
 
-1. Apri Claude Code nel repository e lancia `/team-workflow:init` (in agy: chiedi la skill
-   `init`).
+1. Apri Claude Code nel repository e lancia `/team-workflow:setup-memory` (in agy: chiedi la skill
+   `setup-memory`).
 2. Il comando crea `docs/memory`, rileva i comandi di build e test (Go, Node, Rust, Python,
    Maven, Gradle) e aggiunge un rimando in `AGENTS.md` (e in `GEMINI.md` o `CLAUDE.md` se ci
    sono), cosi' anche Gemini, Codex e Cursor leggono la stessa memoria.

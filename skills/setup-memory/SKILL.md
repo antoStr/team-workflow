@@ -1,5 +1,5 @@
 ---
-name: init
+name: setup-memory
 description: Set up the shared project memory (docs/memory) in this repository and fill it from the code
 argument-hint: "[notes about the project]"
 disable-model-invocation: true

@@ -1,5 +1,5 @@
 ---
-name: wrap-up
+name: end-session
 description: Close the session - update the project memory, record lessons and decisions, report what is left
 disable-model-invocation: true
 ---

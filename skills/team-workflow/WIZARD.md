@@ -6,10 +6,18 @@ agent, with the model, the effort and the expected cost agreed before anything s
 Quick mode: when the user says "defaults" (or "veloce"), skip step 2 and go straight to the
 board with the recommended choices.
 
+Asking: in Claude Code use AskUserQuestion; in agy use its `ask_question` tool. Set multi-select
+(`multiSelect: true`, in agy `is_multi_select: true`) only where several answers make sense,
+the roles in step 1; every other question is single-choice (`multiSelect: false`,
+`is_multi_select: false`), so the user is never shown checkboxes for a one-answer question.
+Never fake a question as a markdown list with `[ ]` boxes.
+
 ## 1. Roles
 
-Propose the roles this task needs (`TEAMS.md`) and let the user pick: `multiSelect: true`, at
-most four options per question, so ask "Who builds?" and then "Who checks?".
+Propose the roles this task needs (`TEAMS.md`), from any team, and let the user pick several
+at once (multi-select). Ask "Who builds?" and "Who checks?" in the same call, at most four
+options each, the roles the task needs first and marked "(Recommended)"; the user can name
+other roles in the free-text answer.
 
 ## 2. One round of questions per chosen agent
 
@@ -20,7 +28,7 @@ First estimate every model option you will offer:
 In agy use its model ids (`agy models`, for example `gemini-3.8-flash-high,claude-sonnet-4-6`):
 they have no price in `pricing.json`, so show tokens only.
 
-Then ask up to four questions in one AskUserQuestion call, recommended option first:
+Then ask up to four questions in one call, recommended option first:
 
 1. **What it works on**: two or three concrete scopes you derived from the task (area, files,
    deliverable).
@@ -32,16 +40,23 @@ Then ask up to four questions in one AskUserQuestion call, recommended option fi
 4. **Effort**: low, medium, high, xhigh (max through the free-text answer); recommend the
    role's default. Haiku has no effort.
 
-The user can always write their own answer instead. Without AskUserQuestion (agy), ask the same
-four points as numbered lists, one agent at a time.
+The user can always write their own answer instead. All four are single-choice.
 
 ## 3. Assignment board
 
-Show one table, the total below it, and ask for the go ("Start (Recommended)", "Change an
+Show one block per agent, never a wide table (terminals wrap long cells and misalign the
+columns), then the total, and ask for the go, single-choice ("Start (Recommended)", "Change an
 agent", "Cancel"):
 
-| Agent | Works on | How | Model | Effort | Launch | Estimate |
-|---|---|---|---|---|---|---|
+```
+1. backend-dev    sonnet, medium, native      ~2.6M tokens, $1.20
+   works on: src/api/orders.py and its tests
+   how:      smallest change with tests
+2. tester         sonnet, medium, native      ~1.1M tokens, $0.50
+   works on: ...
+   how:      ...
+Total ~3.7M tokens, $1.70
+```
 
 ## 4. Launch
 
