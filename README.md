@@ -62,6 +62,7 @@ da solo. Ruoli, modelli e permessi di ogni agente: `skills/team-workflow/TEAMS.m
 | `/team-workflow:end-session` | chiude la sessione: memoria, lezioni apprese, punto di ripresa |
 | `/team-workflow:usage-costs [giorni\|latest]` | token e costi per agente, modello e sessione |
 | `/team-workflow:write-docs [architettura\|onboarding\|changelog\|readme]` | documentazione per le persone ricavata dalla memoria, verificata sul codice |
+| `/team-workflow:update-plugin [check]` | aggiorna il plugin in Claude Code e in agy; con `check` mostra solo la versione installata e l'ultima |
 
 ## Wizard di assegnazione
 
@@ -121,6 +122,10 @@ sezione [agy (Antigravity)](#agy-antigravity).
 La versione installata si vede con `claude plugin list` (o `/plugin`) e in agy con
 `agy plugin list`; l'ultima e' in `.claude-plugin/plugin.json` e nei tag `vX.Y.Z` del repository
 (su GitHub: Watch → Custom → Releases per ricevere un avviso).
+
+Il modo piu' semplice e' il comando `/team-workflow:update-plugin` (in agy la skill
+`update-plugin`): aggiorna entrambi dove il plugin e' installato; `check` mostra solo le versioni.
+Da terminale: `python3 skills/team-workflow/scripts/update_plugin.py [--check]`. A mano:
 
 ```bash
 # Claude Code (oppure attiva l'auto-update del marketplace in /plugin → Marketplaces)

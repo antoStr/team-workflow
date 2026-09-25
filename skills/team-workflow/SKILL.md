@@ -92,6 +92,8 @@ Never accept an agent's claim without evidence: read the diff and rerun the key 
 - `/team-workflow:usage-costs [days|latest]`: tokens and cost by agent, model and session.
 - `/team-workflow:write-docs [architecture|onboarding|changelog|readme]`: `technical-writer` turns the
   memory into documentation for people, every fact checked against the code.
+- `/team-workflow:update-plugin [check]`: update this plugin in Claude Code and agy, or only
+  show the installed and latest versions.
 
 ## 6. Definition of done
 
@@ -146,4 +148,5 @@ Set `TEAM_WORKFLOW_STOP_CHECK=0` in the environment to turn the Stop reminder of
   when they exist), so any other tool reads the same memory.
 
 Scripts: `estimate.py` (cost before launch), `run_worker.py` (exact model and effort, usage
-recorded), `dashboard.py` (usage after), `memcheck.py`, `init_memory.py`, `install_agy.py`.
+recorded), `dashboard.py` (usage after), `memcheck.py`, `init_memory.py`, `install_agy.py`,
+`update_plugin.py`.

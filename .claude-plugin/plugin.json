@@ -1,6 +1,6 @@
 {
   "name": "team-workflow",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "For Claude Code and agy (Antigravity): shared project memory read at every session, on-demand teams of 20 specialist agents (product, design, frontend, backend, database, devops, performance, refactoring, testing, security, release, docs, data analysis, market research, marketing) led by the main session, and an end-of-task report that asks before applying changes.",
   "author": {
     "name": "antoStr",
