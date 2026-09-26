@@ -1,5 +1,6 @@
 """Offline tests for OpenCode support: agents, installer, plugin, workers, usage, add-ons,
 and the options the session wizard offers."""
+import io
 import json
 import os
 import sqlite3
@@ -123,6 +124,16 @@ class OpenCodeTest(ScriptTest):
             data = tw.app_options("agy", self.root)
         self.assertEqual(data["native"]["models"], ["inherit", "flash", "pro"])
         self.assertEqual(data["roles"]["architect"]["model"], "inherit")
+        self.assertIn("session effort", data["roles"]["architect"]["runs"])
+        claude = tw.app_options("claude", self.root)
+        self.assertIn("no effort", tw.runs_as("claude", dict(type="custom", model="haiku", effort="high"),
+                                              claude["native"]))
+        self.assertIn("worker", tw.runs_as("agy", dict(type="worker", model="x", effort="low"), {}))
+        with mock.patch.object(tw.shutil, "which", return_value=None), \
+                mock.patch("sys.stdout", new_callable=io.StringIO) as out:
+            tw.main(["options", "--app", "all"])
+        for heading in ("== Claude Code", "== agy", "== OpenCode", "When you can change"):
+            self.assertIn(heading, out.getvalue())
         self.assertIn("thorough", data["presets"])
         self.assertIn("general", tw.app_options("opencode")["types"])
         self.init_memory()

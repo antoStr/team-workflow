@@ -153,9 +153,11 @@ funzioni equivalenti:
 ## Wizard di assegnazione
 
 **A inizio conversazione** (impostazione `session_wizard`, attiva di default), al primo compito
-che usa gli agenti, il wizard chiede: il preset, gli agenti da usare (anche piu' di uno), e per
-ciascuno modello ed effort tra quelli che la tua app offre in quel momento (`team-workflow
-options` li mostra). In agy `inherit` e' il modello della sessione (per esempio
+che usa gli agenti, il wizard ti mostra prima l'elenco completo (`team-workflow options`: i
+modelli e gli effort che l'app offre ad agenti nativi e worker, e per ogni ruolo tipo, modello,
+effort e come gira davvero; `--app all` per Claude Code, agy e OpenCode insieme), poi chiede il
+preset, gli agenti da usare (anche piu' di uno), e per **ogni** agente scelto modello ed effort
+(due agenti per domanda, finche' non li ha chiesti tutti). In agy `inherit` e' il modello della sessione (per esempio
 `gemini-3.8-flash-high`): i sotto-agenti di agy accettano solo `inherit`, `flash` o `pro`
 (Gemini 3.1 Pro, piu' vecchio), quindi un modello esatto diverso gira come worker; lo stesso in
 OpenCode per un modello o una variante diversi da quelli del file dell'agente, e in Claude Code

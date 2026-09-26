@@ -11,24 +11,30 @@ conversation is launched, agree with the user which agents this conversation use
 among what the app offers right now. Do it once; later tasks in the same conversation reuse
 it and go straight to the board. Skip it when the user says "defaults" or "skip setup".
 
-1. Run `python3 <skill>/scripts/tw.py options --app <claude|agy|opencode> --json` for the app
-   you run in. It lists the presets, the enabled roles with their current type, model and
-   effort, the models and efforts the app offers to native agents and to workers, and in agy
-   the session model that `inherit` means.
+1. Run `python3 <skill>/scripts/tw.py options --app <claude|agy|opencode>` for the app you
+   run in and show its output to the user as it is, in a code block: the models and efforts
+   the app offers to native agents and to workers, every enabled role with its current type,
+   model, effort and how it really runs, and when each can be changed. The user must see this
+   before any question. (`--json` gives the same data for you; `--app all` the three apps.)
 2. One call, single choice: the **preset** for this conversation: "Keep my settings
    (Recommended)", `budget`, `fast`, `thorough`, `security`, `research`.
 3. One call, multi-select: the **roles** this conversation will use ("Who builds?", "Who
    checks?", the enabled roles the likely work needs first); mention packs that are off when
    the repository needs them (`languages_here`).
-4. For the chosen roles, one call with up to four single-choice questions, grouped when several
-   roles share a choice: **model** and **effort**, only values from step 1, each option saying
-   how it runs:
+4. For **every** chosen role, a **model** and an **effort** question, never merged across
+   roles: two roles per call (four questions), repeated until all chosen roles are asked.
+   Only values from step 1. The role's current value is the first option, marked
+   "(current)"; fill the other options with the closest alternatives (a question has at most
+   four options: the rest of the step 1 list stays available through the free-text answer).
+   Each option says how it runs:
    - Claude Code: any model through the Agent tool's `model` parameter (native); an effort
-     different from the agent file's runs as a worker in this conversation.
-   - agy: `inherit` = the session model (say which, for example `gemini-3.8-flash-high`),
-     `flash`, `pro` (native, the tier is in the agent file); any other exact model id from
-     `agy models` runs as a worker. Note that `pro` is Gemini 3.1 Pro, older than the 3.8
-     flash models.
+     different from the agent file's runs as a worker in this conversation. haiku has no
+     effort: skip the effort question for it.
+   - agy: model `inherit` = the session model (name it, for example `gemini-3.8-flash-high`),
+     `flash`, `pro` (native, no effort: the effort question offers "session effort
+     (current)" or an exact worker id such as `gemini-3.8-flash-low`); any other exact id
+     from step 1 runs as a worker, its effort is the id's suffix. `pro` is Gemini 3.1 Pro,
+     older than the 3.8 flash models.
    - OpenCode: the agent file's model and variant (native); any other `provider/model` or
      variant runs as a worker.
 5. Show the session board (one block per role: type, model, effort, native or worker) and ask,

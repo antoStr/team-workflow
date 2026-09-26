@@ -89,8 +89,8 @@ def main():
     name, builtin = APP_NAMES[app]
     if config.get("session_wizard", True):
         context += (f"\nteam-workflow: session setup is on. Before the first agent of this "
-                    f"conversation, run the session setup in WIZARD.md (tw.py options --app {app} "
-                    "--json): preset, roles, model and effort per role.")
+                    f"conversation, run the session setup in WIZARD.md: show `tw.py options --app {app}` "
+                    "to the user, then preset, roles, and model and effort for every chosen role.")
     if app == "opencode":
         context += "\n" + OPENCODE_NOTES
     if changed:  # the app loaded its agents before this hook wrote them

@@ -23,7 +23,7 @@
     tw.py learn [--max N] [--json]         habits of this repository from its git history
     tw.py ci-init                          GitHub Actions workflow: memory and audit on every PR
     tw.py agy-update [NAME...]             what `agy plugin update` would be: reinstall from source
-    tw.py options [--app A] [--json]       what the session wizard can offer in an app now
+    tw.py options [--app A|all] [--json]   models, efforts and roles the session wizard can offer
     tw.py install-opencode [--workspace R] install team-workflow into OpenCode
     tw.py install-cli [--no-shell]         `team-workflow` command, and `agy plugin update` in the shell
 
@@ -277,21 +277,77 @@ def app_options(app, root=None):
                          "per_launch": "the task tool has no model: a subagent uses its file's model "
                                        "and variant; inherit = the model of the calling agent"}
         out["worker"] = {"models": ids, "efforts": "--variant, the model's variants"}
+    for p in out["roles"].values():
+        p["runs"] = runs_as(app, p, out["native"])
     return out
+
+
+def runs_as(app, p, native):
+    """How a role really runs in an app, in words: native or worker, and what the effort does."""
+    if p["type"] == "worker":
+        return "worker: exact model and effort"
+    if p["type"] != "custom":
+        return f"built-in {p['type']}, with the role's instructions in the prompt"
+    model, effort = p["model"], p["effort"]
+    if app == "claude":
+        if model in native["efforts"] and not native["efforts"][model]:
+            return f"native; {model} has no effort, so it is ignored"
+        return f"native: effort {effort} (agent file)"
+    if app == "agy":
+        if model == "inherit":
+            return (f"native: {native.get('session_model') or 'session model'}, "
+                    f"session effort {native.get('session_effort') or '-'}")
+        return f"native: tier {model}, no effort"
+    who = "the calling agent's model" if model == "inherit" else model
+    return f"native: {who}, " + ("default variant" if effort == "medium" else f"variant {effort}")
+
+
+def print_options(data):
+    app, native, worker = data["app"], data["native"], data["worker"]
+    name = {"claude": "Claude Code", "agy": "agy", "opencode": "OpenCode"}[app]
+    print(f"== {name}")
+    print("Models for native agents (the agent file):")
+    if app == "claude":
+        for m in native["models"]:
+            print(f"  {m:<8} effort: {' | '.join(native['efforts'][m]) or 'none'}")
+    elif app == "agy":
+        print(f"  inherit  = session model {native.get('session_model') or '(agy not found)'}, "
+              f"effort {native.get('session_effort') or '-'} (change with /model, /effort)")
+        print("  flash    = Gemini flash tier, no effort")
+        print("  pro      = Gemini 3.1 Pro, older than the 3.8 flash models, no effort")
+        print("  a native agy agent ignores the role's effort; for another effort pick a worker id")
+    else:
+        print("  inherit  = the calling agent's model")
+        print(f"  {', '.join(native['models'][1:]) or '(opencode not found: run opencode models)'}")
+        print(f"  effort: {native['efforts']}")
+    print("Models for workers (any exact model, for one run):")
+    print("  " + (", ".join(worker["models"]) or "-"))
+    efforts = worker["efforts"]
+    print(f"  effort: {' | '.join(efforts) if isinstance(efforts, list) else efforts}")
+    print("Roles now (type, model, effort -> how it runs):")
+    for role, p in data["roles"].items():
+        print(f"  {role:<26} {p['type']:<8} {p['model']:<10} {p['effort']:<7} -> {p['runs']}")
+    print()
 
 
 def cmd_options(args):
     app = args.app or os.environ.get("TEAM_WORKFLOW_APP") or "claude"
-    data = app_options(app, repo_root())
+    root = repo_root()
+    apps = roles.APPS if app == "all" else (app,)
     if args.json:
-        print(json.dumps(data, indent=1))
+        data = [app_options(a, root) for a in apps]
+        print(json.dumps(data if app == "all" else data[0], indent=1))
         return
-    print(f"{app}: native models {', '.join(data['native']['models'][:12])}"
-          + (f" (session model {data['native'].get('session_model')})" if data["native"].get("session_model") else ""))
-    print(f"workers: {', '.join(data['worker']['models'][:12]) or '-'}")
-    for role, p in data["roles"].items():
-        print(f"  {role:<26} {p['type']:<8} {p['model']:<22} {p['effort']}")
-    print("presets: " + ", ".join(data["presets"]))
+    for a in apps:
+        print_options(app_options(a, root))
+    print("presets: " + ", ".join(settings.PROFILES))
+    print("When you can change model and effort:")
+    print("  - at the first task of a conversation, in the session setup (per role)")
+    print("  - before every launch: \"Change an agent\" on the assignment board (this run only)")
+    print("  - for good: tw.py agents set ROLE model=M effort=E [--app A] [--project], then restart the app")
+    print("  - a whole preset: tw.py profile NAME")
+    if app != "all":
+        print("Other apps: options --app all")
 
 
 def cmd_profile(args):
@@ -519,7 +575,7 @@ def main(argv=None):
     le.add_argument("--json", action="store_true")
     sub.add_parser("ci-init", help="GitHub Actions workflow for memory and audit checks")
     op = sub.add_parser("options", help="what the session wizard can offer in an app")
-    op.add_argument("--app", choices=roles.APPS)
+    op.add_argument("--app", choices=(*roles.APPS, "all"))
     op.add_argument("--json", action="store_true")
     io = sub.add_parser("install-opencode", help="install team-workflow into OpenCode")
     io.add_argument("--workspace", help="this repository only (.opencode)")

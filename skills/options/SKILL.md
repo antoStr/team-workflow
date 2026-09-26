@@ -1,7 +1,7 @@
 ---
 name: options
-description: Show what the session wizard can offer in this app right now - presets, enabled roles with type, model and effort, the models and efforts for native agents and for workers (no tokens in Claude Code and OpenCode; in agy run `!team-workflow options`)
-argument-hint: "[--app claude|agy|opencode]"
+description: Show the models and efforts each app offers (native agents and workers), every role with its type, model, effort and how it runs, and when to change them (no tokens in Claude Code and OpenCode; in agy run `!team-workflow options`)
+argument-hint: "[--app claude|agy|opencode|all]"
 disable-model-invocation: true
 ---
 
