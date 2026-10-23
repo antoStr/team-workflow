@@ -24,7 +24,7 @@ NOISE = re.compile(r"(^|/)(package-lock\.json|yarn\.lock|pnpm-lock\.yaml|Cargo\.
 def commits(root, limit):
     """[(hash, subject, [files])], newest first."""
     out = subprocess.run(["git", "-C", root, "log", f"-n{limit}", "--no-merges", "--name-only",
-                          "--format=%x00%h%x09%s"], capture_output=True, text=True)
+                          "--format=%x00%h%x09%s"], capture_output=True, text=True, encoding="utf-8", errors="replace")
     result = []
     for block in out.stdout.split("\x00")[1:]:
         head, _, body = block.partition("\n")

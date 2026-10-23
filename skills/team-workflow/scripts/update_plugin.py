@@ -24,7 +24,7 @@ PLUGIN = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)
 def run(*cmd, timeout=180):
     """(returncode, output) of a command; never raises."""
     try:
-        out = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+        out = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=timeout)
     except (OSError, subprocess.SubprocessError) as e:
         return 1, str(e)
     return out.returncode, (out.stdout + out.stderr).strip()

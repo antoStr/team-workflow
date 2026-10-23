@@ -37,7 +37,7 @@ def main():
         return
     try:
         out = subprocess.run([sys.executable, os.path.join(HERE, "tw.py"), *args],
-                             capture_output=True, text=True, timeout=280,
+                             capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=280,
                              cwd=data.get("cwd") or None)
         text = (out.stdout + out.stderr).strip() or "(no output)"
     except (OSError, subprocess.SubprocessError) as e:

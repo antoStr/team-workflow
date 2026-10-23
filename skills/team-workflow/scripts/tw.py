@@ -7,7 +7,7 @@
     tw.py settings reset KEY [--project]
     tw.py models                           models and efforts each app offers
     tw.py models --app opencode [--provider P] [--search TEXT] [--json]
-                                           OpenCode: providers, models used most, search
+                                           OpenCode: providers, favorite and recent models, search
     tw.py agents [list]                    roles with pack, on/off, type, model, effort per app
     tw.py agents set ROLE model=M effort=E type=T [--app claude|agy] [--project]
     tw.py agents enable|disable ROLE|PACK  switch a role or a whole pack
@@ -75,7 +75,7 @@ sys.exit("team-workflow: plugin not found in Claude Code, agy or OpenCode")
 def output(cmd, timeout=60):
     """stdout of a command, or "" when it cannot run or fails."""
     try:
-        out = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, stdin=subprocess.DEVNULL)
+        out = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=timeout, stdin=subprocess.DEVNULL)
     except (OSError, subprocess.SubprocessError):
         return ""
     return out.stdout if out.returncode == 0 else ""
@@ -84,7 +84,7 @@ def output(cmd, timeout=60):
 def repo_root():
     """The git repository around the working folder, or None (no git, not a repository)."""
     try:
-        out = subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True,
+        out = subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True, encoding="utf-8", errors="replace",
                              timeout=10)
     except (OSError, subprocess.SubprocessError):
         return None
@@ -129,6 +129,8 @@ def cmd_settings(args):
 
 
 def cmd_models(args):
+    if isinstance(args.search, list):
+        args.search = " ".join(args.search)
     if args.app == "opencode" or args.provider or args.search:
         data = opencode_models()
         if args.json:
@@ -185,7 +187,7 @@ def print_opencode_models(data, provider=None, text=None):
     for pid, p in data["providers"].items():
         print(f"  provider {pid} ({p['name']}): {p['models']} models")
     if data["recent"]:
-        print("  used most:")
+        print("  favorites and recent:")
         for m in data["recent"]:
             print("  " + model_line(m))
     print("  find one: models --app opencode --provider <id> --search <text>   (for example --search glm 5.3)")
@@ -374,7 +376,7 @@ def print_options(data):
         for pid, p in native["providers"].items():
             print(f"  provider {pid} ({p['name']}): {p['models']} models")
         if native["recent"]:
-            print("  used most:")
+            print("  favorites and recent:")
             for m in native["recent"]:
                 print("  " + model_line(m))
         print(f"  find one: {native['find'].replace(' --json', '')}")
@@ -611,7 +613,7 @@ def main(argv=None):
     mo = sub.add_parser("models", help="models and efforts each app offers")
     mo.add_argument("--app", choices=roles.APPS, help="opencode: its providers and models")
     mo.add_argument("--provider", help="OpenCode: the models of this provider (for example nano-gpt)")
-    mo.add_argument("--search", help="OpenCode: the models whose id or name has these words")
+    mo.add_argument("--search", nargs="+", help="OpenCode: the models whose id or name has these words")
     mo.add_argument("--json", action="store_true")
     ag = sub.add_parser("agents", help="roles: list, set type/model/effort, enable, new, sync")
     ag.add_argument("action", nargs="?", default="list",

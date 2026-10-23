@@ -105,9 +105,12 @@ def command_text(name, skill_md, scripts, python, v2=True):
     m = re.match(r"\A---\n(.*?)\n---\n(.*)\Z", skill_md, re.S)
     meta = dict(line.split(":", 1) for line in m.group(1).splitlines() if ":" in line)
     description = meta.get("description", "").strip().strip('"')
-    head = f"---\ndescription: {json.dumps(description)}\n---\n{MARK}\n\n"
+    description = re.sub(r"\s*\((?:no tokens in Claude Code|[^()]*run `!team-workflow)[^()]*(?:`[^`]*`[^()]*)*\)\s*$",
+                         "", description)  # Claude Code and agy notes mean nothing here
+    head =f"---\ndescription: {json.dumps(description)}\n---\n{MARK}\n\n"
     if v2 and name in NO_MODEL:
-        tw = f'{python} "{posix(os.path.join(scripts, "tw.py"))}" {NO_MODEL[name]} $ARGUMENTS'
+        app = " --app opencode" if name in ("options", "models") else ""
+        tw = f'{python} "{posix(os.path.join(scripts, "tw.py"))}" {NO_MODEL[name]}{app} $ARGUMENTS'
         return (head + "team-workflow ran this command without you. Show the user the output below "
                 "exactly as it is, in a code block, and add nothing else.\n\n"
                 f"!`{tw}`\n")
@@ -154,10 +157,13 @@ def agents_block(scripts, python):
         BEGIN,
         "# team-workflow",
         "",
-        f"- At the first task of every conversation in a git repository, run `{python} \"{s}/session_start.py\" "
-        "--text` from the repository root and follow what it prints: the project memory, the settings "
-        "and the session setup. Run it once per conversation.",
-        "- The workflows are the /team-workflow/<name> commands and the team-workflow skill.",
+        f"- At the first task of every conversation, run `{python} \"{s}/session_start.py\" "
+        "--text` from the working folder and follow what it prints: the project memory, the settings "
+        "and the session setup. Run it once per conversation. It prints nothing outside a git "
+        "repository: the session setup in WIZARD.md still applies there.",
+        "- The workflows are the /team-workflow/<name> commands and the team-workflow skill. When the "
+        "user calls the team-workflow skill, start with its session setup (question tool), even "
+        "without a task.",
         "- Launch a role with the subagent tool, `agent` = the role (for example `tester`); several "
         "independent roles in the same message. The roles are the subagents in the agents folder.",
         "- Ask the user with the question tool; several answers only when choosing roles.",

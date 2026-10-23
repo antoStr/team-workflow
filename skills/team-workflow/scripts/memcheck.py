@@ -31,7 +31,7 @@ DOMAIN = re.compile(r"^[a-z0-9-]+(?:\.[a-z0-9-]+)+$")
 def repo_paths(root):
     """Tracked files and their folders: cards often write paths relative to a subfolder."""
     try:
-        out = subprocess.run(["git", "-C", root, "ls-files"], capture_output=True, text=True, timeout=30)
+        out = subprocess.run(["git", "-C", root, "ls-files"], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=30)
     except (OSError, subprocess.SubprocessError):
         return set()
     files = out.stdout.splitlines() if out.returncode == 0 else []

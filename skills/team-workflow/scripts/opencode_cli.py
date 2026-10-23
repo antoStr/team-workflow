@@ -127,7 +127,34 @@ def db_path(home=None):
     return os.path.join(home or os.path.expanduser("~"), ".local", "share", "opencode", "opencode.db")
 
 
+def state_models(home=None):
+    """The models the user starred and picked lately in OpenCode (state/model.json): favorites
+    first. [("provider/model", 0)]"""
+    path = os.path.join(home or os.path.expanduser("~"), ".local", "state", "opencode", "model.json")
+    try:
+        with open(path, encoding="utf-8") as f:
+            data = json.load(f)
+    except (OSError, ValueError):
+        return []
+    out = []
+    for key in ("favorite", "recent"):
+        for m in data.get(key) or []:
+            if isinstance(m, dict) and m.get("providerID") and m.get("modelID"):
+                item = (f"{m['providerID']}/{m['modelID']}", 0)
+                if item not in out:
+                    out.append(item)
+    return out
+
+
 def recent(limit=8, home=None):
+    """Favorites and recent picks of OpenCode, then the models the user ran most:
+    [("provider/model", sessions)]."""
+    picked = state_models(home)
+    seen = {k for k, _ in picked}
+    return (picked + [kv for kv in used_most(home) if kv[0] not in seen])[:limit]
+
+
+def used_most(home=None):
     """The models the user ran most in OpenCode, most used first: [("provider/model", sessions)]."""
     path = db_path(home)
     if not os.path.isfile(path):
@@ -159,7 +186,7 @@ def recent(limit=8, home=None):
             db.close()
     except sqlite3.Error:
         return []
-    return sorted(counts.items(), key=lambda kv: -kv[1])[:limit]
+    return sorted(counts.items(), key=lambda kv: -kv[1])
 
 
 @functools.lru_cache(maxsize=None)

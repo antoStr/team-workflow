@@ -36,8 +36,22 @@ it and go straight to the board. Skip it when the user says "defaults" or "skip 
      from step 1 runs as a worker, its effort is the id's suffix. `pro` is Gemini 3.1 Pro,
      older than the 3.8 flash models.
    - OpenCode: the agent file's model and variant (native); any other `provider/model` or
-     variant runs as a worker.
-5. Show the session board (one block per role: type, model, effort, native or worker) and ask,
+     variant runs as a worker. OpenCode's own model picker and variant key work on the
+     conversation's model only, and a skill cannot open them or draw a slider: the question
+     tool, with the model search below, is how models and efforts are chosen here. A role set
+     to `inherit` follows what the user picked in OpenCode's picker.
+     Models, never from the short list alone: step 1 shows only favorites and recent picks, but
+     the user may have hundreds of models (NanoGPT, OpenRouter...). First ask, single choice,
+     "Which model for the roles?": "Keep inherit: the conversation's model (Recommended)",
+     one option per favorite or recent model, "One model for all chosen roles: I search it",
+     "Different per role". For a search, ask the family in free text (for example `glm 5.3`),
+     run `tw.py models --app opencode --provider <id> --search <words> --json`, and offer the
+     matches (name, id, variants) as options, the closest first; with more than four, say how
+     many there are and let the user narrow the words. Take the effort from that model's
+     variants only (none listed = no effort question) and ask it once for "all roles" or per
+     role, as the user chose. Never answer "only these models exist" from the short list.
+5. Always show the session recap (a code block: one block per role with type, model, effort,
+   native or worker, and the preset) before asking to confirm; never skip it. Show the session board (one block per role: type, model, effort, native or worker) and ask,
    single choice: "Use for this conversation (Recommended)", "Use and save as my defaults",
    "Use and save for this project", "Change". Saving runs `tw.py agents set <role> model=...
    effort=... [--app <app>] [--project]` (and `tw.py profile <name>` for a preset); native

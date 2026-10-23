@@ -129,7 +129,7 @@ def main():
     root = os.path.abspath(args.root)
     started = time.time()
     proc = subprocess.run(build_command(args.harness, args.model, args.effort, prompt, args.allow_edits),
-                          cwd=root, capture_output=True, text=True, timeout=args.timeout,
+                          cwd=root, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=args.timeout,
                           stdin=subprocess.DEVNULL)  # opencode run waits on an open stdin
     try:
         data = opencode_events(proc.stdout) if args.harness == "opencode" else json.loads(proc.stdout)

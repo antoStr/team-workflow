@@ -76,7 +76,7 @@ def main():
     build(os.path.abspath(dest))
     print(f"agy plugin written to {dest}")
     if shutil.which("agy"):
-        out = subprocess.run(["agy", "plugin", "validate", dest], capture_output=True, text=True)
+        out = subprocess.run(["agy", "plugin", "validate", dest], capture_output=True, text=True, encoding="utf-8", errors="replace")
         print((out.stdout + out.stderr).strip() or "agy plugin validate: no output")
 
 

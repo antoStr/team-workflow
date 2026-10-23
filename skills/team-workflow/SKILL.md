@@ -15,6 +15,16 @@ in English; an existing memory keeps the language it already uses.
 The scripts named below live in the `scripts/` folder next to this file; the team catalog is
 `TEAMS.md`, also next to this file.
 
+## 0. When this skill is invoked
+
+Whenever the user calls this skill by name (`team-workflow`, with or without a task, in a git
+repository or not), start with the session setup of `WIZARD.md` before anything else, unless
+they said "defaults" or "skip setup" or the setting `session_wizard` is false: run
+`tw.py options --app <claude|agy|opencode>` and show its output, then ask preset, roles, and
+model and effort for every chosen role with the app's question tool, then the board. Do not
+wait for a task and do not skip it because no agent is about to start; the task, if there is
+one, is sized afterwards (section 2). Ask the questions with the tool, never as a text list.
+
 ## 1. Read the memory first
 
 - The SessionStart hook injects `docs/memory/INDEX.md` and `docs/memory/STATE.md`. If they are
@@ -97,6 +107,7 @@ Never accept an agent's claim without evidence: read the diff and rerun the key 
 
 ## 5. Workflows (also available as skills)
 
+- `/team-workflow:start [task]`: session setup wizard, then the task or a menu of workflows.
 - `/team-workflow:setup-memory`: create `docs/memory` and fill it from the code.
 - `/team-workflow:call-team [team] <task>`: describe the task, pick several roles from any team.
 - `/team-workflow:new-feature <what>`: `architect` if structural, then builders, `tester`,

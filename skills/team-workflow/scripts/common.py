@@ -21,7 +21,7 @@ def read_hook_input():
 def git(root, *args):
     """stdout of a git command, or None when git fails or is missing."""
     try:
-        out = subprocess.run(["git", "-C", root, *args], capture_output=True, text=True, timeout=10)
+        out = subprocess.run(["git", "-C", root, *args], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=10)
     except (OSError, subprocess.SubprocessError):
         return None
     return out.stdout if out.returncode == 0 else None

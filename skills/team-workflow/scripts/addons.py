@@ -62,7 +62,7 @@ def home(*parts):
 def run(*cmd, cwd=None, timeout=600):
     """(ok, output) of a command; never raises."""
     try:
-        out = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, cwd=cwd)
+        out = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=timeout, cwd=cwd)
     except (OSError, subprocess.SubprocessError) as e:
         return False, str(e)
     return out.returncode == 0, (out.stdout + out.stderr).strip()
