@@ -36,7 +36,7 @@ class WorkerTest(unittest.TestCase):
         os.makedirs(self.root)
         self.bins = {}
         for name, agy in (("claude", False), ("agy", True)):
-            path = os.path.join(tmp.name, "fake-" + name)
+            path = os.path.join(tmp.name, f"fake-{name}.py")
             with open(path, "w", encoding="utf-8") as f:
                 f.write(FAKE.format(agy=agy))
             os.chmod(path, 0o755)

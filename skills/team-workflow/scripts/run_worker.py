@@ -28,6 +28,13 @@ def role_prompt(role, root=None):
         raise SystemExit(str(e))
 
 
+def cli(variable, default):
+    """The command that starts a CLI: the program, or a .py script (a stand-in CLI) run with this
+    Python, since Windows cannot execute a script by its shebang."""
+    path = os.environ.get(variable, default)
+    return [sys.executable, path] if path.endswith(".py") else [path]
+
+
 def build_command(harness, model, effort, prompt, allow_edits):
     if harness == "opencode":  # read-only through the plan agent; build may edit
         cmd = [opencode_cli.binary() or "opencode", "run", "--format", "json",
@@ -36,11 +43,11 @@ def build_command(harness, model, effort, prompt, allow_edits):
             cmd.append("--auto")
         return cmd + [prompt]
     if harness == "claude":
-        cmd = [os.environ.get("TEAM_WORKFLOW_CLAUDE_BIN", "claude"), "-p", prompt,
+        cmd = [*cli("TEAM_WORKFLOW_CLAUDE_BIN", "claude"), "-p", prompt,
                "--output-format", "json", "--model", model,
                "--permission-mode", "acceptEdits" if allow_edits else "plan"]
     else:
-        cmd = [os.environ.get("TEAM_WORKFLOW_AGY_BIN", "agy"), "--output-format", "json",
+        cmd = [*cli("TEAM_WORKFLOW_AGY_BIN", "agy"), "--output-format", "json",
                "--model", model, "--mode", "accept-edits" if allow_edits else "plan"]
     if effort:
         cmd += ["--effort", effort]
