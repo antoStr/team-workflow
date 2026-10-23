@@ -1,4 +1,5 @@
 """Offline tests for the add-on manager (no network, no real apps)."""
+import isolate_home  # noqa: F401  (first: a throwaway home for the whole run)
 import json
 import os
 import sys
@@ -18,7 +19,7 @@ class AddonsTest(unittest.TestCase):
         tmp = tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
         self.home = tmp.name
-        patcher = mock.patch.dict(os.environ, {"HOME": self.home})
+        patcher = mock.patch.dict(os.environ, {"HOME": self.home, "USERPROFILE": self.home})
         patcher.start()
         self.addCleanup(patcher.stop)
 

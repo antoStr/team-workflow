@@ -1,4 +1,5 @@
 """Offline tests for the local Pro tools: audit, doctor and uninstall, learn, profiles, ci-init."""
+import isolate_home  # noqa: F401  (first: a throwaway home for the whole run)
 import json
 import os
 import subprocess
@@ -19,7 +20,7 @@ import settings  # noqa: E402
 class ProTest(ScriptTest):
     def setUp(self):
         super().setUp()
-        patcher = mock.patch.dict(os.environ, {"HOME": self.tmp})
+        patcher = mock.patch.dict(os.environ, {"HOME": self.tmp, "USERPROFILE": self.tmp})
         patcher.start()
         self.addCleanup(patcher.stop)
 
@@ -113,7 +114,7 @@ class ProTest(ScriptTest):
         # the copied checks run on their own, as they will in GitHub Actions
         vendored = os.path.join(self.root, ".github", "team-workflow", "audit.py")
         run = subprocess.run([sys.executable, vendored, "--root", self.root, "--strict"],
-                             capture_output=True, text=True, env=dict(os.environ, HOME=self.tmp))
+                             capture_output=True, text=True, env=dict(os.environ, HOME=self.tmp, USERPROFILE=self.tmp))
         self.assertEqual(run.returncode, 0, run.stdout + run.stderr)
         self.assertNotEqual(self.run_script("tw.py", "ci-init", cwd=self.root).returncode, 0)
 

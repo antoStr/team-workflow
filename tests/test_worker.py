@@ -1,4 +1,5 @@
 """Offline tests for run_worker.py with fake claude and agy CLIs."""
+import isolate_home  # noqa: F401  (first: a throwaway home for the whole run)
 import json
 import os
 import subprocess
@@ -42,7 +43,7 @@ class WorkerTest(unittest.TestCase):
             self.bins[name] = path
 
     def run_worker(self, harness, *extra):
-        env = dict(os.environ, HOME=self.home, TEAM_WORKFLOW_CLAUDE_BIN=self.bins["claude"],
+        env = dict(os.environ, HOME=self.home, USERPROFILE=self.home, TEAM_WORKFLOW_CLAUDE_BIN=self.bins["claude"],
                    TEAM_WORKFLOW_AGY_BIN=self.bins["agy"])
         out = subprocess.run([sys.executable, SCRIPT, "--harness", harness, "--role", "tester",
                               "--root", self.root, "--task", "check the parser", *extra],

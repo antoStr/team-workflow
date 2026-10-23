@@ -6,6 +6,8 @@
     tw.py settings set KEY VALUE [--project]
     tw.py settings reset KEY [--project]
     tw.py models                           models and efforts each app offers
+    tw.py models --app opencode [--provider P] [--search TEXT] [--json]
+                                           OpenCode: providers, models used most, search
     tw.py agents [list]                    roles with pack, on/off, type, model, effort per app
     tw.py agents set ROLE model=M effort=E type=T [--app claude|agy] [--project]
     tw.py agents enable|disable ROLE|PACK  switch a role or a whole pack
@@ -42,6 +44,7 @@ import addons
 import audit
 import doctor
 import learn
+import opencode_cli
 import roles
 import settings
 import update_plugin
@@ -125,7 +128,15 @@ def cmd_settings(args):
         print(f"  {key}: {' | '.join(allowed)}")
 
 
-def cmd_models(_args):
+def cmd_models(args):
+    if args.app == "opencode" or args.provider or args.search:
+        data = opencode_models()
+        if args.json:
+            found = opencode_cli.search(data["models"], args.provider, args.search) if data else []
+            print(json.dumps(found if (args.provider or args.search) else data, indent=1))
+            return
+        print_opencode_models(data, args.provider, args.search)
+        return
     pricing = load_pricing()
     print("Claude Code (native subagents and workers; a native subagent keeps its file's effort):")
     for alias, mid in pricing.get("aliases", {}).items():
@@ -137,12 +148,47 @@ def cmd_models(_args):
         print("agy workers (exact model, effort in the name): " + (", ".join(ids) or "agy models failed"))
     else:
         print("agy: not installed")
-    if shutil.which("opencode"):
-        ids = [line.strip() for line in output(["opencode", "models"]).splitlines() if "/" in line]
-        print("OpenCode subagents and workers: inherit, or provider/model: " + (", ".join(ids) or "opencode models failed"))
-        print("  effort: the model's variants (for example low, high, max), written as the agent's variant")
-    else:
-        print("OpenCode: not installed")
+    print_opencode_models(opencode_models())
+
+
+def opencode_models():
+    """What OpenCode offers now: the providers the user connected, their models with names and
+    variants, and the models used most. None when OpenCode is not installed."""
+    if not opencode_cli.binary():
+        return None
+    models = opencode_cli.catalog()
+    by_id = {m["id"]: m for m in models}
+    recent = [dict(by_id.get(mid) or {"id": mid, "name": mid, "variants": []}, sessions=n)
+              for mid, n in opencode_cli.recent()]
+    return {"version": ".".join(map(str, opencode_cli.version() or ())) or None,
+            "providers": opencode_cli.providers(models), "recent": recent, "models": models}
+
+
+def model_line(m):
+    variants = ", ".join(m["variants"]) or "none"
+    return f"  {m['id']:<52} {m['name']:<34} variants: {variants}"
+
+
+def print_opencode_models(data, provider=None, text=None):
+    if data is None:
+        print("OpenCode: not installed (or its CLI is not found: set TEAM_WORKFLOW_OPENCODE_BIN)")
+        return
+    if provider or text:
+        found = opencode_cli.search(data["models"], provider, text)
+        print(f"OpenCode models{' of ' + provider if provider else ''}"
+              f"{' matching ' + repr(text) if text else ''}: {len(found)}")
+        for m in found:
+            print(model_line(m))
+        return
+    print(f"OpenCode {data['version'] or ''} subagents and workers: inherit (the calling agent's model) "
+          "or any provider/model below; the effort is the model's variant")
+    for pid, p in data["providers"].items():
+        print(f"  provider {pid} ({p['name']}): {p['models']} models")
+    if data["recent"]:
+        print("  used most:")
+        for m in data["recent"]:
+            print("  " + model_line(m))
+    print("  find one: models --app opencode --provider <id> --search <text>   (for example --search glm 5.3)")
 
 
 def cmd_agents(args):
@@ -270,13 +316,18 @@ def app_options(app, root=None):
                          "per_launch": "invoke_subagent has no model: a subagent uses its file's tier; "
                                        "inherit = the session model (change it with /model)"}
         out["worker"] = {"models": ids, "efforts": "part of the model id (-low, -medium, -high)"}
-    else:
-        ids = [line.strip() for line in output(["opencode", "models"]).splitlines() if "/" in line] \
-            if shutil.which("opencode") else []
-        out["native"] = {"models": ["inherit"] + ids, "efforts": "the model's variants (e.g. low, high, max)",
-                         "per_launch": "the task tool has no model: a subagent uses its file's model "
+    else:  # hundreds of models: the providers and the most used, the rest by search
+        data = opencode_models() or {"version": None, "providers": {}, "recent": [], "models": []}
+        brief = lambda m: {k: m[k] for k in ("id", "name", "variants") if k in m}
+        out["native"] = {"models": ["inherit"] + [m["id"] for m in data["recent"]],
+                         "version": data["version"], "providers": data["providers"],
+                         "recent": [brief(m) for m in data["recent"]],
+                         "find": "tw.py models --app opencode --provider <id> --search <text> --json",
+                         "efforts": "the model's variants (listed per model; none = no effort)",
+                         "per_launch": "the subagent tool has no model: a subagent uses its file's model "
                                        "and variant; inherit = the model of the calling agent"}
-        out["worker"] = {"models": ids, "efforts": "--variant, the model's variants"}
+        out["worker"] = {"models": "any provider/model of the providers above",
+                         "efforts": "the model's variants (run as provider/model#variant)"}
     for p in out["roles"].values():
         p["runs"] = runs_as(app, p, out["native"])
     return out
@@ -318,10 +369,19 @@ def print_options(data):
         print("  a native agy agent ignores the role's effort; for another effort pick a worker id")
     else:
         print("  inherit  = the calling agent's model")
-        print(f"  {', '.join(native['models'][1:]) or '(opencode not found: run opencode models)'}")
+        if not native["providers"]:
+            print("  (OpenCode not found: install it, or set TEAM_WORKFLOW_OPENCODE_BIN to its CLI)")
+        for pid, p in native["providers"].items():
+            print(f"  provider {pid} ({p['name']}): {p['models']} models")
+        if native["recent"]:
+            print("  used most:")
+            for m in native["recent"]:
+                print("  " + model_line(m))
+        print(f"  find one: {native['find'].replace(' --json', '')}")
         print(f"  effort: {native['efforts']}")
     print("Models for workers (any exact model, for one run):")
-    print("  " + (", ".join(worker["models"]) or "-"))
+    models = worker["models"]
+    print("  " + (", ".join(models) if isinstance(models, list) else models or "-"))
     efforts = worker["efforts"]
     print(f"  effort: {' | '.join(efforts) if isinstance(efforts, list) else efforts}")
     print("Roles now (type, model, effort -> how it runs):")
@@ -548,7 +608,11 @@ def main(argv=None):
     st.add_argument("value", nargs="?")
     st.add_argument("--project", action="store_true", help="this repository only")
     st.add_argument("--json", action="store_true")
-    sub.add_parser("models", help="models and efforts each app offers")
+    mo = sub.add_parser("models", help="models and efforts each app offers")
+    mo.add_argument("--app", choices=roles.APPS, help="opencode: its providers and models")
+    mo.add_argument("--provider", help="OpenCode: the models of this provider (for example nano-gpt)")
+    mo.add_argument("--search", help="OpenCode: the models whose id or name has these words")
+    mo.add_argument("--json", action="store_true")
     ag = sub.add_parser("agents", help="roles: list, set type/model/effort, enable, new, sync")
     ag.add_argument("action", nargs="?", default="list",
                     choices=("list", "show", "set", "enable", "disable", "new", "sync"))

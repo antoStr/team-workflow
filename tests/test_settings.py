@@ -1,4 +1,5 @@
 """Offline tests for the settings, the no-model commands and the agy subagent files."""
+import isolate_home  # noqa: F401  (first: a throwaway home for the whole run)
 import glob
 import json
 import os
@@ -24,7 +25,7 @@ class SettingsTest(unittest.TestCase):
         self.addCleanup(tmp.cleanup)
         self.home, self.root = os.path.join(tmp.name, "home"), os.path.join(tmp.name, "repo")
         os.makedirs(self.root)
-        patcher = mock.patch.dict(os.environ, {"HOME": self.home})
+        patcher = mock.patch.dict(os.environ, {"HOME": self.home, "USERPROFILE": self.home})
         patcher.start()
         self.addCleanup(patcher.stop)
 
@@ -109,7 +110,7 @@ class AgySubagentTest(unittest.TestCase):
     def setUp(self):
         tmp = tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
-        patcher = mock.patch.dict(os.environ, {"HOME": tmp.name})
+        patcher = mock.patch.dict(os.environ, {"HOME": tmp.name, "USERPROFILE": tmp.name})
         patcher.start()
         self.addCleanup(patcher.stop)
 

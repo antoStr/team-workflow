@@ -71,14 +71,18 @@ Offer only models and efforts the app really has (`tw.py models` lists them):
   (`tw.py agents set <role> model=pro --app agy`), not per launch.
 - **agy worker**: any id from `agy models` (for example `gemini-3.8-flash-high`,
   `gemini-3.1-pro-low`, `claude-sonnet-4-6`); the effort is part of the id.
-- **OpenCode custom subagent**: `inherit` (the calling agent's model) or a `provider/model` from
-  `opencode models`, and a variant (the effort: for example `low`, `high`, `max`, depending on
-  the model), set per role in the agent file.
-- **OpenCode worker**: any `provider/model` with `--variant`.
+- **OpenCode custom subagent**: `inherit` (the calling agent's model) or a `provider/model` of
+  any provider the user connected (NanoGPT, OpenRouter, Anthropic...), and a variant (the
+  effort), set per role in the agent file. Offer only the variants that model lists (for
+  example GLM 5.3: `low`, `high`, `max`; none listed = no effort question). The options show
+  the providers and the models used most; for any other, ask the user for a provider and a
+  name, then `tw.py models --app opencode --provider <id> --search <text> --json` and offer
+  what it finds (the model's name, its id, its variants).
+- **OpenCode worker**: any `provider/model` with a variant (run as `provider/model#variant`).
 
 Asking: in Claude Code use AskUserQuestion; in agy its `ask_question` tool; in OpenCode its
 `question` tool. Set multi-select (`multiSelect: true`, in agy `is_multi_select: true`, in
-OpenCode `multiple: true`) only where several answers make sense, the roles; every other
+OpenCode the question tool's multiple answers) only where several answers make sense, the roles; every other
 question is single-choice, so the user is never shown checkboxes for a one-answer question.
 Never fake a question as a markdown list with `[ ]` boxes.
 
@@ -142,8 +146,9 @@ settings (`type.<app>.<role>`, shown by `tw.py agents`):
     `model` only when the user chose a different model for this run.
   - agy: `invoke_subagent` with `TypeName: "<role>"`, `Role` a short job title and `Prompt` the
     brief; independent agents go in one call and run in parallel.
-  - OpenCode: the task tool with `subagent_type: "<role>"` and the brief as `prompt`; several
-    task calls in one message run in parallel.
+  - OpenCode: the subagent tool with `agent: "<role>"`, a short `description` and the brief as
+    `prompt` (OpenCode 1.x: the task tool with `subagent_type`); several calls in one message
+    run in parallel.
   If the role is not in the app's agent list (first session after an install or a settings
   change), run `python3 <skill>/scripts/tw.py agents sync`, tell the user to restart the app,
   and for now launch it as a built-in type briefed with the role.

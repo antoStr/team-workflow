@@ -163,8 +163,17 @@ def opencode_runs(root, since=None, home=None):
     import sqlite3
     try:
         db = sqlite3.connect(f"file:{path}?mode=ro", uri=True, timeout=2)
-        sessions = db.execute("select id, parent_id, directory from session").fetchall()
-        messages = db.execute("select session_id, time_created, data from message").fetchall()
+        try:
+            tables = {r[0] for r in db.execute("select name from sqlite_master where type='table'")}
+            if "session_v2" in tables:  # OpenCode 2.x: the message type is a column, the model an object
+                sessions = db.execute("select id, parent_id, directory from session_v2").fetchall()
+                messages = db.execute("select session_id, time_created, data from session_message "
+                                      "where type = 'assistant'").fetchall()
+            else:
+                sessions = db.execute("select id, parent_id, directory from session").fetchall()
+                messages = db.execute("select session_id, time_created, data from message").fetchall()
+        finally:
+            db.close()
     except sqlite3.Error:
         return []
     root = os.path.abspath(root)
@@ -178,10 +187,12 @@ def opencode_runs(root, since=None, home=None):
             msg = json.loads(raw)
         except ValueError:
             continue
-        if msg.get("role") != "assistant" or not msg.get("tokens"):
+        if msg.get("role", "assistant") != "assistant" or not msg.get("tokens"):
             continue
         t, cache = msg["tokens"], msg["tokens"].get("cache") or {}
-        model = f"{msg.get('providerID', '')}/{msg.get('modelID', '')}".strip("/")
+        ref = msg.get("model") if isinstance(msg.get("model"), dict) else {}
+        model = (f"{msg.get('providerID') or ref.get('providerID', '')}/"
+                 f"{msg.get('modelID') or ref.get('id', '')}").strip("/")
         agent = msg.get("agent") or "main"
         if not here[sid] and agent in ("build", "plan"):
             agent = "main"  # the session the user talks to

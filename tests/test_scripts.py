@@ -1,4 +1,5 @@
 """Offline tests for the team-workflow scripts:  python3 -m unittest discover -s tests"""
+import isolate_home  # noqa: F401  (first: a throwaway home for the whole run)
 import json
 import os
 import subprocess
@@ -33,7 +34,7 @@ class ScriptTest(unittest.TestCase):
         subprocess.run(["git", "-C", self.root, *args], check=True, capture_output=True)
 
     def run_script(self, name, *args, hook=None, env=None, cwd=None):
-        e = dict(os.environ, TMPDIR=self.tmp, TEMP=self.tmp, TMP=self.tmp, HOME=self.tmp,
+        e = dict(os.environ, TMPDIR=self.tmp, TEMP=self.tmp, TMP=self.tmp, HOME=self.tmp, USERPROFILE=self.tmp,
                  **(env or {}))
         e.pop("CLAUDE_PROJECT_DIR", None)
         return subprocess.run([sys.executable, os.path.join(SCRIPTS, name), *args],

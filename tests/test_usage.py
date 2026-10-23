@@ -1,4 +1,5 @@
 """Offline tests for usage.py and estimate.py:  python3 -m unittest discover -s tests"""
+import isolate_home  # noqa: F401  (first: a throwaway home for the whole run)
 import json
 import os
 import sys

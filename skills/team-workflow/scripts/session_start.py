@@ -9,7 +9,9 @@ native agents of the app (~/.claude/agents, ~/.gemini/config/agents), from the s
 """
 import json
 import os
+import sys
 
+import opencode_cli
 import roles
 import settings
 import update_plugin
@@ -25,12 +27,27 @@ PROTOCOL = ("team-workflow: follow the team-workflow skill. Read the area card b
 
 APP_NAMES = {"claude": ("Claude Code", "general-purpose"), "opencode": ("OpenCode", "general"),
              "agy": ("agy", "self")}
-OPENCODE_NOTES = (
-    "team-workflow in OpenCode: the workflows are /team-workflow:<name> commands and the "
-    "team-workflow skill; launch roles with the task tool, subagent_type = the role (for example "
-    "tester), several independent roles in the same message; ask the user with the question tool, "
-    "multiple: true only for choosing roles; the scripts are in "
-    "~/.config/opencode/skills/team-workflow/scripts.")
+HERE = os.path.dirname(os.path.abspath(__file__))
+
+
+def agents_dir(app):
+    """Where the app's agents go. OpenCode: next to this copy of the skill
+    (<config>/skills/team-workflow/scripts -> <config>/agents), so an install for one repository
+    (.opencode) keeps its agents there; the default folder otherwise."""
+    conf = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))
+    if app == "opencode" and os.path.basename(os.path.dirname(os.path.dirname(HERE))) == "skills" \
+            and os.path.isdir(os.path.join(conf, "commands")):
+        return os.path.join(conf, "agents")
+    return None
+
+
+def opencode_notes():
+    return ("team-workflow in OpenCode: the workflows are /team-workflow/<name> commands and the "
+            "team-workflow skill; launch roles with the subagent tool, agent = the role (for example "
+            "tester; OpenCode 1.x: the task tool, subagent_type = the role), several independent roles "
+            "in the same message; ask the user with the question tool, several answers only for "
+            f"choosing roles; the scripts are in {HERE.replace(os.sep, '/')}, run them with "
+            f"`{opencode_cli.python_command()}`.")
 
 
 def memory_context(root):
@@ -60,7 +77,11 @@ def save_snapshot(root, session_id):
 
 
 def main():
-    data = read_hook_input()
+    # --text: plain text for an agent that runs this itself (OpenCode 2.x, from AGENTS.md)
+    text_mode = "--text" in sys.argv[1:]
+    data = {"cwd": os.getcwd(), "session_id": f"text-{os.getppid()}"} if text_mode else read_hook_input()
+    if text_mode:
+        os.environ.setdefault("TEAM_WORKFLOW_APP", "opencode")
     root = repo_root(data)
     if not root:
         return
@@ -73,7 +94,7 @@ def main():
     changed = []
     if app == "claude" or (data.get("invocationNum") or 0) <= 1:
         try:
-            r = roles.sync(app, config=config, root=root)
+            r = roles.sync(app, config=config, root=root, dest=agents_dir(app))
             changed = r["written"] + r["removed"]
         except (OSError, ValueError):
             pass  # the agents stay as they were; `tw.py agents sync` rewrites them by hand
@@ -92,7 +113,7 @@ def main():
                     f"conversation, run the session setup in WIZARD.md: show `tw.py options --app {app}` "
                     "to the user, then preset, roles, and model and effort for every chosen role.")
     if app == "opencode":
-        context += "\n" + OPENCODE_NOTES
+        context += "\n" + opencode_notes()
     if changed:  # the app loaded its agents before this hook wrote them
         context += (f"\nteam-workflow: these agents were written or changed now and load from the next "
                     f"session: {', '.join(changed)}. In this session launch them as {builtin} "
@@ -102,6 +123,9 @@ def main():
     if newer:
         notes.append(f"team-workflow {newer} is available (installed "
                      f"{update_plugin.own_version()}): /team-workflow:update-plugin")
+    if text_mode:
+        print("\n".join([context] + notes))
+        return
     out = {"hookSpecificOutput": {"hookEventName": "SessionStart", "additionalContext": context}}
     if notes:
         out["systemMessage"] = " ".join(notes)

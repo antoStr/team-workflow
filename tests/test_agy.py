@@ -1,4 +1,5 @@
 """Offline tests for agy support: hook payloads in agy's format and the agy plugin builder."""
+import isolate_home  # noqa: F401  (first: a throwaway home for the whole run)
 import json
 import os
 import subprocess
@@ -44,7 +45,7 @@ class AgyHooksTest(ScriptTest):
         launcher = (f"import subprocess, sys; subprocess.run([sys.executable, {hook!r}], "
                     f"cwd={plugin_dir!r}, input={payload!r}, text=True)")
         subprocess.run([sys.executable, "-c", launcher], cwd=self.root, capture_output=True,
-                       env=dict(os.environ, TMPDIR=self.tmp, HOME=self.tmp), timeout=60)
+                       env=dict(os.environ, TMPDIR=self.tmp, HOME=self.tmp, USERPROFILE=self.tmp), timeout=60)
         self.assertTrue(os.path.exists(os.path.join(self.tmp, "team-workflow-agy-proc.json")))
 
 

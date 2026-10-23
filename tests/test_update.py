@@ -1,4 +1,5 @@
 """Offline tests for the version parsing in update_plugin.py."""
+import isolate_home  # noqa: F401  (first: a throwaway home for the whole run)
 import os
 import sys
 import unittest

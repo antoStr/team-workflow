@@ -15,6 +15,7 @@ import subprocess
 import sys
 import time
 
+import opencode_cli
 import roles
 from usage import cost_usd, ledger_path, load_pricing, resolve_model, total_tokens
 
@@ -29,12 +30,10 @@ def role_prompt(role, root=None):
 
 def build_command(harness, model, effort, prompt, allow_edits):
     if harness == "opencode":  # read-only through the plan agent; build may edit
-        cmd = [os.environ.get("TEAM_WORKFLOW_OPENCODE_BIN", "opencode"), "run", "--format", "json",
-               "-m", model, "--agent", "build" if allow_edits else "plan"]
+        cmd = [opencode_cli.binary() or "opencode", "run", "--format", "json",
+               *opencode_cli.model_args(model, effort), "--agent", "build" if allow_edits else "plan"]
         if allow_edits:
             cmd.append("--auto")
-        if effort:
-            cmd += ["--variant", effort]
         return cmd + [prompt]
     if harness == "claude":
         cmd = [os.environ.get("TEAM_WORKFLOW_CLAUDE_BIN", "claude"), "-p", prompt,

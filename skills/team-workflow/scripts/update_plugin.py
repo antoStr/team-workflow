@@ -12,6 +12,7 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 import time
 
 NAME = "team-workflow"
@@ -125,7 +126,7 @@ def update_opencode():
     except OSError:
         source = REPO
     if os.path.isdir(source):
-        code, out = run("python3", os.path.join(source, "skills", NAME, "scripts", "install_opencode.py"),
+        code, out = run(sys.executable, os.path.join(source, "skills", NAME, "scripts", "install_opencode.py"),
                         "--source", source)
         return code == 0, out
     tmp = os.path.join(os.path.expanduser("~"), ".team-workflow", "opencode-update")
@@ -133,7 +134,7 @@ def update_opencode():
     code, out = run("git", "clone", "-q", "--depth", "1", source, tmp)
     if code:
         return False, f"cannot fetch {source}, nothing changed\n{out}"
-    code, out = run("python3", os.path.join(tmp, "skills", NAME, "scripts", "install_opencode.py"),
+    code, out = run(sys.executable, os.path.join(tmp, "skills", NAME, "scripts", "install_opencode.py"),
                     "--source", source)
     shutil.rmtree(tmp, ignore_errors=True)
     return code == 0, out

@@ -1,11 +1,14 @@
-// team-workflow for OpenCode (written by install_opencode.py; edits here are overwritten).
+// team-workflow for OpenCode 1.x (written by install_opencode.py; edits here are overwritten).
+// OpenCode 2.x loads only plugins with a default { id, setup } export and gives them no session
+// hooks: there the installer writes a block in AGENTS.md instead of this file.
 // - the project memory, the settings and the OpenCode notes go into the system prompt, once per
 //   session (what the SessionStart hook does in Claude Code);
-// - /team-workflow:settings, agents, profile, models, addons, audit, doctor, ci-init and
+// - /team-workflow/settings, agents, profile, models, addons, audit, doctor, ci-init and
 //   update-plugin are answered by tw.py without the model: no tokens;
 // - when a turn ends with files changed after docs/memory/STATE.md, it asks for the memory
 //   update once (what the Stop hook does in Claude Code).
 const SCRIPTS = "__SCRIPTS__";
+const PYTHON = "__PYTHON__"; // the interpreter that ran the installer
 const NO_MODEL = {
   "update-plugin": "update", settings: "settings", models: "models", addons: "addons",
   agents: "agents", profile: "profile", audit: "audit", doctor: "doctor", "ci-init": "ci-init",
@@ -21,7 +24,7 @@ export const TeamWorkflow = async ({ client, directory }) => {
   const child = new Map(); // sessionID -> true for subagent sessions
 
   async function python(script, args = [], stdin = "") {
-    const proc = Bun.spawn(["python3", `${SCRIPTS}/${script}`, ...args], {
+    const proc = Bun.spawn([PYTHON, `${SCRIPTS}/${script}`, ...args], {
       cwd: directory, stdin: new Blob([stdin]), stdout: "pipe", stderr: "pipe",
       env: { ...process.env, TEAM_WORKFLOW_APP: "opencode" },
     });
@@ -65,7 +68,7 @@ export const TeamWorkflow = async ({ client, directory }) => {
     },
 
     "command.execute.before": async (input) => {
-      const m = /^team-workflow:([\w-]+)$/.exec(input.command || "");
+      const m = /^team-workflow[:/]([\w-]+)$/.exec(input.command || "");
       if (!m || !NO_MODEL[m[1]]) return;
       const out = await python("tw.py", [NO_MODEL[m[1]], ...words(input.arguments || "")]);
       await client.session.prompt({

@@ -1,4 +1,5 @@
 """Offline tests for dashboard.py on a fake Claude Code history and worker ledger."""
+import isolate_home  # noqa: F401  (first: a throwaway home for the whole run)
 import json
 import os
 import sys

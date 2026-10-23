@@ -1,4 +1,5 @@
 """Offline tests for the modular roles: packs, overrides and the native files of both apps."""
+import isolate_home  # noqa: F401  (first: a throwaway home for the whole run)
 import os
 import sys
 import tempfile
@@ -17,7 +18,7 @@ class RolesTest(unittest.TestCase):
         tmp = tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
         self.home = tmp.name
-        patcher = mock.patch.dict(os.environ, {"HOME": self.home})
+        patcher = mock.patch.dict(os.environ, {"HOME": self.home, "USERPROFILE": self.home})
         patcher.start()
         self.addCleanup(patcher.stop)
 

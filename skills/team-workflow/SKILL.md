@@ -174,14 +174,18 @@ reminder off.
   Workers (`run_worker.py --harness agy`) give an exact model id and measured usage. Ask with
   agy's `ask_question` tool wherever this skill says AskUserQuestion; `is_multi_select: true`
   only for questions with several answers.
-- **OpenCode**: install with `python3 <skill>/scripts/install_opencode.py` (or `tw.py
-  install-opencode`); it writes the team-workflow skill, the `/team-workflow:<name>` commands,
-  the enabled roles as subagents (`~/.config/opencode/agents/`) and a plugin that puts the
-  memory and settings into the system prompt, answers the `tw.py` commands without the model
-  and asks for the `STATE.md` update when a turn ends. Launch roles with the task tool,
-  `subagent_type` = the role; ask with the `question` tool (`multiple: true` only for roles);
-  workers: `run_worker.py --harness opencode`. The user runs `tw.py` commands in shell mode
-  (`!team-workflow <command>`) too.
+- **OpenCode** (the CLI or the desktop app): install with `python3
+  <skill>/scripts/install_opencode.py` (or `tw.py install-opencode`); it writes the
+  team-workflow skill, the `/team-workflow/<name>` commands and the enabled roles as subagents
+  (`~/.config/opencode/agents/`). OpenCode 2.x: a block in `~/.config/opencode/AGENTS.md` tells
+  you to run `session_start.py --text` at the first task (memory, settings, session setup), and
+  the commands that need no reasoning print `tw.py`'s output: show it as it is. OpenCode 1.x: a
+  plugin does that work instead. Launch roles with the subagent tool, `agent` = the role
+  (OpenCode 1.x: the task tool, `subagent_type`); ask with the `question` tool (several answers
+  only for roles); workers: `run_worker.py --harness opencode`. Run the scripts with the Python
+  the install names (on Windows `python3` is often the Microsoft Store placeholder). The
+  models: `tw.py models --app opencode` (providers, models used most) and `--provider <id>
+  --search <text>` for the rest.
 - `init_memory.py` also adds the memory pointer to `AGENTS.md` (and `GEMINI.md` or `CLAUDE.md`
   when they exist), so any other tool reads the same memory.
 

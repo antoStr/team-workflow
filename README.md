@@ -6,13 +6,13 @@ quando servono, e un report a fine lavoro che chiede prima di applicare modifich
 
 | Funzione | Claude Code | agy | OpenCode |
 |---|---|---|---|
-| Memoria letta a ogni sessione | hook all'avvio | regole `AGENTS.md` | plugin (prompt di sistema) |
-| Promemoria per aggiornare `STATE.md` | hook Stop | hook Stop | plugin (`session.idle`) |
-| Comandi (`setup-memory`, `call-team`, `write-docs`, `usage-costs`...) | `/team-workflow:<nome>` | skill con lo stesso nome | `/team-workflow:<nome>` |
-| Agenti nativi: 20 del core + pack opzionali + i tuoi | `~/.claude/agents/` | `~/.gemini/config/agents/` (`invoke_subagent`) | `~/.config/opencode/agents/` (task) |
+| Memoria letta a ogni sessione | hook all'avvio | regole `AGENTS.md` | 2.x: blocco in `AGENTS.md`; 1.x: plugin (prompt di sistema) |
+| Promemoria per aggiornare `STATE.md` | hook Stop | hook Stop | 2.x: nelle istruzioni; 1.x: plugin (`session.idle`) |
+| Comandi (`setup-memory`, `call-team`, `write-docs`, `usage-costs`...) | `/team-workflow:<nome>` | skill con lo stesso nome | `/team-workflow/<nome>` |
+| Agenti nativi: 20 del core + pack opzionali + i tuoi | `~/.claude/agents/` | `~/.gemini/config/agents/` (`invoke_subagent`) | `~/.config/opencode/agents/` (strumento subagent) |
 | Wizard a inizio conversazione: preset, agenti, modello ed effort tra quelli offerti | si' | si' | si' |
 | Token misurati nella dashboard | sessioni e sub-agenti | solo i worker | sessioni, sub-agenti e worker |
-| Comandi senza token (impostazioni, agenti, add-on, audit, doctor...) | `/team-workflow:<comando>` | `!team-workflow <comando>` | `/team-workflow:<comando>` e `!team-workflow <comando>` |
+| Comandi senza token (impostazioni, agenti, add-on, audit, doctor...) | `/team-workflow:<comando>` | `!team-workflow <comando>` | `/team-workflow/<comando>` (1.x: 0 token; 2.x: il modello mostra solo l'output) e `!team-workflow <comando>` |
 | Add-on: caveman, ponytail, ECC o qualsiasi plugin | marketplace | plugin, skill o installer di ECC | skill, plugin in `opencode.json` o installer di ECC |
 
 ## Cosa fa
@@ -171,7 +171,10 @@ come, modello, effort, stima di token e costo, e il totale; parte solo con il tu
 `full` per tutti; con `off` nessuna. I modelli proposti sono solo quelli che l'app offre:
 haiku, sonnet, opus, fable in Claude Code; `inherit`, `flash`, `pro` per i sub-agenti di agy e
 gli id di `agy models` (es. `gemini-3.8-flash-high`) per i worker; in OpenCode `inherit` o un
-`provider/modello` di `opencode models`, con la variante come effort.
+`provider/modello` di qualsiasi provider collegato (NanoGPT, OpenRouter, ...), con la variante
+come effort (solo quelle del modello: GLM 5.3 ha `low`, `high`, `max`). Il wizard mostra i
+provider e i modelli che usi di piu'; gli altri li cerca per nome:
+`team-workflow models --app opencode --provider nano-gpt --search "glm 5.3"`.
 
 - **Stime**: `scripts/estimate.py`, tarate su esecuzioni reali; dopo due esecuzioni di un ruolo
   nel progetto usa la mediana della sua storia.
@@ -228,14 +231,28 @@ python3 ~/Workspace/team-workflow/skills/team-workflow/scripts/install_opencode.
 team-workflow install-opencode                                                      # oppure con il comando team-workflow
 ```
 
+Funziona con la CLI e con l'app desktop (OpenCode 2.x; su Windows la CLI dell'app e'
+`%LOCALAPPDATA%\Programs\@opencodedesktop\resources\opencode-cli.exe` e viene trovata da sola).
 Scrive in `~/.config/opencode/`: lo skill `team-workflow` (con script, ruoli e wizard), i
-comandi `/team-workflow:<nome>`, gli agenti dei ruoli attivi e il plugin `team-workflow.js`.
-Il plugin mette memoria e impostazioni nel prompt di sistema, risponde a `settings`, `agents`,
-`profile`, `models`, `addons`, `audit`, `doctor`, `ci-init` e `update-plugin` senza il modello
-(0 token) e, a fine turno, chiede di aggiornare `STATE.md` quando i file sono cambiati.
-L'orchestratore lancia i ruoli con lo strumento task e fa le domande con lo strumento
-`question`. `/team-workflow:update-plugin` (o `team-workflow update`) aggiorna anche OpenCode;
-`install_opencode.py --uninstall` toglie solo i file scritti da team-workflow. OpenCode legge
+comandi `/team-workflow/<nome>` (in una cartella: su Windows i due punti non sono ammessi nei
+nomi dei file) e gli agenti dei ruoli attivi.
+
+- **OpenCode 2.x**: i plugin non possono piu' toccare il prompt di sistema ne' intercettare i
+  comandi, quindi l'installer aggiunge un blocco a `~/.config/opencode/AGENTS.md`: alla prima
+  richiesta di ogni conversazione il modello esegue `session_start.py --text` (memoria,
+  impostazioni, wizard di sessione). `settings`, `agents`, `profile`, `models`, `addons`,
+  `audit`, `doctor`, `ci-init`, `options` e `update-plugin` eseguono `tw.py` dentro il comando e
+  il modello mostra solo l'output (pochi token). Non c'e' un hook di fine turno: il promemoria
+  per `STATE.md` e' nelle istruzioni.
+- **OpenCode 1.x**: al posto del blocco c'e' il plugin `team-workflow.js` (memoria nel prompt di
+  sistema, comandi a 0 token, promemoria `STATE.md` a fine turno).
+
+L'orchestratore lancia i ruoli con lo strumento `subagent` (`task` in 1.x) e fa le domande con lo
+strumento `question`. Comandi e istruzioni usano il Python che funziona davvero sulla macchina:
+su Windows `python3` e' spesso il segnaposto del Microsoft Store, che fallisce sempre.
+`/team-workflow/update-plugin` (o `team-workflow update`) aggiorna anche OpenCode;
+`install_opencode.py --uninstall` toglie solo i file scritti da team-workflow (compreso il blocco
+in `AGENTS.md`); `team-workflow doctor` segnala le installazioni vecchie da rifare. OpenCode legge
 anche le skill in `~/.claude/skills` e `~/.agents/skills`.
 
 ## Installazione

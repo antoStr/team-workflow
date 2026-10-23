@@ -224,7 +224,8 @@ def native_text(app, role, meta, body, p):
             lines += ["permission:",
                       f"  edit: {'allow' if {'Edit', 'Write'} & set(tools) else 'deny'}",
                       f"  bash: {'allow' if 'Bash' in tools else 'deny'}",
-                      f"  webfetch: {'allow' if 'WebFetch' in tools else 'deny'}"]
+                      f"  webfetch: {'allow' if 'WebFetch' in tools else 'deny'}",
+                      f"  websearch: {'allow' if 'WebSearch' in tools else 'deny'}"]
     return "\n".join(lines + ["---", MARK, "", body, ""])
 
 
@@ -279,10 +280,11 @@ def sync(app, config=None, root=None, dest=None, dry_run=False):
         path = os.path.join(dest, name)
         if name.endswith(".md") and name[:-3] not in roles and os.path.isfile(path):
             with open(path, encoding="utf-8") as f:
-                if ours(f.read()):
-                    if not dry_run:
-                        os.remove(path)
-                    result["removed"].append(name[:-3])
+                mine = ours(f.read())
+            if mine:  # closed first: Windows cannot delete an open file
+                if not dry_run:
+                    os.remove(path)
+                result["removed"].append(name[:-3])
     return result
 
 

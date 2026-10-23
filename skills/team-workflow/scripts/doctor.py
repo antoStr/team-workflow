@@ -13,6 +13,7 @@ import sys
 import addons
 import audit
 import memcheck
+import opencode_cli
 import roles
 import settings
 import update_plugin
@@ -35,6 +36,40 @@ def invalid_settings(path):
     return bad
 
 
+def opencode_checks(version, newer=None):
+    """[(status, message)] for the global OpenCode install."""
+    import install_opencode
+    if version is None:
+        return [("warn", "team-workflow is not installed in OpenCode: tw.py install-opencode")]
+    ver = opencode_cli.version()
+    out = [("ok", f"team-workflow {version} in OpenCode {'.'.join(map(str, ver)) if ver else '?'}")]
+    if newer and version != newer:
+        out.append(("warn", f"team-workflow {newer} is available: tw.py update"))
+    conf = install_opencode.config_dir()
+    reinstall = "reinstall: tw.py install-opencode"
+    plugin = os.path.join(conf, "plugins", "team-workflow.js")
+    if opencode_cli.is_v2(ver) and os.path.isfile(plugin):
+        out.append(("warn", f"{plugin} is a 1.x plugin that OpenCode 2.x does not load; {reinstall}"))
+    commands = os.path.join(conf, "commands")
+    old = [n for n in (os.listdir(commands) if os.path.isdir(commands) else [])
+           if n.startswith("team-workflow:") or (n == "team-workflow" and os.path.isfile(os.path.join(commands, n)))]
+    if old:
+        out.append(("warn", f"old command files {', '.join(old)} (not loaded on Windows); {reinstall}"))
+    if opencode_cli.is_v2(ver):
+        try:
+            with open(install_opencode.agents_md(), encoding="utf-8") as f:
+                has_block = install_opencode.BEGIN in f.read()
+        except OSError:
+            has_block = False
+        if not has_block:
+            out.append(("warn", "no team-workflow block in OpenCode's AGENTS.md: the memory is not "
+                                f"loaded; {reinstall}"))
+    python = opencode_cli.python_command()
+    if python != "python3":
+        out.append(("ok", f"python3 does not run here; the OpenCode commands use {python}"))
+    return out
+
+
 def checks(root=None):
     out = []
 
@@ -49,9 +84,10 @@ def checks(root=None):
     newer = update_plugin.newer_version()
     for app in ("claude", "agy", "opencode"):
         version = update_plugin.installed(app)
-        if app == "opencode" and version is None:
-            if shutil.which("opencode"):
-                add("warn", app, "team-workflow is not installed in OpenCode: tw.py install-opencode")
+        if app == "opencode":
+            if opencode_cli.binary():
+                for status, message in opencode_checks(version, newer):
+                    add(status, app, message)
             continue
         if not shutil.which(app):
             continue
