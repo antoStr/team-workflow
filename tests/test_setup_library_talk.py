@@ -111,6 +111,17 @@ class ImportedRolesTest(unittest.TestCase):
         self.assertEqual(catalog["react-reviewer"]["pack"], "frameworks")
 
 
+class ReadmeCatalogTest(unittest.TestCase):
+    def test_readme_lists_every_agent_and_library_entry_of_this_version(self):
+        tools = os.path.join(SCRIPTS, "..", "..", "..", "tools")
+        sys.path.insert(0, tools)
+        import readme_catalog
+        try:
+            readme_catalog.main(["--check"])
+        except SystemExit as e:
+            self.fail(str(e))
+
+
 class TalkTest(unittest.TestCase):
     def setUp(self):
         tmp = tempfile.TemporaryDirectory()
