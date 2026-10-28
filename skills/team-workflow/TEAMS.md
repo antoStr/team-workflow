@@ -9,23 +9,32 @@ spend it where parallel work or an independent check pays back.
 | Team | Build | Check |
 |---|---|---|
 | product | `product-manager`, `ui-ux-designer`, `planner` | `market-researcher`, `architect` |
-| frontend | `frontend-dev`, `ui-ux-designer` | `accessibility-specialist`, `e2e-tester`, `performance-engineer`, `code-reviewer`, `typescript-reviewer` |
-| backend | `backend-dev`, `database-engineer` | `tester`, `security-reviewer`, `performance-engineer`, `code-reviewer`, `<lang>-reviewer` |
+| frontend | `frontend-dev`, `ui-ux-designer` (with the frontend add-on skills: impeccable, taste, frontend-design, solar-icons) | `accessibility-specialist`, `e2e-tester`, `performance-engineer`, `code-reviewer`, `typescript-reviewer`, `react-reviewer`, `vue-reviewer`, `flutter-reviewer` |
+| backend | `backend-dev`, `database-engineer` | `tester`, `security-reviewer`, `performance-engineer`, `code-reviewer`, `<lang>-reviewer`, `database-reviewer`, `django-reviewer`, `fastapi-reviewer` |
 | fullstack | `backend-dev`, `frontend-dev`, `database-engineer` | `tester`, `e2e-tester`, `code-reviewer`, `security-reviewer`, `<lang>-reviewer` |
-| data | `data-analyst`, `database-engineer` | `tester` (for scripts that ship), `ml-reviewer`, `rag-reviewer` |
+| data | `data-analyst`, `database-engineer`, `pytorch-build-fixer` | `tester` (for scripts that ship), `ml-reviewer`, `rag-reviewer` |
 | marketing | `market-researcher`, `marketing-strategist`, `seo-specialist` | `product-manager`, `ui-ux-designer` |
-| quality | none | `tester`, `e2e-tester`, `code-reviewer`, `security-reviewer`, `accessibility-specialist`, `performance-engineer`, `silent-failure-hunter`, `type-design-reviewer`, `test-coverage-reviewer` |
-| release | `release-manager`, `devops-engineer` | `tester`, `technical-writer` (notes and docs), `open-source-sanitizer` (public releases) |
-| maintenance | `refactor-specialist`, `<lang>-build-fixer` | `tester`, `code-reviewer`, `performance-engineer` |
+| quality | none | `tester`, `e2e-tester`, `code-reviewer`, `security-reviewer`, `accessibility-specialist`, `performance-engineer`, `silent-failure-hunter`, `type-design-reviewer`, `test-coverage-reviewer`, `database-reviewer`, `comment-analyzer`, `commit-reviewer` |
+| release | `release-manager`, `devops-engineer`, `open-source-packager`, `open-source-forker` | `tester`, `technical-writer` (notes and docs), `open-source-sanitizer` (public releases) |
+| maintenance | `refactor-specialist`, `code-simplifier`, `build-fixer`, `<lang>-build-fixer`, `<framework>-build-fixer` | `tester`, `code-reviewer`, `performance-engineer` |
 | docs | `technical-writer`, `doc-keeper` | none |
-| architecture | `architect`, `code-explorer`, `planner` | `database-engineer`, `security-reviewer`, `performance-engineer`, `devops-engineer` |
-| agent setup | `harness-optimizer` | `security-reviewer` |
+| architecture | `architect`, `code-architect`, `code-explorer`, `spec-miner`, `planner`, `docs-lookup` | `database-engineer`, `security-reviewer`, `performance-engineer`, `devops-engineer` |
+| agent setup | `harness-optimizer`, `loop-operator` | `security-reviewer`, `agent-evaluator`, `conversation-analyzer` |
+| build loop | `gan-planner`, `gan-generator` | `gan-evaluator` (scores each round until it passes) |
+| network | `network-architect`, `homelab-architect` | `network-config-reviewer`, `network-troubleshooter`, `security-reviewer` |
+| domain | the builders of the task | `healthcare-reviewer` (clinical, PHI), `bengali-reviewer` (Bengali text and NLP) |
+| operations | `chief-of-staff` (email, chat and calendar triage, drafts) | none |
 
 Roles outside the core come from packs the user switches on (`tw.py agents enable <pack>`, or
 `auto` for the languages of the repository). Propose a pack role only when its pack is on; when
 it is off and the task needs it, say which pack to enable. `<lang>` is the repository's
 language: `go`, `rust`, `python`, `typescript`, `java`, `kotlin`, `cpp`, `csharp`, `swift`,
-`dart`, `php`, `ruby`, `fsharp`.
+`dart`, `php`, `ruby`, `fsharp`; `<framework>` is `react`, `django` or `pytorch`
+(pack `frameworks`, with `react-reviewer`, `vue-reviewer`, `django-reviewer`,
+`fastapi-reviewer`, `flutter-reviewer`, `harmonyos-specialist`).
+
+When two or more roles work on one task, they talk to each other through the team channel
+(`TALK.md`): builders and checkers challenge and verify each other directly.
 
 The main session is always the orchestrator and scrum master: it plans, briefs, merges the
 results and keeps the memory.
@@ -70,6 +79,28 @@ strongest model with high effort, `doc-keeper` the lightest, the rest the standa
 | `open-source-sanitizer` | opensource | secrets, personal data and internal references before publishing | nothing |
 | `harness-optimizer` | harness | agent setup: permissions, hooks, MCP, context and cost | proposals |
 | `seo-specialist` | growth | technical and on-page SEO, structured data, Core Web Vitals | report; fixes when assigned |
+| `build-fixer` | quality | any red build or type check, smallest diff | assigned files |
+| `code-simplifier` | quality | simpler code with the same behavior | assigned files |
+| `comment-analyzer` | quality | comments that lie, rot or say nothing | nothing |
+| `commit-reviewer` | quality | reviews the staged diff and drafts a commit message in the repository's style | nothing |
+| `database-reviewer` | quality | queries, schema, indexes, migrations, RLS | nothing |
+| `code-architect` | planning | feature blueprint from the existing patterns: files, interfaces, order | plans |
+| `spec-miner` | planning | the spec an existing codebase implements, recovered from code and tests | specs |
+| `docs-lookup` | planning | current library and API docs, quoted with sources | nothing |
+| `react-reviewer`, `vue-reviewer`, `django-reviewer`, `fastapi-reviewer`, `flutter-reviewer` | frameworks | framework idiom, safety and performance | nothing |
+| `react-build-fixer`, `django-build-fixer` | frameworks | red builds of that framework | assigned files |
+| `harmonyos-specialist` | frameworks | HarmonyOS apps in ArkTS and ArkUI: state, navigation, APIs | assigned files |
+| `pytorch-build-fixer` | ml | PyTorch runtime, CUDA, shape and dtype errors | assigned files |
+| `agent-evaluator` | harness | scores an agent's output on accuracy, completeness, clarity, actionability, concision | nothing |
+| `conversation-analyzer` | harness | finds behaviors in agent transcripts worth preventing with hooks | nothing |
+| `loop-operator` | harness | runs and watches autonomous loops, stops them when stuck | loop state |
+| `gan-planner`, `gan-generator`, `gan-evaluator` | gan | plan, build and score in rounds until the evaluator passes it | spec; assigned files; scores |
+| `open-source-forker`, `open-source-packager` | opensource | a public fork without private parts; README, license, packaging | assigned files |
+| `network-architect`, `homelab-architect` | network | network and homelab designs: VLANs, DNS, VPN, routing | plans |
+| `network-config-reviewer`, `network-troubleshooter` | network | router and switch configs; connectivity diagnosis | nothing |
+| `healthcare-reviewer` | domains | clinical safety, PHI and compliance of healthcare code | nothing |
+| `bengali-reviewer` | domains | Bengali text, NLP and localization | nothing |
+| `chief-of-staff` | ops | triage of email, chat and calendar, drafted replies | drafts |
 
 The user can add roles or override one (`tw.py agents new <role>`) and choose, per role and per
 app, the agent type: `custom` (the generated agent), `worker`, or a built-in type briefed with

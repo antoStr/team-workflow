@@ -3,7 +3,7 @@
 
 It looks at the changes of this session (working tree, and commits since SessionStart),
 never blocks twice in a row (stop_hook_active) and is off with the setting stop_check=false
-(or TEAM_WORKFLOW_STOP_CHECK=0).
+(or TEAM_WORKFLOW_STOP_CHECK=0), and with activation=manual.
 """
 import json
 import os
@@ -40,7 +40,9 @@ def decide(data):
     if again or os.environ.get("TEAM_WORKFLOW_STOP_CHECK") == "0":
         return None
     root = repo_root(data)
-    if not root or not os.path.isfile(os.path.join(root, STATE)) or not settings.load(root)["stop_check"]:
+    config = settings.load(root) if root else {}
+    if (not root or not os.path.isfile(os.path.join(root, STATE)) or not config["stop_check"]
+            or config["activation"] == "manual"):
         return None
     try:
         with open(snapshot_path(session_id(data)), encoding="utf-8") as f:

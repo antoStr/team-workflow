@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """UserPromptSubmit hook (Claude Code): answer /team-workflow:update-plugin, :settings, :models,
-:addons, :agents, :profile, :audit, :doctor and :ci-init by running tw.py, and block the prompt so the model never sees it (no tokens spent).
+:addons, :agents, :profile, :audit, :doctor, :ci-init, :options, :library and :talk by running
+tw.py, and block the prompt so the model never sees it (no tokens spent).
 Any other prompt passes through untouched."""
 import json
 import os
@@ -14,7 +15,8 @@ from common import read_hook_input
 HERE = os.path.dirname(os.path.abspath(__file__))
 COMMANDS = {"update-plugin": "update", "settings": "settings", "models": "models",
             "addons": "addons", "agents": "agents", "profile": "profile", "audit": "audit",
-            "doctor": "doctor", "ci-init": "ci-init", "options": "options"}
+            "doctor": "doctor", "ci-init": "ci-init", "options": "options",
+            "library": "library", "talk": "talk"}
 PATTERN = re.compile(r"\A\s*/team-workflow:(" + "|".join(COMMANDS) + r")(?![\w-])(.*)\Z", re.S)
 
 

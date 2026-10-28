@@ -5,12 +5,15 @@ Prints nothing outside a git repository. In a repository without docs/memory it 
 one-line hint, so the agent can offer to create it. It also records the repository state
 for the Stop hook (stop_check.py), adds the settings that differ from the defaults, and tells
 the user (not the model) when a newer version is out. It keeps the enabled roles current as
-native agents of the app (~/.claude/agents, ~/.gemini/config/agents), from the settings.
+native agents of the app (~/.claude/agents, ~/.gemini/config/agents), from the settings,
+and the library entries the user switched on as native skills. With activation = manual it adds
+one line instead of the memory: use team-workflow only when the user calls it.
 """
 import json
 import os
 import sys
 
+import library
 import opencode_cli
 import roles
 import settings
@@ -23,7 +26,12 @@ MAX_CHARS = 12000  # INDEX + STATE within their limits stay far below this
 PROTOCOL = ("team-workflow: follow the team-workflow skill. Read the area card before coding, "
             "give the end-of-task report in the user's language, ask before applying anything "
             "the user did not request, update docs/memory/STATE.md when files change.")
-
+MANUAL = ("team-workflow is installed and set to manual activation here: do not use the "
+          "team-workflow skill, its agents or its workflows on your own. When the user calls "
+          "/team-workflow:<name> or asks for the team, follow the team-workflow skill and read "
+          "docs/memory/INDEX.md and STATE.md first.")
+TALK = ("team-workflow: team talk is on: when two or more agents work on one task, give them a "
+        "shared channel (TALK.md) so they debug together and verify each other.")
 
 APP_NAMES = {"claude": ("Claude Code", "general-purpose"), "opencode": ("OpenCode", "general"),
              "agy": ("agy", "self")}
@@ -98,17 +106,23 @@ def main():
             changed = r["written"] + r["removed"]
         except (OSError, ValueError):
             pass  # the agents stay as they were; `tw.py agents sync` rewrites them by hand
+        try:
+            library.sync(app, config=config, root=root)
+        except OSError:
+            pass  # `tw.py library sync` retries by hand
     if app == "agy":  # PreInvocation in agy: the memory arrives through the AGENTS.md rules
         print("{}")
         return
-    context = memory_context(root) + "\n\n" + settings.summary(config)
+    manual = config["activation"] == "manual"
+    context = MANUAL if manual else (memory_context(root) + "\n\n" + settings.summary(config)
+                                     + ("\n" + TALK if config["talk"] else ""))
     missing = [s for s in roles.detect(root) if not roles.is_enabled(config, "", s)]
-    if missing:
+    if missing and not manual:
         context += (f"\nteam-workflow: this repository uses {', '.join(missing)}; their reviewer and "
                     "build-fixer packs are off (offer: tw.py agents enable auto).")
     notes = []
     name, builtin = APP_NAMES[app]
-    if config.get("session_wizard", True):
+    if config.get("session_wizard", True) and not manual:
         context += (f"\nteam-workflow: session setup is on. Before the first agent of this "
                     f"conversation, run the session setup in WIZARD.md: show `tw.py options --app {app}` "
                     "to the user, then preset, roles, and model and effort for every chosen role.")

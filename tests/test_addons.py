@@ -77,6 +77,30 @@ class AddonsTest(unittest.TestCase):
             addons.apply("remove", "ponytail")
         self.assertNotIn("ponytail", addons.chosen())
 
+    def test_frontend_bundle_copies_skills_from_their_folder_also_into_claude(self):
+        for name, folder in (("impeccable", ".agents/skills/impeccable"), ("solar-icons", "skills/solar-icons")):
+            clone = addons.clone_dir(name)
+            self.write(os.path.join(clone, *folder.split("/"), "SKILL.md"), f"---\nname: {name}\n---\n")
+            os.makedirs(os.path.join(clone, ".git"), exist_ok=True)
+        with mock.patch.object(addons, "run", return_value=(True, "")):
+            ok, log = addons.copy_skills("impeccable", addons.CATALOG["impeccable"])  # .agents/skills
+        self.assertTrue(ok, log)
+        self.assertEqual(addons.agy_skill_dirs("impeccable"), ["impeccable"])
+        present = lambda app: app == "claude"  # noqa: E731
+        with mock.patch.object(addons, "run", return_value=(True, "")), \
+                mock.patch.object(addons, "present", present):
+            ok, log = addons.apply("add", "solar-icons", ("claude",))
+            self.assertTrue(ok, log)  # no marketplace: copied as skills, no `claude plugin`
+            self.assertNotIn("claude plugin", log)
+            self.assertEqual(addons.claude_version(addons.CATALOG["solar-icons"], "solar-icons"), "skills")
+            ok, log = addons.apply("remove", "solar-icons", ("claude",))
+        self.assertFalse(os.path.exists(os.path.join(addons.claude_skills_dir(), "solar-icons")))
+        with mock.patch.object(addons, "apply", wraps=addons.apply) as spy, \
+                mock.patch.object(addons, "present", return_value=False):
+            ok, log = addons.apply("add", "frontend")
+        self.assertEqual([c.args[1] for c in spy.call_args_list[1:]], list(addons.BUNDLES["frontend"]))
+        self.assertEqual(set(addons.BUNDLES["frontend"]) - set(addons.chosen()), set())
+
 
 if __name__ == "__main__":
     unittest.main()

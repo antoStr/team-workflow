@@ -13,7 +13,10 @@ quando servono, e un report a fine lavoro che chiede prima di applicare modifich
 | Wizard a inizio conversazione: preset, agenti, modello ed effort tra quelli offerti | si' | si' | si' |
 | Token misurati nella dashboard | sessioni e sub-agenti | solo i worker | sessioni, sub-agenti e worker |
 | Comandi senza token (impostazioni, agenti, add-on, audit, doctor...) | `/team-workflow:<comando>` | `!team-workflow <comando>` | `/team-workflow/<comando>` (1.x: 0 token; 2.x: il modello mostra solo l'output) e `!team-workflow <comando>` |
-| Add-on: caveman, ponytail, ECC o qualsiasi plugin | marketplace | plugin, skill o installer di ECC | skill, plugin in `opencode.json` o installer di ECC |
+| Add-on: caveman, ponytail, ECC, il set frontend o qualsiasi plugin | marketplace (o skill copiate) | plugin, skill o installer di ECC | skill, plugin in `opencode.json` o installer di ECC |
+| Agenti che parlano tra loro (team talk) | si' | si' | si' |
+| Libreria ECC: 311 skill, 97 comandi, 22 set di regole | ricerca + skill native a scelta | ricerca + skill native a scelta | ricerca + skill native a scelta |
+| Attivazione automatica o solo quando la chiami | si' | solo il controllo Stop | si' |
 
 ## Cosa fa
 
@@ -27,7 +30,19 @@ quando servono, e un report a fine lavoro che chiede prima di applicare modifich
 - **Controlli**: `memcheck.py` verifica lunghezze, segreti e percorsi citati; `audit` controlla
   la sicurezza della configurazione degli agenti; `ci-init` li mette in CI su ogni pull request.
 - **Tutto personalizzabile**: agenti, pack, modelli, effort, tipo di agente, profili e add-on,
-  senza toccare il plugin.
+  senza toccare il plugin. `/team-workflow:setup` raccoglie tutto in un posto solo, compresa
+  l'attivazione: da sola in ogni progetto, solo in alcuni progetti, o solo quando la chiami.
+- **Agenti che parlano tra loro (team talk)**: gli agenti di un compito condividono un canale
+  (`tw.py talk`, anche tra worktree diversi). Si fanno domande, mettono in dubbio le
+  affermazioni degli altri con le prove, verificano le correzioni e danno un verdetto; il
+  lavoro non e' finito finche' resta aperta una sfida. Tre modi: debug insieme, review
+  incrociata, confronto su una decisione (`TALK.md`). Leggi la conversazione con
+  `/team-workflow:talk read <topic>`.
+- **Tutto ECC dentro team-workflow**: i 32 agenti di Everything Claude Code che mancavano sono
+  ruoli nei pack (frameworks, quality, planning, harness, gan, network, domains, ops...); gli
+  altri 39 erano gia' coperti dai ruoli esistenti. Le 311 skill, i 97 comandi e le 22 serie di
+  regole sono una libreria che l'orchestratore cerca per ogni compito e passa agli agenti, e
+  che puoi installare come skill native a pacchetti o una alla volta (`/team-workflow:library`).
 
 ## I team e gli agenti
 
@@ -38,17 +53,21 @@ da team diversi), e partono solo quelli.
 | Team | Chi costruisce | Chi controlla |
 |---|---|---|
 | product | product-manager, ui-ux-designer, planner | market-researcher, architect |
-| frontend | frontend-dev, ui-ux-designer | accessibility-specialist, e2e-tester, performance-engineer, code-reviewer, typescript-reviewer |
-| backend | backend-dev, database-engineer | tester, security-reviewer, performance-engineer, code-reviewer, `<lang>`-reviewer |
+| frontend | frontend-dev, ui-ux-designer (con le skill del set frontend) | accessibility-specialist, e2e-tester, performance-engineer, code-reviewer, typescript-reviewer, react-reviewer, vue-reviewer, flutter-reviewer |
+| backend | backend-dev, database-engineer | tester, security-reviewer, performance-engineer, code-reviewer, `<lang>`-reviewer, database-reviewer, django-reviewer, fastapi-reviewer |
 | fullstack | backend-dev, frontend-dev, database-engineer | tester, e2e-tester, code-reviewer, security-reviewer, `<lang>`-reviewer |
 | data | data-analyst, database-engineer | tester, ml-reviewer, rag-reviewer |
 | marketing | market-researcher, marketing-strategist, seo-specialist | product-manager, ui-ux-designer |
-| quality | nessuno | tester, e2e-tester, code-reviewer, security-reviewer, accessibility-specialist, performance-engineer, silent-failure-hunter, type-design-reviewer, test-coverage-reviewer |
+| quality | nessuno | tester, e2e-tester, code-reviewer, security-reviewer, accessibility-specialist, performance-engineer, silent-failure-hunter, type-design-reviewer, test-coverage-reviewer, database-reviewer, comment-analyzer, commit-reviewer |
 | release | release-manager, devops-engineer | tester, technical-writer, open-source-sanitizer |
-| maintenance | refactor-specialist, `<lang>`-build-fixer | tester, code-reviewer, performance-engineer |
+| maintenance | refactor-specialist, code-simplifier, build-fixer, `<lang>`-build-fixer | tester, code-reviewer, performance-engineer |
 | docs | technical-writer, doc-keeper | nessuno |
-| architecture | architect, code-explorer, planner | database-engineer, security-reviewer, performance-engineer, devops-engineer |
-| agent setup | harness-optimizer | security-reviewer |
+| architecture | architect, code-architect, code-explorer, spec-miner, planner, docs-lookup | database-engineer, security-reviewer, performance-engineer, devops-engineer |
+| agent setup | harness-optimizer, loop-operator | security-reviewer, agent-evaluator, conversation-analyzer |
+| build loop | gan-planner, gan-generator | gan-evaluator |
+| network | network-architect, homelab-architect | network-config-reviewer, network-troubleshooter, security-reviewer |
+| domain | chi costruisce il compito | healthcare-reviewer, bengali-reviewer |
+| operations | chief-of-staff | nessuno |
 
 **Pack.** I 20 ruoli del **core** sono sempre attivi; gli altri arrivano da pack che accendi
 quando servono:
@@ -56,12 +75,20 @@ quando servono:
 | Pack | Ruoli |
 |---|---|
 | un pack per linguaggio: `go`, `rust`, `python`, `typescript`, `java`, `kotlin`, `cpp`, `csharp`, `swift`, `dart`, `php`, `ruby`, `fsharp` | `<lang>-reviewer` (idiomi, sicurezza, framework come Django, FastAPI, React, Vue, Next.js, Spring, Laravel, Rails) e `<lang>-build-fixer` (build rossa, type check, dipendenze) |
-| `quality` | silent-failure-hunter, type-design-reviewer, test-coverage-reviewer |
-| `planning` | planner, code-explorer |
-| `ml` | ml-reviewer, rag-reviewer |
-| `opensource` | open-source-sanitizer |
-| `harness` | harness-optimizer |
+| `frameworks` | react-reviewer, react-build-fixer, vue-reviewer, django-reviewer, django-build-fixer, fastapi-reviewer, flutter-reviewer, harmonyos-specialist |
+| `quality` | silent-failure-hunter, type-design-reviewer, test-coverage-reviewer, build-fixer, code-simplifier, comment-analyzer, commit-reviewer, database-reviewer |
+| `planning` | planner, code-explorer, code-architect, spec-miner, docs-lookup |
+| `ml` | ml-reviewer, rag-reviewer, pytorch-build-fixer |
+| `opensource` | open-source-sanitizer, open-source-forker, open-source-packager |
+| `harness` | harness-optimizer, agent-evaluator, conversation-analyzer, loop-operator |
+| `gan` | gan-planner, gan-generator, gan-evaluator |
+| `network` | network-architect, network-config-reviewer, network-troubleshooter, homelab-architect |
+| `domains` | healthcare-reviewer, bengali-reviewer |
+| `ops` | chief-of-staff |
 | `growth` | seo-specialist |
+
+I ruoli con `source: "ECC ..."` sono importati da Everything Claude Code (MIT) con
+`tools/import_ecc.py`, che ricostruisce anche la libreria: rilancialo dopo un aggiornamento di ECC.
 
 `/team-workflow:agents enable auto` accende i pack dei linguaggi del repository (all'avvio
 l'orchestratore te lo propone quando li trova). Ogni linguaggio e' un solo file
@@ -92,6 +119,7 @@ app. Chi scrive il codice non lo approva mai da solo.
 
 | Comando | Cosa fa |
 |---|---|
+| `/team-workflow:setup [area]` | configura tutto: attivazione (automatica, solo in questo progetto, solo quando la chiami), wizard, team, modelli, ruoli e pack, libreria, team talk, controlli, add-on, preset |
 | `/team-workflow:setup-memory` | crea `docs/memory` e la compila leggendo il codice |
 | `/team-workflow:call-team [team] <compito>` | descrivi il compito e scegli le figure (anche piu' di una); il team (frontend, backend, data...) e' facoltativo |
 | `/team-workflow:new-feature <cosa>` | nuova funzionalita' con il team |
@@ -118,6 +146,8 @@ modalita' bash, `!team-workflow <comando>`):
 | `/team-workflow:doctor [--fix]` | stato dell'installazione e riparazione |
 | `/team-workflow:ci-init` | workflow GitHub Actions: memoria e audit su ogni pull request |
 | `/team-workflow:update-plugin [check]` | aggiorna team-workflow (e gli add-on scelti) in entrambe le app |
+| `/team-workflow:library [search <parole>\|show <id>\|enable\|disable <id\|pack>]` | la libreria ECC: pack, ricerca, installazione come skill native |
+| `/team-workflow:talk [read\|open\|clear <topic>]` | cosa si sono detti gli agenti, domande e sfide ancora aperte |
 
 In agy crea una volta il comando `team-workflow`:
 `python3 ~/.gemini/config/plugins/team-workflow/skills/team-workflow/scripts/tw.py install-cli`.
@@ -127,12 +157,22 @@ Da terminale ci sono anche `team-workflow learn` e `team-workflow uninstall [--a
 
 `/team-workflow:addons` elenca il catalogo con le versioni installate in ogni app; `add` installa,
 `update` aggiorna, `remove` toglie, e `update-plugin` aggiorna anche gli add-on scelti.
+`addons add frontend` installa insieme impeccable, taste, frontend-design, solar-icons e
+cloudflare: `frontend-dev`, `ui-ux-designer` e `accessibility-specialist` le usano quando ci
+sono; `security-reviewer`, `backend-dev` e `devops-engineer` usano le skill Cloudflare nei
+progetti su Cloudflare (la sicurezza: `cloudflare-one` per Zero Trust, `turnstile-spin`,
+`workers-best-practices`).
 
 | Add-on | Cosa aggiunge | Claude Code | agy |
 |---|---|---|---|
 | `caveman` | risposte compresse, meno token in uscita (licenza MIT e BSL) | marketplace | le sue skill copiate in `~/.gemini/config/skills` |
 | `ponytail` | la soluzione piu' semplice che funziona, meno codice | marketplace | `agy plugin install` |
 | `ecc` | Everything Claude Code: 68 agenti, 292 skill, regole e hook | marketplace | installer di ECC per Antigravity, nel progetto |
+| `impeccable` | design, critica, audit e rifinitura delle interfacce (Apache-2.0) | marketplace | le sue skill copiate |
+| `taste` | direzione artistica anti-"AI slop" per siti e schermate (MIT) | marketplace | le sue skill copiate |
+| `frontend-design` | la skill frontend-design di Anthropic (Apache-2.0) | marketplace ufficiale | la skill copiata |
+| `solar-icons` | icone Solar: nomi esatti e import per framework (MIT, icone CC BY 4.0) | skill copiata in `~/.claude/skills` | la skill copiata |
+| `cloudflare` | skill Cloudflare: Workers best practices, Zero Trust (`cloudflare-one`), Turnstile, web perf (Apache-2.0) | marketplace | le sue skill copiate |
 | qualsiasi altro | `addons add owner/repo` o `addons add plugin@marketplace` (per esempio uno del marketplace ufficiale Anthropic) | marketplace | plugin se ha `plugin.json`, altrimenti le sue skill |
 
 ## team-workflow e le funzioni Pro di ECC
@@ -305,6 +345,11 @@ repository (`.team-workflow.json`); `settings reset <chiave>` torna al valore pr
 
 | Chiave | Predefinito | Cosa decide |
 |---|---|---|
+| `activation` | `auto` | `auto`: ogni sessione in un repository carica memoria, protocollo e controllo Stop; `manual`: team-workflow resta zitto finche' non lo chiami. Solo in alcuni progetti: `manual` per l'utente e `auto --project` in quei progetti |
+| `talk` | `true` | gli agenti di un compito parlano tra loro sul canale condiviso (`TALK.md`) |
+| `talk_rounds` | `3` | quanti giri di risposte al massimo prima di portarti il disaccordo |
+| `library.packs.<pack>` | spenti | pack della libreria ECC installati come skill native |
+| `library.skills.<id>` | - | una singola voce della libreria, accesa o spenta (vince sul pack) |
 | `session_wizard` | `true` | a inizio conversazione chiede preset, agenti, modello ed effort tra quelli offerti dall'app |
 | `wizard` | `quick` | `quick`: riepilogo con le scelte consigliate, domande solo per chi vuoi cambiare; `full`: tutte le domande; `off`: nessuna |
 | `max_agents` | `4` | quanti agenti propone al massimo senza chiedere |

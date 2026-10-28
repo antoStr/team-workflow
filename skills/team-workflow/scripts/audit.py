@@ -174,6 +174,18 @@ def custom_rules(root):
     return rules
 
 
+def from_library(path, text):
+    """A SKILL.md that tw.py library installed and that still equals its library entry."""
+    try:
+        import library  # absent where ci-init copied this file alone
+    except ImportError:
+        return False
+    folder = os.path.dirname(path)
+    if not os.path.isfile(os.path.join(folder, library.MARK)):
+        return False
+    return read(library.main_file(os.path.basename(folder))) == text
+
+
 def audit(root=None):
     """(findings sorted by severity, number of files scanned)."""
     files, out = targets(root), []
@@ -190,7 +202,14 @@ def audit(root=None):
             data = load_json(path) or {}
             out += scan_mcp(path, data.get("mcpServers")) + scan_text(path, json.dumps(data))
         else:
-            out += scan_text(path, read(path) or "", instructions=True)
+            text = read(path) or ""
+            found = scan_text(path, text, instructions=True)
+            if found and from_library(path, text):  # ECC's own warnings quote these phrases
+                for f in found:
+                    if f["what"].startswith("prompt-injection phrase"):
+                        f["severity"] = "low"
+                        f["what"] += " (team-workflow library entry from ECC, unchanged: check the context)"
+            out += found
     for rule in custom_rules(root):
         try:
             rx = re.compile(rule["pattern"])

@@ -5,10 +5,11 @@ The catalog lists the known ones; any other GitHub repository with a Claude Code
 kept in the settings (`addons.<name>`), so `update` refreshes them with team-workflow.
 
 How each app installs an add-on:
-- Claude Code: its marketplace (`claude plugin marketplace add`, `claude plugin install`).
+- Claude Code: its marketplace (`claude plugin marketplace add`, `claude plugin install`);
+  "skills" (a repository without a marketplace): its skills copied into ~/.claude/skills.
 - agy, "plugin": `agy plugin install <GitHub URL>` (the repository has a plugin.json).
 - agy, "skills": agy has no plugin for it, so the repository's skills/<name>/SKILL.md folders
-  are copied into ~/.gemini/config/skills (marked, so only ours are ever removed).
+  (or <skills_dir>/<name>/SKILL.md) are copied into ~/.gemini/config/skills (marked, so only ours are ever removed).
 - agy, "ecc": ECC's own Antigravity installer, per project (it writes <repository>/.agents).
 - OpenCode, "skills": the skills copied into ~/.config/opencode/skills (OpenCode also reads
   ~/.claude/skills and ~/.agents/skills: skills already there are not copied twice).
@@ -41,7 +42,35 @@ CATALOG = {
         "agy": "ecc", "opencode": "ecc", "license": "MIT",
         "about": "Everything Claude Code: 68 agents, 292 skills, rules and hooks",
     },
+    # The frontend set (`addons add frontend`): the frontend roles use these skills when present.
+    "impeccable": {
+        "repo": "pbakaus/impeccable", "marketplace": "impeccable", "plugin": "impeccable",
+        "agy": "skills", "opencode": "skills", "skills_dir": ".agents/skills", "license": "Apache-2.0",
+        "about": "design, critique, audit, polish and harden frontend interfaces",
+    },
+    "taste": {
+        "repo": "Leonxlnx/taste-skill", "marketplace": "taste-skill", "plugin": "taste-skill",
+        "agy": "skills", "opencode": "skills", "license": "MIT",
+        "about": "anti-slop art direction for landing pages, sites and app screens",
+    },
+    "frontend-design": {
+        "repo": "anthropics/claude-plugins-official", "marketplace": "claude-plugins-official",
+        "plugin": "frontend-design", "agy": "skills", "opencode": "skills",
+        "skills_dir": "plugins/frontend-design/skills", "license": "Apache-2.0",
+        "about": "Anthropic's frontend-design skill: distinctive, non-templated visual design",
+    },
+    "solar-icons": {
+        "repo": "saoudi-h/solar-icons", "claude": "skills", "agy": "skills", "opencode": "skills",
+        "license": "MIT (icons by 480 Design, CC BY 4.0)",
+        "about": "Solar icon set: exact icon names and framework imports",
+    },
+    "cloudflare": {
+        "repo": "cloudflare/skills", "marketplace": "cloudflare", "plugin": "cloudflare",
+        "agy": "skills", "opencode": "skills", "license": "Apache-2.0",
+        "about": "Cloudflare skills: Workers best practices, Zero Trust (cloudflare-one), Turnstile, perf",
+    },
 }
+BUNDLES = {"frontend": ("impeccable", "taste", "frontend-design", "solar-icons", "cloudflare")}
 APPS = ("claude", "agy", "opencode")
 
 
@@ -112,7 +141,13 @@ def chosen(config=None):
 
 # --- Claude Code -------------------------------------------------------------------------
 
-def claude_version(entry):
+def claude_skills_dir():
+    return home(".claude", "skills")
+
+
+def claude_version(entry, name=None):
+    if entry.get("claude") == "skills":  # a repository without a Claude Code marketplace
+        return "skills" if name and agy_skill_dirs(name, claude_skills_dir()) else None
     try:
         with open(home(".claude", "plugins", "installed_plugins.json"), encoding="utf-8") as f:
             data = json.load(f)
@@ -215,8 +250,9 @@ def copy_skills(name, entry, dest=None, also_seen=()):
     dest, copied, skipped = dest or agy_skills_dir(), [], []
     os.makedirs(dest, exist_ok=True)
     ours = set(agy_skill_dirs(name, dest))
-    for d in sorted(os.listdir(os.path.join(src, "skills"))):
-        skill = os.path.join(src, "skills", d)
+    base = os.path.join(src, *entry.get("skills_dir", "skills").split("/"))
+    for d in sorted(os.listdir(base)) if os.path.isdir(base) else []:
+        skill = os.path.join(base, d)
         if not os.path.isfile(os.path.join(skill, "SKILL.md")):
             continue
         target = os.path.join(dest, d)
@@ -374,17 +410,21 @@ def status_lines(root=None):
     lines = []
     for name in names:
         entry = picked.get(name) or CATALOG[name]
-        claude = claude_version(entry) if present("claude") else None
+        claude = claude_version(entry, name) if present("claude") else None
         agy = agy_version(name, entry) if present("agy") else None
         oc = opencode_version(name, entry) if present("opencode") else None
         mark = "*" if name in picked else " "
-        lines.append(f"{mark} {name:<10} claude: {claude or '-':<10} agy: {agy or '-':<16} "
+        lines.append(f"{mark} {name:<16} claude: {claude or '-':<10} agy: {agy or '-':<16} "
                      f"opencode: {oc or '-':<16} {entry.get('about', '')[:60]}")
     return lines
 
 
 def apply(action, spec, apps=APPS, root=None):
-    """add, update or remove one add-on in the chosen apps; returns (ok, log)."""
+    """add, update or remove one add-on (or a bundle of them) in the chosen apps; returns (ok, log)."""
+    if spec in BUNDLES:
+        results = [(n, *apply(action, n, apps, root)) for n in BUNDLES[spec]]
+        return (all(ok for _, ok, _ in results),
+                "\n".join(f"== {n}\n{out}" for n, _, out in results))
     if action == "add":
         name, entry = resolve(spec)
     else:
@@ -397,7 +437,16 @@ def apply(action, spec, apps=APPS, root=None):
         if not present(app):
             log.append(f"{app}: not installed, skipped")
             continue
-        if app == "claude":
+        if app == "claude" and entry.get("claude") == "skills":
+            if action == "remove":
+                for d in agy_skill_dirs(name, claude_skills_dir()):
+                    shutil.rmtree(os.path.join(claude_skills_dir(), d), ignore_errors=True)
+                ok, out = True, f"removed its skills from {claude_skills_dir()}"
+            else:
+                ok, out = copy_skills(name, entry, claude_skills_dir())
+            log.append(f"claude: {out}")
+            ok_all &= ok
+        elif app == "claude":
             try:
                 steps = claude_steps(action, entry)
             except ValueError as e:

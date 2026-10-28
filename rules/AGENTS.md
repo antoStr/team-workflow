@@ -15,6 +15,11 @@
 - The user's settings: `python3 <team-workflow skill folder>/scripts/tw.py settings --json`;
   the roles with their type and model: `tw.py agents`. A role whose type is a built-in
   (`self`, `research`) is launched as that type with `tw.py agents show <role>` as its brief.
+- When two or more agents work on one task, give them a shared channel so they debug together,
+  challenge and verify each other (`TALK.md` of the team-workflow skill, `tw.py talk`); the task
+  is not done while `tw.py talk open <topic>` lists anything.
+- Before briefing agents, `tw.py library search <task words>` finds ECC skills, commands and
+  rules; give each agent the paths it needs.
 - End every task with a report: done, verified with evidence, findings, decisions. Ask before
   applying anything the user did not request.
 - When files change, update `docs/memory/STATE.md`.

@@ -38,7 +38,8 @@ REPO = "https://github.com/antoStr/team-workflow"
 # workflows answered by tw.py alone: the model only shows the output
 NO_MODEL = {"update-plugin": "update", "settings": "settings", "models": "models", "addons": "addons",
             "agents": "agents", "profile": "profile", "audit": "audit", "doctor": "doctor",
-            "ci-init": "ci-init", "options": "options"}
+            "ci-init": "ci-init", "options": "options",
+            "library": "library", "talk": "talk"}
 
 
 def config_dir(workspace=None):

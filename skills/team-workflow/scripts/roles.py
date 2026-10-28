@@ -8,8 +8,9 @@ Sources, later ones win for the same role name:
     ~/.team-workflow/agents/<role>.md                        your own roles or overrides
     <repository>/.team-workflow/agents/<role>.md             roles for one project
 
-Shared blocks in roles/_shared/<name>.md are appended to the body of a role: untrusted-input
-to every role, the others when the role's frontmatter lists them in `includes`.
+Shared blocks in roles/_shared/<name>.md are appended to the body of a role: team-talk and
+untrusted-input to every role, the others when the role's frontmatter lists them in `includes`.
+Roles with `source: "ECC ..."` were imported from Everything Claude Code by tools/import_ecc.py.
 
 Native files, written only for enabled roles whose type is "custom" and marked as ours:
     Claude Code  ~/.claude/agents/<role>.md
@@ -131,7 +132,7 @@ def compose(meta, body):
     except ValueError:
         names = []
     blocks = []
-    for name in list(names) + ["untrusted-input"]:
+    for name in list(names) + ["team-talk", "untrusted-input"]:
         path = os.path.join(ROLES_DIR, "_shared", name + ".md")
         if os.path.isfile(path):
             with open(path, encoding="utf-8") as f:

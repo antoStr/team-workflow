@@ -5,6 +5,10 @@ import json
 import os
 
 DEFAULTS = {
+    # auto = in every repository the session loads the memory, the protocol and the Stop check;
+    # manual = team-workflow stays quiet until the user calls /team-workflow:<name>. Set it in the
+    # user file for every project and with --project for one (manual everywhere, auto here).
+    "activation": "auto",
     # Assignment wizard: quick = the board with the recommended choices, questions only for the
     # agents the user wants to change; full = every question for every agent; off = no wizard,
     # launch with the recommended choices.
@@ -19,6 +23,10 @@ DEFAULTS = {
     "end_report": "full",          # full | short
     "update_check": True,          # tell at session start when a new version is out (daily)
     "stop_check": True,            # remind to update docs/memory/STATE.md at the end of a turn
+    # Team talk (TALK.md): agents of a task share a channel to debug together, challenge and
+    # verify each other; talk_rounds is how many rounds of replies the orchestrator runs at most.
+    "talk": True,
+    "talk_rounds": 3,
     # Model per role, per app. Claude Code: haiku, sonnet, opus, fable or a model id.
     # agy subagents: inherit (the session's model), flash or pro. OpenCode: inherit or
     # provider/model from `opencode models`. "default" covers the roles not listed.
@@ -42,6 +50,9 @@ DEFAULTS = {
     # still be switched off with enabled.<role> false.
     "packs": {"default": False, "core": True, "custom": True},
     "enabled": {"default": True},
+    # The ECC library (`tw.py library`): packs or single entries installed as native skills.
+    # Off by default: the orchestrator searches the library and briefs agents with the paths.
+    "library": {"packs": {"default": False}, "skills": {"default": False}},
     # Add-on plugins chosen with `tw.py addons add`; `update` refreshes them too.
     "addons": {},
 }
@@ -58,12 +69,14 @@ PROFILES = {
                  "effort.default": "high", "packs.quality": True, "auto_security_review": True},
     "security": {"auto_security_review": True, "packs.quality": True, "worker_edits": False,
                  "models.claude.security-reviewer": "opus", "effort.security-reviewer": "max"},
-    "research": {"packs.planning": True, "effort.market-researcher": "high",
-                 "effort.data-analyst": "high", "effort.code-explorer": "high",
+    "research": {"packs.planning": True, "library.packs.research-apis": True,
+                 "effort.market-researcher": "high", "effort.data-analyst": "high",
+                 "effort.code-explorer": "high",
                  "type.claude.code-explorer": "Explore"},
 }
 
 CHOICES = {
+    "activation": ("auto", "manual"),
     "wizard": ("quick", "full", "off"),
     "launch": ("native", "worker"),
     "end_report": ("full", "short"),
@@ -73,7 +86,7 @@ CHOICES = {
     "type.agy": ("custom", "worker", "self", "research"),
     "type.opencode": ("custom", "worker", "general", "explore"),
 }
-ROLE_TABLES = ("models", "effort", "type", "packs", "enabled")  # any role name is a valid key inside these
+ROLE_TABLES = ("models", "effort", "type", "packs", "enabled", "library")  # any role name is a valid key inside these
 
 
 def home_dir():

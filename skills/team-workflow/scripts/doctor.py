@@ -12,6 +12,7 @@ import sys
 
 import addons
 import audit
+import library
 import memcheck
 import opencode_cli
 import roles
@@ -131,7 +132,7 @@ def checks(root=None):
     for name, entry in addons.chosen(config).items():
         for app in entry.get("apps", addons.APPS):
             if shutil.which(app):
-                version = (addons.claude_version(entry) if app == "claude"
+                version = (addons.claude_version(entry, name) if app == "claude"
                            else addons.agy_version(name, entry))
                 add("ok" if version else "warn", f"add-on {name}",
                     f"{app}: {version or 'chosen but not installed (tw.py addons update)'}")
@@ -181,6 +182,8 @@ def uninstall(everything=False):
             if ours:
                 os.remove(path)
                 done.append(f"removed {path}")
+        nothing = {"library": {"packs": {}, "skills": {}}}  # every library skill we installed goes
+        done += [f"removed {app} library skill {n}" for n in library.sync(app, config=nothing)["removed"]]
     for name in addons.chosen():
         for d in addons.agy_skill_dirs(name):
             shutil.rmtree(os.path.join(addons.agy_skills_dir(), d), ignore_errors=True)

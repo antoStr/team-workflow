@@ -1,6 +1,6 @@
 ---
 name: team-workflow
-description: Organize development work in a repository with shared project memory, on-demand teams of specialist agents (product, design, frontend, backend, database, devops, performance, refactoring, testing, security, release, docs, data analysis, market research, marketing) and an end-of-task report that asks before applying changes. Use at the start of any coding task (feature, fix, refactor, review, release), when the user asks to set up project memory, to call a team or an agent, to analyze data or a market, or to wrap up a session, and whenever docs/memory exists and work is about to change code.
+description: Organize development work in a repository with shared project memory, on-demand teams of specialist agents (product, design, frontend, backend, database, devops, performance, refactoring, testing, security, release, docs, data analysis, market research, marketing, plus language, framework, quality and other packs) that talk to each other to debug and verify each other's work, a searchable library of ECC skills, commands and rules, and an end-of-task report that asks before applying changes. Use at the start of any coding task (feature, fix, refactor, review, release), when the user asks to set up project memory, to call a team or an agent, to analyze data or a market, or to wrap up a session, and whenever docs/memory exists and work is about to change code.
 ---
 
 # Team workflow
@@ -13,7 +13,12 @@ Always answer the user in the language they write in. Agent prompts and new memo
 in English; an existing memory keeps the language it already uses.
 
 The scripts named below live in the `scripts/` folder next to this file; the team catalog is
-`TEAMS.md`, also next to this file.
+`TEAMS.md`, the team talk protocol `TALK.md` and the ECC library `library/`, also next to this
+file.
+
+When the session context says team-workflow is set to manual activation, use this skill only
+when the user calls `/team-workflow:<name>` or asks for the team; the user changes that with
+`/team-workflow:setup`.
 
 ## 0. When this skill is invoked
 
@@ -56,8 +61,9 @@ solo and delegating, choose delegation for every size above trivial.
 ## 3. The agents and how smart they are
 
 `TEAMS.md` lists the roles: twenty in the core pack, and optional packs the user switches on
-(a reviewer and a build fixer for each of 13 languages; quality, planning, ML, open source,
-agent setup, SEO), plus any role the user writes. The plugin writes every enabled role as a
+(a reviewer and a build fixer for each of 13 languages; frameworks, quality, planning, ML, GAN
+build loop, open source, agent setup, network, domains, ops, SEO; most imported from
+Everything Claude Code), plus any role the user writes. The plugin writes every enabled role as a
 native agent of the app (`~/.claude/agents/<role>.md`, `~/.gemini/config/agents/<role>.md`).
 Type, model and effort of each role come from the settings (`type.<app>.<role>`,
 `models.<app>.<role>`, `effort.<role>`):
@@ -75,7 +81,8 @@ mistake is expensive, not by default.
 Every behavior above can be changed by the user: `tw.py settings` shows them, `tw.py settings
 set <key> <value> [--project]` changes them (user file `~/.team-workflow/settings.json`,
 project file `.team-workflow.json`); `tw.py agents` changes roles, `tw.py profile` applies a
-preset (budget, fast, balanced, thorough, security, research). Follow them: `wizard`,
+preset (budget, fast, balanced, thorough, security, research); `/team-workflow:setup` walks
+through all of them. Follow them: `activation`, `talk`, `talk_rounds`, `library`, `wizard`,
 `max_agents`, `launch`, `worker_edits`, `auto_security_review`, `end_report` (short: done,
 verified, decisions only), `update_check`, `stop_check`, `models`, `effort`, `type`, `packs`,
 `enabled`, `addons`. When the session context says the repository's languages have packs that
@@ -105,9 +112,30 @@ Agents start with an empty context and know only what you send.
 
 Never accept an agent's claim without evidence: read the diff and rerun the key command.
 
+### The library
+
+`library/` holds the skills, commands and rules of Everything Claude Code (patterns per
+language and framework, TDD, verification loops, security, deployment, research, business
+and more). Before briefing, run `tw.py library search <words of the task>` and give each agent
+the paths of the few entries its work needs ("read <path>/MAIN.md first"); for code, add
+`rules-<language>` (its `rules-common` too). Entries marked "calls ECC's scripts" work only with
+ECC installed (`tw.py addons add ecc`). The user installs entries as native skills with
+`tw.py library enable`; installed ones the app already offers by name.
+
+### Team talk
+
+When two or more agents work on one task and the setting `talk` is true, give them a shared
+channel so they talk to each other: they debug together, challenge each other's claims and
+verify each other's fixes, instead of each reporting only to you. `TALK.md` has the modes
+(debug, review, debate), the brief, the rounds and the rules; `tw.py talk open <topic>` must
+print "nothing open" before the task is done.
+
 ## 5. Workflows (also available as skills)
 
 - `/team-workflow:start [task]`: session setup wizard, then the task or a menu of workflows.
+- `/team-workflow:setup [area]`: everything in one place: activation (on its own in every
+  project, only in this project, or only when called), wizard, team, models, roles and packs,
+  library, team talk, checks, add-ons, presets.
 - `/team-workflow:setup-memory`: create `docs/memory` and fill it from the code.
 - `/team-workflow:call-team [team] <task>`: describe the task, pick several roles from any team.
 - `/team-workflow:new-feature <what>`: `architect` if structural, then builders, `tester`,
@@ -129,14 +157,15 @@ Never accept an agent's claim without evidence: read the diff and rerun the key 
   `update-plugin [check]`, `settings`, `models`, `agents` (list, show, set, enable, disable,
   new, sync), `addons` (caveman, ponytail, ECC or any plugin, in both apps), `profile`,
   `audit` (secrets, permissions, hooks, MCP, prompt injection in the agent setup), `doctor
-  [--fix]`, `ci-init` (GitHub Actions checks on every pull request).
+  [--fix]`, `ci-init` (GitHub Actions checks on every pull request), `library` (list, search,
+  show, enable, disable), `talk` (channels, `read TOPIC`, `open TOPIC`).
 
 ## 6. Definition of done
 
 1. The checks in `PLAYBOOKS.md` pass; new behavior has tests, and a new test fails without the
    change.
 2. The `tester` approved it (the author never approves its own work); the other checkers the
-   user chose approved it too.
+   user chose approved it too; with team talk, no question or challenge is left open.
 3. The memory is updated (section 8).
 4. The end-of-task report is given (section 7).
 
@@ -203,4 +232,5 @@ reminder off.
 Scripts: `estimate.py` (cost before launch), `run_worker.py` (exact model and effort, usage
 recorded), `dashboard.py` (usage after), `memcheck.py`, `init_memory.py`, `install_agy.py`,
 `update_plugin.py`, `install_opencode.py`, `tw.py` (every command without the model), `roles.py` (roles, packs and the
-native agents), `addons.py`, `audit.py`, `doctor.py`, `learn.py`.
+native agents), `library.py` (the ECC library), `talk.py` (team talk), `addons.py`, `audit.py`,
+`doctor.py`, `learn.py`.
