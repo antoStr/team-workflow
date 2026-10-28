@@ -25,7 +25,7 @@ when the user calls `/team-workflow:<name>` or asks for the team; the user chang
 Whenever the user calls this skill by name (`team-workflow`, with or without a task, in a git
 repository or not), start with the session setup of `WIZARD.md` before anything else, unless
 they said "defaults" or "skip setup" or the setting `session_wizard` is false: run
-`tw.py options --app <claude|agy|opencode>` and show its output, then ask with the app's
+`tw.py options --app <claude|agy|opencode|codex>` and show its output, then ask with the app's
 question tool where the choices go (this conversation, user defaults or this project), the
 preset, the roles, model and effort for every chosen role, the skills and add-ons, and team
 talk, then the recap. Do not
@@ -126,11 +126,13 @@ with `tw.py library enable`; installed ones the app already offers by name. Add-
 
 ### Team talk
 
-When two or more agents work on one task and the setting `talk` is true, give them a shared
-channel so they talk to each other: they debug together, challenge each other's claims and
-verify each other's fixes, instead of each reporting only to you. `TALK.md` has the modes
-(debug, review, debate), the brief, the rounds and the rules; `tw.py talk open <topic>` must
-print "nothing open" before the task is done.
+Every task with two or more agents gets its own channel: a group conversation of you (as
+`orchestrator`), every agent, and anyone who joins later, the user included. You open it with
+the kickoff, every agent joins and reads the history, and all of you talk there: questions,
+findings, challenges, fixes, verdicts, decisions. You take part, you do not only relay. It is
+off only when the user set `talk` to false. `TALK.md` has the modes (debug, review, debate), the
+brief, the rounds and the rules; `tw.py talk open <topic>` must print "nothing open" before the
+task is done.
 
 ## 5. Workflows (also available as skills)
 
@@ -160,7 +162,8 @@ print "nothing open" before the task is done.
   new, sync), `addons` (skills, plugins, MCP servers and bundles, in every app), `profile`,
   `audit` (secrets, permissions, hooks, MCP, prompt injection in the agent setup), `doctor
   [--fix]`, `ci-init` (GitHub Actions checks on every pull request), `library` (list, search,
-  show, enable, disable), `talk` (channels, `read TOPIC`, `open TOPIC`).
+  show, enable, disable), `talk` (channels, `who`, `read`, `open`, and `post --from user` for the
+  user to join a conversation).
 
 ## 6. Definition of done
 
@@ -200,7 +203,7 @@ When files changed (the Stop hook reminds you if `STATE.md` is older than the la
 The setting `stop_check` (or `TEAM_WORKFLOW_STOP_CHECK=0` in the environment) turns the Stop
 reminder off.
 
-## 9. Claude Code, agy and OpenCode
+## 9. Claude Code, agy, OpenCode and Codex
 
 - **Claude Code**: agents are the generated `<role>` agents (`subagent_type: "<role>"`);
   commands are `/team-workflow:<name>`; the hooks load the memory and write the agents at
@@ -228,11 +231,18 @@ reminder off.
   the install names (on Windows `python3` is often the Microsoft Store placeholder). The
   models: `tw.py models --app opencode` (providers, models used most) and `--provider <id>
   --search <text>` for the rest.
+- **Codex** (the CLI and the app, also behind the opencodex proxy): install with `tw.py
+  install-codex` (one project: `--workspace <repo>`). It writes the team-workflow skill and one
+  skill per workflow (`$team-workflow-<name>`) to `~/.codex/skills/`, the enabled roles as Codex
+  agents (`~/.codex/agents/<role>.toml`, listed in a block of `~/.codex/config.toml`) and a block
+  in `~/.codex/AGENTS.md` that tells you to run `session_start.py --text --app codex` at the first
+  task. Spawn a role by its agent name; ask the user one question at a time as a numbered list
+  of options. The models: `tw.py options --app codex` (from Codex's model catalog).
 - `init_memory.py` also adds the memory pointer to `AGENTS.md` (and `GEMINI.md` or `CLAUDE.md`
   when they exist), so any other tool reads the same memory.
 
 Scripts: `estimate.py` (cost before launch), `run_worker.py` (exact model and effort, usage
 recorded), `dashboard.py` (usage after), `memcheck.py`, `init_memory.py`, `install_agy.py`,
-`update_plugin.py`, `install_opencode.py`, `tw.py` (every command without the model), `roles.py` (roles, packs and the
+`update_plugin.py`, `install_opencode.py`, `install_codex.py`, `tw.py` (every command without the model), `roles.py` (roles, packs and the
 native agents), `library.py` (the library), `talk.py` (team talk), `addons.py`, `audit.py`,
 `doctor.py`, `learn.py`.

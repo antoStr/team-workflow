@@ -11,6 +11,7 @@ Memoria di progetto condivisa · agenti che lavorano e si controllano a vicenda 
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-supportato-d97757)
 ![agy](https://img.shields.io/badge/agy%20(Antigravity)-supportato-4285f4)
 ![OpenCode](https://img.shields.io/badge/OpenCode-supportato-6e40c9)
+![Codex](https://img.shields.io/badge/Codex%20%2F%20opencodex-supportato-10a37f)
 
 </div>
 
@@ -38,7 +39,8 @@ Memoria di progetto condivisa · agenti che lavorano e si controllano a vicenda 
 
 ## 💡 Cos'è, in due parole
 
-**team-workflow** è un plugin per **Claude Code**, **agy (Antigravity)** e **OpenCode**.
+**team-workflow** è un plugin per **Claude Code**, **agy (Antigravity)**, **OpenCode** e
+**Codex** (anche quando passa da **opencodex**).
 
 Di solito parli con un solo assistente che fa tutto da solo. Con team-workflow l'assistente
 diventa il **capo di un team**: capisce il lavoro, ti propone gli specialisti giusti (chi
@@ -131,6 +133,20 @@ Riavvia OpenCode. I comandi si chiamano `/team-workflow/<nome>`.
 
 </details>
 
+<details>
+<summary><b>Codex</b> (CLI o app, anche tramite opencodex)</summary>
+
+```bash
+git clone https://github.com/antoStr/team-workflow
+python3 team-workflow/skills/team-workflow/scripts/tw.py install-codex
+```
+
+Riavvia Codex. I comandi sono skill che si chiamano `$team-workflow-<nome>`
+(per esempio `$team-workflow-start`); gli agenti sono agenti di Codex. Con **opencodex** non
+serve altro: è un proxy davanti a Codex e usa la stessa installazione.
+
+</details>
+
 > [!NOTE]
 > **Su Windows** `python3` spesso apre il Microsoft Store invece di Python: usa `python` al suo
 > posto. Per aggiornare in futuro: `/team-workflow:update-plugin` (in agy
@@ -151,9 +167,14 @@ Apri il tuo progetto nell'app e segui questi passi:
 | **5** | `/team-workflow:end-session` | Chiudi la giornata: memoria aggiornata, lezioni imparate, punto da cui ripartire. |
 
 > [!TIP]
-> In **OpenCode** i comandi si scrivono con la barra al posto dei due punti
-> (`/team-workflow/start`). In **agy** chiedi la skill con lo stesso nome (`start`,
-> `setup-memory`...).
+> **Ogni comando funziona in tutte le app**, cambia solo come si scrive:
+>
+> | App | Come si scrive (esempio: `start`) |
+> |---|---|
+> | Claude Code | `/team-workflow:start` |
+> | OpenCode | `/team-workflow/start` |
+> | agy | chiedi la skill `start`, oppure `!team-workflow start` per i comandi di configurazione |
+> | Codex | `$team-workflow-start` |
 
 ---
 
@@ -220,9 +241,17 @@ e tu scegli. Chi costruisce non approva mai il proprio lavoro.
 
 ## 💬 Agenti che parlano tra loro
 
-Quando due o più agenti lavorano allo stesso compito condividono un **canale**: si fanno domande,
-contestano le affermazioni degli altri **con le prove**, verificano le correzioni e danno un
-verdetto. Il lavoro non è finito finché resta aperta una contestazione.
+Ogni lavoro con **due o più agenti** ha **un suo canale**: una vera conversazione di gruppo dedicata
+a quel compito. Ci sono **l'orchestratore**, che apre la conversazione, risponde e decide,
+**tutti gli agenti** e **chiunque entri dopo**: un altro agente, oppure **tu**. Si fanno
+domande, contestano le affermazioni degli altri **con le prove**, verificano le correzioni e
+danno un verdetto. Il lavoro non è finito finché resta aperta una contestazione.
+
+| Comando | A cosa serve |
+|---|---|
+| `/team-workflow:talk who <topic>` | Chi partecipa alla conversazione e di cosa si occupa |
+| `/team-workflow:talk read <topic>` | Leggi tutta la conversazione |
+| `/team-workflow:talk post <topic> --from user "..."` | Entra anche tu: una tua indicazione o decisione |
 
 Un esempio vero, da una prova con un solo bug segnalato (messaggi abbreviati):
 
@@ -355,7 +384,7 @@ Lancia `/team-workflow:doctor`: controlla l'installazione e, con `--fix`, ripara
 | Documento | Contenuto |
 |---|---|
 | 👥 [Guida agli agenti](docs/AGENTS.md) | Usare, cambiare e creare agenti, con esempi pronti da copiare |
-| 📘 [Manuale completo](docs/REFERENCE.md) | Ogni comando, impostazione e dettaglio per Claude Code, agy e OpenCode |
+| 📘 [Manuale completo](docs/REFERENCE.md) | Ogni comando, impostazione e dettaglio per Claude Code, agy, OpenCode e Codex |
 | 📋 [Catalogo](docs/CATALOG.md) | Tutti i 127 agenti e le 412 voci della libreria |
 | 💬 [Team talk](skills/team-workflow/TALK.md) | Come gli agenti parlano tra loro |
 | 🧩 [Wizard](skills/team-workflow/WIZARD.md) | Le domande prima di far partire il team |

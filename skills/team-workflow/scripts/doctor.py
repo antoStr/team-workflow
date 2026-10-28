@@ -83,8 +83,16 @@ def checks(root=None):
         add("ok", "python", sys.version.split()[0])
 
     newer = update_plugin.newer_version()
-    for app in ("claude", "agy", "opencode"):
+    for app in ("claude", "agy", "opencode", "codex"):
         version = update_plugin.installed(app)
+        if app == "codex":
+            import install_codex
+            if install_codex.present():
+                add("ok" if version and not (newer and version != newer) else "warn", app,
+                    f"team-workflow {version}" + (f", {newer} available: tw.py update" if newer and version
+                                                  and version != newer else "")
+                    if version else "team-workflow is not installed in Codex: tw.py install-codex")
+            continue
         if app == "opencode":
             if opencode_cli.binary():
                 for status, message in opencode_checks(version, newer):
@@ -184,6 +192,9 @@ def uninstall(everything=False):
                 done.append(f"removed {path}")
         nothing = {"library": {"packs": {}, "skills": {}}}  # every library skill we installed goes
         done += [f"removed {app} library skill {n}" for n in library.sync(app, config=nothing)["removed"]]
+    import install_codex
+    if os.path.isdir(install_codex.config_dir()):
+        done += install_codex.uninstall()  # its skills, agents and config.toml and AGENTS.md blocks
     for name in addons.chosen():
         for d in addons.agy_skill_dirs(name):
             shutil.rmtree(os.path.join(addons.agy_skills_dir(), d), ignore_errors=True)

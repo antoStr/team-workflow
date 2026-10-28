@@ -36,6 +36,8 @@
     tw.py library enable|disable ID|PACK [--project]   install it as a native skill, or remove it
     tw.py library sync                     rewrite the installed library skills of every app
     tw.py talk [list]                      team talk channels of this repository
+    tw.py talk join TOPIC --as ROLE [WHAT I OWN]   take part, then read the whole conversation
+    tw.py talk who TOPIC                   who takes part and what each one owns
     tw.py talk post TOPIC --from ROLE [--to ROLE] [--kind K] [--re ID] [--wait SECONDS] TEXT...
     tw.py talk read TOPIC [--for ROLE] [--since ID] [--wait SECONDS]   --for: only unread ones
     tw.py talk open TOPIC [--strict]       open questions and challenges, unread messages per role
@@ -67,7 +69,7 @@ from usage import load_pricing
 
 EFFORTS = ("low", "medium", "high", "xhigh", "max")
 LAUNCHER = '''#!/usr/bin/env python3
-"""team-workflow launcher: runs tw.py from the installed plugin (Claude Code, agy, OpenCode)."""
+"""team-workflow launcher: runs tw.py from the installed plugin (Claude Code, agy, OpenCode, Codex)."""
 import json, os, sys
 home = os.path.expanduser("~")
 paths = []
@@ -79,11 +81,12 @@ except (OSError, ValueError, KeyError, AttributeError):
     pass
 paths.append(os.path.join(home, ".gemini", "config", "plugins", "team-workflow"))
 paths.append(os.path.join(home, ".config", "opencode"))  # skills/team-workflow lives there
+paths.append(os.environ.get("CODEX_HOME") or os.path.join(home, ".codex"))  # and here for Codex
 for p in paths:
     tw = os.path.join(p, "skills", "team-workflow", "scripts", "tw.py")
     if os.path.isfile(tw):
         os.execv(sys.executable, [sys.executable, tw, *sys.argv[1:]])
-sys.exit("team-workflow: plugin not found in Claude Code, agy or OpenCode")
+sys.exit("team-workflow: plugin not found in Claude Code, agy, OpenCode or Codex")
 '''
 
 
@@ -166,6 +169,10 @@ def cmd_models(args):
     else:
         print("agy: not installed")
     print_opencode_models(opencode_models())
+    import install_codex
+    found = install_codex.models()
+    print("Codex agents: inherit (the session's model) or " + (", ".join(
+        f"{m['id']} ({'/'.join(m['efforts']) or 'no effort'})" for m in found) or "no catalog in ~/.codex"))
 
 
 def opencode_models():
@@ -214,11 +221,11 @@ def cmd_agents(args):
     action, rest = args.action, args.rest
     if action == "list":
         rows = [("role", "pack", "on", "Claude Code: type model effort", "agy: type model",
-                 "OpenCode: type model variant")]
+                 "OpenCode: type model variant", "Codex: type model effort")]
         rows += roles.table(config, root)
-        widths = [max(len(r[i]) for r in rows) for i in range(5)]
+        widths = [max(len(r[i]) for r in rows) for i in range(6)]
         for r in rows:
-            print("  ".join(c.ljust(w) for c, w in zip(r, widths)) + "  " + r[5])
+            print("  ".join(c.ljust(w) for c, w in zip(r, widths)) + "  " + r[6])
         packs = sorted({i["pack"] for i in roles.catalog(root).values()})
         on = [p for p in packs if roles.is_enabled(config, "", p)]
         print(f"\npacks on: {', '.join(on)}")
@@ -342,6 +349,15 @@ def app_options(app, root=None):
                          "per_launch": "invoke_subagent has no model: a subagent uses its file's tier; "
                                        "inherit = the session model (change it with /model)"}
         out["worker"] = {"models": ids, "efforts": "part of the model id (-low, -medium, -high)"}
+    elif app == "codex":
+        import install_codex
+        found = install_codex.models()
+        out["native"] = {"models": ["inherit"] + [m["id"] for m in found],
+                         "efforts": {m["id"]: m["efforts"] for m in found},
+                         "names": {m["id"]: m["name"] for m in found},
+                         "per_launch": "a Codex agent uses its file's model and reasoning effort; "
+                                       "inherit = the session's model"}
+        out["worker"] = {"models": "-", "efforts": "-"}
     else:  # hundreds of models: the providers and the most used, the rest by search
         data = opencode_models() or {"version": None, "providers": {}, "recent": [], "models": []}
         brief = lambda m: {k: m[k] for k in ("id", "name", "variants") if k in m}
@@ -381,7 +397,7 @@ def runs_as(app, p, native):
 
 def print_options(data):
     app, native, worker = data["app"], data["native"], data["worker"]
-    name = {"claude": "Claude Code", "agy": "agy", "opencode": "OpenCode"}[app]
+    name = {"claude": "Claude Code", "agy": "agy", "opencode": "OpenCode", "codex": "Codex"}[app]
     print(f"== {name}")
     print("Models for native agents (the agent file):")
     if app == "claude":
@@ -393,6 +409,12 @@ def print_options(data):
         print("  flash    = Gemini flash tier, no effort")
         print("  pro      = Gemini 3.1 Pro, older than the 3.8 flash models, no effort")
         print("  a native agy agent ignores the role's effort; for another effort pick a worker id")
+    elif app == "codex":
+        print("  inherit  = the session's model")
+        for m in native["models"][1:]:
+            print(f"  {m:<28} {native['names'][m]:<26} effort: {' | '.join(native['efforts'][m]) or 'none'}")
+        if len(native["models"]) == 1:
+            print("  (no Codex model catalog found in ~/.codex)")
     else:
         print("  inherit  = the calling agent's model")
         if not native["providers"]:
@@ -591,6 +613,16 @@ def cmd_install_cli(args):
             print(f"added `agy plugin update [name...]` to {full} (open a new terminal to use it)")
 
 
+def cmd_install_codex(args):
+    import install_codex
+    if args.uninstall:
+        print("\n".join(install_codex.uninstall(args.workspace)) or "nothing to remove")
+        return
+    r = install_codex.install(args.workspace)
+    print(f"installed in Codex: {r['payload']}; {r['skills']} workflow skills ($team-workflow-<name>), "
+          f"{len(r['agents'])} agents written or refreshed. Restart Codex.")
+
+
 def cmd_install_opencode(args):
     import install_opencode
     result = install_opencode.install(args.workspace)
@@ -704,15 +736,28 @@ def cmd_talk(args):
         if args.action == "list":
             channels = talk.topics()
             for name, msgs in channels:
-                print(f"{name:<32} {len(msgs):>4} messages  {len(talk.open_threads(msgs))} open")
+                print(f"{name:<32} {len(msgs):>4} messages  {len(talk.open_threads(msgs))} open  "
+                      + ", ".join(talk.members(msgs)))
             print(("" if channels else "no channels yet\n") + f"channels: {talk.channel_dir()}")
             return
         if not args.topic:
             raise ValueError(f"usage: talk {args.action} TOPIC")
+        if args.action == "who":
+            msgs = talk.read(args.topic)
+            joined = {m["from"]: m["text"] for m in msgs if m["kind"] == "join"}
+            for name in talk.members(msgs):
+                print(f"{name:<24} {joined.get(name, '-')}")
+            print("" if msgs else "nobody yet")
+            return
+        if args.action == "join":  # take part: say what you own, then read everything said so far
+            args.kind, args.action, args.role = "join", "post", args.sender
+            args.since = 0
         if args.action == "post":
             print(talk.line(talk.post(args.topic, args.sender, " ".join(args.text), args.kind,
                                       args.to, args.re)))
-            if args.wait:  # post, then wait for the reply in the same call
+            if args.kind == "join":
+                args.action = "read"
+            elif args.wait:  # post, then wait for the reply in the same call
                 args.role, args.action = args.sender, "read"
         if args.action == "read":
             if args.wait:
@@ -843,6 +888,9 @@ def main(argv=None):
     op.add_argument("--json", action="store_true")
     io = sub.add_parser("install-opencode", help="install team-workflow into OpenCode")
     io.add_argument("--workspace", help="this repository only (.opencode)")
+    ix = sub.add_parser("install-codex", help="install team-workflow into Codex (also behind opencodex)")
+    ix.add_argument("--workspace", help="this repository only (.codex and its AGENTS.md)")
+    ix.add_argument("--uninstall", action="store_true", help="remove what the installer wrote")
     au2 = sub.add_parser("agy-update", help="agy plugin update: reinstall agy plugins from their source")
     au2.add_argument("names", nargs="*", help="plugins to update (default: all)")
     ic = sub.add_parser("install-cli", help="add team-workflow to ~/.local/bin and `agy plugin update`")
@@ -854,10 +902,10 @@ def main(argv=None):
     li.add_argument("rest", nargs="*", help="PACK..., WORDS..., ID or PACK")
     li.add_argument("--project", action="store_true", help="enable/disable: this repository only")
     tk = sub.add_parser("talk", help="team talk: the channel where agents talk to each other")
-    tk.add_argument("action", nargs="?", default="list", choices=("list", "post", "read", "open", "clear"))
+    tk.add_argument("action", nargs="?", default="list", choices=("list", "join", "who", "post", "read", "open", "clear"))
     tk.add_argument("topic", nargs="?")
     tk.add_argument("text", nargs="*")
-    tk.add_argument("--from", dest="sender", help="post: your role")
+    tk.add_argument("--from", "--as", dest="sender", help="post, join: your role (orchestrator, user, a role)")
     tk.add_argument("--to", help="post: one role (default: everyone)")
     tk.add_argument("--kind", default="note", choices=talk.KINDS)
     tk.add_argument("--re", type=int, help="post: the id of the message this answers")
@@ -890,6 +938,7 @@ def main(argv=None):
         {"profile": cmd_profile, "audit": cmd_audit, "doctor": cmd_doctor, "uninstall": cmd_uninstall,
          "learn": cmd_learn, "ci-init": cmd_ci_init, "install-cli": cmd_install_cli,
          "agy-update": cmd_agy_update, "install-opencode": cmd_install_opencode,
+         "install-codex": cmd_install_codex,
          "options": cmd_options, "setup": cmd_setup, "library": cmd_library,
          "talk": cmd_talk}[args.command](args)
 

@@ -79,6 +79,7 @@ avvio:
 | Claude Code | `~/.claude/agents/<ruolo>.md` |
 | agy | `~/.gemini/config/agents/<ruolo>.md` |
 | OpenCode | `~/.config/opencode/agents/<ruolo>.md` |
+| Codex | `~/.codex/agents/<ruolo>.toml`, elencati in `~/.codex/config.toml` |
 
 > [!WARNING]
 > Non modificare i file in queste ultime cartelle: verrebbero sovrascritti. Modifica sempre
@@ -316,15 +317,20 @@ dargliene una:
 
 ## 🤝 Farlo lavorare con gli altri
 
-Il tuo agente sa già parlare con gli altri: il blocco `team-talk` viene aggiunto da solo. Quando
-lavora in squadra:
+Il tuo agente sa già parlare con gli altri: il blocco `team-talk` viene aggiunto da solo. Ogni
+lavoro con due o più agenti ha una conversazione di gruppo dedicata, con l'orchestratore, gli
+altri agenti e chiunque entri dopo (anche tu). Quando lavora in squadra:
+
+- entra nella conversazione (`talk join`) e legge tutto quello che è stato detto;
 
 - pubblica quello che scopre, con le prove (file, riga, comando e risultato);
 - risponde alle domande e alle obiezioni che riceve;
 - contesta le affermazioni degli altri che non lo convincono;
 - non può scrivere finché non ha letto i messaggi arrivati nel frattempo.
 
-Puoi leggere cosa si sono detti con `/team-workflow:talk read <topic>`.
+Puoi leggere cosa si sono detti con `/team-workflow:talk read <topic>`, vedere chi partecipa con
+`/team-workflow:talk who <topic>` e scrivere anche tu con
+`/team-workflow:talk post <topic> --from user "..."`.
 
 > [!TIP]
 > Per sfruttarlo bene, nella sezione `## Boundaries` scrivi cosa **non** fa l'agente e a chi
@@ -394,7 +400,7 @@ Usa solo minuscole, numeri e trattini: `api-designer`, non `Api_Designer`.
 | leggere cosa si sono detti gli agenti | `/team-workflow:talk read <topic>` |
 | controllare che tutto funzioni | `/team-workflow:doctor` |
 
-<sub>In **OpenCode** scrivi `/team-workflow/agents`; in **agy** usa `!team-workflow agents`.</sub>
+<sub>In **OpenCode** scrivi `/team-workflow/agents`; in **agy** usa `!team-workflow agents`; in **Codex** `$team-workflow-agents`.</sub>
 
 <div align="center">
 

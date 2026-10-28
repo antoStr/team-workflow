@@ -322,6 +322,32 @@ su Windows `python3` e' spesso il segnaposto del Microsoft Store, che fallisce s
 in `AGENTS.md`); `team-workflow doctor` segnala le installazioni vecchie da rifare. OpenCode legge
 anche le skill in `~/.claude/skills` e `~/.agents/skills`.
 
+## Codex
+
+```bash
+python3 ~/Workspace/team-workflow/skills/team-workflow/scripts/tw.py install-codex   # dalla copia del repository
+team-workflow install-codex                                                         # oppure con il comando team-workflow
+team-workflow install-codex --workspace /percorso/repo                              # un solo progetto
+team-workflow install-codex --uninstall                                             # toglie solo i file di team-workflow
+```
+
+Funziona con la CLI e con l'app di Codex, e anche quando Codex passa da **opencodex** (un proxy
+che non cambia dove Codex legge skill e agenti). Scrive in `~/.codex/` (o in `CODEX_HOME`):
+
+- `skills/team-workflow/`: la skill principale, con script, ruoli, libreria e wizard;
+- `skills/team-workflow-<nome>/`: una skill per ogni workflow (`$team-workflow-start`,
+  `$team-workflow-setup`, `$team-workflow-agents`...). Quelle di configurazione eseguono
+  `tw.py` e il modello mostra solo l'output;
+- `agents/<ruolo>.toml`: i ruoli attivi come agenti di Codex (modello, effort, sandbox in sola
+  lettura per chi controlla), elencati in un blocco di `config.toml` tra due marcatori. Un
+  agente con lo stesso nome che hai definito tu non viene toccato;
+- un blocco in `AGENTS.md`: alla prima richiesta di ogni conversazione il modello esegue
+  `session_start.py --text --app codex` (memoria, impostazioni, wizard di sessione).
+
+Gli add-on funzionano anche qui: le skill vanno in `~/.codex/skills`, i server MCP in un blocco
+`[mcp_servers]` di `config.toml`. Le domande arrivano come elenco numerato di opzioni.
+`team-workflow update` aggiorna anche Codex.
+
 ## Installazione
 
 Requisiti: Claude Code e/o agy, `git` e `python3`. Claude Code:

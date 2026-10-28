@@ -16,6 +16,8 @@ How each app installs an add-on:
 - OpenCode, "plugin-file": the repository's .opencode/plugins/<name>.mjs, from a local clone,
   listed in the "plugin" array of ~/.config/opencode/opencode.json.
 - OpenCode, "ecc": the same upstream installer (kept for add-ons chosen before 0.9.1).
+- Codex: the repository's skills copied into ~/.codex/skills, or an MCP server in a block of
+  ~/.codex/config.toml (install_codex.py); Codex has no marketplace for these.
 - any app, "mcp": an MCP server at user level: `claude mcp add --scope user`, the "mcpServers"
   of ~/.gemini/config/mcp_config.json, the "mcp" table of ~/.config/opencode/opencode.json.
   A server with the same name the user configured is never replaced.
@@ -140,12 +142,55 @@ BUNDLES = {
     "popular": ("superpowers", "anthropic-docs", "anthropic-examples", "karpathy", "ui-ux-pro-max",
                 "context7"),
 }
-APPS = ("claude", "agy", "opencode")
+APPS = ("claude", "agy", "opencode", "codex")
 
 
 def present(app):
-    """Is the app on this machine (its command, or for OpenCode its config folder)?"""
+    """Is the app on this machine (its command, or for OpenCode and Codex its config folder)?"""
+    if app == "codex":
+        import install_codex
+        return install_codex.present()
     return bool(shutil.which(app)) or (app == "opencode" and os.path.isdir(opencode_dir()))
+
+
+def codex_kind(entry):
+    """How an add-on goes into Codex: its MCP server, or its skills; None when it has neither."""
+    if entry.get("codex"):
+        return entry["codex"]
+    if "mcp" in entry:
+        return "mcp"
+    return "skills" if entry.get("repo") and entry.get("agy") != "ecc" else None
+
+
+def codex_skills_dir():
+    import install_codex
+    return os.path.join(install_codex.config_dir(), "skills")
+
+
+def codex_version(name, entry):
+    kind = codex_kind(entry)
+    if kind == "mcp":
+        import install_codex
+        return "mcp" if name in install_codex.mcp_servers() else None
+    if kind == "skills":
+        found = agy_skill_dirs(name, codex_skills_dir())
+        return f"{len(found)} skills" if found else None
+    return None
+
+
+def codex_apply(action, name, entry):
+    kind = codex_kind(entry)
+    if kind == "mcp":
+        import install_codex
+        return install_codex.set_mcp(name, None if action == "remove" else mcp_command(entry, "codex"))
+    if kind == "skills":
+        dest = codex_skills_dir()
+        if action == "remove":
+            for d in agy_skill_dirs(name, dest):
+                shutil.rmtree(os.path.join(dest, d), ignore_errors=True)
+            return True, f"removed its skills from {dest}"
+        return copy_skills(name, entry, dest)
+    return True, "no Codex install for this add-on, skipped"
 
 
 def opencode_dir():
@@ -555,9 +600,10 @@ def status_lines(root=None):
         claude = claude_version(entry, name) if present("claude") else None
         agy = agy_version(name, entry) if present("agy") else None
         oc = opencode_version(name, entry) if present("opencode") else None
+        cx = codex_version(name, entry) if present("codex") else None
         mark = "*" if name in picked else " "
         lines.append(f"{mark} {name:<20} claude: {claude or '-':<10} agy: {agy or '-':<16} "
-                     f"opencode: {oc or '-':<16} {entry.get('about', '')[:60]}")
+                     f"opencode: {oc or '-':<16} codex: {cx or '-':<10} {entry.get('about', '')[:50]}")
     return lines
 
 
@@ -579,7 +625,11 @@ def apply(action, spec, apps=APPS, root=None):
         if not present(app):
             log.append(f"{app}: not installed, skipped")
             continue
-        if entry.get(app) == "mcp":
+        if app == "codex":
+            ok, out = codex_apply(action, name, entry)
+            log.append(f"codex: {out}")
+            ok_all &= ok
+        elif entry.get(app) == "mcp":
             ok, out = mcp_apply(app, action, name, entry)
             log.append(f"{app}: {out}")
             ok_all &= ok

@@ -7,6 +7,7 @@ entries its work needs; no app loads them by itself. The entries the user switch
     Claude Code  ~/.claude/skills/<id>/SKILL.md
     agy          ~/.gemini/config/skills/<id>/SKILL.md
     OpenCode     ~/.config/opencode/skills/<id>/SKILL.md
+    Codex        ~/.codex/skills/<id>/SKILL.md
 A folder holds MARK when team-workflow wrote it; any other folder with the same name is left alone.
 """
 import json
@@ -71,7 +72,9 @@ def native_dir(app):
     home = os.path.expanduser("~")
     return {"claude": os.path.join(home, ".claude", "skills"),
             "agy": os.path.join(home, ".gemini", "config", "skills"),
-            "opencode": os.path.join(home, ".config", "opencode", "skills")}[app]
+            "opencode": os.path.join(home, ".config", "opencode", "skills"),
+            "codex": os.path.join(os.environ.get("CODEX_HOME") or os.path.join(home, ".codex"),
+                                  "skills")}[app]
 
 
 def installed_hash(folder):

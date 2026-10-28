@@ -35,6 +35,7 @@ DEFAULTS = {
                    "doc-keeper": "haiku"},
         "agy": {"default": "inherit"},  # the session's model (/model); pro is Gemini 3.1 Pro
         "opencode": {"default": "inherit"},
+        "codex": {"default": "inherit"},  # inherit = the session's model, or a Codex model id
     },
     # Effort per role: low, medium, high, xhigh, max (Claude Code agents and workers; agy puts
     # the effort in the worker's model id; OpenCode writes it as the agent's variant, except
@@ -45,7 +46,7 @@ DEFAULTS = {
     # the role: Claude Code general-purpose, Explore, Plan; agy self, research; OpenCode
     # general, explore.
     "type": {"claude": {"default": "custom"}, "agy": {"default": "custom"},
-             "opencode": {"default": "custom"}},
+             "opencode": {"default": "custom"}, "codex": {"default": "custom"}},
     # Packs of roles (core, languages, quality...) on or off; a role inside an enabled pack can
     # still be switched off with enabled.<role> false.
     "packs": {"default": False, "core": True, "custom": True},
@@ -85,6 +86,7 @@ CHOICES = {
     "type.claude": ("custom", "worker", "general-purpose", "Explore", "Plan"),
     "type.agy": ("custom", "worker", "self", "research"),
     "type.opencode": ("custom", "worker", "general", "explore"),
+    "type.codex": ("custom",),
 }
 ROLE_TABLES = ("models", "effort", "type", "packs", "enabled", "library")  # any role name is a valid key inside these
 

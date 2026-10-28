@@ -17,19 +17,22 @@ import library  # noqa: E402
 import roles  # noqa: E402
 
 CATALOG = os.path.join(ROOT, "docs", "CATALOG.md")
+# Italian one-liners for people; the agents' own instructions stay in English.
+ITALIAN = os.path.join(ROOT, "docs", "catalog.it.json")
+
+
+def italian():
+    with open(ITALIAN, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def it_text(table, key, it):
+    """The Italian description; a missing one stops the build, so none slips through."""
+    if key not in it[table]:
+        raise SystemExit(f"docs/catalog.it.json: no Italian description for {table} {key!r}")
+    return it[table][key].replace("|", "\\|")
 PACK_ORDER = ("core", "frameworks", "quality", "planning", "ml", "harness", "gan", "opensource",
               "network", "domains", "ops", "growth", "alt")
-
-
-def short(text, limit=160):
-    """The first sentence of a description, cut at limit, safe inside a table cell."""
-    text = re.sub(r"\s+", " ", text or "").strip()
-    text = re.sub(r"^Use this agent (?:to |for )?", "", text)
-    text = text[:1].upper() + text[1:]
-    first = re.split(r"(?<=[.!?])\s", text, maxsplit=1)[0]
-    if len(first) > limit:
-        first = first[:limit - 1].rsplit(" ", 1)[0] + "…"
-    return first.replace("|", "\\|")
 
 
 def version():
@@ -37,7 +40,15 @@ def version():
         return json.load(f)["version"]
 
 
+def agent_it(role, meta, it):
+    alt = re.match(r"Alternative version of the ([\w-]+) role", meta.get("description", ""))
+    if role.startswith("alt-") and alt:
+        return f"Versione alternativa del ruolo `{alt.group(1)}`, per una seconda opinione."
+    return it_text("agents", role, it)
+
+
 def agents_block():
+    it = italian()
     catalog = roles.catalog()
     packs = {}
     for role, info in catalog.items():
@@ -56,20 +67,30 @@ def agents_block():
                 "| Agente | Cosa fa |", "|---|---|"]
         for role in sorted(packs[pack]):
             meta, _ = roles.parse(roles.read(catalog[role]))
-            out.append(f"| `{role}` | {short(meta.get('description'))} |")
+            out.append(f"| `{role}` | {agent_it(role, meta, it)} |")
         out += ["", "</details>", ""]
     out += [f"<details><summary><b>linguaggi</b> ({len(languages)} pack, {lang_count} agenti)</summary>", "",
             "| Agente | Pack | Cosa fa |", "|---|---|---|"]
     for slug in languages:
         meta, _ = roles.languages()[slug]
-        focus = meta.get("language", slug) + ": " + meta.get("focus", "")
-        out.append(f"| `{slug}-reviewer` | `{slug}` | review di {short(focus)} |")
-        out.append(f"| `{slug}-build-fixer` | `{slug}` | build rossa, type check e dipendenze in "
-                   f"{meta.get('language', slug)}: la correzione piu' piccola |")
+        name = meta.get("language", slug)
+        out.append(f"| `{slug}-reviewer` | `{slug}` | Rivede il codice {name}: correttezza, sicurezza e "
+                   "idiomi del linguaggio, con i suoi strumenti. |")
+        out.append(f"| `{slug}-build-fixer` | `{slug}` | Ripara build, type check e dipendenze {name} "
+                   "con la modifica più piccola. |")
     return out + ["", "</details>", ""]
 
 
+def library_it(e, it):
+    if e["kind"] == "rule":
+        lang = e["id"][len("rules-"):]
+        return ("Regole comuni a tutti i linguaggi: stile, pattern, sicurezza, test." if lang == "common"
+                else f"Regole di stile per {lang}: stile, pattern, sicurezza, test.")
+    return it_text("library", e["id"], it)
+
+
 def library_block():
+    it = italian()
     data, found = library.index(), library.entries()
     kinds = {k: sum(e["kind"] == k for e in found.values()) for k in ("skill", "command", "rule")}
     out = ["## Tutta la libreria", "",
@@ -78,10 +99,11 @@ def library_block():
            "`/team-workflow:library search <parole>`, installa con `library enable <id|pack>`.", ""]
     for pack, about in data["packs"].items():
         mine = sorted((e for e in found.values() if e["pack"] == pack), key=lambda e: e["id"])
-        out += [f"<details><summary><b>{pack}</b> ({len(mine)}): {short(about, 100)}</summary>", "",
+        out += [f"<details><summary><b>{pack}</b> ({len(mine)}): {it_text('packs', pack, it)}</summary>", "",
                 "| Voce | Tipo | Cosa fa |", "|---|---|---|"]
         for e in mine:
-            out.append(f"| `{e['id']}` | {e['kind']} | {short(e['description'])} |")
+            kind = {"skill": "skill", "command": "comando", "rule": "regole"}[e["kind"]]
+            out.append(f"| `{e['id']}` | {kind} | {library_it(e, it)} |")
         out += ["", "</details>", ""]
     return out
 

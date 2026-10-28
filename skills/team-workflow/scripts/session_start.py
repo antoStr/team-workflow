@@ -30,21 +30,22 @@ MANUAL = ("team-workflow is installed and set to manual activation here: do not 
           "team-workflow skill, its agents or its workflows on your own. When the user calls "
           "/team-workflow:<name> or asks for the team, follow the team-workflow skill and read "
           "docs/memory/INDEX.md and STATE.md first.")
-TALK = ("team-workflow: team talk is on: when two or more agents work on one task, give them a "
-        "shared channel (TALK.md) so they debug together and verify each other.")
+TALK = ("team-workflow: team talk is on: every task with two or more agents gets its own channel, a "
+        "group conversation of you (as orchestrator), every agent and anyone who joins (TALK.md).")
 
 APP_NAMES = {"claude": ("Claude Code", "general-purpose"), "opencode": ("OpenCode", "general"),
-             "agy": ("agy", "self")}
+             "agy": ("agy", "self"), "codex": ("Codex", "default")}
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 
 def agents_dir(app):
-    """Where the app's agents go. OpenCode: next to this copy of the skill
+    """Where the app's agents go. OpenCode and Codex: next to this copy of the skill
     (<config>/skills/team-workflow/scripts -> <config>/agents), so an install for one repository
-    (.opencode) keeps its agents there; the default folder otherwise."""
+    (.opencode, .codex) keeps its agents there; the default folder otherwise."""
     conf = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))
-    if app == "opencode" and os.path.basename(os.path.dirname(os.path.dirname(HERE))) == "skills" \
-            and os.path.isdir(os.path.join(conf, "commands")):
+    installed = os.path.basename(os.path.dirname(os.path.dirname(HERE))) == "skills"
+    if installed and ((app == "opencode" and os.path.isdir(os.path.join(conf, "commands")))
+                      or (app == "codex" and os.path.basename(conf) == ".codex")):
         return os.path.join(conf, "agents")
     return None
 
@@ -56,6 +57,14 @@ def opencode_notes():
             "in the same message; ask the user with the question tool, several answers only for "
             f"choosing roles; the scripts are in {HERE.replace(os.sep, '/')}, run them with "
             f"`{opencode_cli.python_command()}`.")
+
+
+def codex_notes():
+    return ("team-workflow in Codex: the workflows are the $team-workflow-<name> skills and the "
+            "team-workflow skill; the roles are Codex agents: spawn one by its name (for example "
+            "tester), several independent roles at the same time; ask the user one question at a "
+            "time as a numbered list of options and wait; the scripts are in "
+            f"{HERE.replace(os.sep, '/')}, run them with `{opencode_cli.python_command()}`.")
 
 
 def memory_context(root):
@@ -87,8 +96,12 @@ def save_snapshot(root, session_id):
 def main():
     utf8_output()
     # --text: plain text for an agent that runs this itself (OpenCode 2.x, from AGENTS.md)
-    text_mode = "--text" in sys.argv[1:]
+    # --text --app codex: the same from Codex's AGENTS.md block
+    argv = sys.argv[1:]
+    text_mode = "--text" in argv
     data = {"cwd": os.getcwd(), "session_id": f"text-{os.getppid()}"} if text_mode else read_hook_input()
+    if "--app" in argv and argv.index("--app") + 1 < len(argv):
+        os.environ["TEAM_WORKFLOW_APP"] = argv[argv.index("--app") + 1]
     if text_mode:
         os.environ.setdefault("TEAM_WORKFLOW_APP", "opencode")
     root = repo_root(data)
@@ -130,6 +143,8 @@ def main():
                     "chosen role, skills and add-ons, and team talk.")
     if app == "opencode":
         context += "\n" + opencode_notes()
+    elif app == "codex":
+        context += "\n" + codex_notes()
     if changed:  # the app loaded its agents before this hook wrote them
         context += (f"\nteam-workflow: these agents were written or changed now and load from the next "
                     f"session: {', '.join(changed)}. In this session launch them as {builtin} "

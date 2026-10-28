@@ -60,14 +60,14 @@ it and go straight to the board. Skip it when the user says "defaults" or "skip 
    chosen yet (`frontend`, `token-saving`, `mcp`, `popular`, from step 1) and single add-ons
    the work needs; installing one downloads it and writes the apps' configuration, so run
    `tw.py addons add <name>` only for what the user picked, and say a restart loads it.
-6. When two or more roles were chosen, one single choice for **team talk** (`TALK.md`): "On,
-   up to 3 rounds (Recommended)", "On, 1 round (cheaper)", "Off: each agent reports only to
-   you". Skip it with one role.
+6. When two or more roles were chosen, one single choice for the **team conversation**
+   (`TALK.md`, always on with 2+ agents): "Up to 3 rounds (Recommended)", "1 round (cheaper)",
+   "5 rounds (hard problems)". Skip it with one role.
 7. Always show the session recap before asking to confirm; never skip it: a code block with
    the scope, the preset, one block per role (type, model, effort, native or worker), the
    skills, the add-ons and team talk. Ask, single choice: "Start (Recommended)", "Change".
    With a default scope, save: `tw.py agents set <role> model=... effort=... [--app <app>]
-   [--project]`, `tw.py profile <name> [--project]`, `tw.py settings set talk|talk_rounds ...
+   [--project]`, `tw.py profile <name> [--project]`, `tw.py settings set talk_rounds ...
    [--project]`; native agents pick saved changes up after the app restarts, so for this
    conversation keep the worker launch where step 4 said so.
 

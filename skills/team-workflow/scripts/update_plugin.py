@@ -100,17 +100,29 @@ def opencode_payload():
     return os.path.join(os.path.expanduser("~"), ".config", "opencode", "skills", NAME)
 
 
-def opencode_version():
+def codex_payload():
+    home = os.environ.get("CODEX_HOME") or os.path.join(os.path.expanduser("~"), ".codex")
+    return os.path.join(home, "skills", NAME)
+
+
+PAYLOADS = {"opencode": (opencode_payload, "install_opencode.py"), "codex": (codex_payload, "install_codex.py")}
+
+
+def payload_version(harness):
     try:
-        with open(os.path.join(opencode_payload(), "VERSION"), encoding="utf-8") as f:
+        with open(os.path.join(PAYLOADS[harness][0](), "VERSION"), encoding="utf-8") as f:
             return f.read().strip()
     except OSError:
         return None
 
 
+def opencode_version():
+    return payload_version("opencode")
+
+
 def installed(harness):
-    if harness == "opencode":
-        return opencode_version()
+    if harness in PAYLOADS:
+        return payload_version(harness)
     if not shutil.which(harness):
         return None
     if harness == "claude":
@@ -118,23 +130,25 @@ def installed(harness):
     return agy_version()
 
 
-def update_opencode():
-    """Reinstall into OpenCode from the source it was installed from (a folder or a git URL)."""
+def update_opencode(harness="opencode"):
+    """Reinstall into OpenCode (or Codex) from the source it was installed from (a folder or a
+    git URL)."""
+    payload, installer = PAYLOADS[harness]
     try:
-        with open(os.path.join(opencode_payload(), ".source"), encoding="utf-8") as f:
+        with open(os.path.join(payload(), ".source"), encoding="utf-8") as f:
             source = f.read().strip()
     except OSError:
         source = REPO
     if os.path.isdir(source):
-        code, out = run(sys.executable, os.path.join(source, "skills", NAME, "scripts", "install_opencode.py"),
+        code, out = run(sys.executable, os.path.join(source, "skills", NAME, "scripts", installer),
                         "--source", source)
         return code == 0, out
-    tmp = os.path.join(os.path.expanduser("~"), ".team-workflow", "opencode-update")
+    tmp = os.path.join(os.path.expanduser("~"), ".team-workflow", f"{harness}-update")
     shutil.rmtree(tmp, ignore_errors=True)
     code, out = run("git", "clone", "-q", "--depth", "1", source, tmp)
     if code:
         return False, f"cannot fetch {source}, nothing changed\n{out}"
-    code, out = run(sys.executable, os.path.join(tmp, "skills", NAME, "scripts", "install_opencode.py"),
+    code, out = run(sys.executable, os.path.join(tmp, "skills", NAME, "scripts", installer),
                     "--source", source)
     shutil.rmtree(tmp, ignore_errors=True)
     return code == 0, out
@@ -142,8 +156,8 @@ def update_opencode():
 
 def update(harness, source):
     """Run the update steps; (ok, log)."""
-    if harness == "opencode":
-        return update_opencode()
+    if harness in PAYLOADS:
+        return update_opencode(harness)
     if harness == "agy":  # safe path: source checked first, previous version restored on failure
         return agy_update([NAME])
     steps = [("claude", "plugin", "marketplace", "update", NAME),
@@ -221,14 +235,14 @@ def agy_update(names=None):
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Check and update the installed team-workflow plugin.")
     ap.add_argument("--check", action="store_true", help="only show installed and latest versions")
-    ap.add_argument("--harness", choices=("claude", "agy", "opencode", "all"), default="all")
+    ap.add_argument("--harness", choices=("claude", "agy", "opencode", "codex", "all"), default="all")
     ap.add_argument("--source", default=REPO, help="what agy installs from (default: GitHub)")
     args = ap.parse_args(argv)
 
     latest = fetch_latest()
     print(f"latest: {latest or 'unknown (no network?)'}")
     failed = False
-    for harness in (("claude", "agy", "opencode") if args.harness == "all" else (args.harness,)):
+    for harness in (("claude", "agy", "opencode", "codex") if args.harness == "all" else (args.harness,)):
         before = installed(harness)
         if before is None:
             print(f"{harness}: not installed")

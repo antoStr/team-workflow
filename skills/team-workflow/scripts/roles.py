@@ -16,6 +16,8 @@ Native files, written only for enabled roles whose type is "custom" and marked a
     Claude Code  ~/.claude/agents/<role>.md
     agy          ~/.gemini/config/agents/<role>.md   (agy drops a file whose `model` is not
                  inherit, flash or pro, or whose description has an unquoted ": ")
+    OpenCode     ~/.config/opencode/agents/<role>.md
+    Codex        ~/.codex/agents/<role>.toml, listed in ~/.codex/config.toml (install_codex.py)
 """
 import glob
 import json
@@ -37,7 +39,8 @@ def ours(text):
 AGY_TOOLS = {"Read": ["view_file"], "Grep": ["grep_search"], "Glob": ["find_by_name", "list_dir"],
              "Bash": ["run_command"], "Edit": ["replace_file_content"], "Write": ["write_to_file"],
              "WebSearch": ["search_web"], "WebFetch": ["read_url_content"]}
-APPS = ("claude", "agy", "opencode")
+APPS = ("claude", "agy", "opencode", "codex")
+EXT = {"codex": ".toml"}  # the native agent file of each app; .md for the others
 COLORS = {"red": "#E5484D", "orange": "#F76B15", "yellow": "#FFC53D", "green": "#46A758",
           "cyan": "#00A2C7", "blue": "#3E63DD", "purple": "#8E4EC6", "pink": "#D6409F"}
 
@@ -45,7 +48,8 @@ COLORS = {"red": "#E5484D", "orange": "#F76B15", "yellow": "#FFC53D", "green": "
 def installed_apps():
     """The apps present on this machine (their command, or their config folder)."""
     import shutil
-    config = {"claude": ("~/.claude",), "agy": ("~/.gemini",), "opencode": ("~/.config/opencode",)}
+    config = {"claude": ("~/.claude",), "agy": ("~/.gemini",), "opencode": ("~/.config/opencode",),
+              "codex": ("~/.codex",)}
     return [a for a in APPS if shutil.which(a) or any(os.path.isdir(os.path.expanduser(p))
                                                       for p in config[a])]
 
@@ -197,7 +201,30 @@ def efforts(model):
     return entry.get("effort") if entry and "effort" in entry else None
 
 
+def toml_text(value):
+    """A TOML string: literal multi-line when it can be, else basic with escapes."""
+    if "'''" not in value:
+        return "'''\n" + value + "'''"
+    return json.dumps(value)
+
+
+def codex_text(role, meta, body, p):
+    """A Codex agent (config file of [agents.<role>] in config.toml)."""
+    tools = json.loads(meta["tools"]) if meta.get("tools") else None
+    writes = tools is None or bool({"Edit", "Write", "Bash"} & set(tools))
+    lines = [f"# {MARK}", f"# {role}: {meta.get('description', role)}"[:400].replace("\n", " ")]
+    if p["model"] and p["model"] != "inherit":
+        lines.append(f"model = {json.dumps(p['model'])}")
+    if p["effort"]:
+        lines.append(f"model_reasoning_effort = {json.dumps(p['effort'])}")
+    lines.append(f"sandbox_mode = {json.dumps('workspace-write' if writes else 'read-only')}")
+    lines.append(f"developer_instructions = {toml_text(body)}")
+    return "\n".join(lines) + "\n"
+
+
 def native_text(app, role, meta, body, p):
+    if app == "codex":
+        return codex_text(role, meta, body, p)
     lines = ["---", f"name: {role}", f"description: {json.dumps(meta.get('description', role))}"]
     tools = json.loads(meta["tools"]) if meta.get("tools") else None
     if app == "claude":
@@ -231,6 +258,10 @@ def native_text(app, role, meta, body, p):
 
 
 def native_dir(app, workspace=None):
+    if app == "codex":
+        base = os.path.join(workspace, ".codex") if workspace else os.environ.get(
+            "CODEX_HOME") or os.path.join(os.path.expanduser("~"), ".codex")
+        return os.path.join(base, "agents")
     if app == "claude":
         base = os.path.join(workspace, ".claude") if workspace else os.path.join(
             os.path.expanduser("~"), ".claude")
@@ -253,8 +284,9 @@ def sync(app, config=None, root=None, dest=None, dry_run=False):
         os.makedirs(dest, exist_ok=True)
     result = {"written": [], "removed": [], "skipped": []}
     roles = catalog(root)
+    ext = EXT.get(app, ".md")
     for role, info in roles.items():
-        path = os.path.join(dest, role + ".md")
+        path = os.path.join(dest, role + ext)
         try:
             with open(path, encoding="utf-8") as f:
                 old = f.read()
@@ -279,13 +311,16 @@ def sync(app, config=None, root=None, dest=None, dry_run=False):
             result["written"].append(role)
     for name in os.listdir(dest) if os.path.isdir(dest) else []:  # ours, for vanished roles
         path = os.path.join(dest, name)
-        if name.endswith(".md") and name[:-3] not in roles and os.path.isfile(path):
+        if name.endswith(ext) and name[:-len(ext)] not in roles and os.path.isfile(path):
             with open(path, encoding="utf-8") as f:
                 mine = ours(f.read())
             if mine:  # closed first: Windows cannot delete an open file
                 if not dry_run:
                     os.remove(path)
-                result["removed"].append(name[:-3])
+                result["removed"].append(name[:-len(ext)])
+    if app == "codex" and not dry_run:
+        import install_codex  # the agents are listed in config.toml
+        install_codex.register_agents(dest)
     return result
 
 
@@ -311,13 +346,14 @@ def table(config, root=None):
     """Rows for `tw.py agents`: role, pack, on/off, then type/model/effort per app."""
     rows = []
     for role, info in catalog(root).items():
-        c, a, o = (plan(config, role, app) for app in APPS)
+        c, a, o, x = (plan(config, role, app) for app in APPS)
         effort = c["effort"] if efforts(c["model"]) != [] else "-"
         origin = "" if info["origin"] == "plugin" else f" ({info['origin']})"
         rows.append((role, info["pack"] + origin,
                      "on" if is_enabled(config, role, info["pack"]) else "off",
                      f"{c['type']} {c['model']} {effort}", f"{a['type']} {a['model']}",
-                     f"{o['type']} {o['model']}" + (f" {o['effort']}" if o["effort"] != "medium" else "")))
+                     f"{o['type']} {o['model']}" + (f" {o['effort']}" if o["effort"] != "medium" else ""),
+                     f"{x['type']} {x['model']} {x['effort']}"))
     return sorted(rows, key=lambda r: (r[1] != "core", r[2] == "off", r[1], r[0]))
 
 

@@ -190,6 +190,18 @@ class TalkTest(unittest.TestCase):
         talk.clear("c", cwd=self.cwd)
         self.assertEqual(talk.seen("c", "dev", cwd=self.cwd), 0)
 
+    def test_group_conversation_join_members_and_the_user(self):
+        talk.post("g", "orchestrator", "goal: fix it; dev owns a.py, tester owns tests", cwd=self.cwd)
+        talk.post("g", "dev", "I own a.py", "join", cwd=self.cwd)  # a join is never refused
+        talk.post("g", "tester", "", "join", cwd=self.cwd)
+        late = talk.unread("g", "reviewer", cwd=self.cwd)  # a newcomer reads the whole history
+        self.assertEqual([m["id"] for m in late], [1, 2, 3])
+        talk.post("g", "user", "unknown coupons must raise", "decision", cwd=self.cwd)  # never refused
+        msgs = talk.read("g", self.cwd)
+        self.assertEqual(talk.members(msgs), ["orchestrator", "dev", "tester", "user"])
+        self.assertEqual(msgs[2]["text"], "joined")
+        self.assertEqual([m["kind"] for m in talk.unread("g", "dev", cwd=self.cwd)], ["note", "join", "decision"])
+
     def test_post_then_wait_in_one_command(self):
         import subprocess
         tw = [sys.executable, os.path.join(SCRIPTS, "tw.py"), "talk"]

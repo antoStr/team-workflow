@@ -1,5 +1,6 @@
-"""Team talk: a channel where the agents of one task talk to each other directly, so they can
-debug together, challenge each other's claims and verify each other's work (TALK.md).
+"""Team talk: one channel per task where everybody working on it talks together: the
+orchestrator, every agent, and anyone who joins later (another agent, the user). They debug
+together, challenge each other's claims and verify each other's work (TALK.md).
 
 A topic is one JSON line per message in <git common dir>/team-workflow/talk/<topic>.jsonl: the
 common dir is shared by every worktree of the repository, so agents in separate worktrees see
@@ -9,7 +10,8 @@ Message: {"id", "time", "from", "to" (a role, or null for everyone), "kind", "re
 answers), "text"}. A question stays open until a reply with re=its id; a challenge stays open
 until a verdict with re=its id. `open_threads` is the orchestrator's gate before "done".
 <topic>.seen.json keeps, per role, the last message it read: `read --for ROLE` shows only what
-is new for that role, so agents never track ids nor reread the history.
+is new for that role, so agents never track ids nor reread the history. A `join` message says
+who takes part and what they own; a newcomer reads the whole history first.
 """
 import json
 import os
@@ -19,7 +21,7 @@ import time
 
 import settings
 
-KINDS = ("note", "finding", "question", "answer", "challenge", "fix", "verdict")
+KINDS = ("join", "note", "finding", "question", "answer", "challenge", "fix", "verdict", "decision")
 REPLIES = ("answer", "fix", "verdict")  # they need --re
 CLOSED_BY = {"question": ("answer", "fix", "verdict"), "challenge": ("verdict",)}
 TOPIC = re.compile(r"[a-z0-9][a-z0-9-]{0,63}")
@@ -96,13 +98,17 @@ def post(topic, sender, text, kind="note", to=None, re_id=None, cwd=None):
         raise ValueError(f"kind is one of: {', '.join(KINDS)}")
     if kind in REPLIES and not re_id:
         raise ValueError(f"a {kind} answers a message: give --re ID")
+    if kind == "join" and not text.strip():
+        text = "joined"
     if not (sender and text.strip()):
         raise ValueError("a message needs --from and a text")
     file = path(topic, cwd)
     os.makedirs(os.path.dirname(file), exist_ok=True)
     with _Lock(file):
         msgs = read(topic, cwd)
-        pending = for_role(msgs, sender, seen(topic, sender, cwd))
+        # a newcomer joins first, then reads; a person (user) reads when they like
+        pending = ([] if kind == "join" or sender == "user"
+                   else for_role(msgs, sender, seen(topic, sender, cwd)))
         if pending:  # checked under the lock: nothing can arrive between this and the append
             mark_seen(topic, sender, msgs[-1]["id"], cwd)
             raise Unread(pending)
@@ -192,6 +198,15 @@ def unread_by_role(topic, cwd=None):
         if ids:
             found[role] = ids
     return found
+
+
+def members(msgs):
+    """Everybody in the conversation, in the order they joined or first spoke."""
+    seen_names = []
+    for m in msgs:
+        if m["from"] not in seen_names:
+            seen_names.append(m["from"])
+    return seen_names
 
 
 def topics(cwd=None):
