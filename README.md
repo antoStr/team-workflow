@@ -94,7 +94,7 @@ flowchart LR
 
 ## 📦 Installazione
 
-**Ti servono:** `git`, **Python 3** e almeno una delle tre app.
+**Ti servono:** `git`, **Python 3** e almeno una delle quattro app.
 
 <details open>
 <summary><b>Claude Code</b> (consigliato)</summary>

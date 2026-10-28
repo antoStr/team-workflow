@@ -236,8 +236,9 @@ reminder off.
   skill per workflow (`$team-workflow-<name>`) to `~/.codex/skills/`, the enabled roles as Codex
   agents (`~/.codex/agents/<role>.toml`, listed in a block of `~/.codex/config.toml`) and a block
   in `~/.codex/AGENTS.md` that tells you to run `session_start.py --text --app codex` at the first
-  task. Spawn a role by its agent name; ask the user one question at a time as a numbered list
-  of options. The models: `tw.py options --app codex` (from Codex's model catalog).
+  task. Spawn a role by its agent name; ask the user with `request_user_input` when available, else
+  one question at a time as a numbered list of options. The models: `tw.py options --app codex`
+  (from Codex's model catalog).
 - `init_memory.py` also adds the memory pointer to `AGENTS.md` (and `GEMINI.md` or `CLAUDE.md`
   when they exist), so any other tool reads the same memory.
 

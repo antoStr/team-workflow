@@ -157,6 +157,18 @@ def cmd_models(args):
             return
         print_opencode_models(data, args.provider, args.search)
         return
+    if args.app == "codex":
+        import install_codex
+        found = install_codex.models()
+        if args.json:
+            print(json.dumps(found, indent=1))
+            return
+        print("Codex agents: inherit (the session's model) or any model below:")
+        for m in found:
+            print(f"  {m['id']:<32} {m['name']:<28} effort: {', '.join(m['efforts']) or 'none'}")
+        if not found:
+            print("  (no Codex model catalog found in ~/.codex)")
+        return
     pricing = load_pricing()
     print("Claude Code (native subagents and workers; a native subagent keeps its file's effort):")
     for alias, mid in pricing.get("aliases", {}).items():
@@ -391,6 +403,11 @@ def runs_as(app, p, native):
             return (f"native: {native.get('session_model') or 'session model'}, "
                     f"session effort {native.get('session_effort') or '-'}")
         return f"native: tier {model}, no effort"
+    if app == "codex":
+        who = "the session's model" if model == "inherit" else model
+        if model in native.get("efforts", {}) and not native["efforts"][model]:
+            return f"native: {who}, no effort"
+        return f"native: {who}, reasoning effort {effort} (agent file)"
     who = "the calling agent's model" if model == "inherit" else model
     return f"native: {who}, " + ("default variant" if effort == "medium" else f"variant {effort}")
 
@@ -804,7 +821,8 @@ SETUP_GROUPS = (
      "shared channel where agents debug together, challenge and verify each other (TALK.md)."),
     ("Checks", ("stop_check", "update_check"), "memory reminder at the end of a turn; daily update check."),
     ("Default models", ("models.claude.default", "models.agy.default", "models.opencode.default",
-                        "effort.default"), "per role: tw.py agents set ROLE model=M effort=E."),
+                        "models.codex.default", "effort.default"),
+     "per role: tw.py agents set ROLE model=M effort=E."),
 )
 
 

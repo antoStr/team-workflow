@@ -66,10 +66,10 @@ The user can ask for a mode; otherwise pick it from the task and say which in th
    `--from` and `--for`, the mode, and the full command (the absolute path of `tw.py` and the
    Python to run it). The role's "Team talk" instructions say how to use them: first of all it
    runs `talk join`, which shows it the whole conversation.
-3. **Take part**: while the agents work, read with `talk read TOPIC --for orchestrator`. Answer
-   what is addressed to you (`--to orchestrator`), post decisions (`decision`), and challenge
-   too when something does not add up. Do not answer for the agents and do not filter what
-   they say to each other.
+3. **Take part**: while the agents work, read with `talk read TOPIC --for orchestrator` (never
+   `--for` another role: that marks its messages read). Answer what is addressed to you
+   (`--to orchestrator`), post decisions (`decision`), and challenge too when something does not
+   add up. Do not answer for the agents and do not filter what they say to each other.
 4. **Newcomers**: an agent launched mid-task (one more reviewer, another developer) gets the same
    brief and runs `talk join`: it reads the whole history and takes part. The user can write at
    any time with `/team-workflow:talk post TOPIC --from user "..."`: treat it as the user's own

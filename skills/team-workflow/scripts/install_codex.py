@@ -9,6 +9,9 @@
                                                     ~/.codex/config.toml (a block we manage)
     ~/.codex/AGENTS.md                              a block: memory, settings and session setup
                                                     at the first task (session_start.py --text)
+    ~/.codex/rules/team-workflow.rules              Codex's sandbox reads only the project: this
+                                                    rule lets `<python> <our script>` run, and
+                                                    nothing else
 
 With --workspace the same goes into <repository>/.codex and the block into
 <repository>/AGENTS.md. CODEX_HOME moves ~/.codex, as it does for Codex. Only what we wrote is
@@ -21,9 +24,9 @@ import json
 import os
 import re
 import shutil
+import sys
 
 import install_opencode
-import opencode_cli
 import roles
 from common import utf8_output
 
@@ -50,6 +53,13 @@ def payload_dir(workspace=None):
 
 def agents_md(workspace=None):
     return os.path.join(workspace, "AGENTS.md") if workspace else os.path.join(config_dir(), "AGENTS.md")
+
+
+def python_path():
+    """The Python that runs this installer, by absolute path: Codex runs commands in a sandbox
+    whose PATH often has no python (only the py launcher with nothing behind it)."""
+    exe = sys.executable.replace(chr(92), "/")
+    return f'"{exe}"' if " " in exe else exe
 
 
 def present():
@@ -155,6 +165,29 @@ def ours(path):
     return MARK in read_text(path)
 
 
+def rules_path(workspace=None):
+    return os.path.join(config_dir(workspace), "rules", "team-workflow.rules")
+
+
+def write_rules(scripts, python, workspace=None):
+    """Allow exactly `<python> <one of our scripts> ...`: on Windows Codex's sandbox cannot read
+    the user profile, where both Python and the installed scripts live."""
+    exe = python.strip('"')
+    exes = list(dict.fromkeys([install_opencode.posix(exe), os.path.normpath(exe)]))
+    names = sorted(n for n in os.listdir(scripts) if n.endswith(".py"))
+    paths = list(dict.fromkeys(p for n in names for p in (
+        install_opencode.posix(os.path.join(scripts, n)), os.path.normpath(os.path.join(scripts, n)))))
+    targets = ", ".join(json.dumps(p) for p in paths)
+    rules = "".join(f"prefix_rule(\n    pattern = [{json.dumps(e)}, [{targets}]],\n    decision = \"allow\",\n)\n"
+                    for e in exes)
+    text = f"# {MARK}\n# team-workflow: its own scripts, run with the Python that installed it.\n{rules}"
+    path = rules_path(workspace)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(text)
+    return path
+
+
 def workflow_text(name, skill_md, scripts, python):
     """A Codex skill from one of our workflow skills."""
     m = re.match(r"\A---\n(.*?)\n---\n(.*)\Z", skill_md, re.S)
@@ -165,9 +198,11 @@ def workflow_text(name, skill_md, scripts, python):
     head = (f"---\nname: {NAME}-{name}\ndescription: {json.dumps(description)}\n---\n{MARK}\n\n")
     tw = f'{python} "{install_opencode.posix(os.path.join(scripts, "tw.py"))}"'
     if name in install_opencode.NO_MODEL:
-        return (head + f"Run `{tw} {install_opencode.NO_MODEL[name]} <what the user wrote after the "
-                "skill name>` from the repository root and show the user its output exactly as it "
-                "is, in a code block. Add nothing else.\n")
+        app = " --app codex" if name in ("options", "models") else ""
+        win = ', shell="bash"' if os.name == "nt" else ""
+        return (head + f"Run `{tw} {install_opencode.NO_MODEL[name]}{app} <what the user wrote after the "
+                f'skill name>` from the repository root (`exec_command` with `sandbox_permissions="require_escalated"`{win}) '
+                "and show the user its output exactly as it is, in a code block. Add nothing else.\n")
     body = m.group(2).strip().replace("<team-workflow skill folder>",
                                       install_opencode.posix(os.path.dirname(scripts)))
     body = body.replace("$ARGUMENTS", "(what the user wrote after the skill name)")
@@ -181,16 +216,22 @@ def instructions_block(scripts, python):
         "# team-workflow",
         "",
         f"- At the first task of every conversation, run `{python} \"{s}/session_start.py\" --text "
-        "--app codex` from the working folder and follow what it prints: the project memory, the "
-        "settings and the session setup. Run it once per conversation.",
+        "--app codex` from the working folder (`exec_command` with "
+        + ('`sandbox_permissions="require_escalated"`, `shell="bash"`) ' if os.name == "nt"
+           else '`sandbox_permissions="require_escalated"`) ')
+        + "and follow what it prints: the project memory, the settings and the session setup. "
+        "Run it once per conversation.",
         "- The workflows are the team-workflow skills (`$team-workflow-start`, `$team-workflow-setup`, "
         "`$team-workflow-agents`...) and the team-workflow skill. When the user calls the "
         "team-workflow skill, start with its session setup, even without a task.",
         "- The roles are Codex agents (for example `tester`, `security-reviewer`): spawn the agent "
         "by its name; several independent roles at the same time.",
-        "- Ask the user one question at a time as a short numbered list of options (recommended "
-        "first) and wait for the answer; say when several answers are allowed.",
-        f"- Run the team-workflow scripts as `{python} \"{s}/<script>.py\"` (they are in {s}).",
+        "- Ask the user with your question tool (request_user_input) when it is available, "
+        "recommended option first; without it, one question at a time as a short numbered list of "
+        "options, and wait for the answer.",
+        f"- Run the team-workflow scripts as `{python} \"{s}/<script>.py\"` (they are in {s}) with "
+        '`sandbox_permissions="require_escalated"` (`rules/team-workflow.rules` allows them'
+        + ('; on Windows pass `shell="bash"` too, never PowerShell `&`).' if os.name == "nt" else ")."),
         "- When files change, update docs/memory/STATE.md before you finish the task.",
         "- Answer in the language the user writes in.",
         install_opencode.END,
@@ -209,7 +250,7 @@ def remove_skills(conf):
 
 
 def install(workspace=None, source=None):
-    python = opencode_cli.python_command()
+    python = python_path()
     conf = config_dir(workspace)
     payload = payload_dir(workspace)
     if os.path.isdir(payload):
@@ -241,6 +282,7 @@ def install(workspace=None, source=None):
             f.write(workflow_text(name, read_text(path), scripts, python))
         written.append(name)
     install_opencode.write_block(agents_md(workspace), instructions_block(scripts, python))
+    write_rules(scripts, python, workspace)
     agents = roles.sync("codex", dest=roles.native_dir("codex", workspace))
     return {"payload": payload, "skills": len(written), "agents": agents["written"],
             "agents_not_ours": agents["skipped"], "python": python,
@@ -250,6 +292,9 @@ def install(workspace=None, source=None):
 def uninstall(workspace=None):
     conf = config_dir(workspace)
     done = [f"removed skill {n}" for n in remove_skills(conf)]
+    if os.path.isfile(rules_path(workspace)) and ours(rules_path(workspace)):
+        os.remove(rules_path(workspace))
+        done.append(f"removed {rules_path(workspace)}")
     if install_opencode.remove_block(agents_md(workspace)):
         done.append(f"removed the team-workflow block of {agents_md(workspace)}")
     folder = roles.native_dir("codex", workspace)

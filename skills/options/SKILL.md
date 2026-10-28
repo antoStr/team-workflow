@@ -1,7 +1,7 @@
 ---
 name: options
 description: Show the models and efforts each app offers (native agents and workers), every role with its type, model, effort and how it runs, and when to change them (no tokens in Claude Code and OpenCode; in agy run `!team-workflow options`)
-argument-hint: "[--app claude|agy|opencode|all]"
+argument-hint: "[--app claude|agy|opencode|codex|all]"
 disable-model-invocation: true
 ---
 

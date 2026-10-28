@@ -9,7 +9,8 @@ Run `python3 <team-workflow skill folder>/scripts/tw.py setup` from the reposito
 show its output as it is. It is the current configuration: every value says whether it comes
 from the project file, the user file or the defaults.
 
-Then ask with the question tool (AskUserQuestion; agy `ask_question`; OpenCode `question`), in
+Then ask with the question tool (AskUserQuestion; agy `ask_question`; OpenCode `question`; Codex
+`request_user_input`, or a numbered list), in
 the user's language, recommended option first. If the user named an area ($ARGUMENTS), start
 there and skip the questions about the others.
 

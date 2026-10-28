@@ -6,7 +6,7 @@ disable-model-invocation: true
 ---
 
 Use the team-workflow skill. Run its session setup first (`WIZARD.md`, "Session setup"): show
-`tw.py options --app <claude|agy|opencode>` for the app you run in, then ask with the question tool
+`tw.py options --app <claude|agy|opencode|codex>` for the app you run in, then ask with the question tool
 where the choices go, the preset, the roles, model and effort for every chosen role, the
 skills and add-ons, and team talk, then the session recap.
 

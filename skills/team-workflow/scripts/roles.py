@@ -212,13 +212,16 @@ def codex_text(role, meta, body, p):
     """A Codex agent (config file of [agents.<role>] in config.toml)."""
     tools = json.loads(meta["tools"]) if meta.get("tools") else None
     writes = tools is None or bool({"Edit", "Write", "Bash"} & set(tools))
-    lines = [f"# {MARK}", f"# {role}: {meta.get('description', role)}"[:400].replace("\n", " ")]
+    win = ' and `shell="bash"`' if os.name == "nt" else ""
+    note = (f'\n\nIn Codex, run `tw.py` commands (such as `tw.py talk`) via `exec_command` with '
+            f'`sandbox_permissions="require_escalated"`{win} (`team-workflow.rules` allows them).')
+    lines = [f"# {MARK}", f"# {role}: {' '.join(meta.get('description', role).split())}"]
     if p["model"] and p["model"] != "inherit":
         lines.append(f"model = {json.dumps(p['model'])}")
     if p["effort"]:
         lines.append(f"model_reasoning_effort = {json.dumps(p['effort'])}")
     lines.append(f"sandbox_mode = {json.dumps('workspace-write' if writes else 'read-only')}")
-    lines.append(f"developer_instructions = {toml_text(body)}")
+    lines.append(f"developer_instructions = {toml_text(body + note)}")
     return "\n".join(lines) + "\n"
 
 

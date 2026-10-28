@@ -31,7 +31,8 @@ MANUAL = ("team-workflow is installed and set to manual activation here: do not 
           "/team-workflow:<name> or asks for the team, follow the team-workflow skill and read "
           "docs/memory/INDEX.md and STATE.md first.")
 TALK = ("team-workflow: team talk is on: every task with two or more agents gets its own channel, a "
-        "group conversation of you (as orchestrator), every agent and anyone who joins (TALK.md).")
+        "group conversation of you (as orchestrator), every agent and anyone who joins "
+        "(tw.py talk; see TALK.md).")
 
 APP_NAMES = {"claude": ("Claude Code", "general-purpose"), "opencode": ("OpenCode", "general"),
              "agy": ("agy", "self"), "codex": ("Codex", "default")}
@@ -60,11 +61,13 @@ def opencode_notes():
 
 
 def codex_notes():
+    win = ' and `shell="bash"`' if os.name == "nt" else ""
     return ("team-workflow in Codex: the workflows are the $team-workflow-<name> skills and the "
             "team-workflow skill; the roles are Codex agents: spawn one by its name (for example "
-            "tester), several independent roles at the same time; ask the user one question at a "
-            "time as a numbered list of options and wait; the scripts are in "
-            f"{HERE.replace(os.sep, '/')}, run them with `{opencode_cli.python_command()}`.")
+            "tester), several independent roles at the same time; ask the user with the question tool "
+            "(request_user_input), or one question at a time as a numbered list; the scripts are in "
+            f"{HERE.replace(os.sep, '/')}, run them with `{sys.executable.replace(os.sep, '/')}` "
+            f'using `sandbox_permissions="require_escalated"`{win}.')
 
 
 def memory_context(root):

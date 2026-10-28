@@ -1,5 +1,6 @@
 """Offline tests for Codex: install, agents in config.toml, MCP servers, uninstall."""
 import isolate_home  # noqa: F401  (first: a throwaway home for the whole run)
+import json
 import os
 import subprocess
 import sys
@@ -51,6 +52,9 @@ class CodexTest(unittest.TestCase):
         self.assertIn("tw.py\" agents", skill)  # answered by tw.py, the model only shows it
         self.assertTrue(os.path.isfile(self.conf("skills", "team-workflow", "SKILL.md")))
         self.assertTrue(os.path.isfile(self.conf("agents", "architect.toml")))
+        self.assertTrue(os.path.isfile(self.conf("rules", "team-workflow.rules")))
+        self.assertIn("prefix_rule(", self.read(self.conf("rules", "team-workflow.rules")))
+        self.assertIn("require_escalated", self.read(os.path.join(self.repo, "AGENTS.md")))
         config = self.read(self.conf("config.toml"))
         self.assertEqual(config.count("[agents.tester]"), 1)  # the user's own stays the only one
         self.assertIn("[agents.architect]", config)
@@ -58,12 +62,14 @@ class CodexTest(unittest.TestCase):
         if tomllib:
             parsed = tomllib.loads(config)
             self.assertEqual(parsed["agents"]["tester"]["description"], "mine")
+            self.assertTrue(parsed["agents"]["backend-dev"]["description"].endswith("in the agent body."))
             agent = tomllib.loads(self.read(self.conf("agents", "architect.toml")))
             self.assertEqual(agent["sandbox_mode"], "read-only")  # architect has no Edit or Write
             self.assertIn("## Team talk", agent["developer_instructions"])
         install_codex.uninstall(self.repo)
         self.assertFalse(os.path.exists(self.conf("skills", "team-workflow-agents")))
         self.assertFalse(os.path.exists(self.conf("agents", "architect.toml")))
+        self.assertFalse(os.path.exists(self.conf("rules", "team-workflow.rules")))
         config = self.read(self.conf("config.toml"))
         self.assertNotIn("[agents.architect]", config)
         self.assertIn('[agents.tester]\ndescription = "mine"', config)
@@ -93,8 +99,16 @@ class CodexTest(unittest.TestCase):
                              encoding="utf-8", env=os.environ)
         self.assertIn("$team-workflow-<name>", out.stdout)
         self.assertIn("options --app codex", out.stdout)
+        self.assertIn("require_escalated", out.stdout)
+        talk_cli = subprocess.run([sys.executable, os.path.join(SCRIPTS, "talk.py"), "list"],
+                                  cwd=self.repo, capture_output=True, text=True, encoding="utf-8",
+                                  env=os.environ)
+        self.assertEqual(talk_cli.returncode, 0, talk_cli.stderr)
+        self.assertIn("channels:", talk_cli.stdout)
 
     def test_roles_table_and_native_text_include_codex(self):
+        import io
+        import tw
         self.assertIn("codex", roles.APPS)
         meta, body = roles.load("tester")
         text = roles.native_text("codex", "tester", meta, body,
@@ -102,6 +116,16 @@ class CodexTest(unittest.TestCase):
         self.assertIn('model = "gpt-6-astra"', text)
         self.assertIn('model_reasoning_effort = "high"', text)
         self.assertTrue(roles.ours(text))
+        os.makedirs(install_codex.config_dir(), exist_ok=True)
+        with open(os.path.join(install_codex.config_dir(), "models_cache.json"), "w", encoding="utf-8") as f:
+            json.dump({"models": [{"slug": "anthropic/claude-sonnet-5", "display_name": "Sonnet 5",
+                                   "supported_reasoning_levels": [{"effort": "low"}, {"effort": "high"}]}]}, f)
+        opts = tw.app_options("codex", self.repo)
+        self.assertIn("the session's model, reasoning effort medium", opts["roles"]["tester"]["runs"])
+        with mock.patch("sys.stdout", new_callable=io.StringIO) as out:
+            tw.main(["models", "--app", "codex"])
+        self.assertIn("anthropic/claude-sonnet-5", out.getvalue())
+        self.assertNotIn("Claude Code (", out.getvalue())
 
 
 if __name__ == "__main__":

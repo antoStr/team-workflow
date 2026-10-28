@@ -11,11 +11,11 @@ conversation is launched, agree with the user which agents this conversation use
 among what the app offers right now. Do it once; later tasks in the same conversation reuse
 it and go straight to the board. Skip it when the user says "defaults" or "skip setup".
 
-1. Run `python3 <skill>/scripts/tw.py options --app <claude|agy|opencode>` for the app you
+1. Run `python3 <skill>/scripts/tw.py options --app <claude|agy|opencode|codex>` for the app you
    run in and show its output to the user as it is, in a code block: the models and efforts
    the app offers to native agents and to workers, every enabled role with its current type,
    model, effort and how it really runs, and when each can be changed. The user must see this
-   before any question. (`--json` gives the same data for you; `--app all` the three apps.)
+   before any question. (`--json` gives the same data for you; `--app all` the four apps.)
 2. One call, two single-choice questions: **where the choices go**, "This conversation only
    (Recommended)", "My defaults for every project" (user file), "This project's defaults"
    (project file; in a git repository only), and the **preset**: "Keep my settings
@@ -52,6 +52,8 @@ it and go straight to the board. Skip it when the user says "defaults" or "skip 
      many there are and let the user narrow the words. Take the effort from that model's
      variants only (none listed = no effort question) and ask it once for "all roles" or per
      role, as the user chose. Never answer "only these models exist" from the short list.
+   - Codex: each agent runs with the model (`inherit` = the session's model, or a model id from
+     step 1) and reasoning effort of its `.toml` file; saved choices apply after restarting Codex.
 5. One call, up to two multi-select questions: the **skills** and the **add-ons** for this
    conversation. Skills: run `tw.py library search <words of the task, or the repository's
    languages> --json` and offer the three best entries plus `rules-<language>` of the
@@ -106,9 +108,12 @@ Offer only models and efforts the app really has (`tw.py models` lists them):
   name, then `tw.py models --app opencode --provider <id> --search <text> --json` and offer
   what it finds (the model's name, its id, its variants).
 - **OpenCode worker**: any `provider/model` with a variant (run as `provider/model#variant`).
+- **Codex agent**: `inherit` (the session's model) or any model id from `tw.py models --app codex`,
+  and one of that model's reasoning efforts, written in the agent's `.toml` file.
 
 Asking: in Claude Code use AskUserQuestion; in agy its `ask_question` tool; in OpenCode its
-`question` tool. Set multi-select (`multiSelect: true`, in agy `is_multi_select: true`, in
+`question` tool; in Codex its `request_user_input` tool when available (else one question at a time
+as a numbered list). Set multi-select (`multiSelect: true`, in agy `is_multi_select: true`, in
 OpenCode the question tool's multiple answers) only where several answers make sense, the roles; every other
 question is single-choice, so the user is never shown checkboxes for a one-answer question.
 Never fake a question as a markdown list with `[ ]` boxes.
@@ -176,6 +181,8 @@ settings (`type.<app>.<role>`, shown by `tw.py agents`):
   - OpenCode: the subagent tool with `agent: "<role>"`, a short `description` and the brief as
     `prompt` (OpenCode 1.x: the task tool with `subagent_type`); several calls in one message
     run in parallel.
+  - Codex: spawn the agent named `<role>` (for example `tester`) with the brief; independent
+    agents spawned together run in parallel.
   If the role is not in the app's agent list (first session after an install or a settings
   change), run `python3 <skill>/scripts/tw.py agents sync`, tell the user to restart the app,
   and for now launch it as a built-in type briefed with the role.

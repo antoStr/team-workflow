@@ -231,3 +231,9 @@ def line(m):
     to = f" -> {m['to']}" if m.get("to") else ""
     re_ = f" re #{m['re']}" if m.get("re") else ""
     return f"#{m['id']} {m['time'][11:]} {m['from']}{to} [{m['kind']}]{re_}: {m['text']}"
+
+
+if __name__ == "__main__":
+    import sys
+    import tw
+    tw.main(["talk", *sys.argv[1:]])

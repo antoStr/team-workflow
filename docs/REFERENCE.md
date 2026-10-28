@@ -342,10 +342,13 @@ che non cambia dove Codex legge skill e agenti). Scrive in `~/.codex/` (o in `CO
   lettura per chi controlla), elencati in un blocco di `config.toml` tra due marcatori. Un
   agente con lo stesso nome che hai definito tu non viene toccato;
 - un blocco in `AGENTS.md`: alla prima richiesta di ogni conversazione il modello esegue
-  `session_start.py --text --app codex` (memoria, impostazioni, wizard di sessione).
+  `session_start.py --text --app codex` (memoria, impostazioni, wizard di sessione);
+- `rules/team-workflow.rules`: una regola `prefix_rule` che consente nella sandbox di Codex solo
+  `<python> <script di team-workflow>`, lasciando tutto il resto sotto le regole normali.
 
 Gli add-on funzionano anche qui: le skill vanno in `~/.codex/skills`, i server MCP in un blocco
-`[mcp_servers]` di `config.toml`. Le domande arrivano come elenco numerato di opzioni.
+`[mcp_servers]` di `config.toml`. Le domande usano `request_user_input` quando disponibile
+(altrimenti un elenco numerato di opzioni).
 `team-workflow update` aggiorna anche Codex.
 
 ## Installazione

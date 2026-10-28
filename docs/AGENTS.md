@@ -159,10 +159,10 @@ Ogni agente usa un **modello** (più forte e caro, o più leggero e veloce) e un
 /team-workflow:agents set architect model=pro --app agy
 ```
 
-| Valori | Claude Code | agy | OpenCode |
-|---|---|---|---|
-| Modello | `haiku`, `sonnet`, `opus`, `fable` | `inherit`, `flash`, `pro` | `inherit` o `provider/modello` |
-| Impegno | `low`, `medium`, `high`, `xhigh`, `max` | nel nome del modello del worker | la "variante" del modello |
+| Valori | Claude Code | agy | OpenCode | Codex |
+|---|---|---|---|---|
+| Modello | `haiku`, `sonnet`, `opus`, `fable` | `inherit`, `flash`, `pro` | `inherit` o `provider/modello` | `inherit` o un modello del catalogo |
+| Impegno | `low`, `medium`, `high`, `xhigh`, `max` | nel nome del modello del worker | la "variante" del modello | `model_reasoning_effort` del modello |
 
 > [!TIP]
 > Spendi i modelli forti dove un errore costa caro (architettura, sicurezza) e quelli leggeri
