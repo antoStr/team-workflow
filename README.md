@@ -213,7 +213,8 @@ e tu scegli. Chi costruisce non approva mai il proprio lavoro.
 /team-workflow:agents enable auto      ← accende i pack dei linguaggi del tuo progetto
 ```
 
-📋 L'elenco completo con la descrizione di ogni agente è nel **[catalogo](docs/CATALOG.md)**.
+📋 L'elenco completo con la descrizione di ogni agente è nel **[catalogo](docs/CATALOG.md)**.<br>
+🛠️ Per usarli, cambiarli o **crearne di nuovi** passo passo c'è la **[guida agli agenti](docs/AGENTS.md)**.
 
 ---
 
@@ -353,6 +354,7 @@ Lancia `/team-workflow:doctor`: controlla l'installazione e, con `--fix`, ripara
 
 | Documento | Contenuto |
 |---|---|
+| 👥 [Guida agli agenti](docs/AGENTS.md) | Usare, cambiare e creare agenti, con esempi pronti da copiare |
 | 📘 [Manuale completo](docs/REFERENCE.md) | Ogni comando, impostazione e dettaglio per Claude Code, agy e OpenCode |
 | 📋 [Catalogo](docs/CATALOG.md) | Tutti i 127 agenti e le 412 voci della libreria |
 | 💬 [Team talk](skills/team-workflow/TALK.md) | Come gli agenti parlano tra loro |

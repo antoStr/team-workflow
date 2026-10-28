@@ -1,6 +1,6 @@
 {
   "name": "team-workflow",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "license": "MIT",
   "description": "For Claude Code, agy (Antigravity) and OpenCode: shared project memory read at every session; on-demand teams of specialist agents (20 core roles plus language, framework, quality and other packs) led by the main session, that talk to each other to debug and verify each other's work; a searchable library of skills, commands and coding rules; add-ons and MCP servers in bundles; and an end-of-task report that asks before applying changes.",
   "author": {

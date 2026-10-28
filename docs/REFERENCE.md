@@ -1,6 +1,7 @@
 # team-workflow: manuale completo
 
-La guida per iniziare e' il [README](../README.md); l'elenco di tutti gli agenti e della libreria e' in
+La guida per iniziare e' il [README](../README.md); per usare e creare agenti c'e' la
+[guida agli agenti](AGENTS.md); l'elenco di tutti gli agenti e della libreria e' in
 [CATALOG.md](CATALOG.md). Qui trovi ogni dettaglio, app per app.
 
 Plugin per **Claude Code**, **agy (Antigravity)** e **OpenCode** che organizza il lavoro su un progetto come
