@@ -1258,6 +1258,11 @@ Licenza MIT (`skills/team-workflow/library/NOTICE.md`). Cerca con `/team-workflo
 
 <!-- catalog:end -->
 
+## Licenza
+
+MIT (`LICENSE`). Il contenuto importato nella libreria e nei ruoli `source: "imported ..."`
+mantiene la sua licenza: `skills/team-workflow/library/NOTICE.md`.
+
 ## Sviluppo
 
 ```bash
