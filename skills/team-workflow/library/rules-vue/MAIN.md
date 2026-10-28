@@ -1,6 +1,6 @@
 ---
 name: rules-vue
-description: "Coding rules from ECC, vue rules: style, patterns, security, testing. Use when writing or reviewing vue code."
+description: "Coding rules, vue rules: style, patterns, security, testing. Use when writing or reviewing vue code."
 ---
 
 # Vue rules

@@ -4,7 +4,7 @@ description: "Reviews FastAPI applications for async correctness, dependency inj
 tools: ["Read", "Grep", "Glob", "Bash"]
 color: cyan
 includes: ["review-discipline"]
-source: "ECC agents/fastapi-reviewer.md (MIT, affaan-m/everything-claude-code)"
+source: "imported (MIT, see library/NOTICE.md)"
 ---
 
 ## Review Scope

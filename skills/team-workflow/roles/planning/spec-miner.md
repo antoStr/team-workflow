@@ -3,7 +3,7 @@ name: spec-miner
 description: "Extracts behavioral specs from existing codebases for OpenSpec. Produces flat Requirement and Invariant blocks with structured metadata (entities, enforced, id, test anchors). Outputs openspec/specs/<capability>/spec.md. Fully self-bootstrapping \u2014 no dependency on codebase-onboarding. Use when onboarding a brownfield project to spec-driven development."
 tools: ["Read", "Grep", "Glob", "Bash", "Write"]
 color: blue
-source: "ECC agents/spec-miner.md (MIT, affaan-m/everything-claude-code)"
+source: "imported (MIT, see library/NOTICE.md)"
 ---
 
 ## Tool guardrails
@@ -31,10 +31,10 @@ You extract behavioral specifications from existing codebases that have no OpenS
 This agent is fully self-sufficient — it does not require `codebase-onboarding`.
 
 1. **Detect project structure** (minimum viable scan):
-   - Find package manifests: `package.json`, `go.mod`, `pom.xml`, `pyproject.toml`, etc.
-   - Find framework configs: `next.config.*`, `vite.config.*`, `django settings`, `spring boot main`, etc.
-   - Map top-level directory layout (ignore `node_modules`, `vendor`, `.git`, `dist`, `build`)
-   - Identify entry points: `main.*`, `index.*`, `app.*`, `server.*`, `cmd/`, `src/main/`
+ - Find package manifests: `package.json`, `go.mod`, `pom.xml`, `pyproject.toml`, etc.
+ - Find framework configs: `next.config.*`, `vite.config.*`, `django settings`, `spring boot main`, etc.
+ - Map top-level directory layout (ignore `node_modules`, `vendor`, `.git`, `dist`, `build`)
+ - Identify entry points: `main.*`, `index.*`, `app.*`, `server.*`, `cmd/`, `src/main/`
 
 2. **Group into capabilities**. A capability is a cohesive cluster of related entry points and their backing directories. Group by reading each entry point's first-level dependencies (injected services, imported modules, annotated components). Entry points that share the same service namespace belong to the same capability. Name each capability with a kebab-case identifier: `orders`, `payments`, `user-auth`, `inventory`.
 
@@ -51,9 +51,9 @@ A 50-file module cannot be fully read in one session. Use this progressive strat
 1. **Sample**: Read the entry files first — routers, controllers, service facades, public API surfaces. These typically contain ~70% of behavioral assertions. Extract all Requirements and Invariants from this set.
 
 2. **Expand**: For each behavior found in the sample, trace one level down its call chain. If a Requirement says "stock is decremented", read `InventoryService.decrement()` to verify. Stop when:
-   - The call chain reaches an external boundary (DB query, HTTP call, message queue)
-   - Three consecutive expanded files yield no new behavioral assertions
-   - You've read 15 files total for this capability
+ - The call chain reaches an external boundary (DB query, HTTP call, message queue)
+ - Three consecutive expanded files yield no new behavioral assertions
+ - You've read 15 files total for this capability
 
 3. **Defer**: If files remain unread, list them in an `<!-- deferred: file1.md, file2.md -->` comment at the bottom of the spec. They can be mined in a subsequent session.
 

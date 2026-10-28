@@ -1,6 +1,6 @@
 ---
 name: rules-perl
-description: "Coding rules from ECC, perl rules: style, patterns, security, testing. Use when writing or reviewing perl code."
+description: "Coding rules, perl rules: style, patterns, security, testing. Use when writing or reviewing perl code."
 ---
 
 # Perl rules

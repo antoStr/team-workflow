@@ -3,7 +3,7 @@ name: django-build-fixer
 description: "Django/Python build, migration, and dependency error resolution specialist. Fixes pip/Poetry errors, migration conflicts, import errors, Django configuration issues, and collectstatic failures with minimal changes. Use when Django setup or startup fails."
 tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob"]
 color: cyan
-source: "ECC agents/django-build-resolver.md (MIT, affaan-m/everything-claude-code)"
+source: "imported (MIT, see library/NOTICE.md)"
 ---
 
 # Django Build Error Resolver
@@ -53,12 +53,12 @@ python manage.py collectstatic --dry-run --noinput 2>&1
 ## Resolution Workflow
 
 ```text
-1. Reproduce the error          -> Capture exact message
-2. Identify error category      -> See table below
-3. Read affected file/config    -> Understand context
-4. Apply minimal fix            -> Only what's needed
-5. python manage.py check       -> Validate Django config
-6. Run test suite               -> Ensure nothing broke
+1. Reproduce the error -> Capture exact message
+2. Identify error category -> See table below
+3. Read affected file/config -> Understand context
+4. Apply minimal fix -> Only what's needed
+5. python manage.py check -> Validate Django config
+6. Run test suite -> Ensure nothing broke
 ```
 
 ## Common Fix Patterns
@@ -157,8 +157,8 @@ from apps.users.models import User
 
 # Good - import inside function
 def get_user(pk):
-    from apps.users.models import User
-    return User.objects.get(pk=pk)
+ from apps.users.models import User
+ return User.objects.get(pk=pk)
 
 # Good - use apps registry
 from django.apps import apps

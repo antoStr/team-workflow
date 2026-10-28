@@ -1,6 +1,6 @@
 ---
 name: rules-react-native
-description: "Coding rules from ECC, react-native rules: style, patterns, security, testing. Use when writing or reviewing react-native code."
+description: "Coding rules, react-native rules: style, patterns, security, testing. Use when writing or reviewing react-native code."
 ---
 
 # React-native rules

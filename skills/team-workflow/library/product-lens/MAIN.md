@@ -2,7 +2,7 @@
 name: product-lens
 description: Validate the why before building through four product diagnostics — a YC-style product diagnostic that produces PRODUCT-BRIEF.md with a go/no-go recommendation, a founder review scoring product-market-fit signals, a user journey audit measuring time-to-value, and ICE feature prioritization. Use when pressure-testing product direction, choosing between features, sanity-checking a launch, or converting a vague idea into a product brief.
 metadata:
-  origin: ECC
+ origin: 
 ---
 
 # Product Lens — Think Before You Build

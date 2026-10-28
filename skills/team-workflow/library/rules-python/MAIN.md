@@ -1,6 +1,6 @@
 ---
 name: rules-python
-description: "Coding rules from ECC, python rules: style, patterns, security, testing. Use when writing or reviewing python code."
+description: "Coding rules, python rules: style, patterns, security, testing. Use when writing or reviewing python code."
 ---
 
 # Python rules

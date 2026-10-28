@@ -1,6 +1,6 @@
 ---
 name: setup
-description: Set up team-workflow in one place - activation (on its own in every project, only in this project, or only when you call it), session wizard, team size and launch, models and effort, roles and packs, the ECC library, agents that talk to each other, checks, add-ons and presets
+description: Set up team-workflow in one place - activation (on its own in every project, only in this project, or only when you call it), session wizard, team size and launch, models and effort, roles and packs, the library, agents that talk to each other, checks, add-ons and presets
 argument-hint: "[area to change, for example activation or library]"
 disable-model-invocation: true
 ---
@@ -24,7 +24,7 @@ there and skip the questions about the others.
    manual there only turns off the Stop check.
 2. **What else to change** (multi-select, at most four options per question, so ask two
    questions in one call): session setup and questions; team size and launch; models and
-   effort; roles and packs; ECC library; agents talking to each other; checks; add-ons;
+   effort; roles and packs; the library; agents talking to each other; checks; add-ons;
    a preset. Nothing chosen: go to step 4.
 3. For each chosen area, one question with the concrete choices, then run the command:
    - Session setup and questions: `session_wizard` true or false, `wizard` quick, full or off,
@@ -36,15 +36,18 @@ there and skip the questions about the others.
      (`agents set ROLE model=M effort=E`).
    - Roles and packs: show `tw.py agents`; offer the packs that are off (languages of the
      repository first: `agents enable auto`; quality, planning, frameworks, harness, gan, ml,
-     opensource, network, domains, ops, growth) with `agents enable PACK`.
-   - ECC library: show `tw.py library`; offer packs or entries to install as native skills
+     opensource, network, domains, ops, growth, alt) with `agents enable PACK`.
+   - The library: show `tw.py library`; offer packs or entries to install as native skills
      (`library enable PACK|ID`), the language rules of this repository first
      (`library enable rules-<language>`). Say that the orchestrator can use any entry by path
      without installing it, and that installed skills take room in every session's context.
    - Agents talking to each other: `talk` true or false, `talk_rounds` 1 to 5 (`TALK.md`).
    - Checks: `stop_check`, `update_check`.
-   - Add-ons: show `tw.py addons`; `addons add NAME`, or `addons add frontend` for the frontend
-     set (impeccable, taste, frontend-design, solar-icons, cloudflare) the frontend roles use.
+   - Add-ons: show `tw.py addons`; `addons add NAME`, or a bundle: `frontend` (impeccable,
+     taste, frontend-design, solar-icons, cloudflare: the frontend roles use them),
+     `token-saving` (caveman, ponytail, context-mode, serena), `mcp` (context7, playwright,
+     serena, sequential-thinking), `popular` (superpowers, Anthropic's skills, karpathy,
+     ui-ux-pro-max, context7).
    - A preset: `tw.py profile` lists them; `profile NAME`.
    Ask each time whether the change is for every project (user file) or this repository
    (`--project`) when the user did not say.

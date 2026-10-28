@@ -1,6 +1,6 @@
 ---
 name: rules-nuxt
-description: "Coding rules from ECC, nuxt rules: style, patterns, security, testing. Use when writing or reviewing nuxt code."
+description: "Coding rules, nuxt rules: style, patterns, security, testing. Use when writing or reviewing nuxt code."
 ---
 
 # Nuxt rules

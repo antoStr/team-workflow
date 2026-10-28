@@ -2,7 +2,7 @@
 name: agent-runtime-gateway-smoke-test
 description: Verify a local agent API, temporary gateway tunnel, and remote sandbox callback with a tool-free task, then restore the original app connection.
 metadata:
-  origin: ECC
+ origin: 
 ---
 
 # Agent Runtime Gateway Smoke Test

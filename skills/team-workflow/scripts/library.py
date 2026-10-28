@@ -1,5 +1,5 @@
-"""The library: the skills, commands and rules of Everything Claude Code (ECC), imported by
-tools/import_ecc.py into ../library/<id>/MAIN.md with ../library/index.json.
+"""The library: hundreds of skills, commands and coding rules (MIT, see ../library/NOTICE.md),
+imported by tools/import_upstream.py into ../library/<id>/MAIN.md with ../library/index.json.
 
 The orchestrator searches it (`tw.py library search <words>`) and gives an agent the path of the
 entries its work needs; no app loads them by itself. The entries the user switches on

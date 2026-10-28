@@ -2,7 +2,7 @@
 name: blueprint
 description: "Turn a one-line objective into a step-by-step construction plan for multi-session, multi-agent engineering projects: one-PR-sized steps with self-contained context briefs, dependency graph with parallel-step detection, adversarial review gate, and plan mutation protocol. Use when planning a large feature, refactor, or roadmap that spans multiple PRs or sessions; not for single-PR tasks or when the user says \"just do it\"."
 metadata:
-  origin: community
+ origin: community
 ---
 
 # Blueprint — Construction Plan Generator

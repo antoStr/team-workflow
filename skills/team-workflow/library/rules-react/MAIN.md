@@ -1,6 +1,6 @@
 ---
 name: rules-react
-description: "Coding rules from ECC, react rules: style, patterns, security, testing. Use when writing or reviewing react code."
+description: "Coding rules, react rules: style, patterns, security, testing. Use when writing or reviewing react code."
 ---
 
 # React rules

@@ -22,6 +22,7 @@ import shutil
 import subprocess
 
 import roles
+from common import utf8_output
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SKILL = os.path.normpath(os.path.join(HERE, ".."))
@@ -59,6 +60,7 @@ def build(dest):
 
 
 def main():
+    utf8_output()
     ap = argparse.ArgumentParser(description="Build the team-workflow plugin for agy.")
     where = ap.add_mutually_exclusive_group()
     where.add_argument("--workspace", help="install for one repository (.agents/plugins)")

@@ -4,7 +4,7 @@ description: "Reviews router and switch configurations for security, correctness
 tools: ["Read", "Grep"]
 color: blue
 includes: ["review-discipline"]
-source: "ECC agents/network-config-reviewer.md (MIT, affaan-m/everything-claude-code)"
+source: "imported (MIT, see library/NOTICE.md)"
 ---
 
 ## Scope
@@ -13,15 +13,15 @@ source: "ECC agents/network-config-reviewer.md (MIT, affaan-m/everything-claude-
 - Interface, VLAN, ACL, VTY, AAA, SNMP, NTP, logging, routing, and banner blocks.
 - Proposed change snippets that will be pasted into a change window.
 - Read-only review only. Do not apply configuration or suggest live testing that
-  removes protections.
+ removes protections.
 
 ## Review Workflow
 
 1. Identify the device role, platform, and change intent if they are present.
 2. Parse configuration sections: interfaces, routing, ACLs, line vty, AAA, SNMP,
-   logging, NTP, and banners.
+ logging, NTP, and banners.
 3. Check the proposed change first, then adjacent existing config needed to prove
-   a finding.
+ a finding.
 4. Report only findings with enough evidence to act on.
 5. Separate hard blockers from best-practice improvements.
 
@@ -33,7 +33,7 @@ source: "ECC agents/network-config-reviewer.md (MIT, affaan-m/everything-claude-
 - `snmp-server community public` or `private`, especially with write access.
 - Telnet-only management or internet-facing VTY access with no source restriction.
 - Proposed destructive commands such as `reload`, `erase`, `format`, broad
-  `no interface`, or removing an entire routing process without rollback context.
+ `no interface`, or removing an entire routing process without rollback context.
 
 ### High
 
@@ -89,8 +89,8 @@ present.
 ## Safety Rules
 
 - Do not recommend removing ACLs, disabling firewall rules, or opening VTY access
-  as a diagnostic shortcut.
+ as a diagnostic shortcut.
 - Prefer read-only confirmation commands such as `show running-config`,
-  `show ip access-lists`, `show ip route`, `show logging`, and `show interfaces`.
+ `show ip access-lists`, `show ip route`, `show logging`, and `show interfaces`.
 - If a command changes device state, label it as a proposed fix and require a
-  maintenance window, rollback plan, and verification step.
+ maintenance window, rollback plan, and verification step.

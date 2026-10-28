@@ -1,6 +1,6 @@
-"""Security audit of the AI agent setup, local and free (the kind of scan AgentShield and ECC Pro
-sell as a hosted service): Claude Code and agy settings, permissions, hooks, MCP servers,
-instruction files, agents and skills of the user and of the repository.
+"""Security audit of the AI agent setup, local and free: Claude Code and agy settings,
+permissions, hooks, MCP servers, instruction files, agents and skills of the user and of the
+repository.
 
 Findings: {"severity", "file", "what", "fix"}; severities: critical, high, medium, low.
 Custom rules (your own policy pack): ~/.team-workflow/audit-rules.json and
@@ -174,16 +174,25 @@ def custom_rules(root):
     return rules
 
 
-def from_library(path, text):
-    """A SKILL.md that tw.py library installed and that still equals its library entry."""
+def from_imported(path, text):
+    """A skill tw.py library installed, or an agent written from an imported role, that still
+    holds the imported text unchanged."""
     try:
         import library  # absent where ci-init copied this file alone
+        import roles
     except ImportError:
         return False
-    folder = os.path.dirname(path)
-    if not os.path.isfile(os.path.join(folder, library.MARK)):
+    folder, name = os.path.dirname(path), os.path.splitext(os.path.basename(path))[0]
+    if os.path.isfile(os.path.join(folder, library.MARK)):
+        return read(library.main_file(os.path.basename(folder))) == text
+    info = roles.catalog().get(name)
+    if not (info and roles.ours(text) and 'source: "imported' in roles.read(info)):
         return False
-    return read(library.main_file(os.path.basename(folder))) == text
+    app = ("agy" if ".gemini" in path else "opencode" if "opencode" in path else "claude")
+    config = settings.load()
+    meta, body = roles.parse(roles.read(info))
+    expected = roles.native_text(app, name, meta, roles.compose(meta, body), roles.plan(config, name, app))
+    return expected == text  # exactly what team-workflow writes: any edit counts as a change
 
 
 def audit(root=None):
@@ -204,11 +213,11 @@ def audit(root=None):
         else:
             text = read(path) or ""
             found = scan_text(path, text, instructions=True)
-            if found and from_library(path, text):  # ECC's own warnings quote these phrases
+            if found and from_imported(path, text):  # their own warnings quote these phrases
                 for f in found:
                     if f["what"].startswith("prompt-injection phrase"):
                         f["severity"] = "low"
-                        f["what"] += " (team-workflow library entry from ECC, unchanged: check the context)"
+                        f["what"] += " (imported text, unchanged: check the context)"
             out += found
     for rule in custom_rules(root):
         try:

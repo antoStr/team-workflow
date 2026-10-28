@@ -1,6 +1,6 @@
 ---
 name: rules-cpp
-description: "Coding rules from ECC, cpp rules: style, patterns, security, testing. Use when writing or reviewing cpp code."
+description: "Coding rules, cpp rules: style, patterns, security, testing. Use when writing or reviewing cpp code."
 ---
 
 # Cpp rules

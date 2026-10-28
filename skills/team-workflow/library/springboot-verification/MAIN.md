@@ -2,7 +2,7 @@
 name: springboot-verification
 description: Run the full Spring Boot verification loop — Maven or Gradle build, SpotBugs, PMD, and Checkstyle static analysis, unit and Testcontainers integration tests with JaCoCo coverage, OWASP dependency and secret scans, and diff review — producing a pass/fail readiness report. Use when preparing a Spring Boot pull request, validating coverage thresholds, or running pre-deploy verification.
 metadata:
-  origin: ECC
+ origin: 
 ---
 
 # Spring Boot Verification Loop

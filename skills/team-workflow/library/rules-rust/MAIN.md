@@ -1,6 +1,6 @@
 ---
 name: rules-rust
-description: "Coding rules from ECC, rust rules: style, patterns, security, testing. Use when writing or reviewing rust code."
+description: "Coding rules, rust rules: style, patterns, security, testing. Use when writing or reviewing rust code."
 ---
 
 # Rust rules

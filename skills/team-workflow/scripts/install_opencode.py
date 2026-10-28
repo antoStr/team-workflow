@@ -26,6 +26,7 @@ import sys
 
 import opencode_cli
 import roles
+from common import utf8_output
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SKILL = os.path.normpath(os.path.join(HERE, ".."))
@@ -294,6 +295,7 @@ def uninstall(workspace=None):
 
 
 def main():
+    utf8_output()
     ap = argparse.ArgumentParser(description="Install team-workflow into OpenCode.")
     ap.add_argument("--workspace", help="install for one repository (.opencode)")
     ap.add_argument("--source", help="where updates come from (default: the GitHub repository)")

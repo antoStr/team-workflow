@@ -3,7 +3,7 @@ name: loop-operator
 description: "Operate autonomous agent loops, monitor progress, and intervene safely when loops stall."
 tools: ["Read", "Grep", "Glob", "Bash", "Edit"]
 color: yellow
-source: "ECC agents/loop-operator.md (MIT, affaan-m/everything-claude-code)"
+source: "imported (MIT, see library/NOTICE.md)"
 ---
 
 ## Mission

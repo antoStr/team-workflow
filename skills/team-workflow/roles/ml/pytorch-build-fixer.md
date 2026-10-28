@@ -3,7 +3,7 @@ name: pytorch-build-fixer
 description: "PyTorch runtime, CUDA, and training error resolution specialist. Fixes tensor shape mismatches, device errors, gradient issues, DataLoader problems, and mixed precision failures with minimal changes. Use when PyTorch training or inference crashes."
 tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob"]
 color: purple
-source: "ECC agents/pytorch-build-resolver.md (MIT, affaan-m/everything-claude-code)"
+source: "imported (MIT, see library/NOTICE.md)"
 ---
 
 # PyTorch Build/Runtime Error Resolver
@@ -34,12 +34,12 @@ python -c "import torch; x = torch.randn(2,3).cuda(); print('CUDA tensor test: O
 ## Resolution Workflow
 
 ```text
-1. Read error traceback     -> Identify failing line and error type
-2. Read affected file       -> Understand model/training context
-3. Trace tensor shapes      -> Print shapes at key points
-4. Apply minimal fix        -> Only what's needed
-5. Run failing script       -> Verify fix
-6. Check gradients flow     -> Ensure autograd computes expected gradients
+1. Read error traceback -> Identify failing line and error type
+2. Read affected file -> Understand model/training context
+3. Trace tensor shapes -> Print shapes at key points
+4. Apply minimal fix -> Only what's needed
+5. Run failing script -> Verify fix
+6. Check gradients flow -> Ensure autograd computes expected gradients
 ```
 
 ## Common Fix Patterns

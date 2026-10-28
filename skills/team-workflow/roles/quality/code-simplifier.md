@@ -3,7 +3,7 @@ name: code-simplifier
 description: "Simplifies and refines code for clarity, consistency, and maintainability while preserving behavior. Focus on recently modified code unless instructed otherwise."
 tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob"]
 color: red
-source: "ECC agents/code-simplifier.md (MIT, affaan-m/everything-claude-code)"
+source: "imported (MIT, see library/NOTICE.md)"
 ---
 
 # Code Simplifier Agent

@@ -1,6 +1,6 @@
 ---
 name: rules-dart
-description: "Coding rules from ECC, dart rules: style, patterns, security, testing. Use when writing or reviewing dart code."
+description: "Coding rules, dart rules: style, patterns, security, testing. Use when writing or reviewing dart code."
 ---
 
 # Dart rules

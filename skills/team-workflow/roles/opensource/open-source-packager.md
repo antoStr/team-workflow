@@ -3,7 +3,7 @@ name: open-source-packager
 description: "Generate complete open-source packaging for a sanitized project. Produces CLAUDE.md, setup.sh, README.md, LICENSE, CONTRIBUTING.md, and GitHub issue templates. Makes any repo immediately usable with Claude Code. Third stage of the opensource-pipeline skill."
 tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob"]
 color: green
-source: "ECC agents/opensource-packager.md (MIT, affaan-m/everything-claude-code)"
+source: "imported (MIT, see library/NOTICE.md)"
 ---
 
 # Open-Source Packager
@@ -48,23 +48,23 @@ This is the most important file. Keep it under 100 lines — concise is critical
 ## Quick Start
 
 \`\`\`bash
-./setup.sh              # First-time setup
-{dev command}           # Start development server
-{test command}          # Run tests
+./setup.sh # First-time setup
+{dev command} # Start development server
+{test command} # Run tests
 \`\`\`
 
 ## Commands
 
 \`\`\`bash
 # Development
-{install command}        # Install dependencies
-{dev server command}     # Start dev server
-{lint command}           # Run linter
-{build command}          # Production build
+{install command} # Install dependencies
+{dev server command} # Start dev server
+{lint command} # Run linter
+{build command} # Production build
 
 # Testing
-{test command}           # Run tests
-{coverage command}       # Run with coverage
+{test command} # Run tests
+{coverage command} # Run with coverage
 
 # Docker
 cp .env.example .env
@@ -121,8 +121,8 @@ command -v {package_manager} >/dev/null 2>&1 || { echo "Error: {package_manager}
 
 # Environment
 if [ ! -f .env ]; then
-  cp .env.example .env
-  echo "Created .env from .env.example — edit it with your values"
+ cp .env.example .env
+ echo "Created .env from .env.example — edit it with your values"
 fi
 
 # Dependencies
@@ -133,10 +133,10 @@ echo ""
 echo "=== Setup complete! ==="
 echo ""
 echo "Next steps:"
-echo "  1. Edit .env with your configuration"
-echo "  2. Run: {dev command}"
-echo "  3. Open: http://localhost:{port}"
-echo "  4. Using Claude Code? CLAUDE.md has all the context."
+echo " 1. Edit .env with your configuration"
+echo " 2. Run: {dev command}"
+echo " 3. Open: http://localhost:{port}"
+echo " 4. Using Claude Code? CLAUDE.md has all the context."
 ```
 
 After writing, make it executable: `chmod +x setup.sh`
@@ -186,8 +186,8 @@ Key settings: {list 3-5 most important env vars}
 ## Development
 
 \`\`\`bash
-{dev command}     # Start dev server
-{test command}    # Run tests
+{dev command} # Start dev server
+{test command} # Run tests
 \`\`\`
 
 ## Using with Claude Code
@@ -195,7 +195,7 @@ Key settings: {list 3-5 most important env vars}
 This project includes a \`CLAUDE.md\` that gives Claude Code full context.
 
 \`\`\`bash
-claude    # Start Claude Code — reads CLAUDE.md automatically
+claude # Start Claude Code — reads CLAUDE.md automatically
 \`\`\`
 
 ## License

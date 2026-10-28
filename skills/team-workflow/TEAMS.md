@@ -101,6 +101,7 @@ strongest model with high effort, `doc-keeper` the lightest, the rest the standa
 | `healthcare-reviewer` | domains | clinical safety, PHI and compliance of healthcare code | nothing |
 | `bengali-reviewer` | domains | Bengali text, NLP and localization | nothing |
 | `chief-of-staff` | ops | triage of email, chat and calendar, drafted replies | drafts |
+| `alt-<name>` | alt | an alternative version of a role team-workflow already has (`alt-tdd-guide` next to `tester`, `alt-architect` next to `architect`...): propose one when the user wants a second take or a different style | as the role it mirrors |
 
 The user can add roles or override one (`tw.py agents new <role>`) and choose, per role and per
 app, the agent type: `custom` (the generated agent), `worker`, or a built-in type briefed with

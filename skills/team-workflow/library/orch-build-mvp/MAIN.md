@@ -2,7 +2,7 @@
 name: orch-build-mvp
 description: Orchestrate bootstrapping a working MVP from a design or spec document — ingest the SDD/PRD, plan thin vertical slices, scaffold the first end-to-end slice, then drive a generator-evaluator build loop with review and gated feat commits. Use when a design or spec document must become a running MVP through planned vertical slices.
 metadata:
-  origin: ECC
+ origin: 
 ---
 
 # orch-build-mvp

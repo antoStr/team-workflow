@@ -4,7 +4,7 @@ description: "PostgreSQL database specialist for query optimization, schema desi
 tools: ["Read", "Grep", "Glob", "Bash"]
 color: red
 includes: ["review-discipline"]
-source: "ECC agents/database-reviewer.md (MIT, affaan-m/everything-claude-code)"
+source: "imported (MIT, see library/NOTICE.md)"
 ---
 
 # Database Reviewer

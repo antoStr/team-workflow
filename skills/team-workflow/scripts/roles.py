@@ -10,7 +10,7 @@ Sources, later ones win for the same role name:
 
 Shared blocks in roles/_shared/<name>.md are appended to the body of a role: team-talk and
 untrusted-input to every role, the others when the role's frontmatter lists them in `includes`.
-Roles with `source: "ECC ..."` were imported from Everything Claude Code by tools/import_ecc.py.
+Roles with `source: "imported ..."` come from tools/import_upstream.py (MIT, see library/NOTICE.md).
 
 Native files, written only for enabled roles whose type is "custom" and marked as ours:
     Claude Code  ~/.claude/agents/<role>.md

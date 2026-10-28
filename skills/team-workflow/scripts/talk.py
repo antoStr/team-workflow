@@ -8,6 +8,8 @@ the same channel, and it is never committed. Outside a repository: ~/.team-workf
 Message: {"id", "time", "from", "to" (a role, or null for everyone), "kind", "re" (the id it
 answers), "text"}. A question stays open until a reply with re=its id; a challenge stays open
 until a verdict with re=its id. `open_threads` is the orchestrator's gate before "done".
+<topic>.seen.json keeps, per role, the last message it read: `read --for ROLE` shows only what
+is new for that role, so agents never track ids nor reread the history.
 """
 import json
 import os
@@ -79,7 +81,17 @@ class _Lock:
             pass
 
 
+class Unread(ValueError):
+    """The sender has messages it has not read: they come with the error, already marked read."""
+
+    def __init__(self, msgs):
+        super().__init__("read these first, then post again:\n" + "\n".join(line(m) for m in msgs))
+        self.msgs = msgs
+
+
 def post(topic, sender, text, kind="note", to=None, re_id=None, cwd=None):
+    """Append a message. A sender with unread messages gets them instead (Unread), so nobody
+    answers without knowing what was said meanwhile."""
     if kind not in KINDS:
         raise ValueError(f"kind is one of: {', '.join(KINDS)}")
     if kind in REPLIES and not re_id:
@@ -90,6 +102,10 @@ def post(topic, sender, text, kind="note", to=None, re_id=None, cwd=None):
     os.makedirs(os.path.dirname(file), exist_ok=True)
     with _Lock(file):
         msgs = read(topic, cwd)
+        pending = for_role(msgs, sender, seen(topic, sender, cwd))
+        if pending:  # checked under the lock: nothing can arrive between this and the append
+            mark_seen(topic, sender, msgs[-1]["id"], cwd)
+            raise Unread(pending)
         if re_id and not any(m["id"] == re_id for m in msgs):
             raise ValueError(f"no message #{re_id} in {topic}")
         msg = {"id": len(msgs) + 1, "time": time.strftime("%Y-%m-%dT%H:%M:%S"), "from": sender,
@@ -104,14 +120,56 @@ def for_role(msgs, role, since=0):
     return [m for m in msgs if m["id"] > since and m["from"] != role and m["to"] in (None, role)]
 
 
-def wait(topic, role, since=0, timeout=120, poll=1.0, cwd=None):
-    """Block until a message for the role arrives after `since`, or the timeout; returns them."""
-    end = time.time() + timeout
+def _cursors_path(topic, cwd=None):
+    return path(topic, cwd)[:-len(".jsonl")] + ".seen.json"
+
+
+def seen(topic, role, cwd=None):
+    """The last message id a role has read in a topic (0: nothing yet)."""
+    try:
+        with open(_cursors_path(topic, cwd), encoding="utf-8") as f:
+            return int(json.load(f).get(role, 0))
+    except (OSError, ValueError, AttributeError):
+        return 0
+
+
+def mark_seen(topic, role, last, cwd=None):
+    file = _cursors_path(topic, cwd)
+    os.makedirs(os.path.dirname(file), exist_ok=True)
+    with _Lock(file):
+        try:
+            with open(file, encoding="utf-8") as f:
+                data = json.load(f)
+        except (OSError, ValueError):
+            data = {}
+        data[role] = max(int(data.get(role, 0)), last)
+        with open(file, "w", encoding="utf-8") as f:
+            json.dump(data, f)
+
+
+def unread(topic, role, since=None, cwd=None):
+    """Messages for a role it has not read yet (after `since` when given), marked read now."""
+    msgs = read(topic, cwd)
+    found = for_role(msgs, role, seen(topic, role, cwd) if since is None else since)
+    if msgs:
+        mark_seen(topic, role, msgs[-1]["id"], cwd)
+    return found
+
+
+def wait(topic, role, since=None, timeout=120, poll=1.0, cwd=None):
+    """Block until a message for the role arrives (unread, or after `since`), or the timeout.
+    Returns (messages, seconds waited)."""
+    start = time.time()
+    if role and since is None:
+        since = seen(topic, role, cwd)
+    since = since or 0
     while True:
-        found = for_role(read(topic, cwd), role, since) if role else [
-            m for m in read(topic, cwd) if m["id"] > since]
-        if found or time.time() >= end:
-            return found
+        msgs = read(topic, cwd)
+        found = for_role(msgs, role, since) if role else [m for m in msgs if m["id"] > since]
+        if found or time.time() - start >= timeout:
+            if role and msgs:
+                mark_seen(topic, role, msgs[-1]["id"], cwd)
+            return found, round(time.time() - start)
         time.sleep(poll)
 
 
@@ -125,6 +183,17 @@ def open_threads(msgs):
             and not set(replies.get(m["id"], [])) & set(CLOSED_BY[m["kind"]])]
 
 
+def unread_by_role(topic, cwd=None):
+    """{role: [ids]} of the messages addressed to a role that it has not read yet."""
+    msgs = read(topic, cwd)
+    found = {}
+    for role in sorted({m["to"] for m in msgs if m.get("to")}):
+        ids = [m["id"] for m in for_role(msgs, role, seen(topic, role, cwd)) if m["to"] == role]
+        if ids:
+            found[role] = ids
+    return found
+
+
 def topics(cwd=None):
     folder = channel_dir(cwd)
     names = sorted(n[:-6] for n in os.listdir(folder) if n.endswith(".jsonl")) if os.path.isdir(folder) else []
@@ -134,9 +203,13 @@ def topics(cwd=None):
 def clear(topic, cwd=None):
     try:
         os.remove(path(topic, cwd))
-        return True
     except FileNotFoundError:
         return False
+    try:
+        os.remove(_cursors_path(topic, cwd))
+    except FileNotFoundError:
+        pass
+    return True
 
 
 def line(m):

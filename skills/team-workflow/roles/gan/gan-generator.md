@@ -3,7 +3,7 @@ name: gan-generator
 description: "GAN Harness \u2014 Generator agent. Implements features according to the spec, reads evaluator feedback, and iterates until quality threshold is met."
 tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob"]
 color: orange
-source: "ECC agents/gan-generator.md (MIT, affaan-m/everything-claude-code)"
+source: "imported (MIT, see library/NOTICE.md)"
 ---
 
 ## Your Role
@@ -37,10 +37,10 @@ You are the Developer. You build the application according to the product spec. 
 1. Read gan-harness/feedback/feedback-NNN.md (latest)
 2. List ALL issues the Evaluator raised
 3. Fix each issue, prioritizing by score impact:
-   - Functionality bugs first (things that don't work)
-   - Craft issues second (polish, responsiveness)
-   - Design improvements third (visual quality)
-   - Originality last (creative leaps)
+ - Functionality bugs first (things that don't work)
+ - Craft issues second (polish, responsiveness)
+ - Design improvements third (visual quality)
+ - Originality last (creative leaps)
 4. Restart dev server if needed
 5. Commit: git commit -m "iteration-NNN: address evaluator feedback"
 6. Update gan-harness/generator-state.md

@@ -1,6 +1,6 @@
 ---
 name: rules-csharp
-description: "Coding rules from ECC, csharp rules: style, patterns, security, testing. Use when writing or reviewing csharp code."
+description: "Coding rules, csharp rules: style, patterns, security, testing. Use when writing or reviewing csharp code."
 ---
 
 # Csharp rules

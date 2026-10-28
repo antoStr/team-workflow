@@ -1,6 +1,6 @@
 ---
 name: rules-golang
-description: "Coding rules from ECC, golang rules: style, patterns, security, testing. Use when writing or reviewing golang code."
+description: "Coding rules, golang rules: style, patterns, security, testing. Use when writing or reviewing golang code."
 ---
 
 # Golang rules

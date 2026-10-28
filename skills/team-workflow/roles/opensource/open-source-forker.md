@@ -3,7 +3,7 @@ name: open-source-forker
 description: "Fork any project for open-sourcing. Copies files, strips secrets and credentials (20+ patterns), replaces internal references with placeholders, generates .env.example, and cleans git history. First stage of the opensource-pipeline skill."
 tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob"]
 color: green
-source: "ECC agents/opensource-forker.md (MIT, affaan-m/everything-claude-code)"
+source: "imported (MIT, see library/NOTICE.md)"
 ---
 
 # Open-Source Forker
@@ -38,9 +38,9 @@ find SOURCE_DIR -type f | grep -v node_modules | grep -v .git | grep -v __pycach
 ```bash
 mkdir -p TARGET_DIR
 rsync -av --exclude='.git' --exclude='node_modules' --exclude='__pycache__' \
-  --exclude='.env*' --exclude='*.pyc' --exclude='.venv' --exclude='venv' \
-  --exclude='.claude/' --exclude='.secrets/' --exclude='secrets/' \
-  SOURCE_DIR/ TARGET_DIR/
+ --exclude='.env*' --exclude='*.pyc' --exclude='.venv' --exclude='venv' \
+ --exclude='.claude/' --exclude='.secrets/' --exclude='secrets/' \
+ SOURCE_DIR/ TARGET_DIR/
 ```
 
 ### Step 3: Secret Detection and Stripping

@@ -16,7 +16,9 @@ it and go straight to the board. Skip it when the user says "defaults" or "skip 
    the app offers to native agents and to workers, every enabled role with its current type,
    model, effort and how it really runs, and when each can be changed. The user must see this
    before any question. (`--json` gives the same data for you; `--app all` the three apps.)
-2. One call, single choice: the **preset** for this conversation: "Keep my settings
+2. One call, two single-choice questions: **where the choices go**, "This conversation only
+   (Recommended)", "My defaults for every project" (user file), "This project's defaults"
+   (project file; in a git repository only), and the **preset**: "Keep my settings
    (Recommended)", `budget`, `fast`, `thorough`, `security`, `research`.
 3. One call, multi-select: the **roles** this conversation will use ("Who builds?", "Who
    checks?", the enabled roles the likely work needs first); mention packs that are off when
@@ -50,13 +52,24 @@ it and go straight to the board. Skip it when the user says "defaults" or "skip 
      many there are and let the user narrow the words. Take the effort from that model's
      variants only (none listed = no effort question) and ask it once for "all roles" or per
      role, as the user chose. Never answer "only these models exist" from the short list.
-5. Always show the session recap (a code block: one block per role with type, model, effort,
-   native or worker, and the preset) before asking to confirm; never skip it. Show the session board (one block per role: type, model, effort, native or worker) and ask,
-   single choice: "Use for this conversation (Recommended)", "Use and save as my defaults",
-   "Use and save for this project", "Change". Saving runs `tw.py agents set <role> model=...
-   effort=... [--app <app>] [--project]` (and `tw.py profile <name>` for a preset); native
-   agents pick saved changes up after the app restarts, so for this conversation keep the
-   worker launch where step 4 said so.
+5. One call, up to two multi-select questions: the **skills** and the **add-ons** for this
+   conversation. Skills: run `tw.py library search <words of the task, or the repository's
+   languages> --json` and offer the three best entries plus `rules-<language>` of the
+   repository; chosen entries are given to the agents by path (nothing is installed unless the
+   scope is a default: then `tw.py library enable <id> [--project]`). Add-ons: the bundles not
+   chosen yet (`frontend`, `token-saving`, `mcp`, `popular`, from step 1) and single add-ons
+   the work needs; installing one downloads it and writes the apps' configuration, so run
+   `tw.py addons add <name>` only for what the user picked, and say a restart loads it.
+6. When two or more roles were chosen, one single choice for **team talk** (`TALK.md`): "On,
+   up to 3 rounds (Recommended)", "On, 1 round (cheaper)", "Off: each agent reports only to
+   you". Skip it with one role.
+7. Always show the session recap before asking to confirm; never skip it: a code block with
+   the scope, the preset, one block per role (type, model, effort, native or worker), the
+   skills, the add-ons and team talk. Ask, single choice: "Start (Recommended)", "Change".
+   With a default scope, save: `tw.py agents set <role> model=... effort=... [--app <app>]
+   [--project]`, `tw.py profile <name> [--project]`, `tw.py settings set talk|talk_rounds ...
+   [--project]`; native agents pick saved changes up after the app restarts, so for this
+   conversation keep the worker launch where step 4 said so.
 
 ## 0. Settings and the models on offer
 

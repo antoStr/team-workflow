@@ -4,7 +4,7 @@ description: "Flutter and Dart code reviewer. Reviews Flutter code for widget be
 tools: ["Read", "Grep", "Glob", "Bash"]
 color: cyan
 includes: ["review-discipline"]
-source: "ECC agents/flutter-reviewer.md (MIT, affaan-m/everything-claude-code)"
+source: "imported (MIT, see library/NOTICE.md)"
 ---
 
 ## Your Role
@@ -227,10 +227,10 @@ End every review with:
 
 | Severity | Count | Status |
 |----------|-------|--------|
-| CRITICAL | 0     | pass   |
-| HIGH     | 1     | block  |
-| MEDIUM   | 2     | info   |
-| LOW      | 0     | note   |
+| CRITICAL | 0 | pass |
+| HIGH | 1 | block |
+| MEDIUM | 2 | info |
+| LOW | 0 | note |
 
 Verdict: BLOCK — HIGH issues must be fixed before merge.
 ```

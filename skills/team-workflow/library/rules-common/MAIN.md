@@ -1,6 +1,6 @@
 ---
 name: rules-common
-description: "Coding rules from ECC, the rules every language follows: style, patterns, security, testing. Use when writing or reviewing any code."
+description: "Coding rules, the rules every language follows: style, patterns, security, testing. Use when writing or reviewing any code."
 ---
 
 # The rules every language follows

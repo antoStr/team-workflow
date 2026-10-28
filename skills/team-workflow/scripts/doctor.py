@@ -1,5 +1,5 @@
 """Health check, repair and clean uninstall of team-workflow in Claude Code and agy (the doctor,
-repair and uninstall tools ECC keeps for Pro, here local and free).
+repair and uninstall, local and free).
 
     checks(root)            -> [(status, area, message)]   status: ok, warn, fail
     repair(root)            -> [message]                    what --fix changed
@@ -127,7 +127,7 @@ def checks(root=None):
         project = roles.shadowed(app, root, config)
         if project:
             add("warn", f"{app} agents", "in this repository, project agents with the same name "
-                "replace these roles (for example ECC's): " + ", ".join(project))
+                "replace these roles: " + ", ".join(project))
 
     for name, entry in addons.chosen(config).items():
         for app in entry.get("apps", addons.APPS):

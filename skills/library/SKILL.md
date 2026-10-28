@@ -1,6 +1,6 @@
 ---
 name: library
-description: The ECC library inside team-workflow - 311 skills, 97 commands and 22 rule sets from Everything Claude Code - list packs, search entries for a task, show one, install packs or entries as native skills (no tokens in Claude Code; in agy run `!team-workflow library`)
+description: The library inside team-workflow - 296 skills, 94 commands and 22 coding rule sets - list packs, search entries for a task, show one, install packs or entries as native skills (no tokens in Claude Code; in agy run `!team-workflow library`)
 argument-hint: "[list [PACK...] | search WORDS | show ID | enable|disable ID|PACK [--project] | sync]"
 disable-model-invocation: true
 ---

@@ -50,7 +50,7 @@ DEFAULTS = {
     # still be switched off with enabled.<role> false.
     "packs": {"default": False, "core": True, "custom": True},
     "enabled": {"default": True},
-    # The ECC library (`tw.py library`): packs or single entries installed as native skills.
+    # The library (`tw.py library`): packs or single entries installed as native skills.
     # Off by default: the orchestrator searches the library and briefs agents with the paths.
     "library": {"packs": {"default": False}, "skills": {"default": False}},
     # Add-on plugins chosen with `tw.py addons add`; `update` refreshes them too.

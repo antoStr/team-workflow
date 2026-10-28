@@ -1,6 +1,6 @@
 ---
 name: rules-php
-description: "Coding rules from ECC, php rules: style, patterns, security, testing. Use when writing or reviewing php code."
+description: "Coding rules, php rules: style, patterns, security, testing. Use when writing or reviewing php code."
 ---
 
 # Php rules

@@ -3,7 +3,7 @@ name: react-build-fixer
 description: "Diagnose and fix React build failures across Vite, webpack, Next.js, CRA, Parcel, esbuild, and Bun. Handles JSX/TSX compile errors, hydration mismatches, server/client component boundary failures, missing types, and bundler-specific configuration issues with minimal, surgical changes. MUST BE USED when a React build fails."
 tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob"]
 color: cyan
-source: "ECC agents/react-build-resolver.md (MIT, affaan-m/everything-claude-code)"
+source: "imported (MIT, see library/NOTICE.md)"
 ---
 
 # React Build Resolver
@@ -30,13 +30,13 @@ This agent owns **React build / bundler / runtime hydration** failures. For pure
 Run in order, stop at first match:
 
 ```bash
-test -f next.config.js -o -f next.config.ts -o -f next.config.mjs   # Next.js
-test -f vite.config.js -o -f vite.config.ts -o -f vite.config.mjs   # Vite
-test -f rsbuild.config.js -o -f rsbuild.config.ts                   # Rsbuild
-grep -l "react-scripts" package.json                                # CRA
-test -f webpack.config.js -o -f webpack.config.ts                   # webpack
-{ test -f .parcelrc || grep -q '"parcel"' package.json; }          # Parcel
-{ test -f bunfig.toml && grep -q '"bun"' package.json; }           # Bun
+test -f next.config.js -o -f next.config.ts -o -f next.config.mjs # Next.js
+test -f vite.config.js -o -f vite.config.ts -o -f vite.config.mjs # Vite
+test -f rsbuild.config.js -o -f rsbuild.config.ts # Rsbuild
+grep -l "react-scripts" package.json # CRA
+test -f webpack.config.js -o -f webpack.config.ts # webpack
+{ test -f .parcelrc || grep -q '"parcel"' package.json; } # Parcel
+{ test -f bunfig.toml && grep -q '"bun"' package.json; } # Bun
 ```
 
 ## Diagnostic Commands
@@ -57,23 +57,23 @@ npm run typecheck --if-present
 test -f tsconfig.json && npx --no-install tsc --noEmit -p tsconfig.json
 
 # Bundler-specific
-next build                          # Next.js
-vite build                          # Vite
-react-scripts build                 # CRA
-webpack --mode=production           # webpack
-parcel build src/index.html         # Parcel
+next build # Next.js
+vite build # Vite
+react-scripts build # CRA
+webpack --mode=production # webpack
+parcel build src/index.html # Parcel
 bun build ./src/index.tsx --outdir=dist
 ```
 
 ## Resolution Workflow
 
 ```
-1. Run build               -> capture full error output
-2. Identify the layer      -> TypeScript / bundler config / runtime / hydration
-3. Read affected file      -> understand context
-4. Apply minimal fix       -> only what the error demands
-5. Re-run build            -> verify fix; if it surfaces a new error, treat as a fresh diagnosis (do not bundle unrelated fixes)
-6. Run tests if present    -> ensure fix did not regress behavior
+1. Run build -> capture full error output
+2. Identify the layer -> TypeScript / bundler config / runtime / hydration
+3. Read affected file -> understand context
+4. Apply minimal fix -> only what the error demands
+5. Re-run build -> verify fix; if it surfaces a new error, treat as a fresh diagnosis (do not bundle unrelated fixes)
+6. Run tests if present -> ensure fix did not regress behavior
 ```
 
 ## Common Failure Patterns
@@ -153,9 +153,9 @@ Common triggers:
 ### Dependency Issues
 
 ```bash
-npm ls react                       # check for duplicates
-npm ls @types/react                # check version alignment
-npm dedupe                         # consolidate duplicates
+npm ls react # check for duplicates
+npm ls @types/react # check version alignment
+npm dedupe # consolidate duplicates
 # Only when `npm ls react` reports duplicates or a version mismatch with `@types/react`.
 # Upgrade react and react-dom as a pair (matching the major already in use) — never independently.
 # Replace <major> with the project's React major (17 / 18 / 19); jumping majors is a separate, deliberate change.
@@ -203,5 +203,5 @@ Final: `Build Status: SUCCESS | Errors Fixed: N | Files Modified: <list>` or `Bu
 
 - Agent: `react-reviewer` for code review after build is green
 - Rules: `rules/react/coding-style.md`, `rules/react/patterns.md`
-- Skills: `skills/react-patterns/`, `skills/frontend-patterns/`
+- Skills: the `react-patterns` library entry (`tw.py library show react-patterns`)/`, the `frontend-patterns` library entry (`tw.py library show frontend-patterns`)/`
 - Commands: `/react-build`, `/react-review`

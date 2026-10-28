@@ -3,7 +3,7 @@ name: build-fixer
 description: "Build and TypeScript error resolution specialist. Use PROACTIVELY when build fails or type errors occur. Fixes build/type errors only with minimal diffs, no architectural edits. Focuses on getting the build green quickly."
 tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob"]
 color: red
-source: "ECC agents/build-error-resolver.md (MIT, affaan-m/everything-claude-code)"
+source: "imported (MIT, see library/NOTICE.md)"
 ---
 
 # Build Error Resolver
@@ -23,7 +23,7 @@ You are an expert build error resolution specialist. Your mission is to get buil
 
 ```bash
 npx tsc --noEmit --pretty
-npx tsc --noEmit --pretty --incremental false   # Show all errors
+npx tsc --noEmit --pretty --incremental false # Show all errors
 npm run build
 npx eslint . --ext .ts,.tsx,.js,.jsx
 ```

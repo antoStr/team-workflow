@@ -1,18 +1,18 @@
 ---
 name: prompt-caching-strategy
 description: >-
-  Optimize LLM prompt caching hit rate to reduce API costs and improve latency.
-  Analyzes prompt structure, identifies cacheable vs non-cacheable content,
-  and recommends restructuring to maximize cache reuse.
-  TRIGGER when: user says "prompt cache", "cache hit rate", "reduce LLM cost",
-  "optimize token usage", "cheaper LLM calls", or asks about prompt caching
-  strategies for OpenAI/Anthropic/other providers.
-  DO NOT TRIGGER when: user just wants to optimize a single prompt's quality
-  (use prompt-optimizer instead), or asks about general caching infrastructure.
+ Optimize LLM prompt caching hit rate to reduce API costs and improve latency.
+ Analyzes prompt structure, identifies cacheable vs non-cacheable content,
+ and recommends restructuring to maximize cache reuse.
+ TRIGGER when: user says "prompt cache", "cache hit rate", "reduce LLM cost",
+ "optimize token usage", "cheaper LLM calls", or asks about prompt caching
+ strategies for OpenAI/Anthropic/other providers.
+ DO NOT TRIGGER when: user just wants to optimize a single prompt's quality
+ (use prompt-optimizer instead), or asks about general caching infrastructure.
 metadata:
-  origin: community
-  author: cyberspace-cs
-  version: "1.0.0"
+ origin: community
+ author: cyberspace-cs
+ version: "1.0.0"
 ---
 
 # Prompt Caching Strategy

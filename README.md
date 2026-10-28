@@ -10,21 +10,25 @@ quando servono, e un report a fine lavoro che chiede prima di applicare modifich
 | Promemoria per aggiornare `STATE.md` | hook Stop | hook Stop | 2.x: nelle istruzioni; 1.x: plugin (`session.idle`) |
 | Comandi (`setup-memory`, `call-team`, `write-docs`, `usage-costs`...) | `/team-workflow:<nome>` | skill con lo stesso nome | `/team-workflow/<nome>` |
 | Agenti nativi: 20 del core + pack opzionali + i tuoi | `~/.claude/agents/` | `~/.gemini/config/agents/` (`invoke_subagent`) | `~/.config/opencode/agents/` (strumento subagent) |
-| Wizard a inizio conversazione: preset, agenti, modello ed effort tra quelli offerti | si' | si' | si' |
+| Wizard a inizio conversazione: dove salvare le scelte (conversazione, utente, progetto), preset, agenti, modello ed effort per app, skill, add-on, team talk | si' | si' | si' |
 | Token misurati nella dashboard | sessioni e sub-agenti | solo i worker | sessioni, sub-agenti e worker |
 | Comandi senza token (impostazioni, agenti, add-on, audit, doctor...) | `/team-workflow:<comando>` | `!team-workflow <comando>` | `/team-workflow/<comando>` (1.x: 0 token; 2.x: il modello mostra solo l'output) e `!team-workflow <comando>` |
-| Add-on: caveman, ponytail, ECC, il set frontend o qualsiasi plugin | marketplace (o skill copiate) | plugin, skill o installer di ECC | skill, plugin in `opencode.json` o installer di ECC |
+| Add-on: skill, plugin e server MCP, anche a pacchetti (`frontend`, `token-saving`, `mcp`, `popular`) | marketplace, skill copiate, `claude mcp add` | plugin o skill copiate, `mcp_config.json` | skill copiate, plugin e `mcp` in `opencode.json` |
 | Agenti che parlano tra loro (team talk) | si' | si' | si' |
-| Libreria ECC: 311 skill, 97 comandi, 22 set di regole | ricerca + skill native a scelta | ricerca + skill native a scelta | ricerca + skill native a scelta |
+| Libreria: 296 skill, 94 comandi, 22 set di regole | ricerca + skill native a scelta | ricerca + skill native a scelta | ricerca + skill native a scelta |
 | Attivazione automatica o solo quando la chiami | si' | solo il controllo Stop | si' |
 
-## Novita' della 0.9.0
+## Novita' della 0.9
 
-- **Tutto Everything Claude Code dentro team-workflow**: 88 agenti (32 nuovi da ECC in nuovi
-  pack: frameworks, gan, network, domains, ops, e in quality, planning, harness, ml,
-  opensource) e una libreria di 430 voci (311 skill, 97 comandi, 22 set di regole) che
-  l'orchestratore cerca per ogni compito. Elenco completo nel
-  [Catalogo completo](#catalogo-completo-versione-090).
+- **127 agenti**: 20 nel core, 26 per 13 linguaggi, e i pack frameworks, quality, planning,
+  ml, harness, gan, opensource, network, domains, ops, growth; il pack `alt` aggiunge 39
+  versioni alternative di ruoli che esistono gia' (`alt-<nome>`). Elenco completo nel
+  [Catalogo completo](#catalogo-completo-versione-091).
+- **Libreria di 412 voci** (296 skill, 94 comandi, 22 set di regole) che l'orchestratore cerca
+  per ogni compito e passa agli agenti; le installi come skill native a pacchetti o una alla
+  volta (`/team-workflow:library`). Contiene solo voci che funzionano da sole.
+- **Add-on, MCP e pacchetti**: `addons add frontend | token-saving | mcp | popular` installa
+  in un colpo skill, plugin e server MCP in Claude Code, agy e OpenCode (vedi [Add-on](#add-on)).
 - **Agenti che parlano tra loro**: canale condiviso per fare debug insieme, contestarsi le
   affermazioni con le prove e verificarsi a vicenda (`/team-workflow:talk`, `TALK.md`).
 - **`/team-workflow:setup`**: tutte le impostazioni in un posto, compresa l'attivazione
@@ -50,13 +54,16 @@ quando servono, e un report a fine lavoro che chiede prima di applicare modifich
   (`tw.py talk`, anche tra worktree diversi). Si fanno domande, mettono in dubbio le
   affermazioni degli altri con le prove, verificano le correzioni e danno un verdetto; il
   lavoro non e' finito finche' resta aperta una sfida. Tre modi: debug insieme, review
-  incrociata, confronto su una decisione (`TALK.md`). Leggi la conversazione con
+  incrociata, confronto su una decisione (`TALK.md`). Ogni ruolo legge solo i messaggi nuovi
+  per lui (`read --for <ruolo>`), chiede e aspetta la risposta in un solo comando
+  (`post ... --wait 90`), e non puo' scrivere finche' non ha letto quello che gli e' arrivato:
+  niente correzioni incrociate ne' messaggi persi. `talk open` mostra sfide aperte e messaggi non
+  letti. In una prova con un bug segnalato, il tester ne ha trovati altri due e li ha fatti
+  correggere e verificare in circa un minuto e mezzo. Leggi la conversazione con
   `/team-workflow:talk read <topic>`.
-- **Tutto ECC dentro team-workflow**: i 32 agenti di Everything Claude Code che mancavano sono
-  ruoli nei pack (frameworks, quality, planning, harness, gan, network, domains, ops...); gli
-  altri 39 erano gia' coperti dai ruoli esistenti. Le 311 skill, i 97 comandi e le 22 serie di
-  regole sono una libreria che l'orchestratore cerca per ogni compito e passa agli agenti, e
-  che puoi installare come skill native a pacchetti o una alla volta (`/team-workflow:library`).
+- **Libreria**: 296 skill, 94 comandi e 22 serie di regole che l'orchestratore cerca per ogni
+  compito e passa agli agenti, e che puoi installare come skill native a pacchetti o una alla
+  volta (`/team-workflow:library`).
 
 ## I team e gli agenti
 
@@ -99,10 +106,11 @@ quando servono:
 | `network` | network-architect, network-config-reviewer, network-troubleshooter, homelab-architect |
 | `domains` | healthcare-reviewer, bengali-reviewer |
 | `ops` | chief-of-staff |
+| `alt` | 39 versioni alternative di ruoli che esistono gia': `alt-tdd-guide` accanto a `tester`, `alt-architect`, `alt-code-reviewer`... |
 | `growth` | seo-specialist |
 
-I ruoli con `source: "ECC ..."` sono importati da Everything Claude Code (MIT) con
-`tools/import_ecc.py`, che ricostruisce anche la libreria: rilancialo dopo un aggiornamento di ECC.
+I ruoli con `source: "imported ..."` e la libreria arrivano da una raccolta open source con
+licenza MIT (`skills/team-workflow/library/NOTICE.md`); `tools/import_upstream.py` li ricostruisce.
 
 `/team-workflow:agents enable auto` accende i pack dei linguaggi del repository (all'avvio
 l'orchestratore te lo propone quando li trova). Ogni linguaggio e' un solo file
@@ -160,7 +168,7 @@ modalita' bash, `!team-workflow <comando>`):
 | `/team-workflow:doctor [--fix]` | stato dell'installazione e riparazione |
 | `/team-workflow:ci-init` | workflow GitHub Actions: memoria e audit su ogni pull request |
 | `/team-workflow:update-plugin [check]` | aggiorna team-workflow (e gli add-on scelti) in entrambe le app |
-| `/team-workflow:library [search <parole>\|show <id>\|enable\|disable <id\|pack>]` | la libreria ECC: pack, ricerca, installazione come skill native |
+| `/team-workflow:library [search <parole>\|show <id>\|enable\|disable <id\|pack>]` | la libreria: pack, ricerca, installazione come skill native |
 | `/team-workflow:talk [read\|open\|clear <topic>]` | cosa si sono detti gli agenti, domande e sfide ancora aperte |
 
 In agy crea una volta il comando `team-workflow`:
@@ -171,38 +179,39 @@ Da terminale ci sono anche `team-workflow learn` e `team-workflow uninstall [--a
 
 `/team-workflow:addons` elenca il catalogo con le versioni installate in ogni app; `add` installa,
 `update` aggiorna, `remove` toglie, e `update-plugin` aggiorna anche gli add-on scelti.
-`addons add frontend` installa insieme impeccable, taste, frontend-design, solar-icons e
-cloudflare: `frontend-dev`, `ui-ux-designer` e `accessibility-specialist` le usano quando ci
-sono; `security-reviewer`, `backend-dev` e `devops-engineer` usano le skill Cloudflare nei
-progetti su Cloudflare (la sicurezza: `cloudflare-one` per Zero Trust, `turnstile-spin`,
-`workers-best-practices`).
+Pacchetti, installati con un solo comando in ogni app:
 
-| Add-on | Cosa aggiunge | Claude Code | agy |
+| Pacchetto | Contiene |
+|---|---|
+| `frontend` | impeccable, taste, frontend-design, solar-icons, cloudflare: `frontend-dev`, `ui-ux-designer` e `accessibility-specialist` le usano quando ci sono; `security-reviewer`, `backend-dev` e `devops-engineer` usano le skill Cloudflare nei progetti su Cloudflare (`cloudflare-one` per Zero Trust, `turnstile-spin`, `workers-best-practices`) |
+| `token-saving` | caveman (risposte compresse), ponytail (meno codice), context-mode (output enormi fuori dal contesto), serena (navigazione per simboli invece di file interi) |
+| `mcp` | context7 (documentazione aggiornata delle librerie), playwright (browser), serena, sequential-thinking |
+| `popular` | superpowers, le skill di Anthropic (documenti ed esempi), karpathy, ui-ux-pro-max, context7 |
+
+Un server MCP va al livello utente: `claude mcp add --scope user` in Claude Code,
+`~/.gemini/config/mcp_config.json` in agy, la tabella `mcp` di `~/.config/opencode/opencode.json`
+in OpenCode. Un server con lo stesso nome che hai configurato tu non viene toccato.
+
+| Add-on | Cosa aggiunge | Claude Code | agy e OpenCode |
 |---|---|---|---|
 | `caveman` | risposte compresse, meno token in uscita (licenza MIT e BSL) | marketplace | le sue skill copiate in `~/.gemini/config/skills` |
 | `ponytail` | la soluzione piu' semplice che funziona, meno codice | marketplace | `agy plugin install` |
-| `ecc` | Everything Claude Code: 68 agenti, 292 skill, regole e hook | marketplace | installer di ECC per Antigravity, nel progetto |
 | `impeccable` | design, critica, audit e rifinitura delle interfacce (Apache-2.0) | marketplace | le sue skill copiate |
 | `taste` | direzione artistica anti-"AI slop" per siti e schermate (MIT) | marketplace | le sue skill copiate |
 | `frontend-design` | la skill frontend-design di Anthropic (Apache-2.0) | marketplace ufficiale | la skill copiata |
 | `solar-icons` | icone Solar: nomi esatti e import per framework (MIT, icone CC BY 4.0) | skill copiata in `~/.claude/skills` | la skill copiata |
 | `cloudflare` | skill Cloudflare: Workers best practices, Zero Trust (`cloudflare-one`), Turnstile, web perf (Apache-2.0) | marketplace | le sue skill copiate |
+| `superpowers` | flusso piano, test, esecuzione, review, chiusura (MIT) | marketplace | skill copiate |
+| `anthropic-docs` | skill di Anthropic per Word, PDF, PowerPoint, Excel | marketplace | skill copiate |
+| `anthropic-examples` | skill di Anthropic: skill-creator, mcp-builder, webapp-testing... (Apache-2.0) | marketplace | skill copiate |
+| `karpathy` | linee guida di codice: modifiche semplici, mirate, verificate | marketplace | skill copiate |
+| `ui-ux-pro-max` | regole di design UI/UX, palette, font, design system (MIT) | marketplace | skill copiate |
+| `context-mode` | tiene fuori dal contesto gli output enormi degli strumenti | marketplace | server MCP |
+| `context7` | documentazione aggiornata e per versione delle librerie (MIT) | marketplace | server MCP |
+| `playwright` | un browser vero che gli agenti guidano (Apache-2.0) | server MCP | server MCP |
+| `serena` | navigazione e modifica del codice per simboli: meno file letti, meno token (serve `uv`) | server MCP | server MCP |
+| `sequential-thinking` | ragionamento passo per passo sui problemi difficili (MIT) | server MCP | server MCP |
 | qualsiasi altro | `addons add owner/repo` o `addons add plugin@marketplace` (per esempio uno del marketplace ufficiale Anthropic) | marketplace | plugin se ha `plugin.json`, altrimenti le sue skill |
-
-## team-workflow e le funzioni Pro di ECC
-
-ECC e' open source (MIT); la parte a pagamento, ECC Pro (19 dollari per utente al mese), e' un
-servizio ospitato su GitHub. team-workflow offre in locale, gratis e senza limiti di commit, le
-funzioni equivalenti:
-
-| ECC Pro (servizio ospitato) | team-workflow (locale) |
-|---|---|
-| analisi dei repository privati, fino a 1.000-5.000 commit | `learn-history`: tutta la storia git, in locale |
-| audit su pull request e push | `ci-init`: workflow GitHub Actions con memcheck e audit |
-| scansione AgentShield | `audit`: segreti, permessi, hook, server MCP, prompt injection, testo invisibile |
-| profili security e research | `profile security`, `profile research` (e budget, fast, thorough) |
-| doctor, repair, uninstall | `doctor --fix`, `uninstall` |
-| regole personalizzate (Enterprise) | `~/.team-workflow/audit-rules.json` e `.team-workflow-audit.json` |
 
 ## Wizard di assegnazione
 
@@ -346,10 +355,6 @@ prima sessione in un repository git: Claude Code li carica dalla sessione succes
 lo ricorda; nel frattempo l'orchestratore usa `general-purpose` con le istruzioni del ruolo).
 `/team-workflow:doctor` controlla che sia tutto a posto.
 
-Con ECC installato in un progetto per agy, i suoi agenti con lo stesso nome (`architect`,
-`code-reviewer`, `security-reviewer` e i revisori dei linguaggi) sostituiscono i nostri in quel
-progetto: `doctor` e `addons add ecc` li elencano. In Claude Code non succede (i suoi sono `ecc:*`).
-
 ## Impostazioni
 
 Tutti i comportamenti si cambiano senza toccare il plugin: `/team-workflow:settings` (in agy
@@ -362,9 +367,9 @@ repository (`.team-workflow.json`); `settings reset <chiave>` torna al valore pr
 | `activation` | `auto` | `auto`: ogni sessione in un repository carica memoria, protocollo e controllo Stop; `manual`: team-workflow resta zitto finche' non lo chiami. Solo in alcuni progetti: `manual` per l'utente e `auto --project` in quei progetti |
 | `talk` | `true` | gli agenti di un compito parlano tra loro sul canale condiviso (`TALK.md`) |
 | `talk_rounds` | `3` | quanti giri di risposte al massimo prima di portarti il disaccordo |
-| `library.packs.<pack>` | spenti | pack della libreria ECC installati come skill native |
+| `library.packs.<pack>` | spenti | pack della libreria installati come skill native |
 | `library.skills.<id>` | - | una singola voce della libreria, accesa o spenta (vince sul pack) |
-| `session_wizard` | `true` | a inizio conversazione chiede preset, agenti, modello ed effort tra quelli offerti dall'app |
+| `session_wizard` | `true` | a inizio conversazione chiede dove salvare le scelte, preset, agenti, modello ed effort tra quelli offerti dall'app, skill, add-on e team talk |
 | `wizard` | `quick` | `quick`: riepilogo con le scelte consigliate, domande solo per chi vuoi cambiare; `full`: tutte le domande; `off`: nessuna |
 | `max_agents` | `4` | quanti agenti propone al massimo senza chiedere |
 | `launch` | `native` | `native` (sub-agenti dell'app) o `worker` (processi headless con modello ed effort esatti) |
@@ -422,11 +427,11 @@ per percorsi citati che nel repository non esistono.
 
 <!-- catalog:begin (generated by tools/readme_catalog.py: do not edit by hand) -->
 
-## Catalogo completo (versione 0.9.0)
+## Catalogo completo (versione 0.9.1)
 
-### Tutti gli agenti (88)
+### Tutti gli agenti (127)
 
-`ECC` = importato da Everything Claude Code. Accendi un pack con `/team-workflow:agents enable <pack>` (il core e' sempre acceso).
+20 nel core, 81 negli altri pack, 26 nei pack dei linguaggi; il pack `alt` raccoglie versioni alternative di ruoli che esistono gia' (`alt-<nome>`). Accendi un pack con `/team-workflow:agents enable <pack>` (il core e' sempre acceso).
 
 <details><summary><b>core</b> (20)</summary>
 
@@ -459,14 +464,14 @@ per percorsi citati che nel repository non esistono.
 
 | Agente | Cosa fa |
 |---|---|
-| `django-build-fixer` `ECC` | Django/Python build, migration, and dependency error resolution specialist. |
-| `django-reviewer` `ECC` | Expert Django code reviewer specializing in ORM correctness, DRF patterns, migration safety, security misconfigurations, and production-grade Django practices. |
-| `fastapi-reviewer` `ECC` | Reviews FastAPI applications for async correctness, dependency injection, Pydantic schemas, security, OpenAPI quality, testing, and production readiness. |
-| `flutter-reviewer` `ECC` | Flutter and Dart code reviewer. |
-| `harmonyos-specialist` `ECC` | HarmonyOS application development expert specializing in ArkTS and ArkUI. |
-| `react-build-fixer` `ECC` | Diagnose and fix React build failures across Vite, webpack, Next.js, CRA, Parcel, esbuild, and Bun. |
-| `react-reviewer` `ECC` | Expert React/JSX code reviewer specializing in hook correctness, render performance, server/client component boundaries, accessibility, and React-specific… |
-| `vue-reviewer` `ECC` | Expert Vue.js code reviewer specializing in Composition API correctness, reactivity pitfalls, component architecture, template security, and Vue-specific… |
+| `django-build-fixer` | Django/Python build, migration, and dependency error resolution specialist. |
+| `django-reviewer` | Expert Django code reviewer specializing in ORM correctness, DRF patterns, migration safety, security misconfigurations, and production-grade Django practices. |
+| `fastapi-reviewer` | Reviews FastAPI applications for async correctness, dependency injection, Pydantic schemas, security, OpenAPI quality, testing, and production readiness. |
+| `flutter-reviewer` | Flutter and Dart code reviewer. |
+| `harmonyos-specialist` | HarmonyOS application development expert specializing in ArkTS and ArkUI. |
+| `react-build-fixer` | Diagnose and fix React build failures across Vite, webpack, Next.js, CRA, Parcel, esbuild, and Bun. |
+| `react-reviewer` | Expert React/JSX code reviewer specializing in hook correctness, render performance, server/client component boundaries, accessibility, and React-specific… |
+| `vue-reviewer` | Expert Vue.js code reviewer specializing in Composition API correctness, reactivity pitfalls, component architecture, template security, and Vue-specific… |
 
 </details>
 
@@ -474,11 +479,11 @@ per percorsi citati che nel repository non esistono.
 
 | Agente | Cosa fa |
 |---|---|
-| `build-fixer` `ECC` | Build and TypeScript error resolution specialist. |
-| `code-simplifier` `ECC` | Simplifies and refines code for clarity, consistency, and maintainability while preserving behavior. |
-| `comment-analyzer` `ECC` | Analyze code comments for accuracy, completeness, maintainability, and comment rot risk. |
-| `commit-reviewer` `ECC` | Reviews a staged diff and drafts a Conventional Commits-compliant message matching the repository's actual history norms. |
-| `database-reviewer` `ECC` | PostgreSQL database specialist for query optimization, schema design, security, and performance. |
+| `build-fixer` | Build and TypeScript error resolution specialist. |
+| `code-simplifier` | Simplifies and refines code for clarity, consistency, and maintainability while preserving behavior. |
+| `comment-analyzer` | Analyze code comments for accuracy, completeness, maintainability, and comment rot risk. |
+| `commit-reviewer` | Reviews a staged diff and drafts a Conventional Commits-compliant message matching the repository's actual history norms. |
+| `database-reviewer` | PostgreSQL database specialist for query optimization, schema design, security, and performance. |
 | `silent-failure-hunter` | Find failures that the code hides: swallowed exceptions, errors turned into empty values or defaults, missing timeouts, lost error context, fire-and-forget… |
 | `test-coverage-reviewer` | Judge whether the tests of a change would catch the bugs that matter: untested branches and error paths, assertions that cannot fail, over-mocking, missing… |
 | `type-design-reviewer` | Review new or changed types, schemas and data models for how well they protect invariants: illegal states that can be represented, primitive obsession,… |
@@ -489,11 +494,11 @@ per percorsi citati che nel repository non esistono.
 
 | Agente | Cosa fa |
 |---|---|
-| `code-architect` `ECC` | Designs feature architectures by analyzing existing codebase patterns and conventions, then providing implementation blueprints with concrete files,… |
+| `code-architect` | Designs feature architectures by analyzing existing codebase patterns and conventions, then providing implementation blueprints with concrete files,… |
 | `code-explorer` | Understand how an existing feature works before changing it: it traces the execution path from the entry point to storage and back, maps the modules, data… |
-| `docs-lookup` `ECC` | When the user asks how to use a library, framework, or API or needs up-to-date code examples, use Context7 MCP to fetch current documentation and return… |
+| `docs-lookup` | When the user asks how to use a library, framework, or API or needs up-to-date code examples, use Context7 MCP to fetch current documentation and return… |
 | `planner` | Turn an agreed feature, refactor or migration into an implementation plan before code is written: ordered steps, the files each step touches, dependencies… |
-| `spec-miner` `ECC` | Extracts behavioral specs from existing codebases for OpenSpec. |
+| `spec-miner` | Extracts behavioral specs from existing codebases for OpenSpec. |
 
 </details>
 
@@ -502,7 +507,7 @@ per percorsi citati che nel repository non esistono.
 | Agente | Cosa fa |
 |---|---|
 | `ml-reviewer` | Review machine learning code headed for production: data contracts and validation, feature pipelines, training reproducibility, evaluation (leakage, splits,… |
-| `pytorch-build-fixer` `ECC` | PyTorch runtime, CUDA, and training error resolution specialist. |
+| `pytorch-build-fixer` | PyTorch runtime, CUDA, and training error resolution specialist. |
 | `rag-reviewer` | Review a retrieval-augmented generation pipeline: document ingestion and chunking, embeddings and the vector store, retrieval and reranking, prompt assembly,… |
 
 </details>
@@ -511,10 +516,10 @@ per percorsi citati che nel repository non esistono.
 
 | Agente | Cosa fa |
 |---|---|
-| `agent-evaluator` `ECC` | Evaluates agent output against 5-axis quality rubric (accuracy, completeness, clarity, actionability, conciseness). |
-| `conversation-analyzer` `ECC` | When analyzing conversation transcripts to find behaviors worth preventing with hooks. |
+| `agent-evaluator` | Evaluates agent output against 5-axis quality rubric (accuracy, completeness, clarity, actionability, conciseness). |
+| `conversation-analyzer` | When analyzing conversation transcripts to find behaviors worth preventing with hooks. |
 | `harness-optimizer` | Review and tune the AI agent setup of a repository or user: Claude Code and agy settings, permissions, hooks, MCP servers, agents, skills, rules and memory… |
-| `loop-operator` `ECC` | Operate autonomous agent loops, monitor progress, and intervene safely when loops stall. |
+| `loop-operator` | Operate autonomous agent loops, monitor progress, and intervene safely when loops stall. |
 
 </details>
 
@@ -522,9 +527,9 @@ per percorsi citati che nel repository non esistono.
 
 | Agente | Cosa fa |
 |---|---|
-| `gan-evaluator` `ECC` | GAN Harness — Evaluator agent. |
-| `gan-generator` `ECC` | GAN Harness — Generator agent. |
-| `gan-planner` `ECC` | GAN Harness — Planner agent. |
+| `gan-evaluator` | GAN Harness — Evaluator agent. |
+| `gan-generator` | GAN Harness — Generator agent. |
+| `gan-planner` | GAN Harness — Planner agent. |
 
 </details>
 
@@ -532,8 +537,8 @@ per percorsi citati che nel repository non esistono.
 
 | Agente | Cosa fa |
 |---|---|
-| `open-source-forker` `ECC` | Fork any project for open-sourcing. |
-| `open-source-packager` `ECC` | Generate complete open-source packaging for a sanitized project. |
+| `open-source-forker` | Fork any project for open-sourcing. |
+| `open-source-packager` | Generate complete open-source packaging for a sanitized project. |
 | `open-source-sanitizer` | Before a repository, a fork or a code sample is made public: it scans the files and the git history for secrets, credentials, personal data, internal… |
 
 </details>
@@ -542,10 +547,10 @@ per percorsi citati che nel repository non esistono.
 
 | Agente | Cosa fa |
 |---|---|
-| `homelab-architect` `ECC` | Designs home and small-lab network plans from hardware inventory, goals, and operator experience level, with safe staged changes and rollback guidance. |
-| `network-architect` `ECC` | Designs enterprise or multi-site network architecture from requirements, using existing network skills for focused routing, validation, automation, and… |
-| `network-config-reviewer` `ECC` | Reviews router and switch configurations for security, correctness, stale references, risky change-window commands, and missing operational guardrails. |
-| `network-troubleshooter` `ECC` | Diagnoses network connectivity, routing, DNS, interface, and policy symptoms with a read-only OSI-layer workflow and evidence-backed root cause summary. |
+| `homelab-architect` | Designs home and small-lab network plans from hardware inventory, goals, and operator experience level, with safe staged changes and rollback guidance. |
+| `network-architect` | Designs enterprise or multi-site network architecture from requirements, using existing network skills for focused routing, validation, automation, and… |
+| `network-config-reviewer` | Reviews router and switch configurations for security, correctness, stale references, risky change-window commands, and missing operational guardrails. |
+| `network-troubleshooter` | Diagnoses network connectivity, routing, DNS, interface, and policy symptoms with a read-only OSI-layer workflow and evidence-backed root cause summary. |
 
 </details>
 
@@ -553,8 +558,8 @@ per percorsi citati che nel repository non esistono.
 
 | Agente | Cosa fa |
 |---|---|
-| `bengali-reviewer` `ECC` | Reviews code handling Bengali (Bangla) text for Unicode correctness, proper normalization, script-aware processing, and internationalization best practices. |
-| `healthcare-reviewer` `ECC` | Reviews healthcare application code for clinical safety, CDSS accuracy, PHI compliance, and medical data integrity. |
+| `bengali-reviewer` | Reviews code handling Bengali (Bangla) text for Unicode correctness, proper normalization, script-aware processing, and internationalization best practices. |
+| `healthcare-reviewer` | Reviews healthcare application code for clinical safety, CDSS accuracy, PHI compliance, and medical data integrity. |
 
 </details>
 
@@ -562,7 +567,7 @@ per percorsi citati che nel repository non esistono.
 
 | Agente | Cosa fa |
 |---|---|
-| `chief-of-staff` `ECC` | Personal communication chief of staff that triages email, Slack, LINE, and Messenger. |
+| `chief-of-staff` | Personal communication chief of staff that triages email, Slack, LINE, and Messenger. |
 
 </details>
 
@@ -574,31 +579,90 @@ per percorsi citati che nel repository non esistono.
 
 </details>
 
-<details><summary><b>linguaggi</b> (13 pack, 26 agenti)</summary>
+<details><summary><b>alt</b> (39)</summary>
 
-| Pack | Agenti | Cosa controllano |
-|---|---|---|
-| `cpp` | `cpp-reviewer`, `cpp-build-fixer` | C and C++: memory safety, undefined behavior, ownership, concurrency, modern C++ idioms |
-| `csharp` | `csharp-reviewer`, `csharp-build-fixer` | C#: async correctness, nullable references, resource handling, ASP.NET Core and EF Core |
-| `dart` | `dart-reviewer`, `dart-build-fixer` | Dart and Flutter: null safety, async, widget lifecycle and rebuilds, state management |
-| `fsharp` | `fsharp-reviewer`, `fsharp-build-fixer` | F#: functional design, type safety, pattern matching, async and task code |
-| `go` | `go-reviewer`, `go-build-fixer` | Go: error handling, concurrency, context propagation, API and package design |
-| `java` | `java-reviewer`, `java-build-fixer` | Java: correctness, resource and transaction handling, concurrency, Spring Boot and Quarkus |
-| `kotlin` | `kotlin-reviewer`, `kotlin-build-fixer` | Kotlin: null safety, coroutines and Flow, Android lifecycle, Compose, KMP and Ktor |
-| `php` | `php-reviewer`, `php-build-fixer` | PHP: security, types, errors, Laravel and Symfony patterns |
-| `python` | `python-reviewer`, `python-build-fixer` | Python: correctness, exceptions, typing, security, Django, FastAPI and data code |
-| `ruby` | `ruby-reviewer`, `ruby-build-fixer` | Ruby: correctness, security, Rails patterns and database access |
-| `rust` | `rust-reviewer`, `rust-build-fixer` | Rust: ownership and lifetimes, error handling, unsafe code, concurrency, API design |
-| `swift` | `swift-reviewer`, `swift-build-fixer` | Swift: memory management, Swift concurrency, value semantics, SwiftUI |
-| `typescript` | `typescript-reviewer`, `typescript-build-fixer` | TypeScript and JavaScript: type safety, async correctness, Node and browser security, React, Vue and Next.js |
+| Agente | Cosa fa |
+|---|---|
+| `alt-a11y-architect` | Alternative version of the accessibility-specialist role. |
+| `alt-architect` | Alternative version of the architect role. |
+| `alt-code-explorer` | Alternative version of the code-explorer role. |
+| `alt-code-reviewer` | Alternative version of the code-reviewer role. |
+| `alt-cpp-build-resolver` | Alternative version of the cpp-build-fixer role. |
+| `alt-cpp-reviewer` | Alternative version of the cpp-reviewer role. |
+| `alt-csharp-reviewer` | Alternative version of the csharp-reviewer role. |
+| `alt-dart-build-resolver` | Alternative version of the dart-build-fixer role. |
+| `alt-doc-updater` | Alternative version of the doc-keeper role. |
+| `alt-e2e-runner` | Alternative version of the e2e-tester role. |
+| `alt-fsharp-reviewer` | Alternative version of the fsharp-reviewer role. |
+| `alt-go-build-resolver` | Alternative version of the go-build-fixer role. |
+| `alt-go-reviewer` | Alternative version of the go-reviewer role. |
+| `alt-harness-optimizer` | Alternative version of the harness-optimizer role. |
+| `alt-java-build-resolver` | Alternative version of the java-build-fixer role. |
+| `alt-java-reviewer` | Alternative version of the java-reviewer role. |
+| `alt-kotlin-build-resolver` | Alternative version of the kotlin-build-fixer role. |
+| `alt-kotlin-reviewer` | Alternative version of the kotlin-reviewer role. |
+| `alt-marketing-agent` | Alternative version of the marketing-strategist role. |
+| `alt-mle-reviewer` | Alternative version of the ml-reviewer role. |
+| `alt-opensource-sanitizer` | Alternative version of the open-source-sanitizer role. |
+| `alt-performance-optimizer` | Alternative version of the performance-engineer role. |
+| `alt-php-reviewer` | Alternative version of the php-reviewer role. |
+| `alt-planner` | Alternative version of the planner role. |
+| `alt-pr-test-analyzer` | Alternative version of the test-coverage-reviewer role. |
+| `alt-python-reviewer` | Alternative version of the python-reviewer role. |
+| `alt-rag-pipeline-reviewer` | Alternative version of the rag-reviewer role. |
+| `alt-refactor-cleaner` | Alternative version of the refactor-specialist role. |
+| `alt-ruby-reviewer` | Alternative version of the ruby-reviewer role. |
+| `alt-rust-build-resolver` | Alternative version of the rust-build-fixer role. |
+| `alt-rust-reviewer` | Alternative version of the rust-reviewer role. |
+| `alt-security-reviewer` | Alternative version of the security-reviewer role. |
+| `alt-seo-specialist` | Alternative version of the seo-specialist role. |
+| `alt-silent-failure-hunter` | Alternative version of the silent-failure-hunter role. |
+| `alt-swift-build-resolver` | Alternative version of the swift-build-fixer role. |
+| `alt-swift-reviewer` | Alternative version of the swift-reviewer role. |
+| `alt-tdd-guide` | Alternative version of the tester role. |
+| `alt-type-design-analyzer` | Alternative version of the type-design-reviewer role. |
+| `alt-typescript-reviewer` | Alternative version of the typescript-reviewer role. |
 
 </details>
 
-### Tutta la libreria (430: 311 skill, 97 comandi, 22 set di regole)
+<details><summary><b>linguaggi</b> (13 pack, 26 agenti)</summary>
 
-Da Everything Claude Code 2.2.3 (MIT). Cerca con `/team-workflow:library search <parole>`, installa con `library enable <id|pack>`. `ECC runtime` = chiama gli script di ECC: serve `addons add ecc`.
+| Agente | Pack | Cosa fa |
+|---|---|---|
+| `cpp-reviewer` | `cpp` | review di C and C++: memory safety, undefined behavior, ownership, concurrency, modern C++ idioms |
+| `cpp-build-fixer` | `cpp` | build rossa, type check e dipendenze in C and C++: la correzione piu' piccola |
+| `csharp-reviewer` | `csharp` | review di C#: async correctness, nullable references, resource handling, ASP.NET Core and EF Core |
+| `csharp-build-fixer` | `csharp` | build rossa, type check e dipendenze in C#: la correzione piu' piccola |
+| `dart-reviewer` | `dart` | review di Dart and Flutter: null safety, async, widget lifecycle and rebuilds, state management |
+| `dart-build-fixer` | `dart` | build rossa, type check e dipendenze in Dart and Flutter: la correzione piu' piccola |
+| `fsharp-reviewer` | `fsharp` | review di F#: functional design, type safety, pattern matching, async and task code |
+| `fsharp-build-fixer` | `fsharp` | build rossa, type check e dipendenze in F#: la correzione piu' piccola |
+| `go-reviewer` | `go` | review di Go: error handling, concurrency, context propagation, API and package design |
+| `go-build-fixer` | `go` | build rossa, type check e dipendenze in Go: la correzione piu' piccola |
+| `java-reviewer` | `java` | review di Java: correctness, resource and transaction handling, concurrency, Spring Boot and Quarkus |
+| `java-build-fixer` | `java` | build rossa, type check e dipendenze in Java: la correzione piu' piccola |
+| `kotlin-reviewer` | `kotlin` | review di Kotlin: null safety, coroutines and Flow, Android lifecycle, Compose, KMP and Ktor |
+| `kotlin-build-fixer` | `kotlin` | build rossa, type check e dipendenze in Kotlin: la correzione piu' piccola |
+| `php-reviewer` | `php` | review di PHP: security, types, errors, Laravel and Symfony patterns |
+| `php-build-fixer` | `php` | build rossa, type check e dipendenze in PHP: la correzione piu' piccola |
+| `python-reviewer` | `python` | review di Python: correctness, exceptions, typing, security, Django, FastAPI and data code |
+| `python-build-fixer` | `python` | build rossa, type check e dipendenze in Python: la correzione piu' piccola |
+| `ruby-reviewer` | `ruby` | review di Ruby: correctness, security, Rails patterns and database access |
+| `ruby-build-fixer` | `ruby` | build rossa, type check e dipendenze in Ruby: la correzione piu' piccola |
+| `rust-reviewer` | `rust` | review di Rust: ownership and lifetimes, error handling, unsafe code, concurrency, API design |
+| `rust-build-fixer` | `rust` | build rossa, type check e dipendenze in Rust: la correzione piu' piccola |
+| `swift-reviewer` | `swift` | review di Swift: memory management, Swift concurrency, value semantics, SwiftUI |
+| `swift-build-fixer` | `swift` | build rossa, type check e dipendenze in Swift: la correzione piu' piccola |
+| `typescript-reviewer` | `typescript` | review di TypeScript and JavaScript: type safety, async correctness, Node and browser security, React, Vue and Next.js |
+| `typescript-build-fixer` | `typescript` | build rossa, type check e dipendenze in TypeScript and JavaScript: la correzione piu' piccola |
 
-<details><summary><b>agentic-patterns</b> (37): Agentic engineering, autonomous loops, agent harness construction, and LLM pipeline optimization…</summary>
+</details>
+
+### Tutta la libreria (412: 296 skill, 94 comandi, 22 set di regole)
+
+Licenza MIT (`skills/team-workflow/library/NOTICE.md`). Cerca con `/team-workflow:library search <parole>`, installa con `library enable <id|pack>`.
+
+<details><summary><b>agentic-patterns</b> (35): Agentic engineering, autonomous loops, agent harness construction, and LLM pipeline optimization…</summary>
 
 | Voce | Tipo | Cosa fa |
 |---|---|---|
@@ -620,19 +684,17 @@ Da Everything Claude Code 2.2.3 (MIT). Cerca con `/team-workflow:library search 
 | `dynamic-workflow-mode` | skill | Design task-local harnesses, eval gates, and reusable skill extraction for Claude dynamic workflow mode and other adaptive agent harnesses. |
 | `enterprise-agent-ops` | skill | Operational controls for long-lived or cloud-hosted agent systems — runtime lifecycle (start, pause, stop, restart), observability (logs, metrics, traces),… |
 | `gan-style-harness` | skill | GAN-inspired Generator-Evaluator agent harness for building high-quality applications autonomously. |
-| `hermes-imports` | skill | Convert local Hermes operator workflows into sanitized ECC skills and release-pack artifacts. |
-| `nanoclaw-repl` | skill | Operate and extend NanoClaw, ECC's zero-dependency session-aware REPL, with persistent markdown-backed sessions and slash commands for model switching, skill… |
 | `openclaw-persona-forge` | skill | 为 OpenClaw AI Agent 锻造完整的龙虾灵魂方案。根据用户偏好或随机抽卡， 输出身份定位、灵魂描述(SOUL.md)、角色化底线规则、名字和头像生图提示词。 如当前环境提供已审核的生图 skill，可自动生成统一风格头像图片。 当用户需要创建、设计或定制 OpenClaw 龙虾灵魂时使用。… |
 | `opensource-pipeline` | skill | Open-source pipeline: fork, sanitize, and package private projects for safe public release. |
 | `orch-add-feature` | skill | Orchestrate building a brand-new feature end to end — research, plan, TDD implementation, review, and gated commit — by delegating each phase to the matching… |
 | `orch-build-mvp` | skill | Orchestrate bootstrapping a working MVP from a design or spec document — ingest the SDD/PRD, plan thin vertical slices, scaffold the first end-to-end slice,… |
 | `orch-change-feature` | skill | Orchestrate altering an existing, working feature to new desired behavior — update its tests to the new spec, change the implementation to match, review, and… |
-| `orch-fix-defect` | skill | Orchestrate fixing a bug — reproduce it as a failing regression test, fix to green, review, and gated commit — by delegating each phase to the matching ECC… |
+| `orch-fix-defect` | skill | Orchestrate fixing a bug — reproduce it as a failing regression test, fix to green, review, and gated commit — by delegating each phase to the matching agent. |
 | `orch-pipeline` | skill | Shared orchestration engine behind the orch-* skill family — the gated Research-Plan-TDD-Review-Commit pipeline, size classifier, agent and command map, and… |
 | `orch-refine-code` | skill | Orchestrate a behavior-preserving refactor — confirm tests are green, restructure without changing behavior, keep tests green, review, and gated commit. |
-| `plan-orchestrate` | skill | Read a plan document, decompose it into steps, classify each step, and emit the ready-to-paste ECC slash command for that step, carrying the step identifier… |
+| `plan-orchestrate` | skill | Read a plan document, decompose it into steps, classify each step, and emit the ready-to-paste slash command for that step, carrying the step identifier and… |
 | `prompt-caching-strategy` | skill | Optimize LLM prompt caching hit rate to reduce API costs and improve latency. |
-| `prompt-optimizer` | skill | Analyze draft prompts, detect intent and missing context, match ECC commands, skills, and agents, and output a ready-to-paste optimized prompt with diagnosis… |
+| `prompt-optimizer` | skill | Analyze draft prompts, detect intent and missing context, match commands, skills, and agents, and output a ready-to-paste optimized prompt with diagnosis and… |
 | `ralphinho-rfc-pipeline` | skill | Split an RFC into a multi-agent execution DAG — decompose into work units with dependencies and acceptance tests, run research, plan, implement, test, and… |
 | `regex-vs-llm-structured-text` | skill | Decision framework for parsing structured text (quizzes, forms, invoices, receipts, tables) with a hybrid regex-first pipeline — regex extraction handles 95%+… |
 | `search-first` | skill | Research-before-coding workflow: search npm/PyPI, MCP servers, skills, and GitHub for existing tools before writing custom code, then adopt, extend, or build. |
@@ -663,21 +725,22 @@ Da Everything Claude Code 2.2.3 (MIT). Cerca con `/team-workflow:library search 
 
 </details>
 
-<details><summary><b>commands</b> (97): ECC slash commands, installed as skills you call by name.</summary>
+<details><summary><b>commands</b> (94): Slash commands, installed as skills you call by name.</summary>
 
 | Voce | Tipo | Cosa fa |
 |---|---|---|
 | `aside` | command | Answer a quick side question without interrupting or losing context from the current task. |
-| `astra-review` | command | Send Claude-written code to GPT-6-Astra (ChatGPT, via Codex CLI) for an independent cross-provider review, then fix what it finds. (`ECC runtime`) |
-| `auto-update` | command | Pull the latest ECC repo changes and reinstall the current managed targets. (`ECC runtime`) |
 | `build-fix` | command | Detect the project build system and incrementally fix build/type errors with minimal safe changes. |
 | `checkpoint` | command | Create, verify, or list workflow checkpoints after running verification checks. |
+| `claw` | command | Legacy slash-entry shim for the nanoclaw-repl skill. |
 | `code-review` | command | Code review — local uncommitted changes or GitHub PR (pass PR number/URL for PR mode). |
-| `cost-report` | command | Generate a local Claude Code cost report from the ECC cost-tracker metrics log. |
+| `context-budget-command` | command | Legacy slash-entry shim for the context-budget skill. |
 | `cpp-build` | command | Fix C++ build errors, CMake issues, and linker problems incrementally. |
 | `cpp-review` | command | Comprehensive C++ code review for memory safety, modern C++ idioms, concurrency, and security. |
 | `cpp-test` | command | Enforce TDD workflow for C++. |
-| `ecc-guide-command` | command | Navigate ECC's current agents, skills, commands, hooks, install profiles, and docs from the live repository surface. |
+| `devfleet` | command | Legacy slash-entry shim for the claude-devfleet skill. |
+| `docs` | command | Legacy slash-entry shim for the documentation-lookup skill. |
+| `e2e` | command | Legacy slash-entry shim for the e2e-testing skill. |
 | `epic-claim` | command | Claim an epic issue, stamp coordination state, and sync local ownership. |
 | `epic-decompose` | command | Break an epic into task children without creating task branches. |
 | `epic-publish` | command | Publish a validated epic update back to the issue and local cache. |
@@ -685,7 +748,7 @@ Da Everything Claude Code 2.2.3 (MIT). Cerca con `/team-workflow:library search 
 | `epic-sync` | command | Sync epic issue bodies, labels, and local coordination snapshots from GitHub. |
 | `epic-unblock` | command | Sweep blocked epic issues and reopen anything whose dependencies are closed. |
 | `epic-validate` | command | Validate epic readiness, dependencies, and coordination policy. |
-| `evolve` | command | Analyze instincts and suggest or generate evolved structures (`ECC runtime`) |
+| `eval` | command | Legacy slash-entry shim for the eval-harness skill. |
 | `fastapi-review` | command | Review a FastAPI application for architecture, async correctness, dependency injection, Pydantic schemas, security, performance, and testability. |
 | `feature-dev` | command | Guided feature development with codebase understanding and architecture focus |
 | `flutter-build` | command | Fix Dart analyzer errors and Flutter build failures incrementally. |
@@ -703,8 +766,6 @@ Da Everything Claude Code 2.2.3 (MIT). Cerca con `/team-workflow:library search 
 | `hookify-help` | command | Get help with the hookify system |
 | `hookify-list` | command | List all configured hookify rules |
 | `instinct-export` | command | Export instincts from project/global scope to a file |
-| `instinct-import` | command | Import instincts from file or URL into project/global scope (`ECC runtime`) |
-| `instinct-status` | command | Show learned instincts (project + global) with confidence (`ECC runtime`) |
 | `jira` | command | Retrieve a Jira ticket, analyze requirements, update status, or add comments. |
 | `kotlin-build` | command | Fix Kotlin/Gradle build errors, compiler warnings, and dependency issues incrementally. |
 | `kotlin-review` | command | Comprehensive Kotlin code review for idiomatic patterns, null safety, coroutine safety, and security. |
@@ -726,43 +787,41 @@ Da Everything Claude Code 2.2.3 (MIT). Cerca con `/team-workflow:library search 
 | `orch-fix-defect-command` | command | Orchestrate fixing a bug — reproduce it as a failing regression test, fix to green, review, gated commit. |
 | `orch-refine-code-command` | command | Orchestrate a behavior-preserving refactor — confirm tests green, restructure without changing behavior, keep green, review, gated commit. |
 | `orch-review` | command | Run the orch-review native Workflow over a diff (local changes or a GitHub PR) and report blocking vs advisory findings. |
+| `orchestrate` | command | Legacy slash-entry shim for dmux-workflows and autonomous-agent-harness. |
 | `plan` | command | Restate requirements, assess risks, and create step-by-step implementation plan. |
-| `plan-canvas-command` | command | Open a plan or HTML artifact in the browser Plan Canvas for annotate-and-approve review. |
+| `plan-canvas` | command | Open a plan or HTML artifact in the browser Plan Canvas for annotate-and-approve review. |
 | `plan-prd` | command | Generate a lean, problem-first PRD and hand off to /plan for implementation planning. |
 | `pm2` | command | Analyze a project and generate PM2 service commands for detected frontend, backend, or database services. |
 | `pr` | command | Create a GitHub PR from current branch with unpushed commits — discovers templates, analyzes changes, pushes |
-| `project-init` | command | Detect a project's stack and produce a dry-run ECC onboarding plan using the repository's install manifests and stack mappings. |
-| `projects` | command | List known projects and their instinct statistics (`ECC runtime`) |
-| `promote` | command | Promote project-scoped instincts to global scope (`ECC runtime`) |
+| `prompt-optimize` | command | Legacy slash-entry shim for the prompt-optimizer skill. |
 | `prp-commit` | command | Quick commit with natural language file targeting — describe what to commit in plain English |
 | `prp-implement` | command | Execute an implementation plan with rigorous validation loops |
 | `prp-plan` | command | Create comprehensive feature implementation plan with codebase analysis and pattern extraction |
 | `prp-pr` | command | Alias of /pr for the PRP workflow series. |
 | `prp-prd` | command | Interactive PRD generator - problem-first, hypothesis-driven product spec with back-and-forth questioning |
-| `prune` | command | Delete pending instincts older than 30 days that were never promoted. (`ECC runtime`) |
 | `python-review` | command | Comprehensive Python code review for PEP 8 compliance, type hints, security, and Pythonic idioms. |
-| `quality-gate` | command | Run the ECC formatter quality gate for a single file and report remediation steps. |
 | `react-build` | command | Fix React build failures (Vite, webpack, Next.js, CRA, Parcel, esbuild, Bun) incrementally — JSX/TSX compile errors, hydration mismatches, server/client… |
 | `react-review` | command | Comprehensive React/JSX code review for hook correctness, render performance, server/client component boundaries, accessibility, and React-specific security. |
 | `react-test` | command | Enforce TDD workflow for React. |
 | `refactor-clean` | command | Safely identify and remove dead code with verification after each change. |
 | `resume-session` | command | Load the most recent session file from ~/.claude/session-data/ and resume work with full context from where the last session ended. |
 | `review-pr` | command | Comprehensive PR review using specialized agents (code-reviewer, comment-analyzer, pr-test-analyzer, silent-failure-hunter, type-design-analyzer,… |
+| `rules-distill-command` | command | Legacy slash-entry shim for the rules-distill skill. |
 | `rust-build` | command | Fix Rust build errors, borrow checker issues, and dependency problems incrementally. |
 | `rust-review` | command | Comprehensive Rust code review for ownership, lifetimes, error handling, unsafe usage, and idiomatic patterns. |
 | `rust-test` | command | Enforce TDD workflow for Rust. |
 | `santa-loop` | command | Adversarial dual-review convergence loop — two independent model reviewers must both approve before code ships. |
 | `save-session` | command | Save current session state to a dated file in ~/.claude/session-data/ so work can be resumed in a future session with full context. |
+| `security-command` | command | Run comprehensive security review |
 | `security-scan-command` | command | Run AgentShield against agent, hook, MCP, permission, and secret surfaces. |
-| `sessions` | command | Manage Claude Code session history, aliases, and session metadata. (`ECC runtime`) |
 | `setup-pm` | command | Configure your preferred package manager (npm/pnpm/yarn/bun) |
 | `skill-create` | command | Analyze local git history to extract coding patterns and generate SKILL.md files. |
-| `skill-health` | command | Show skill portfolio health dashboard with charts and analytics. (`ECC runtime`) |
-| `skill-host-compat-command` | command | Lint ECC skills for Codex/Cursor-safe frontmatter and Claude-only substitutions before a skill PR. (`ECC runtime`) |
+| `tdd` | command | Legacy slash-entry shim for the tdd-workflow skill. |
 | `test-coverage` | command | Analyze coverage, identify gaps, and generate missing tests toward the target threshold. |
 | `token-card-command` | command | Render a token-usage stat card from local agent session logs and commit it to the repo. |
 | `update-codemaps` | command | Scan project structure and generate token-lean architecture codemaps. |
 | `update-docs` | command | Sync documentation from source-of-truth files such as scripts, schemas, routes, and exports. |
+| `verify` | command | Legacy slash-entry shim for the verification-loop skill. |
 | `vue-review` | command | Comprehensive Vue.js code review for Composition API correctness, reactivity, composable patterns, template security, accessibility, and Vue-specific… |
 
 </details>
@@ -827,15 +886,7 @@ Da Everything Claude Code 2.2.3 (MIT). Cerca con `/team-workflow:library search 
 
 | Voce | Tipo | Cosa fa |
 |---|---|---|
-| `context-and-decisions` | skill | Govern stable domain context with a narrowly scoped CONTEXT.md when needed, and route hard-to-reverse decisions to ECC's existing… |
-
-</details>
-
-<details><summary><b>documentation-governance</b> (1): Optional documentation-governance routing and deterministic read-only audits.</summary>
-
-| Voce | Tipo | Cosa fa |
-|---|---|---|
-| `docs-governance` | skill | Route broad documentation-governance requests to existing ECC skills and run an opt-in, read-only audit of mapped documentation roles, links, ADR indexes, and… |
+| `context-and-decisions` | skill | Govern stable domain context with a narrowly scoped CONTEXT.md when needed, and route hard-to-reverse decisions to the existing architecture-decision-records… |
 
 </details>
 
@@ -875,7 +926,7 @@ Da Everything Claude Code 2.2.3 (MIT). Cerca con `/team-workflow:library search 
 | `fastapi-patterns` | skill | FastAPI best practices covering project structure, Pydantic v2 schemas, dependency injection, async handlers, authentication, authorization, transactional… |
 | `flutter-dart-code-review` | skill | Library-agnostic Flutter/Dart code review checklist covering widget best practices, state management patterns (BLoC, Riverpod, Provider, GetX, MobX, Signals),… |
 | `frontend-a11y` | skill | Accessibility patterns for React and Next.js — semantic HTML, ARIA attributes, form labeling, keyboard navigation, focus management, and screen reader support. |
-| `frontend-design-direction` | skill | Set an ECC-specific frontend design direction for production UI work. |
+| `frontend-design-direction` | skill | Set a frontend design direction for production UI work. |
 | `frontend-patterns` | skill | Frontend development patterns for React, Next.js, state management, performance optimization, and UI best practices. |
 | `frontend-slides` | skill | Create stunning, animation-rich HTML presentations from scratch or by converting PowerPoint files. |
 | `fsharp-testing` | skill | F# testing patterns with xUnit, FsUnit, Unquote, FsCheck property-based testing, integration tests, and test organization best practices. |
@@ -953,7 +1004,7 @@ Da Everything Claude Code 2.2.3 (MIT). Cerca con `/team-workflow:library search 
 |---|---|---|
 | `blender-motion-state-inspection` | skill | Use this skill when inspecting Blender characters, rigs, poses, animation retargeting, ground contact, facing direction, or model-vs-motion alignment where… |
 | `fal-ai-media` | skill | Unified media generation via fal.ai MCP — image, video, and audio. |
-| `manim-video` | skill | Build reusable Manim explainers for technical concepts, graphs, system diagrams, and product walkthroughs, then hand off to the wider ECC video stack if needed. |
+| `manim-video` | skill | Build reusable Manim explainers for technical concepts, graphs, system diagrams, and product walkthroughs, then hand off to the wider video stack if needed. |
 | `remotion-video-creation` | skill | Best practices for Remotion - Video creation in React. |
 | `taste` | skill | Creative-direction layer for music videos and short-form edits in the angelcore / cloud-trance / hyperpop family — a named-genre aesthetic vocabulary, mood +… |
 | `taste-application` | skill | Generate new video against a distilled style pack and cut it into a finished piece - plan takes from the reference's cut rhythm, generate on fal, grade with… |
@@ -965,11 +1016,11 @@ Da Everything Claude Code 2.2.3 (MIT). Cerca con `/team-workflow:library search 
 
 </details>
 
-<details><summary><b>nasiko-control-plane-pack</b> (1): Experimental Nasiko CLI lifecycle bridge guidance for pinned installation, read-only status,…</summary>
+<details><summary><b>misc</b> (1): Skills kept outside the main skills folder upstream.</summary>
 
 | Voce | Tipo | Cosa fa |
 |---|---|---|
-| `nasiko-control-plane` | skill | Manage the experimental Nasiko CLI lifecycle through ECC — read-only status checks, consent-gated install of the pinned qualified version with dry-run… |
+| `project-guidelines-example` | skill | Project-specific skill template covering architecture, patterns, testing, and deployment guidance. |
 
 </details>
 
@@ -984,30 +1035,27 @@ Da Everything Claude Code 2.2.3 (MIT). Cerca con `/team-workflow:library search 
 
 </details>
 
-<details><summary><b>operator-workflows</b> (20): Connected-app operator workflows for setup audits, billing operations, program tracking, Google…</summary>
+<details><summary><b>operator-workflows</b> (17): Connected-app operator workflows for setup audits, billing operations, program tracking, Google…</summary>
 
 | Voce | Tipo | Cosa fa |
 |---|---|---|
 | `api-connector-builder` | skill | Build a new API connector or provider by matching the target repo's existing integration pattern exactly. |
-| `automation-audit-ops` | skill | Evidence-first automation inventory and overlap audit workflow for ECC. |
+| `automation-audit-ops` | skill | Evidence-first automation inventory and overlap audit workflow. |
 | `connections-optimizer` | skill | Reorganize the user's X and LinkedIn network with review-first pruning, add/follow recommendations, and channel-specific warm outreach drafted in the user's… |
-| `cost-tracking` | skill | Track and report Claude Code token usage, spending, and budgets from the local ECC cost-tracker metrics log. |
 | `customer-billing-ops` | skill | Operate customer billing workflows such as subscriptions, refunds, churn triage, billing-portal recovery, and plan analysis using connected billing tools like… |
 | `dashboard-builder` | skill | Build monitoring dashboards that answer real operator questions for Grafana, SigNoz, and similar platforms. |
-| `ecc-tools-cost-audit` | skill | Evidence-first ECC Tools burn and billing audit workflow. |
-| `email-ops` | skill | Evidence-first mailbox triage, drafting, send verification, and sent-mail-safe follow-up workflow for ECC. |
-| `finance-billing-ops` | skill | Evidence-first revenue, pricing, refunds, team-billing, and billing-model truth workflow for ECC. |
+| `email-ops` | skill | Evidence-first mailbox triage, drafting, send verification, and sent-mail-safe follow-up workflow. |
+| `finance-billing-ops` | skill | Evidence-first revenue, pricing, refunds, team-billing, and billing-model truth workflow. |
 | `github-ops` | skill | GitHub repository operations, automation, and management. |
 | `google-workspace-ops` | skill | Operate across Google Drive, Docs, Sheets, and Slides as one workflow surface for plans, trackers, decks, and shared documents. |
 | `jira-integration` | skill | Use this skill when retrieving Jira tickets, analyzing requirements, updating ticket status, adding comments, or transitioning issues. |
 | `knowledge-ops` | skill | Knowledge base management, ingestion, sync, and retrieval across multiple storage layers (local files, MCP memory, vector stores, Git repos). |
 | `mailtrap-email-integration` | skill | Guides agents through integrating transactional email sending via Mailtrap's Email API, including sandbox testing, domain verification, and API authentication. |
-| `messages-ops` | skill | Evidence-first live messaging workflow for ECC. |
+| `messages-ops` | skill | Evidence-first live messaging workflow. |
 | `project-flow-ops` | skill | Operate execution flow across GitHub and Linear by triaging issues and pull requests, linking active work, and keeping GitHub public-facing while Linear… |
-| `terminal-ops` | skill | Evidence-first repo execution workflow for ECC. |
+| `terminal-ops` | skill | Evidence-first repo execution workflow. |
 | `token-card` | skill | Render a token-usage stat card from local Claude Code, Codex, Gemini CLI, and OpenCode session logs and commit it into the repository as a file. |
-| `unified-notifications-ops` | skill | Operate notifications as one ECC-native workflow across GitHub, Linear, desktop alerts, hooks, and connected communication surfaces. |
-| `workspace-surface-audit` | skill | Audit the active repo, MCP servers, plugins, connectors, env surfaces, and harness setup, then recommend the highest-value ECC-native skills, hooks, agents,… |
+| `unified-notifications-ops` | skill | Operate notifications as one workflow across GitHub, Linear, desktop alerts, hooks, and connected communication surfaces. |
 
 </details>
 
@@ -1052,7 +1100,7 @@ Da Everything Claude Code 2.2.3 (MIT). Cerca con `/team-workflow:library search 
 | `documentation-lookup` | skill | Use up-to-date library and framework docs via Context7 MCP instead of training data. |
 | `exa-search` | skill | Neural search via Exa MCP for web, code, and company research. |
 | `osint-investigation` | skill | Sparse-clue OSINT investigation methodology for extracting overlooked leads, connecting fragmented evidence, and testing explanations across sources. |
-| `research-ops` | skill | Evidence-first current-state research workflow for ECC. |
+| `research-ops` | skill | Evidence-first current-state research workflow. |
 | `scientific-db-pubmed-database` | skill | Direct PubMed and NCBI E-utilities search workflows for biomedical literature, MeSH queries, PMID lookup, citation retrieval, and API-backed literature… |
 | `scientific-db-uspto-database` | skill | USPTO patent and trademark data workflow for official record lookup, PatentSearch queries, TSDR checks, assignment data, and reproducible IP research logs. |
 | `scientific-pkg-gget` | skill | Gget CLI and Python workflow for quick genomic database queries, sequence lookup, BLAST-style searches, enrichment checks, and reproducible bioinformatics… |
@@ -1061,32 +1109,32 @@ Da Everything Claude Code 2.2.3 (MIT). Cerca con `/team-workflow:library search 
 
 </details>
 
-<details><summary><b>rules</b> (22): ECC coding rules: the common set and one set per language or framework.</summary>
+<details><summary><b>rules</b> (22): Coding rules: the common set and one set per language or framework.</summary>
 
 | Voce | Tipo | Cosa fa |
 |---|---|---|
-| `rules-angular` | rule | Coding rules from ECC, angular rules: style, patterns, security, testing. |
-| `rules-arkts` | rule | Coding rules from ECC, arkts rules: style, patterns, security, testing. |
-| `rules-common` | rule | Coding rules from ECC, the rules every language follows: style, patterns, security, testing. |
-| `rules-cpp` | rule | Coding rules from ECC, cpp rules: style, patterns, security, testing. |
-| `rules-csharp` | rule | Coding rules from ECC, csharp rules: style, patterns, security, testing. |
-| `rules-dart` | rule | Coding rules from ECC, dart rules: style, patterns, security, testing. |
-| `rules-fsharp` | rule | Coding rules from ECC, fsharp rules: style, patterns, security, testing. |
-| `rules-golang` | rule | Coding rules from ECC, golang rules: style, patterns, security, testing. |
-| `rules-java` | rule | Coding rules from ECC, java rules: style, patterns, security, testing. |
-| `rules-kotlin` | rule | Coding rules from ECC, kotlin rules: style, patterns, security, testing. |
-| `rules-nuxt` | rule | Coding rules from ECC, nuxt rules: style, patterns, security, testing. |
-| `rules-perl` | rule | Coding rules from ECC, perl rules: style, patterns, security, testing. |
-| `rules-php` | rule | Coding rules from ECC, php rules: style, patterns, security, testing. |
-| `rules-python` | rule | Coding rules from ECC, python rules: style, patterns, security, testing. |
-| `rules-react` | rule | Coding rules from ECC, react rules: style, patterns, security, testing. |
-| `rules-react-native` | rule | Coding rules from ECC, react-native rules: style, patterns, security, testing. |
-| `rules-ruby` | rule | Coding rules from ECC, ruby rules: style, patterns, security, testing. |
-| `rules-rust` | rule | Coding rules from ECC, rust rules: style, patterns, security, testing. |
-| `rules-swift` | rule | Coding rules from ECC, swift rules: style, patterns, security, testing. |
-| `rules-typescript` | rule | Coding rules from ECC, typescript rules: style, patterns, security, testing. |
-| `rules-vue` | rule | Coding rules from ECC, vue rules: style, patterns, security, testing. |
-| `rules-web` | rule | Coding rules from ECC, web rules: style, patterns, security, testing. |
+| `rules-angular` | rule | Coding rules, angular rules: style, patterns, security, testing. |
+| `rules-arkts` | rule | Coding rules, arkts rules: style, patterns, security, testing. |
+| `rules-common` | rule | Coding rules, the rules every language follows: style, patterns, security, testing. |
+| `rules-cpp` | rule | Coding rules, cpp rules: style, patterns, security, testing. |
+| `rules-csharp` | rule | Coding rules, csharp rules: style, patterns, security, testing. |
+| `rules-dart` | rule | Coding rules, dart rules: style, patterns, security, testing. |
+| `rules-fsharp` | rule | Coding rules, fsharp rules: style, patterns, security, testing. |
+| `rules-golang` | rule | Coding rules, golang rules: style, patterns, security, testing. |
+| `rules-java` | rule | Coding rules, java rules: style, patterns, security, testing. |
+| `rules-kotlin` | rule | Coding rules, kotlin rules: style, patterns, security, testing. |
+| `rules-nuxt` | rule | Coding rules, nuxt rules: style, patterns, security, testing. |
+| `rules-perl` | rule | Coding rules, perl rules: style, patterns, security, testing. |
+| `rules-php` | rule | Coding rules, php rules: style, patterns, security, testing. |
+| `rules-python` | rule | Coding rules, python rules: style, patterns, security, testing. |
+| `rules-react` | rule | Coding rules, react rules: style, patterns, security, testing. |
+| `rules-react-native` | rule | Coding rules, react-native rules: style, patterns, security, testing. |
+| `rules-ruby` | rule | Coding rules, ruby rules: style, patterns, security, testing. |
+| `rules-rust` | rule | Coding rules, rust rules: style, patterns, security, testing. |
+| `rules-swift` | rule | Coding rules, swift rules: style, patterns, security, testing. |
+| `rules-typescript` | rule | Coding rules, typescript rules: style, patterns, security, testing. |
+| `rules-vue` | rule | Coding rules, vue rules: style, patterns, security, testing. |
+| `rules-web` | rule | Coding rules, web rules: style, patterns, security, testing. |
 
 </details>
 
@@ -1115,14 +1163,6 @@ Da Everything Claude Code 2.2.3 (MIT). Cerca con `/team-workflow:library search 
 | `security-review` | skill | Use this skill when adding authentication, handling user input, working with secrets, creating API endpoints, or implementing payment/sensitive features. |
 | `security-scan` | skill | Scan your Claude Code configuration (.claude/ directory) for security vulnerabilities, misconfigurations, and injection risks using AgentShield. |
 | `springboot-security` | skill | Spring Security best practices for authn/authz, validation, CSRF, secrets, headers, rate limiting, and dependency security in Java Spring Boot services. |
-
-</details>
-
-<details><summary><b>skill-unified-memory</b> (1): Single-skill unified-memory guidance; requires the separately installed ecc-universal CLI runtime.</summary>
-
-| Voce | Tipo | Cosa fa |
-|---|---|---|
-| `unified-memory` | skill | Share durable, inspectable context and handoffs between Claude, Codex, Hermes, Cursor, OpenCode, and other agents through the local ECC Memory Vault. |
 
 </details>
 
@@ -1165,16 +1205,15 @@ Da Everything Claude Code 2.2.3 (MIT). Cerca con `/team-workflow:library search 
 
 </details>
 
-<details><summary><b>workflow-quality</b> (52): Evaluation, TDD, verification, compaction, learning, and cross-harness memory skills, including…</summary>
+<details><summary><b>workflow-quality</b> (44): Evaluation, TDD, verification, compaction, learning, and cross-harness memory skills, including…</summary>
 
 | Voce | Tipo | Cosa fa |
 |---|---|---|
 | `agent-introspection-debugging` | skill | Structured self-debugging workflow for AI agent failures using capture, diagnosis, contained recovery, and introspection reports. |
 | `agent-self-evaluation` | skill | Use after completing any non-trivial task. |
-| `agent-sort` | skill | Build an evidence-backed ECC install plan for a specific repo by sorting skills, commands, rules, hooks, and extras into DAILY vs LIBRARY buckets using… |
 | `ai-regression-testing` | skill | Regression testing strategies for AI-assisted development. |
 | `architecture-decision-records` | skill | Capture architectural decisions as numbered ADR markdown files in docs/adr/ with context, alternatives considered, consequences, and an index README. |
-| `brownfield-retrospective` | skill | Run the ECC engineering process retroactively against an existing project slice. |
+| `brownfield-retrospective` | skill | Run the engineering process retroactively against an existing project slice. |
 | `browser-qa` | skill | Run automated post-deploy UI verification with a browser automation MCP (claude-in-chrome, Playwright, or Puppeteer): console-error and Core Web Vitals smoke… |
 | `ck` | skill | Persistent per-project memory for Claude Code (Context Keeper) driven by deterministic Node.js /ck commands: init, save, resume, info, list, forget, and… |
 | `click-path-audit` | skill | Trace every user-facing button/touchpoint through its full state change sequence to find bugs where functions individually work but cancel each other out,… |
@@ -1182,19 +1221,14 @@ Da Everything Claude Code 2.2.3 (MIT). Cerca con `/team-workflow:library search 
 | `codebase-onboarding` | skill | Analyze an unfamiliar codebase and generate a structured onboarding guide with architecture map, key entry points, conventions, and a starter CLAUDE.md. |
 | `codehealth-mcp` | skill | Real-time structural Code Health via CodeScene MCP — review before edits, verify score deltas after changes, gate commits and PRs. |
 | `config-gc` | skill | Garbage collection for your Claude Code configuration. |
-| `configure-ecc` | skill | Run the conversational ECC setup wizard inside the current harness: inventory the install, collect scope (user/project/local) and hook mode… (`ECC runtime`) |
 | `context-budget` | skill | Routes live context checks to the native Codex or Claude Code meter without scanning files, and performs a bounded static component audit only when explicitly… |
 | `continuous-learning` | skill | [DEPRECATED - use continuous-learning-v2] Legacy v1 stop-hook skill extractor. |
-| `continuous-learning-v2` | skill | Instinct-based learning system that observes sessions via hooks, creates atomic instincts with confidence scoring, and evolves them into skills/commands/agents. (`ECC runtime`) |
 | `conventional-commit-review` | skill | Reviews staged changes and drafts a Conventional Commits-compliant commit message with the right type, scope, and length. |
 | `council` | skill | Convene a four-voice council for ambiguous decisions, tradeoffs, and go/no-go calls. |
 | `council-multi-model` | skill | Add one optional external Codex critique after the existing council has produced a decision draft. |
-| `deepseek-harness-setup` | skill | Install and operate Everything Claude Code (ECC) on the DeepSeek Harness (DSH): native skill roots (~/.dsh/skills, .agents/skills), the… (`ECC runtime`) |
 | `delivery-gate` | skill | Stop hook that blocks Claude from finishing until quality checks pass. |
 | `dev-team` | skill | Simulate a collaborative dev team session where multiple role-based personas (PM, Architect, Developer, QA) respond to the same problem together in one session. |
 | `e2e-testing` | skill | Playwright E2E testing patterns, Page Object Model, configuration, CI/CD integration, artifact management, and flaky test strategies. |
-| `ecc-guide` | skill | Answer questions about ECC by reading the live repo surface — agents, skills, commands, hooks, rules, install profiles, and docs — instead of memory. |
-| `ecc-recipes` | skill | Map a described workflow to the right ECC command group with run-order and stop condition, or browse all command-group recipe families read live from the… |
 | `error-handling` | skill | Patterns for robust error handling across TypeScript, Python, and Go. |
 | `eval-harness` | skill | Eval-driven development (EDD) framework for AI coding sessions — define capability and regression evals before coding, grade with code-based, model-based,… |
 | `git-workflow` | skill | Git workflow patterns including branching strategies, commit conventions, keeping history clean and readable, tidying local commits before merging, merge vs… |
@@ -1205,7 +1239,6 @@ Da Everything Claude Code 2.2.3 (MIT). Cerca con `/team-workflow:library search 
 | `iterative-retrieval` | skill | Pattern for progressively refining context retrieval to solve the subagent context problem. |
 | `living-docs-governance` | skill | Keep a long-lived project's documentation from rotting by assigning existing project docs clear constitution, map, status, and history roles, then wiring the… |
 | `loop-design-check` | skill | Design a goal-oriented agent loop or review one for failure modes: spinning, Goodhart-gaming the verifier, or running a wrong answer to completion. |
-| `plan-canvas` | skill | Open plans and HTML artifacts in a local browser canvas where the human annotates elements, chats, and approves or requests changes without leaving the page. (`ECC runtime`) |
 | `plankton-code-quality` | skill | Write-time code quality enforcement using Plankton — auto-formatting, linting, and Claude-powered fixes on every file edit via hooks. |
 | `product-lens` | skill | Validate the why before building through four product diagnostics — a YC-style product diagnostic that produces PRODUCT-BRIEF.md with a go/no-go… |
 | `production-audit` | skill | Local-evidence production readiness audit for shipped apps, pre-launch reviews, post-merge checks, and "what breaks in prod?" questions without sending repo… |
@@ -1213,7 +1246,6 @@ Da Everything Claude Code 2.2.3 (MIT). Cerca con `/team-workflow:library search 
 | `rules-distill` | skill | Scan skills to extract cross-cutting principles and distill them into rules — append, revise, or create new rule files. |
 | `santa-method` | skill | Multi-agent adversarial verification: two independent reviewers with the same rubric must both pass before output ships, with a fix-and-re-review convergence… |
 | `skill-comply` | skill | Visualize whether skills, rules, and agent definitions are actually followed — auto-generates scenarios at 3 prompt strictness levels, runs agents, classifies… |
-| `skill-host-compat` | skill | Lint ECC skills for Codex/Cursor-safe frontmatter and Claude-only substitutions before a skill PR. (`ECC runtime`) |
 | `skill-scout` | skill | Search existing local, marketplace, GitHub, and web skill sources before creating a new skill. |
 | `skill-stocktake` | skill | Use when auditing Claude skills and commands for quality. |
 | `story-lifecycle` | skill | Manage a file-based epic → story → sprint development loop without requiring an external project management tool. |
@@ -1230,7 +1262,7 @@ Da Everything Claude Code 2.2.3 (MIT). Cerca con `/team-workflow:library search 
 
 ```bash
 python3 -m unittest discover -s tests
-python3 tools/import_ecc.py <checkout di ECC>   # rigenera ruoli ECC e libreria
+python3 tools/import_upstream.py <checkout>     # rigenera ruoli importati e libreria
 python3 tools/readme_catalog.py                  # rigenera il catalogo del README (i test lo controllano)
 for p in .claude-plugin/plugin.json skills; do claude plugin validate "$p" --strict; done
 agy plugin validate .

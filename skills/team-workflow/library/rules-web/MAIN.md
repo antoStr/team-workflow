@@ -1,6 +1,6 @@
 ---
 name: rules-web
-description: "Coding rules from ECC, web rules: style, patterns, security, testing. Use when writing or reviewing web code."
+description: "Coding rules, web rules: style, patterns, security, testing. Use when writing or reviewing web code."
 ---
 
 # Web rules

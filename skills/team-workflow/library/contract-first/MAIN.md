@@ -2,7 +2,7 @@
 name: contract-first
 description: Coordinate frontend/backend or service-to-service work through one authoritative machine-checkable contract (OpenAPI, AsyncAPI, Protocol Buffers, or JSON Schema), with generated consumer types and contract-verified integration. Use when parallel consumer and provider work must evolve an API or event schema without field drift, mock/production shape mismatch, or one side silently redefining the interface.
 metadata:
-  origin: ECC
+ origin: 
 ---
 
 # Contract-First Collaboration

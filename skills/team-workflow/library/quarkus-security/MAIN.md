@@ -2,7 +2,7 @@
 name: quarkus-security
 description: "Quarkus security implementation patterns: JWT and OIDC authentication, @RolesAllowed RBAC and SecurityIdentity checks, Bean Validation and custom validators, parameterized Panache queries, BCrypt password hashing, CORS and security headers, rate limiting, audit logging, Vault or environment-variable secrets, and dependency CVE scanning. Use when adding authentication or authorization, validating input, managing secrets, or hardening a Quarkus application."
 metadata:
-  origin: ECC
+ origin: 
 ---
 
 # Quarkus Security Review

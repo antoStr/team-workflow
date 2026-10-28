@@ -9,7 +9,7 @@
   "plugins": [
     {
       "name": "team-workflow",
-      "description": "Shared project memory, on-demand teams of specialist agents that talk to each other and verify each other's work, the Everything Claude Code library, and an end-of-task report that asks before applying changes.",
+      "description": "Shared project memory, on-demand teams of specialist agents that talk to each other and verify each other's work, a searchable library of skills, commands and rules, and an end-of-task report that asks before applying changes.",
       "source": "./",
       "category": "productivity"
     }

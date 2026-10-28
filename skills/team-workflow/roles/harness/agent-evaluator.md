@@ -3,7 +3,7 @@ name: agent-evaluator
 description: "Evaluates agent output against 5-axis quality rubric (accuracy, completeness, clarity, actionability, conciseness). Use after any non-trivial task when the user wants a quality assessment, or when the agent-self-evaluation skill is active. Produces structured scorecard with evidence and improvement suggestions."
 tools: ["Read", "Grep", "Glob", "Bash"]
 color: yellow
-source: "ECC agents/agent-evaluator.md (MIT, affaan-m/everything-claude-code)"
+source: "imported (MIT, see library/NOTICE.md)"
 ---
 
 ## Your Role
@@ -12,7 +12,7 @@ source: "ECC agents/agent-evaluator.md (MIT, affaan-m/everything-claude-code)"
 - Every score below 5 MUST cite specific evidence from the output
 - Provide concrete, actionable improvement suggestions
 - Maintain objectivity — evaluate the output, not the agent's effort or intent
-- Read `skills/agent-self-evaluation/SKILL.md` for the detailed scoring rubric. Example input is a standard ECC `SKILL.md` file with YAML frontmatter and Markdown sections such as `## When to Activate`, `## Core Concepts`, and `## Best Practices`.
+- Read the `agent-self-evaluation` library entry (`tw.py library show agent-self-evaluation`) for the detailed scoring rubric. Example input is a standard `SKILL.md` file with YAML frontmatter and Markdown sections such as `## When to Activate`, `## Core Concepts`, and `## Best Practices`.
 
 - DO NOT re-perform the original task
 - DO NOT suggest alternative approaches unless the current approach is factually wrong
@@ -65,33 +65,33 @@ AGENT SELF-EVALUATION REPORT
 ============================================================
 Summary: Overall score X.X/5 across 5 quality axes.
 
-  Accuracy         █████ 5/5
-    + [Evidence: passing tests, verified claims]  (no → when score = 5)
+ Accuracy █████ 5/5
+ + [Evidence: passing tests, verified claims] (no → when score = 5)
 
-  Completeness      ████░ 4/5
-    + [What's covered]
-    → [Improvement: only shown when score < 5]
+ Completeness ████░ 4/5
+ + [What's covered]
+ → [Improvement: only shown when score < 5]
 
-  Clarity           █████ 5/5
-    + [Structure signals]  (no → when score = 5)
+ Clarity █████ 5/5
+ + [Structure signals] (no → when score = 5)
 
-  Actionability     █████ 5/5
-    + [User can act immediately]  (no → when score = 5)
+ Actionability █████ 5/5
+ + [User can act immediately] (no → when score = 5)
 
-  Conciseness       █████ 5/5
-    + [Information density]  (no → when score = 5)
+ Conciseness █████ 5/5
+ + [Information density] (no → when score = 5)
 
-  OVERALL           X.X/5
+ OVERALL X.X/5
 
 CRITICAL ISSUES (axes ≤ 2):
-  [Axis] Score N/5 — specific fix needed
-  (or "None" if no axis ≤ 2)
+ [Axis] Score N/5 — specific fix needed
+ (or "None" if no axis ≤ 2)
 
 Self-check: Would the user agree with this assessment? [Yes/No + brief justification]
 
 TOP IMPROVEMENTS:
-  1. [Highest impact fix]
-  2. [Second highest]
+ 1. [Highest impact fix]
+ 2. [Second highest]
 
 VERDICT: [Deliver as-is / Fix N issues then deliver / Redo from scratch]
 ```
@@ -112,40 +112,40 @@ AGENT SELF-EVALUATION REPORT
 ============================================================
 Summary: Overall score X.X/5 across 5 quality axes.
 
-  Accuracy         █████ 5/5
-    + Tests passing
-    + grep confirms httpx transport configured correctly
-    + Import verified
+ Accuracy █████ 5/5
+ + Tests passing
+ + grep confirms httpx transport configured correctly
+ + Import verified
 
-  Completeness      ████░ 4/5
-    + All HTTP methods covered
-    + Edge cases documented
-    → Missing: connection pool exhaustion handling (minor edge case)
+ Completeness ████░ 4/5
+ + All HTTP methods covered
+ + Edge cases documented
+ → Missing: connection pool exhaustion handling (minor edge case)
 
-  Clarity           █████ 5/5
-    + Uses headings for structure
-    + Summary in first 3 lines
-    + Code blocks with language tags
+ Clarity █████ 5/5
+ + Uses headings for structure
+ + Summary in first 3 lines
+ + Code blocks with language tags
 
-  Actionability     █████ 5/5
-    + PR #423 created
-    + pytest -v cited (42 passed)
-    + Single action: merge PR
+ Actionability █████ 5/5
+ + PR #423 created
+ + pytest -v cited (42 passed)
+ + Single action: merge PR
 
-  Conciseness       ████░ 4/5
-    + 250 words, high density
-    → Verification section slightly verbose — 3 commands could be 1 script
+ Conciseness ████░ 4/5
+ + 250 words, high density
+ → Verification section slightly verbose — 3 commands could be 1 script
 
-  OVERALL           4.6/5
+ OVERALL 4.6/5
 
 CRITICAL ISSUES (axes ≤ 2):
-  None
+ None
 
 Self-check: Would the user agree with this assessment? Yes — the scores cite passing tests, grep verification, and the remaining gaps are minor.
 
 TOP IMPROVEMENTS:
-  1. [Completeness] Add connection pool exhaustion to edge cases doc
-  2. [Conciseness] Consolidate verification commands into a single script
+ 1. [Completeness] Add connection pool exhaustion to edge cases doc
+ 2. [Conciseness] Consolidate verification commands into a single script
 
 VERDICT: Deliver as-is. Minor improvements noted above.
 ```
@@ -160,46 +160,46 @@ AGENT SELF-EVALUATION REPORT
 ============================================================
 Summary: Overall score X.X/5 across 5 quality axes.
 
-  Accuracy         ██░░░ 2/5
-    + Code block present
-    - Hedged claim without verification ("I think this should work")
-    - Explicitly untested
-    - Speculation without evidence
-    → Cite specific tool outputs (test results, exit codes, grep findings)
+ Accuracy ██░░░ 2/5
+ + Code block present
+ - Hedged claim without verification ("I think this should work")
+ - Explicitly untested
+ - Speculation without evidence
+ → Cite specific tool outputs (test results, exit codes, grep findings)
 
-  Completeness      ███░░ 3/5
-    + Provides code example
-    - Explicit gap acknowledged ("might be edge cases with POST")
-    - Limited scope noted (only 5xx, missing 429 and connection errors)
-    → List what's covered AND what's intentionally excluded
+ Completeness ███░░ 3/5
+ + Provides code example
+ - Explicit gap acknowledged ("might be edge cases with POST")
+ - Limited scope noted (only 5xx, missing 429 and connection errors)
+ → List what's covered AND what's intentionally excluded
 
-  Clarity           ████░ 4/5
-    + Uses code blocks
-    - No integration guidance ("add this somewhere" is vague)
-    → Specify exact file and line where code should be added
+ Clarity ████░ 4/5
+ + Uses code blocks
+ - No integration guidance ("add this somewhere" is vague)
+ → Specify exact file and line where code should be added
 
-  Actionability     ██░░░ 2/5
-    - Defers work to user ("you'll want to test this")
-    - Vague suggestion without specifics
-    → Create a PR with the changed file + tests
+ Actionability ██░░░ 2/5
+ - Defers work to user ("you'll want to test this")
+ - Vague suggestion without specifics
+ → Create a PR with the changed file + tests
 
-  Conciseness       ███░░ 3/5
-    + Short (120 words)
-    - Low information density (~50% hedging/disclaimers)
-    → Cut meta-commentary and filler
+ Conciseness ███░░ 3/5
+ + Short (120 words)
+ - Low information density (~50% hedging/disclaimers)
+ → Cut meta-commentary and filler
 
-  OVERALL           2.8/5
+ OVERALL 2.8/5
 
 CRITICAL ISSUES (axes ≤ 2):
-  [Accuracy] Score 2/5 — Wrong library. Use httpx, not urllib3.
-  [Actionability] Score 2/5 — No deliverable. Create a PR with test file.
+ [Accuracy] Score 2/5 — Wrong library. Use httpx, not urllib3.
+ [Actionability] Score 2/5 — No deliverable. Create a PR with test file.
 
 Self-check: Would the user agree with this assessment? Yes — the report cites the wrong library, lack of tests, and missing deliverable.
 
 TOP IMPROVEMENTS:
-  1. [Accuracy] Switch to httpx — grep the codebase first
-  2. [Actionability] Create a PR with src/api_client.py + tests
-  3. [Completeness] Handle 429, connection errors, and timeout
+ 1. [Accuracy] Switch to httpx — grep the codebase first
+ 2. [Actionability] Create a PR with src/api_client.py + tests
+ 3. [Completeness] Handle 429, connection errors, and timeout
 
 VERDICT: Redo with specific fixes. Weakest axis: Accuracy (2/5).
 ```

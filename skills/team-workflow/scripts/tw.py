@@ -14,7 +14,7 @@
     tw.py agents show ROLE                 the full instructions of a role
     tw.py agents new ROLE                  your own role (or an override) to edit
     tw.py agents sync                      rewrite the native agents of both apps
-    tw.py addons [list]                    add-on plugins (caveman, ponytail, ecc, any other)
+    tw.py addons [list]                    add-on plugins, MCP servers and bundles
     tw.py addons add NAME|owner/repo|plugin@marketplace [--app claude|agy]
     tw.py addons remove NAME
     tw.py addons update [NAME]
@@ -30,15 +30,15 @@
     tw.py install-cli [--no-shell]         `team-workflow` command, and `agy plugin update` in the shell
     tw.py setup                            everything in one place: activation, wizard, team, talk,
                                            checks, roles, library, add-ons, and how to change them
-    tw.py library [list [PACK...]]         the ECC library: packs, or the entries of some packs
+    tw.py library [list [PACK...]]         the library: packs, or the entries of some packs
     tw.py library search WORDS...          entries for a task, best first, with their path
     tw.py library show ID                  one entry's instructions
     tw.py library enable|disable ID|PACK [--project]   install it as a native skill, or remove it
     tw.py library sync                     rewrite the installed library skills of every app
     tw.py talk [list]                      team talk channels of this repository
-    tw.py talk post TOPIC --from ROLE [--to ROLE] [--kind K] [--re ID] TEXT...
-    tw.py talk read TOPIC [--for ROLE] [--since ID] [--wait SECONDS]
-    tw.py talk open TOPIC                  questions and challenges still open (exit 1 when any)
+    tw.py talk post TOPIC --from ROLE [--to ROLE] [--kind K] [--re ID] [--wait SECONDS] TEXT...
+    tw.py talk read TOPIC [--for ROLE] [--since ID] [--wait SECONDS]   --for: only unread ones
+    tw.py talk open TOPIC [--strict]       open questions and challenges, unread messages per role
     tw.py talk clear TOPIC
 
 In Claude Code, /team-workflow:<command> for update-plugin, settings, models, agents, addons,
@@ -62,6 +62,7 @@ import roles
 import settings
 import talk
 import update_plugin
+from common import utf8_output
 from usage import load_pricing
 
 EFFORTS = ("low", "medium", "high", "xhigh", "max")
@@ -305,8 +306,17 @@ def app_options(app, root=None):
     pricing = load_pricing()
     catalog = roles.catalog(root)
     enabled = [r for r, i in catalog.items() if roles.is_enabled(config, r, i["pack"])]
-    out = {"app": app, "settings": {"wizard": config["wizard"], "max_agents": config["max_agents"],
-                                    "launch": config["launch"]},
+    lib = library.pack_rows(config)
+    out = {"app": app, "settings": {k: config[k] for k in ("activation", "wizard", "max_agents", "launch",
+                                                            "talk", "talk_rounds", "end_report")},
+           "scope": {"user_file": settings.user_file(),
+                     "project_file": settings.project_file(root) if root else None},
+           "library": {"entries": sum(r[1] for r in lib), "packs": {r[0]: r[1] for r in lib},
+                       "installed": {r[0]: r[2] for r in lib if r[2]},
+                       "search": "tw.py library search <words> --json"},
+           "addons": {"chosen": sorted(config.get("addons") or {}),
+                      "catalog": {n: e.get("about", "") for n, e in addons.CATALOG.items()},
+                      "bundles": {b: list(n) for b, n in addons.BUNDLES.items()}},
            "presets": {k: v for k, v in settings.PROFILES.items()},
            "types": list(settings.CHOICES[f"type.{app}"]),
            "roles": {r: dict(roles.plan(config, r, app), pack=catalog[r]["pack"]) for r in enabled},
@@ -410,18 +420,29 @@ def cmd_options(args):
     app = args.app or os.environ.get("TEAM_WORKFLOW_APP") or "claude"
     root = repo_root()
     apps = roles.APPS if app == "all" else (app,)
+    every = [app_options(a, root) for a in apps]
     if args.json:
-        data = [app_options(a, root) for a in apps]
-        print(json.dumps(data if app == "all" else data[0], indent=1))
+        print(json.dumps(every if app == "all" else every[0], indent=1))
         return
-    for a in apps:
-        print_options(app_options(a, root))
+    for data in every:
+        print_options(data)
     print("presets: " + ", ".join(settings.PROFILES))
     print("When you can change model and effort:")
     print("  - at the first task of a conversation, in the session setup (per role)")
     print("  - before every launch: \"Change an agent\" on the assignment board (this run only)")
     print("  - for good: tw.py agents set ROLE model=M effort=E [--app A] [--project], then restart the app")
     print("  - a whole preset: tw.py profile NAME")
+    data = every[0]
+    st, lib, add = data["settings"], data["library"], data["addons"]
+    print(f"Session: activation {st['activation']}, team talk {'on' if st['talk'] else 'off'} "
+          f"({st['talk_rounds']} rounds), wizard {st['wizard']}, up to {st['max_agents']} agents")
+    print(f"Skills: library of {lib['entries']} entries in {len(lib['packs'])} packs; installed: "
+          + (", ".join(f"{p} ({n})" for p, n in lib["installed"].items()) or "none")
+          + "; find: library search WORDS")
+    print("Add-ons chosen: " + (", ".join(add["chosen"]) or "none") + "; bundles: "
+          + "; ".join(f"{b} = {', '.join(n)}" for b, n in add["bundles"].items()))
+    print(f"Saving choices: user file {data['scope']['user_file']}"
+          + (f", project file {data['scope']['project_file']}" if data["scope"]["project_file"] else ""))
     if app != "all":
         print("Other apps: options --app all")
 
@@ -622,9 +643,8 @@ def sync_library(root):
 
 
 def entry_line(e, config):
-    note = "  (calls ECC's scripts: tw.py addons add ecc)" if e.get("runtime") else ""
     return (f"{'*' if library.is_on(config, e) else ' '} {e['id']:<38} {e['kind']:<7} {e['pack']:<26} "
-            f"{e['description'][:100]}{note}")
+            f"{e['description'][:100]}")
 
 
 def cmd_library(args):
@@ -632,7 +652,7 @@ def cmd_library(args):
     config = settings.load(root)
     found, rest = library.entries(), args.rest
     if not found:
-        raise SystemExit("the library is missing: reinstall team-workflow (tools/import_ecc.py builds it)")
+        raise SystemExit("the library is missing: reinstall team-workflow (tools/import_upstream.py builds it)")
     if args.action == "list":
         if rest:
             for e in sorted(found.values(), key=lambda e: (e["pack"], e["id"])):
@@ -642,9 +662,7 @@ def cmd_library(args):
         print(f"{'pack':<28} {'entries':>7} {'on':>4}  about")
         for pack, count, on, about in library.pack_rows(config):
             print(f"{pack:<28} {count:>7} {on:>4}  {about[:90]}")
-        src = library.index()["source"]
-        print(f"\n{len(found)} entries from ECC {src.get('version', '')} ({src.get('commit', '')[:12]}, "
-              f"MIT) in {library.LIBRARY}")
+        print(f"\n{len(found)} entries (MIT, see NOTICE.md) in {library.LIBRARY}")
         print("library PACK... lists entries; library search WORDS; library show ID")
         print("library enable|disable ID|PACK [--project] installs or removes native skills (* = on)")
         return
@@ -694,23 +712,31 @@ def cmd_talk(args):
         if args.action == "post":
             print(talk.line(talk.post(args.topic, args.sender, " ".join(args.text), args.kind,
                                       args.to, args.re)))
-        elif args.action == "read":
+            if args.wait:  # post, then wait for the reply in the same call
+                args.role, args.action = args.sender, "read"
+        if args.action == "read":
             if args.wait:
-                msgs = talk.wait(args.topic, args.role, args.since, args.wait)
+                msgs, waited = talk.wait(args.topic, args.role, args.since, args.wait)
+            elif args.role:
+                msgs, waited = talk.unread(args.topic, args.role, args.since), None
             else:
-                every = talk.read(args.topic)
-                msgs = talk.for_role(every, args.role, args.since) if args.role else [
-                    m for m in every if m["id"] > args.since]
+                msgs, waited = [m for m in talk.read(args.topic) if m["id"] > (args.since or 0)], None
             if args.json:
                 print(json.dumps(msgs, indent=1, ensure_ascii=False))
                 return
             print("\n".join(talk.line(m) for m in msgs) or "(no new messages)")
-            last = max([m["id"] for m in talk.read(args.topic)] or [0])
-            print(f"(last message #{last}: next time read with --since {last})")
+            if waited is not None:
+                print(f"({len(msgs)} new after {waited}s)" if msgs else
+                      f"(nothing new after waiting {waited}s)")
+            if not args.role:
+                last = max([m["id"] for m in talk.read(args.topic)] or [0])
+                print(f"(last message #{last}; read --for ROLE shows only what is new for a role)")
         elif args.action == "open":
             threads = talk.open_threads(talk.read(args.topic))
             print("\n".join(talk.line(m) for m in threads) or "nothing open")
-            if threads:
+            for role, ids in talk.unread_by_role(args.topic).items():
+                print(f"unread by {role}: " + ", ".join(f"#{i}" for i in ids))
+            if threads and args.strict:
                 raise SystemExit(1)
         elif args.action == "clear":
             print("cleared" if talk.clear(args.topic) else "no such channel")
@@ -725,7 +751,8 @@ SETUP_GROUPS = (
      "auto in some projects: settings set activation manual, then in those projects "
      "settings set activation auto --project."),
     ("Session setup and questions", ("session_wizard", "wizard", "end_report"),
-     "session_wizard: preset, roles, model and effort at the first task; wizard: quick | full | off."),
+     "session_wizard: at the first task, scope, preset, roles, models, skills, add-ons, talk; "
+     "wizard: quick | full | off."),
     ("Team", ("max_agents", "launch", "worker_edits", "auto_security_review"),
      "launch native subagents or headless workers (exact model and effort)."),
     ("Agents talk to each other", ("talk", "talk_rounds"),
@@ -758,7 +785,7 @@ def cmd_setup(_args):
     print("  change: agents enable|disable ROLE|PACK|auto, agents set ROLE ..., agents new ROLE")
     lib = library.pack_rows(config)
     lib_on = [f"{p} ({n})" for p, _, n, _ in lib if n]
-    print(f"\nLibrary (ECC skills, commands, rules): {sum(r[1] for r in lib)} entries in {len(lib)} packs; "
+    print(f"\nLibrary (skills, commands, rules): {sum(r[1] for r in lib)} entries in {len(lib)} packs; "
           f"installed: {', '.join(lib_on) or 'none'}.")
     print("  change: library, library search WORDS, library enable|disable ID|PACK [--project]")
     chosen = config.get("addons") or {}
@@ -769,6 +796,7 @@ def cmd_setup(_args):
 
 
 def main(argv=None):
+    utf8_output()
     ap = argparse.ArgumentParser(prog="team-workflow", description=__doc__.split("\n")[0])
     sub = ap.add_subparsers(dest="command", required=True)
     up = sub.add_parser("update", help="update the plugin in Claude Code and agy")
@@ -820,7 +848,7 @@ def main(argv=None):
     ic = sub.add_parser("install-cli", help="add team-workflow to ~/.local/bin and `agy plugin update`")
     ic.add_argument("--no-shell", action="store_true", help="do not add the agy function to .zshrc/.bashrc")
     sub.add_parser("setup", help="every setting in one place, with how to change it")
-    li = sub.add_parser("library", help="ECC skills, commands and rules: list, search, show, enable")
+    li = sub.add_parser("library", help="skills, commands and rules: list, search, show, enable")
     li.add_argument("action", nargs="?", default="list",
                     choices=("list", "search", "show", "enable", "disable", "sync"))
     li.add_argument("rest", nargs="*", help="PACK..., WORDS..., ID or PACK")
@@ -834,8 +862,11 @@ def main(argv=None):
     tk.add_argument("--kind", default="note", choices=talk.KINDS)
     tk.add_argument("--re", type=int, help="post: the id of the message this answers")
     tk.add_argument("--for", dest="role", help="read: only messages for this role")
-    tk.add_argument("--since", type=int, default=0, help="read: after this message id")
-    tk.add_argument("--wait", type=int, default=0, help="read: wait up to SECONDS for a new message")
+    tk.add_argument("--since", type=int, help="read: after this message id (default with --for: "
+                                                "what that role has not read yet)")
+    tk.add_argument("--wait", type=int, default=0, help="read, or post then read: wait up to SECONDS "
+                                                        "for a new message")
+    tk.add_argument("--strict", action="store_true", help="open: exit 1 when something is open")
     tk.add_argument("--json", action="store_true")
     args = ap.parse_args(argv)
     if args.command == "update":

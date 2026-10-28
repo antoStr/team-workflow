@@ -3,7 +3,7 @@ name: verification-loop
 description: Run a six-phase verification of a Claude Code session's work — build, type check, lint, tests with coverage, security grep, and diff review — then produce a PASS/FAIL verification report. Use when verifying work after completing a feature or refactor, before creating a PR, or when quality gates must pass.
 license: MIT
 metadata:
-  origin: ECC
+ origin: 
 ---
 
 # Verification Loop Skill

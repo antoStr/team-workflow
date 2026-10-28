@@ -1,7 +1,7 @@
 # Library
 
 Imported from Everything Claude Code 2.2.3 (25278e7d7b6c),
-https://github.com/affaan-m/everything-claude-code, by `tools/import_ecc.py`.
+https://github.com/affaan-m/everything-claude-code, by `tools/import_upstream.py`.
 Do not edit these files: rerun the import.
 
 ```

@@ -2,7 +2,7 @@
 name: token-card
 description: Render a token-usage stat card from local Claude Code, Codex, Gemini CLI, and OpenCode session logs and commit it into the repository as a file. Use when someone wants a current usage figure in a README, or asks for a shareable card of their coding-agent activity.
 metadata:
-  origin: community
+ origin: community
 ---
 
 # Token Card

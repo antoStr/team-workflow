@@ -1,6 +1,6 @@
 ---
 name: rules-typescript
-description: "Coding rules from ECC, typescript rules: style, patterns, security, testing. Use when writing or reviewing typescript code."
+description: "Coding rules, typescript rules: style, patterns, security, testing. Use when writing or reviewing typescript code."
 ---
 
 # Typescript rules

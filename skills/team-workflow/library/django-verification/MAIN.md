@@ -2,7 +2,7 @@
 name: django-verification
 description: Run the full Django verification loop — environment check, mypy/ruff/black linting, migration safety, pytest with coverage targets, pip-audit and bandit security scans, settings and logging review, and diff review — producing a phased pass/fail report before release or PR. Use when preparing a Django pull request, validating migrations or coverage, or running pre-deploy readiness checks.
 metadata:
-  origin: ECC
+ origin: 
 ---
 
 # Django Verification Loop

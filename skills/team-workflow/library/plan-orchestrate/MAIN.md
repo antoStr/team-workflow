@@ -1,8 +1,8 @@
 ---
 name: plan-orchestrate
-description: Read a plan document, decompose it into steps, classify each step, and emit the ready-to-paste ECC slash command for that step, carrying the step identifier and scope in the command's own documented argument form. Generative only — never invokes commands itself and never claims to control what a command runs internally. Steps whose command cannot carry plan scope fail closed instead of being emitted. Use when the user has a multi-step plan and wants the right command for each step without picking it by hand.
+description: Read a plan document, decompose it into steps, classify each step, and emit the ready-to-paste slash command for that step, carrying the step identifier and scope in the command's own documented argument form. Generative only — never invokes commands itself and never claims to control what a command runs internally. Steps whose command cannot carry plan scope fail closed instead of being emitted. Use when the user has a multi-step plan and wants the right command for each step without picking it by hand.
 metadata:
-  origin: ECC
+ origin: 
 ---
 
 # Plan Orchestrate

@@ -3,7 +3,7 @@ name: chief-of-staff
 description: "Personal communication chief of staff that triages email, Slack, LINE, and Messenger. Classifies messages into 4 tiers (skip/info_only/meeting_info/action_required), generates draft replies, and enforces post-send follow-through via hooks. Use when managing multi-channel communication workflows."
 tools: ["Read", "Grep", "Glob", "Bash", "Edit", "Write"]
 color: green
-source: "ECC agents/chief-of-staff.md (MIT, affaan-m/everything-claude-code)"
+source: "imported (MIT, see library/NOTICE.md)"
 ---
 
 ## Your Role
@@ -136,9 +136,9 @@ This checklist is enforced by a `PostToolUse` hook that blocks completion until 
 ## Example Invocations
 
 ```bash
-claude /mail                    # Email-only triage
-claude /slack                   # Slack-only triage
-claude /today                   # All channels + calendar + todo
+claude /mail # Email-only triage
+claude /slack # Slack-only triage
+claude /today # All channels + calendar + todo
 claude /schedule-reply "Reply to Sarah about the board meeting"
 ```
 

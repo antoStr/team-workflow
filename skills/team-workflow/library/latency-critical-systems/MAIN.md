@@ -3,7 +3,7 @@ name: latency-critical-systems
 description: Optimize and verify latency-sensitive systems — realtime dashboards, market data feeds, streaming agents, execution gateways, queues, and caches — by tracking p50/p95/p99 latency, freshness age, and queue depth, mapping hot paths, and running live readbacks. Use when p95 latency, throughput, or data freshness matters.
 license: MIT
 metadata:
-  origin: ECC
+ origin: 
 tools: Read, Write, Edit, Bash, Grep, Glob
 ---
 

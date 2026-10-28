@@ -9,6 +9,14 @@ import tempfile
 MEMORY_DIR = "docs/memory"
 
 
+def utf8_output():
+    """Print UTF-8 whatever the console: on Windows a pipe defaults to cp1252, which cannot
+    encode the dashes, check marks and accents of skills, memory files and agents' messages."""
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="replace")
+
+
 def read_hook_input():
     """The JSON a hook receives on stdin; {} when there is none."""
     try:

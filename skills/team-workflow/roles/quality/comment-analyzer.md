@@ -3,7 +3,8 @@ name: comment-analyzer
 description: "Analyze code comments for accuracy, completeness, maintainability, and comment rot risk."
 tools: ["Read", "Grep", "Glob"]
 color: red
-source: "ECC agents/comment-analyzer.md (MIT, affaan-m/everything-claude-code)"
+includes: ["review-discipline"]
+source: "imported (MIT, see library/NOTICE.md)"
 ---
 
 # Comment Analyzer Agent

@@ -2,7 +2,7 @@
 name: context-budget
 description: Routes live context checks to the native Codex or Claude Code meter without scanning files, and performs a bounded static component audit only when explicitly requested. Use for context-budget requests about remaining capacity or installed context overhead.
 metadata:
-  origin: ECC
+ origin: 
 ---
 
 # Context Budget

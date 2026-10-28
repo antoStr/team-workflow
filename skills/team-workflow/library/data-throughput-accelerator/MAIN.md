@@ -3,7 +3,7 @@ name: data-throughput-accelerator
 description: Diagnose and accelerate large data movement — ingestion, backfill, export, ETL, warehouse loading, manifest catch-up, and table synchronization — by isolating the true bottleneck, benchmarking variants, and codifying the fastest path with a hard accounting block proving rows and timestamps cohere. Use when a pipeline or backfill is too slow and must get faster without losing data correctness.
 license: MIT
 metadata:
-  origin: ECC
+ origin: 
 tools: Read, Write, Edit, Bash, Grep, Glob
 ---
 

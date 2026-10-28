@@ -13,16 +13,21 @@ Skip it for a single agent and for parallel work with nothing in common.
 `tw.py talk` keeps one channel per topic in the repository's git folder, shared by every
 worktree and never committed (outside a repository: `~/.team-workflow/talk/`).
 
-    tw.py talk post TOPIC --from ROLE [--to ROLE] [--kind KIND] [--re ID] TEXT
-    tw.py talk read TOPIC --for ROLE [--since ID] [--wait SECONDS]
+    tw.py talk post TOPIC --from ROLE [--to ROLE] [--kind KIND] [--re ID] [--wait SECONDS] TEXT
+    tw.py talk read TOPIC --for ROLE [--wait SECONDS]   only what is new for that role
     tw.py talk open TOPIC        questions without a reply, challenges without a verdict
     tw.py talk clear TOPIC
 
 Kinds: `note`, `finding` (with evidence), `question`, `answer`, `challenge` (a claim someone
 doubts), `fix` (the change that answers a challenge, with evidence), `verdict` (the challenger
 accepts or rejects, after checking). `answer`, `fix` and `verdict` need `--re ID`. A question
-closes with any reply; a challenge closes only with a verdict. `--wait` lets two agents running
-at the same time talk live: one asks, the other answers while the first waits.
+closes with any reply; a challenge closes only with a verdict. `read --for ROLE` remembers what
+each role has read, so an agent sees only new messages and never tracks ids. A post is refused
+while its sender has unread messages, which it gets instead: nobody answers without knowing
+what was said meanwhile (in the first trials that caused crossed fixes and a missed message).
+`talk open` also lists, per role, the messages addressed to it that it has not read. `--wait` lets two
+agents running at the same time talk live: `post ... --wait 90` asks and waits for the answer in
+one call, and the output says whether something arrived or the time ran out.
 
 ## Choose the mode
 
@@ -46,10 +51,11 @@ The user can ask for a mode; otherwise pick it from the task and say which in th
    finds while it works and reads the channel before its final answer.
 4. Next rounds, at most `talk_rounds` (setting, default 3): run `tw.py talk open TOPIC`. While
    something is open, resume the agents it names (Claude Code: SendMessage to the same agent;
-   otherwise launch it again with the channel as its context) with "read the channel since #N
-   and answer what is addressed to you". Do not answer for them and do not filter what they
-   say to each other.
-5. Close: `tw.py talk open TOPIC` must print "nothing open". If the rounds are over and
+   otherwise launch it again with the channel as its context) with "run `talk read TOPIC --for
+   <role>` and answer what is addressed to you": it gives them only the new messages.
+   Do not answer for them and do not filter what they say to each other.
+5. Close: `tw.py talk open TOPIC` must print "nothing open" and no "unread by" line (an agent
+   that never read a fix addressed to it judged without it: resume it). If the rounds are over and
    something is still open, it is a disagreement: put both sides, with their evidence, to the
    user as a decision.
 6. Check the outcome yourself as always: read the diff and rerun the key command. A verdict

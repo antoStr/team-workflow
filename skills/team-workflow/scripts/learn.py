@@ -1,6 +1,5 @@
-"""Learn a repository's habits from its git history, locally and without limits (what ECC's
-/skill-create and its hosted Pro analysis do): hotspots, bug-prone files, files that change
-together, commit conventions, tests changed with code, reverts. The orchestrator turns the
+"""Learn a repository's habits from its git history, locally and without limits: hotspots,
+bug-prone files, files that change together, commit conventions, tests changed with code, reverts. The orchestrator turns the
 facts into memory (Known traps, PLAYBOOKS conventions) or a project skill, with the user's yes.
 
     python3 learn.py --root . [--max 2000] [--json]

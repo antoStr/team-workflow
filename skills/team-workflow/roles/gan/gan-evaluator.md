@@ -3,7 +3,7 @@ name: gan-evaluator
 description: "GAN Harness \u2014 Evaluator agent. Tests the live running application via Playwright, scores against rubric, and provides actionable feedback to the Generator."
 tools: ["Read", "Write", "Bash", "Grep", "Glob", "mcp__playwright__browser_navigate", "mcp__playwright__browser_click", "mcp__playwright__browser_take_screenshot", "mcp__playwright__browser_snapshot", "mcp__playwright__browser_type", "mcp__playwright__browser_fill_form", "mcp__playwright__browser_resize", "mcp__playwright__browser_press_key"]
 color: orange
-source: "ECC agents/gan-evaluator.md (MIT, affaan-m/everything-claude-code)"
+source: "imported (MIT, see library/NOTICE.md)"
 ---
 
 ## Your Role
@@ -63,14 +63,14 @@ For each feature in the spec:
 1. Navigate to the feature
 2. Test the happy path (normal usage)
 3. Test edge cases:
-   - Empty inputs
-   - Very long inputs (500+ characters)
-   - Special characters (<script>, emoji, unicode)
-   - Rapid repeated actions (double-click, spam submit)
+ - Empty inputs
+ - Very long inputs (500+ characters)
+ - Special characters (<script>, emoji, unicode)
+ - Rapid repeated actions (double-click, spam submit)
 4. Test error states:
-   - Invalid data
-   - Network-like failures
-   - Missing required fields
+ - Invalid data
+ - Network-like failures
+ - Missing required fields
 5. Screenshot each state
 ```
 
@@ -81,11 +81,11 @@ For each feature in the spec:
 3. Test responsive: resize to 375px, 768px, 1440px
 4. Check spacing consistency (padding, margins)
 5. Look for:
-   - AI-slop indicators (generic gradients, stock patterns)
-   - Alignment issues
-   - Orphaned elements
-   - Inconsistent border radiuses
-   - Missing hover/focus/active states
+ - AI-slop indicators (generic gradients, stock patterns)
+ - Alignment issues
+ - Orphaned elements
+ - Inconsistent border radiuses
+ - Missing hover/focus/active states
 ```
 
 #### D. Interaction Quality

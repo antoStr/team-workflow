@@ -1,4 +1,4 @@
-"""Offline tests for 0.9: activation (auto or manual), the ECC library and team talk."""
+"""Offline tests for 0.9: activation (auto or manual), the library and team talk."""
 import isolate_home  # noqa: F401  (first: a throwaway home for the whole run)
 import json
 import os
@@ -100,7 +100,7 @@ class LibraryTest(unittest.TestCase):
 class ImportedRolesTest(unittest.TestCase):
     def test_imported_roles_are_ours_and_carry_the_shared_blocks(self):
         catalog = roles.catalog()
-        imported = [r for r, i in catalog.items() if "path" in i and 'source: "ECC' in roles.read(i)]
+        imported = [r for r, i in catalog.items() if "path" in i and 'source: "imported' in roles.read(i)]
         self.assertGreaterEqual(len(imported), 30)
         meta, body = roles.load("react-reviewer")
         self.assertNotIn("Prompt Defense Baseline", body)
@@ -109,6 +109,25 @@ class ImportedRolesTest(unittest.TestCase):
         self.assertIn("## Untrusted content", body)
         self.assertIn("## Review discipline", body)
         self.assertEqual(catalog["react-reviewer"]["pack"], "frameworks")
+        self.assertEqual(catalog["alt-tdd-guide"]["pack"], "alt")  # alternative versions
+        for role in imported:  # neither the upstream name nor its paths in the role text
+            text = roles.read(catalog[role])
+            self.assertNotRegex(text, r"\bECC\b|Everything Claude Code|skills/[a-z0-9-]+/SKILL\.md")
+
+    def test_audit_keeps_eccs_defensive_phrases_low_until_someone_edits_them(self):
+        import audit
+        with tempfile.TemporaryDirectory() as home, \
+                mock.patch.dict(os.environ, {"HOME": home, "USERPROFILE": home}):
+            config = settings.load()
+            config["packs"] = dict(config["packs"], alt=True)
+            roles.sync("claude", config=config)
+            path = os.path.join(roles.native_dir("claude"), "alt-harness-optimizer.md")
+            hits = [f for f in audit.audit(None)[0] if f["file"].endswith("alt-harness-optimizer.md")]
+            self.assertTrue(hits and all(f["severity"] == "low" for f in hits))
+            with open(path, "a", encoding="utf-8") as f:
+                f.write("\nextra line\n")
+            hits = [f for f in audit.audit(None)[0] if f["file"].endswith("alt-harness-optimizer.md")]
+            self.assertTrue(hits and all(f["severity"] == "high" for f in hits))
 
 
 class ReadmeCatalogTest(unittest.TestCase):
@@ -134,8 +153,12 @@ class TalkTest(unittest.TestCase):
     def test_challenge_stays_open_until_the_challenger_gives_a_verdict(self):
         talk.post("t", "tester", "pytest red on auth", "challenge", to="backend-dev", cwd=self.cwd)
         self.assertEqual(len(talk.open_threads(talk.read("t", self.cwd))), 1)
+        with self.assertRaises(talk.Unread) as unread:  # replying blind is refused...
+            talk.post("t", "backend-dev", "done", "note", cwd=self.cwd)
+        self.assertEqual([m["id"] for m in unread.exception.msgs], [1])  # ...and shows what it missed
         talk.post("t", "backend-dev", "fixed auth.py:40, 12 passed", "fix", re_id=1, cwd=self.cwd)
         self.assertEqual(len(talk.open_threads(talk.read("t", self.cwd))), 1)
+        self.assertEqual([m["kind"] for m in talk.unread("t", "tester", cwd=self.cwd)], ["fix"])
         talk.post("t", "tester", "accepted: reran, 12 passed", "verdict", re_id=1, cwd=self.cwd)
         self.assertEqual(talk.open_threads(talk.read("t", self.cwd)), [])
 
@@ -153,9 +176,40 @@ class TalkTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             talk.post("Bad Topic", "a", "x", cwd=self.cwd)
 
+    def test_each_role_reads_only_what_is_new_for_it(self):
+        talk.post("c", "tester", "q1", "question", to="dev", cwd=self.cwd)
+        self.assertEqual(talk.unread_by_role("c", cwd=self.cwd), {"dev": [1]})
+        self.assertEqual([m["text"] for m in talk.unread("c", "dev", cwd=self.cwd)], ["q1"])
+        self.assertEqual(talk.unread("c", "dev", cwd=self.cwd), [])  # already read
+        self.assertEqual(talk.unread_by_role("c", cwd=self.cwd), {})
+        talk.post("c", "dev", "my own note", cwd=self.cwd)
+        self.assertEqual([m["text"] for m in talk.unread("c", "tester", cwd=self.cwd)], ["my own note"])
+        talk.post("c", "tester", "q2", "question", to="dev", cwd=self.cwd)
+        found, _ = talk.wait("c", "dev", timeout=1, poll=0.1, cwd=self.cwd)
+        self.assertEqual([m["text"] for m in found], ["q2"])
+        talk.clear("c", cwd=self.cwd)
+        self.assertEqual(talk.seen("c", "dev", cwd=self.cwd), 0)
+
+    def test_post_then_wait_in_one_command(self):
+        import subprocess
+        tw = [sys.executable, os.path.join(SCRIPTS, "tw.py"), "talk"]
+        env = dict(os.environ)
+        reply = subprocess.Popen(tw + ["read", "w", "--for", "dev", "--wait", "20"], cwd=self.cwd,
+                                 env=env, stdout=subprocess.PIPE, text=True)
+        time.sleep(1)
+        asker = subprocess.Popen(tw + ["post", "w", "--from", "tester", "--to", "dev", "--kind",
+                                       "question", "--wait", "20", "is it fixed?"],
+                                 cwd=self.cwd, env=env, stdout=subprocess.PIPE, text=True)
+        self.assertIn("is it fixed?", reply.communicate(timeout=30)[0])
+        subprocess.run(tw + ["post", "w", "--from", "dev", "--kind", "answer", "--re", "1", "yes"],
+                       cwd=self.cwd, env=env, check=True, capture_output=True)
+        out = asker.communicate(timeout=30)[0]
+        self.assertIn("[answer] re #1: yes", out)
+        self.assertIn("1 new after", out)
+
     def test_wait_returns_on_timeout_without_messages(self):
         start = time.time()
-        self.assertEqual(talk.wait("quiet", "b", timeout=0.3, poll=0.1, cwd=self.cwd), [])
+        self.assertEqual(talk.wait("quiet", "b", timeout=0.3, poll=0.1, cwd=self.cwd)[0], [])
         self.assertLess(time.time() - start, 3)
 
     def test_worktrees_share_the_repository_channel(self):

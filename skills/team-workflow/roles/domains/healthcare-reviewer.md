@@ -4,7 +4,7 @@ description: "Reviews healthcare application code for clinical safety, CDSS accu
 tools: ["Read", "Grep", "Glob"]
 color: purple
 includes: ["review-discipline"]
-source: "ECC agents/healthcare-reviewer.md (MIT, affaan-m/everything-claude-code)"
+source: "imported (MIT, see library/NOTICE.md)"
 ---
 
 # Healthcare Reviewer — Clinical Safety & PHI Compliance
@@ -71,8 +71,8 @@ You are a clinical informatics reviewer for healthcare software. Patient safety 
 
 ### Issues
 1. [PATIENT SAFETY / CLINICAL / PHI / TECHNICAL] Description
-   - Impact: [potential harm or exposure]
-   - Fix: [required change]
+ - Impact: [potential harm or exposure]
+ - Fix: [required change]
 
 ### Verdict: [SAFE TO DEPLOY / NEEDS FIXES / BLOCK — PATIENT SAFETY RISK]
 ```

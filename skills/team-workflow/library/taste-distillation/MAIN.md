@@ -2,7 +2,7 @@
 name: taste-distillation
 description: Measure a set of reference videos into a reusable style pack - colour grade as a 3D LUT, cut rhythm as a shot-length distribution, hero stills, screen-blend overlay plates, and a text spec for a generative model. Use when the user wants to capture the look of reference footage, build a repeatable look, mint assets from references, or reproduce someone's grade and pacing.
 metadata:
-  origin: ECC
+ origin: 
 ---
 
 # Taste Distillation

@@ -102,5 +102,35 @@ class AddonsTest(unittest.TestCase):
         self.assertEqual(set(addons.BUNDLES["frontend"]) - set(addons.chosen()), set())
 
 
+class McpTest(unittest.TestCase):
+    setUp, write = AddonsTest.setUp, AddonsTest.write  # same throwaway home, without its tests
+
+    def test_mcp_servers_are_written_per_app_and_foreign_ones_left_alone(self):
+        entry = addons.CATALOG["serena"]
+        ok, log = addons.mcp_apply("opencode", "add", "serena", entry)
+        self.assertTrue(ok, log)
+        with open(addons.opencode_config_path(), encoding="utf-8") as f:
+            server = json.load(f)["mcp"]["serena"]
+        self.assertEqual((server["type"], server["command"][0]), ("local", "uvx"))
+        self.assertNotIn("claude-code", server["command"])  # Claude-only arguments stay out
+        addons.mcp_apply("agy", "add", "serena", entry)
+        self.assertEqual(addons.mcp_servers("agy")["serena"]["command"], "uvx")
+        self.assertEqual(addons.agy_version("serena", entry), "mcp")
+        with mock.patch.object(addons, "run", return_value=(True, "")) as run:
+            addons.mcp_apply("claude", "add", "serena", entry)
+        self.assertIn("claude-code", run.call_args.args)
+        self.write(".config/opencode/opencode.json", json.dumps({"mcp": {"playwright": {"mine": 1}}}))
+        ok, log = addons.mcp_apply("opencode", "add", "playwright", addons.CATALOG["playwright"])
+        self.assertIn("left as it is", log)
+        self.assertEqual(addons.mcp_servers("opencode")["playwright"], {"mine": 1})
+        addons.mcp_apply("agy", "remove", "serena", entry)
+        self.assertNotIn("serena", addons.mcp_servers("agy"))
+
+    def test_bundles_name_only_catalog_entries(self):
+        for names in addons.BUNDLES.values():
+            self.assertFalse(set(names) - set(addons.CATALOG))
+        self.assertFalse(set(addons.BUNDLES) & set(addons.CATALOG))
+
+
 if __name__ == "__main__":
     unittest.main()

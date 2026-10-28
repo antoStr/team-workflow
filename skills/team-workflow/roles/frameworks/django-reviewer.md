@@ -4,7 +4,7 @@ description: "Expert Django code reviewer specializing in ORM correctness, DRF p
 tools: ["Read", "Grep", "Glob", "Bash"]
 color: cyan
 includes: ["review-discipline"]
-source: "ECC agents/django-reviewer.md (MIT, affaan-m/everything-claude-code)"
+source: "imported (MIT, see library/NOTICE.md)"
 ---
 
 ## Review Priorities
@@ -23,15 +23,15 @@ source: "ECC agents/django-reviewer.md (MIT, affaan-m/everything-claude-code)"
 ### CRITICAL — ORM Correctness
 
 - **N+1 queries in loops**: Accessing related objects without `select_related`/`prefetch_related`
-  ```python
-  # Bad
-  for order in Order.objects.all():
-      print(order.user.email)  # N+1
+ ```python
+ # Bad
+ for order in Order.objects.all():
+ print(order.user.email) # N+1
 
-  # Good
-  for order in Order.objects.select_related('user').all():
-      print(order.user.email)
-  ```
+ # Good
+ for order in Order.objects.select_related('user').all():
+ print(order.user.email)
+ ```
 - **Missing `atomic()` for multi-step writes**: Use `transaction.atomic()` for any sequence of DB writes
 - **`bulk_create` without `update_conflicts`**: Silent data loss on duplicate keys
 - **`get()` without `DoesNotExist` handling**: Unhandled exception risk
@@ -61,15 +61,15 @@ source: "ECC agents/django-reviewer.md (MIT, affaan-m/everything-claude-code)"
 - **`len(queryset)` instead of `.count()`**: Forces full fetch
 - **`exists()` not used for existence checks**: `if queryset:` fetches objects unnecessarily
 
-  ```python
-  # Bad
-  if Product.objects.filter(sku=sku):
-      ...
+ ```python
+ # Bad
+ if Product.objects.filter(sku=sku):
+ ...
 
-  # Good
-  if Product.objects.filter(sku=sku).exists():
-      ...
-  ```
+ # Good
+ if Product.objects.filter(sku=sku).exists():
+ ...
+ ```
 
 ### HIGH — Code Quality
 
@@ -78,15 +78,15 @@ source: "ECC agents/django-reviewer.md (MIT, affaan-m/everything-claude-code)"
 - **Mutable default in model field**: `default=[]` or `default={}` — use `default=list`
 - **`save()` called without `update_fields`**: Overwrites all columns — risk of clobbering concurrent writes
 
-  ```python
-  # Bad
-  user.last_active = now()
-  user.save()
+ ```python
+ # Bad
+ user.last_active = now()
+ user.save()
 
-  # Good
-  user.last_active = now()
-  user.save(update_fields=['last_active'])
-  ```
+ # Good
+ user.last_active = now()
+ user.save(update_fields=['last_active'])
+ ```
 
 ### MEDIUM — Best Practices
 
@@ -109,12 +109,12 @@ source: "ECC agents/django-reviewer.md (MIT, affaan-m/everything-claude-code)"
 ## Diagnostic Commands
 
 ```bash
-python manage.py check               # Django system check
-python manage.py makemigrations --check  # Detect missing migrations
-ruff check .                         # Fast linter
-mypy . --ignore-missing-imports      # Type checking
-bandit -r . -ll                      # Security scan (medium+)
-pytest --cov=apps --cov-report=term-missing -q  # Tests + coverage
+python manage.py check # Django system check
+python manage.py makemigrations --check # Detect missing migrations
+ruff check . # Fast linter
+mypy . --ignore-missing-imports # Type checking
+bandit -r . -ll # Security scan (medium+)
+pytest --cov=apps --cov-report=term-missing -q # Tests + coverage
 ```
 
 ## Review Output Format

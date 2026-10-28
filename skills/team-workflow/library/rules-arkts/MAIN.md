@@ -1,6 +1,6 @@
 ---
 name: rules-arkts
-description: "Coding rules from ECC, arkts rules: style, patterns, security, testing. Use when writing or reviewing arkts code."
+description: "Coding rules, arkts rules: style, patterns, security, testing. Use when writing or reviewing arkts code."
 ---
 
 # Arkts rules

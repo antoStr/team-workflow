@@ -1,7 +1,7 @@
 ---
 name: context-and-decisions
 description: >-
-  Govern stable domain context with a narrowly scoped CONTEXT.md when needed, and route hard-to-reverse decisions to ECC's existing architecture-decision-records skill. Use when domain terms require repeated explanation, one term has multiple meanings, unclear language causes module-boundary mistakes, or domain semantics must remain separate from architecture decisions.
+ Govern stable domain context with a narrowly scoped CONTEXT.md when needed, and route hard-to-reverse decisions to the existing architecture-decision-records skill. Use when domain terms require repeated explanation, one term has multiple meanings, unclear language causes module-boundary mistakes, or domain semantics must remain separate from architecture decisions.
 ---
 
 # Domain Context and Decision Handoff

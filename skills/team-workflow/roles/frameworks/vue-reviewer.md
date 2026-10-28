@@ -4,7 +4,7 @@ description: "Expert Vue.js code reviewer specializing in Composition API correc
 tools: ["Read", "Grep", "Glob", "Bash"]
 color: cyan
 includes: ["review-discipline"]
-source: "ECC agents/vue-reviewer.md (MIT, affaan-m/everything-claude-code)"
+source: "imported (MIT, see library/NOTICE.md)"
 ---
 
 ## Scope vs typescript-reviewer
@@ -29,9 +29,9 @@ For a `.vue` PR, invoke both agents. For a pure `.ts` change with no Vue imports
 ## When invoked
 
 1. Establish review scope:
-   - PR review: use the actual base branch via `gh pr view --json baseRefName` when available; otherwise the current branch's upstream/merge-base. Never hard-code `main`.
-   - Local review: prefer `git diff --staged -- '*.vue' '*.ts' '*.js'` then `git diff -- '*.vue' '*.ts' '*.js'`.
-   - If history is shallow or single-commit, fall back to `git show --patch HEAD -- '*.vue' '*.ts' '*.js'`.
+ - PR review: use the actual base branch via `gh pr view --json baseRefName` when available; otherwise the current branch's upstream/merge-base. Never hard-code `main`.
+ - Local review: prefer `git diff --staged -- '*.vue' '*.ts' '*.js'` then `git diff -- '*.vue' '*.ts' '*.js'`.
+ - If history is shallow or single-commit, fall back to `git show --patch HEAD -- '*.vue' '*.ts' '*.js'`.
 2. Before reviewing a PR, inspect merge readiness if metadata is available (`gh pr view --json mergeStateStatus,statusCheckRollup`). If checks are red or there are merge conflicts, stop and report.
 3. Run the project's lint command if present — confirm `eslint-plugin-vue` is configured. If the project lacks `vue/multi-word-component-names` or `vue/require-default-prop`, flag as appropriate for project conventions.
 4. Run the project's typecheck command if present (`vue-tsc --noEmit`). Skip cleanly for JS-only projects.
@@ -135,9 +135,9 @@ You DO NOT refactor or rewrite code — you report findings only.
 
 ```bash
 # Required
-npx eslint . --ext .vue,.ts,.js                    # ensure eslint-plugin-vue is configured
-vue-tsc --noEmit                                   # Vue-specific type checking
-npm run typecheck --if-present                     # respect project's canonical command
+npx eslint . --ext .vue,.ts,.js # ensure eslint-plugin-vue is configured
+vue-tsc --noEmit # Vue-specific type checking
+npm run typecheck --if-present # respect project's canonical command
 
 # Useful
 npx eslint . --rule 'vue/multi-word-component-names: error'
@@ -178,9 +178,9 @@ End every review with:
 
 | Severity | Count | Status |
 |----------|-------|--------|
-| CRITICAL | 0     | pass   |
-| HIGH     | 1     | block  |
-| MEDIUM   | 2     | info   |
+| CRITICAL | 0 | pass |
+| HIGH | 1 | block |
+| MEDIUM | 2 | info |
 
 Verdict: BLOCK — HIGH issues must be fixed before merge.
 ```
@@ -189,7 +189,7 @@ Verdict: BLOCK — HIGH issues must be fixed before merge.
 
 - Agents: `typescript-reviewer` (generic TS/JS, invoked alongside on `.vue`/`.ts`), `security-reviewer` (project-wide audit)
 - Rules: `rules/vue/coding-style.md`, `rules/vue/hooks.md`, `rules/vue/patterns.md`, `rules/vue/security.md`, `rules/vue/testing.md`
-- Skills: `skills/vue-patterns/`
+- Skills: the `vue-patterns` library entry (`tw.py library show vue-patterns`)/`
 - Commands: `/vue-review`
 
 ---

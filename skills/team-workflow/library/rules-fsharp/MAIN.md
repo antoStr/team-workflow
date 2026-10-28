@@ -1,6 +1,6 @@
 ---
 name: rules-fsharp
-description: "Coding rules from ECC, fsharp rules: style, patterns, security, testing. Use when writing or reviewing fsharp code."
+description: "Coding rules, fsharp rules: style, patterns, security, testing. Use when writing or reviewing fsharp code."
 ---
 
 # Fsharp rules

@@ -1,6 +1,6 @@
 ---
 name: rules-java
-description: "Coding rules from ECC, java rules: style, patterns, security, testing. Use when writing or reviewing java code."
+description: "Coding rules, java rules: style, patterns, security, testing. Use when writing or reviewing java code."
 ---
 
 # Java rules

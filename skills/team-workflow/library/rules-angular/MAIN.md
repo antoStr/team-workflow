@@ -1,6 +1,6 @@
 ---
 name: rules-angular
-description: "Coding rules from ECC, angular rules: style, patterns, security, testing. Use when writing or reviewing angular code."
+description: "Coding rules, angular rules: style, patterns, security, testing. Use when writing or reviewing angular code."
 ---
 
 # Angular rules

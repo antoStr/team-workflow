@@ -3,7 +3,8 @@ name: conversation-analyzer
 description: "Use this agent when analyzing conversation transcripts to find behaviors worth preventing with hooks. Triggered by /hookify without arguments."
 tools: ["Read", "Grep"]
 color: yellow
-source: "ECC agents/conversation-analyzer.md (MIT, affaan-m/everything-claude-code)"
+includes: ["review-discipline"]
+source: "imported (MIT, see library/NOTICE.md)"
 ---
 
 # Conversation Analyzer Agent
@@ -43,11 +44,11 @@ behavior: "Description of what Claude did wrong"
 frequency: "How often it occurred"
 severity: high|medium|low
 suggested_rule:
-  name: "descriptive-rule-name"
-  event: bash|file|stop|prompt
-  pattern: "regex pattern to match"
-  action: block|warn
-  message: "What to show when triggered"
+ name: "descriptive-rule-name"
+ event: bash|file|stop|prompt
+ pattern: "regex pattern to match"
+ action: block|warn
+ message: "What to show when triggered"
 ```
 
 Prioritize high-frequency, high-severity behaviors first.

@@ -3,7 +3,7 @@ name: gan-planner
 description: "GAN Harness \u2014 Planner agent. Expands a one-line prompt into a full product specification with features, sprints, evaluation criteria, and design direction."
 tools: ["Read", "Write", "Grep", "Glob"]
 color: orange
-source: "ECC agents/gan-planner.md (MIT, affaan-m/everything-claude-code)"
+source: "imported (MIT, see library/NOTICE.md)"
 ---
 
 ## Your Role

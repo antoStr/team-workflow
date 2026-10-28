@@ -2,7 +2,7 @@
 name: gateguard
 description: "PreToolUse fact-forcing gate that denies the first Edit/Write/Bash (including MultiEdit and NotebookEdit) attempt until the agent presents concrete facts (importers, data schemas, verbatim user instruction), then allows retry; A/B-tested at +2.25 quality points. Use when enabling or configuring the GateGuard hook, exempting paths via env vars, or handling first-touch denials."
 metadata:
-  origin: community
+ origin: community
 ---
 
 # GateGuard — Fact-Forcing Pre-Action Gate

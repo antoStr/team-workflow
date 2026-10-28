@@ -2,7 +2,7 @@
 name: token-budget-advisor
 description: Offer a choice of response depth (25%/50%/75%/100%) with token estimates before answering, then answer at that level. Use when the user asks to control response length or token budget, such as 'token budget', 'short version', 'brief answer', 'respuesta corta vs larga', 'cuántos tokens', 'ahorrar tokens', 'responde al 50%', 'dame la versión corta', 'quiero controlar cuánto usas'. Skip if depth is already set this session or 'token' means an auth/payment token.
 metadata:
-  origin: community
+ origin: community
 ---
 
 # Token Budget Advisor (TBA)

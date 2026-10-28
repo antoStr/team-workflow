@@ -20,7 +20,7 @@ import settings
 import update_plugin
 
 from common import (MEMORY_DIR, dirty_paths, git, is_agy, read_hook_input, repo_root, session_id,
-                    snapshot_path)
+                    snapshot_path, utf8_output)
 
 MAX_CHARS = 12000  # INDEX + STATE within their limits stay far below this
 PROTOCOL = ("team-workflow: follow the team-workflow skill. Read the area card before coding, "
@@ -85,6 +85,7 @@ def save_snapshot(root, session_id):
 
 
 def main():
+    utf8_output()
     # --text: plain text for an agent that runs this itself (OpenCode 2.x, from AGENTS.md)
     text_mode = "--text" in sys.argv[1:]
     data = {"cwd": os.getcwd(), "session_id": f"text-{os.getppid()}"} if text_mode else read_hook_input()
@@ -125,7 +126,8 @@ def main():
     if config.get("session_wizard", True) and not manual:
         context += (f"\nteam-workflow: session setup is on. Before the first agent of this "
                     f"conversation, run the session setup in WIZARD.md: show `tw.py options --app {app}` "
-                    "to the user, then preset, roles, and model and effort for every chosen role.")
+                    "to the user, then where the choices go, preset, roles, model and effort for every "
+                    "chosen role, skills and add-ons, and team talk.")
     if app == "opencode":
         context += "\n" + opencode_notes()
     if changed:  # the app loaded its agents before this hook wrote them

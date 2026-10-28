@@ -2,7 +2,7 @@
 name: claude-devfleet
 description: Orchestrate multi-agent coding tasks via Claude DevFleet — plan projects, dispatch parallel agents in isolated worktrees, monitor progress, and read structured reports. Use when dispatching parallel coding agents across isolated worktrees and tracking their reports.
 metadata:
-  origin: community
+ origin: community
 ---
 
 # Claude DevFleet Multi-Agent Orchestration

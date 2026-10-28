@@ -2,8 +2,8 @@
 name: growth-log
 description: Write growth log entries that extract reusable patterns from completed work — root cause, transferable rule, and a recognizable signal — instead of diary-style event narration, with a 4-8 sentence template and merge-duplicates discipline. Use when capturing what was learned after a complex task, debugging session, failure, or rollback, when reviewing progress over a period, or when a delivery gate asks what was learned.
 metadata:
-  version: 1.1.0
-  origin: ECC
+ version: 1.1.0
+ origin: 
 ---
 
 # Growth Log Skill

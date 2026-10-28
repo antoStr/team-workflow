@@ -3,7 +3,7 @@ name: code-architect
 description: "Designs feature architectures by analyzing existing codebase patterns and conventions, then providing implementation blueprints with concrete files, interfaces, data flow, and build order."
 tools: ["Read", "Grep", "Glob", "Bash"]
 color: blue
-source: "ECC agents/code-architect.md (MIT, affaan-m/everything-claude-code)"
+source: "imported (MIT, see library/NOTICE.md)"
 ---
 
 # Code Architect Agent

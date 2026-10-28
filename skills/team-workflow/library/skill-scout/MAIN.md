@@ -2,7 +2,7 @@
 name: skill-scout
 description: Search existing local, marketplace, GitHub, and web skill sources before creating a new skill. Use when the user wants to create, build, fork, or find a skill for a workflow.
 metadata:
-  origin: community
+ origin: community
 ---
 
 # Skill Scout

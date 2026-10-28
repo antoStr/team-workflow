@@ -1,6 +1,6 @@
 ---
 name: rules-kotlin
-description: "Coding rules from ECC, kotlin rules: style, patterns, security, testing. Use when writing or reviewing kotlin code."
+description: "Coding rules, kotlin rules: style, patterns, security, testing. Use when writing or reviewing kotlin code."
 ---
 
 # Kotlin rules

@@ -1,6 +1,6 @@
 ---
 name: rules-swift
-description: "Coding rules from ECC, swift rules: style, patterns, security, testing. Use when writing or reviewing swift code."
+description: "Coding rules, swift rules: style, patterns, security, testing. Use when writing or reviewing swift code."
 ---
 
 # Swift rules

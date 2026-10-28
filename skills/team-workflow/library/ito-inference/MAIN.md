@@ -1,10 +1,10 @@
 ---
 name: ito-inference
-description: Inspect the availability of model serving on a completed Itô compute booking and, when the canonical backend becomes available, hand off an explicitly confirmed serving manifest. Use after ito-compute has booked GPU nodes and the user asks for an OpenAI-compatible endpoint, ito-serve, hosted Kimi, or self-hosted open-weights inference. ECC implements no serving stack of its own.
+description: Inspect the availability of model serving on a completed Itô compute booking and, when the canonical backend becomes available, hand off an explicitly confirmed serving manifest. Use after ito-compute has booked GPU nodes and the user asks for an OpenAI-compatible endpoint, ito-serve, hosted Kimi, or self-hosted open-weights inference. implements no serving stack of its own.
 metadata:
-  origin: ECC
-  status: scaffold
-  aliases: ito-serve, hosted-open-weights
+ origin: 
+ status: scaffold
+ aliases: ito-serve, hosted-open-weights
 ---
 
 # Itô Inference

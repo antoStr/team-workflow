@@ -1,6 +1,6 @@
 ---
 name: team-workflow
-description: Organize development work in a repository with shared project memory, on-demand teams of specialist agents (product, design, frontend, backend, database, devops, performance, refactoring, testing, security, release, docs, data analysis, market research, marketing, plus language, framework, quality and other packs) that talk to each other to debug and verify each other's work, a searchable library of ECC skills, commands and rules, and an end-of-task report that asks before applying changes. Use at the start of any coding task (feature, fix, refactor, review, release), when the user asks to set up project memory, to call a team or an agent, to analyze data or a market, or to wrap up a session, and whenever docs/memory exists and work is about to change code.
+description: Organize development work in a repository with shared project memory, on-demand teams of specialist agents (product, design, frontend, backend, database, devops, performance, refactoring, testing, security, release, docs, data analysis, market research, marketing, plus language, framework, quality and other packs) that talk to each other to debug and verify each other's work, a searchable library of skills, commands and coding rules, and an end-of-task report that asks before applying changes. Use at the start of any coding task (feature, fix, refactor, review, release), when the user asks to set up project memory, to call a team or an agent, to analyze data or a market, or to wrap up a session, and whenever docs/memory exists and work is about to change code.
 ---
 
 # Team workflow
@@ -13,7 +13,7 @@ Always answer the user in the language they write in. Agent prompts and new memo
 in English; an existing memory keeps the language it already uses.
 
 The scripts named below live in the `scripts/` folder next to this file; the team catalog is
-`TEAMS.md`, the team talk protocol `TALK.md` and the ECC library `library/`, also next to this
+`TEAMS.md`, the team talk protocol `TALK.md` and the library `library/`, also next to this
 file.
 
 When the session context says team-workflow is set to manual activation, use this skill only
@@ -25,8 +25,10 @@ when the user calls `/team-workflow:<name>` or asks for the team; the user chang
 Whenever the user calls this skill by name (`team-workflow`, with or without a task, in a git
 repository or not), start with the session setup of `WIZARD.md` before anything else, unless
 they said "defaults" or "skip setup" or the setting `session_wizard` is false: run
-`tw.py options --app <claude|agy|opencode>` and show its output, then ask preset, roles, and
-model and effort for every chosen role with the app's question tool, then the board. Do not
+`tw.py options --app <claude|agy|opencode>` and show its output, then ask with the app's
+question tool where the choices go (this conversation, user defaults or this project), the
+preset, the roles, model and effort for every chosen role, the skills and add-ons, and team
+talk, then the recap. Do not
 wait for a task and do not skip it because no agent is about to start; the task, if there is
 one, is sized afterwards (section 2). Ask the questions with the tool, never as a text list.
 
@@ -50,7 +52,7 @@ one, is sized afterwards (section 2). Ask the questions with the tool, never as 
 | Release | version, tag, publish | `release-manager`, after the `tester` approved |
 
 Before spawning any agent, run the assignment wizard in `WIZARD.md`: at the first team-workflow
-task of a conversation the session setup (preset, roles, model and effort per role among what
+task of a conversation the session setup (scope, preset, roles, model and effort per role among what
 the app offers now), then for each task the board with model, effort and estimated cost per
 agent, with questions as deep as the `wizard` setting asks. Skip it only for trivial tasks you
 do yourself.
@@ -62,9 +64,9 @@ solo and delegating, choose delegation for every size above trivial.
 
 `TEAMS.md` lists the roles: twenty in the core pack, and optional packs the user switches on
 (a reviewer and a build fixer for each of 13 languages; frameworks, quality, planning, ML, GAN
-build loop, open source, agent setup, network, domains, ops, SEO; most imported from
-Everything Claude Code), plus any role the user writes. The plugin writes every enabled role as a
-native agent of the app (`~/.claude/agents/<role>.md`, `~/.gemini/config/agents/<role>.md`).
+build loop, open source, agent setup, network, domains, ops, SEO, and the `alt` pack with
+alternative versions of existing roles as `alt-<name>`), plus any role the user writes. The
+plugin writes every enabled role as a native agent of the app (`~/.claude/agents/<role>.md`, `~/.gemini/config/agents/<role>.md`).
 Type, model and effort of each role come from the settings (`type.<app>.<role>`,
 `models.<app>.<role>`, `effort.<role>`):
 by default `architect` and `security-reviewer` run on the strongest model with high effort
@@ -114,13 +116,13 @@ Never accept an agent's claim without evidence: read the diff and rerun the key 
 
 ### The library
 
-`library/` holds the skills, commands and rules of Everything Claude Code (patterns per
-language and framework, TDD, verification loops, security, deployment, research, business
-and more). Before briefing, run `tw.py library search <words of the task>` and give each agent
+`library/` holds hundreds of skills, commands and coding rules (patterns per language and
+framework, TDD, verification loops, security, deployment, research, business and more). Before briefing, run `tw.py library search <words of the task>` and give each agent
 the paths of the few entries its work needs ("read <path>/MAIN.md first"); for code, add
-`rules-<language>` (its `rules-common` too). Entries marked "calls ECC's scripts" work only with
-ECC installed (`tw.py addons add ecc`). The user installs entries as native skills with
-`tw.py library enable`; installed ones the app already offers by name.
+`rules-<language>` (its `rules-common` too). The user installs entries as native skills
+with `tw.py library enable`; installed ones the app already offers by name. Add-ons
+(`tw.py addons`) bring outside skills, plugins and MCP servers, alone or in bundles
+(`frontend`, `token-saving`, `mcp`, `popular`).
 
 ### Team talk
 
@@ -155,7 +157,7 @@ print "nothing open" before the task is done.
 - Commands answered by `tw.py` without the model in Claude Code (a hook), and in agy with bash
   mode (`!team-workflow <command>`); run `tw.py` yourself only when the user asks you to:
   `update-plugin [check]`, `settings`, `models`, `agents` (list, show, set, enable, disable,
-  new, sync), `addons` (caveman, ponytail, ECC or any plugin, in both apps), `profile`,
+  new, sync), `addons` (skills, plugins, MCP servers and bundles, in every app), `profile`,
   `audit` (secrets, permissions, hooks, MCP, prompt injection in the agent setup), `doctor
   [--fix]`, `ci-init` (GitHub Actions checks on every pull request), `library` (list, search,
   show, enable, disable), `talk` (channels, `read TOPIC`, `open TOPIC`).
@@ -232,5 +234,5 @@ reminder off.
 Scripts: `estimate.py` (cost before launch), `run_worker.py` (exact model and effort, usage
 recorded), `dashboard.py` (usage after), `memcheck.py`, `init_memory.py`, `install_agy.py`,
 `update_plugin.py`, `install_opencode.py`, `tw.py` (every command without the model), `roles.py` (roles, packs and the
-native agents), `library.py` (the ECC library), `talk.py` (team talk), `addons.py`, `audit.py`,
+native agents), `library.py` (the library), `talk.py` (team talk), `addons.py`, `audit.py`,
 `doctor.py`, `learn.py`.

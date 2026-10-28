@@ -10,12 +10,17 @@ How each app installs an add-on:
 - agy, "plugin": `agy plugin install <GitHub URL>` (the repository has a plugin.json).
 - agy, "skills": agy has no plugin for it, so the repository's skills/<name>/SKILL.md folders
   (or <skills_dir>/<name>/SKILL.md) are copied into ~/.gemini/config/skills (marked, so only ours are ever removed).
-- agy, "ecc": ECC's own Antigravity installer, per project (it writes <repository>/.agents).
+- agy, "ecc": an upstream installer, per project (kept for add-ons chosen before 0.9.1).
 - OpenCode, "skills": the skills copied into ~/.config/opencode/skills (OpenCode also reads
   ~/.claude/skills and ~/.agents/skills: skills already there are not copied twice).
 - OpenCode, "plugin-file": the repository's .opencode/plugins/<name>.mjs, from a local clone,
   listed in the "plugin" array of ~/.config/opencode/opencode.json.
-- OpenCode, "ecc": ECC's own OpenCode installer (it writes to ~/.config/opencode).
+- OpenCode, "ecc": the same upstream installer (kept for add-ons chosen before 0.9.1).
+- any app, "mcp": an MCP server at user level: `claude mcp add --scope user`, the "mcpServers"
+  of ~/.gemini/config/mcp_config.json, the "mcp" table of ~/.config/opencode/opencode.json.
+  A server with the same name the user configured is never replaced.
+
+Bundles (`addons add frontend`, `token-saving`, `mcp`, `popular`) add several at once.
 """
 import json
 import os
@@ -36,11 +41,6 @@ CATALOG = {
         "repo": "DietrichGebert/ponytail", "marketplace": "ponytail", "plugin": "ponytail",
         "agy": "plugin", "opencode": "plugin-file", "license": "MIT",
         "about": "the laziest working solution: less code, stdlib and platform first",
-    },
-    "ecc": {
-        "repo": "affaan-m/everything-claude-code", "marketplace": "ecc", "plugin": "ecc",
-        "agy": "ecc", "opencode": "ecc", "license": "MIT",
-        "about": "Everything Claude Code: 68 agents, 292 skills, rules and hooks",
     },
     # The frontend set (`addons add frontend`): the frontend roles use these skills when present.
     "impeccable": {
@@ -70,7 +70,76 @@ CATALOG = {
         "about": "Cloudflare skills: Workers best practices, Zero Trust (cloudflare-one), Turnstile, perf",
     },
 }
-BUNDLES = {"frontend": ("impeccable", "taste", "frontend-design", "solar-icons", "cloudflare")}
+CATALOG.update({
+    # Popular skills and plugins.
+    "superpowers": {
+        "repo": "obra/superpowers", "marketplace": "superpowers-dev", "plugin": "superpowers",
+        "agy": "skills", "opencode": "skills", "license": "MIT",
+        "about": "plan-first, test-driven workflow: brainstorm, plan, execute, review, finish",
+    },
+    "anthropic-docs": {
+        "repo": "anthropics/skills", "marketplace": "anthropic-agent-skills", "plugin": "document-skills",
+        "agy": "skills", "opencode": "skills", "only": ("docx", "pdf", "pptx", "xlsx"),
+        "license": "see each skill's LICENSE.txt",
+        "about": "Anthropic's document skills: Word, PDF, PowerPoint, Excel",
+    },
+    "anthropic-examples": {
+        "repo": "anthropics/skills", "marketplace": "anthropic-agent-skills", "plugin": "example-skills",
+        "agy": "skills", "opencode": "skills", "skip": ("docx", "pdf", "pptx", "xlsx"),
+        "license": "Apache-2.0 (see each skill)",
+        "about": "Anthropic's skills: skill-creator, mcp-builder, webapp-testing, frontend-design...",
+    },
+    "karpathy": {
+        "repo": "forrestchang/andrej-karpathy-skills", "marketplace": "karpathy-skills",
+        "plugin": "andrej-karpathy-skills", "agy": "skills", "opencode": "skills",
+        "license": "none stated in the repository",
+        "about": "coding guidelines after Andrej Karpathy: simple, surgical, verified changes",
+    },
+    "ui-ux-pro-max": {
+        "repo": "nextlevelbuilder/ui-ux-pro-max-skill", "marketplace": "ui-ux-pro-max-skill",
+        "plugin": "ui-ux-pro-max", "agy": "skills", "opencode": "skills",
+        "skills_dir": ".claude/skills", "license": "MIT",
+        "about": "UI/UX design rules, palettes, fonts, design systems and UX checks",
+    },
+    # Token savers.
+    "context-mode": {
+        "repo": "mksglu/context-mode", "marketplace": "context-mode", "plugin": "context-mode",
+        "agy": "mcp", "opencode": "mcp", "mcp": {"command": ["npx", "-y", "context-mode"]},
+        "license": "see its LICENSE",
+        "about": "keeps big tool outputs out of the context (indexed, searched on demand)",
+    },
+    # MCP servers (user level in every app).
+    "context7": {
+        "repo": "upstash/context7", "marketplace": "context7-marketplace", "plugin": "context7",
+        "agy": "mcp", "opencode": "mcp", "mcp": {"command": ["npx", "-y", "@upstash/context7-mcp"]},
+        "license": "MIT", "about": "current, version-aware library docs for the code being written",
+    },
+    "playwright": {
+        "repo": "microsoft/playwright-mcp", "claude": "mcp", "agy": "mcp", "opencode": "mcp",
+        "mcp": {"command": ["npx", "-y", "@playwright/mcp@latest", "--isolated"]},
+        "license": "Apache-2.0", "about": "a real browser the agents drive: navigate, click, snapshot",
+    },
+    "serena": {
+        "repo": "oraios/serena", "claude": "mcp", "agy": "mcp", "opencode": "mcp",
+        "mcp": {"command": ["uvx", "--from", "git+https://github.com/oraios/serena", "serena",
+                            "start-mcp-server", "--project-from-cwd"],
+                "args": {"claude": ["--context", "claude-code"]}},
+        "license": "see its LICENSE (needs uv)",
+        "about": "symbol-level code navigation and edits: fewer whole files read, fewer tokens",
+    },
+    "sequential-thinking": {
+        "repo": "modelcontextprotocol/servers", "claude": "mcp", "agy": "mcp", "opencode": "mcp",
+        "mcp": {"command": ["npx", "-y", "@modelcontextprotocol/server-sequential-thinking"]},
+        "license": "MIT", "about": "step-by-step reasoning tool for hard problems",
+    },
+})
+BUNDLES = {
+    "frontend": ("impeccable", "taste", "frontend-design", "solar-icons", "cloudflare"),
+    "token-saving": ("caveman", "ponytail", "context-mode", "serena"),
+    "mcp": ("context7", "playwright", "serena", "sequential-thinking"),
+    "popular": ("superpowers", "anthropic-docs", "anthropic-examples", "karpathy", "ui-ux-pro-max",
+                "context7"),
+}
 APPS = ("claude", "agy", "opencode")
 
 
@@ -146,6 +215,8 @@ def claude_skills_dir():
 
 
 def claude_version(entry, name=None):
+    if entry.get("claude") == "mcp":
+        return "mcp" if name in mcp_servers("claude") else None
     if entry.get("claude") == "skills":  # a repository without a Claude Code marketplace
         return "skills" if name and agy_skill_dirs(name, claude_skills_dir()) else None
     try:
@@ -218,6 +289,8 @@ def clone_dir(name):
 
 def agy_version(name, entry):
     kind = entry.get("agy")
+    if kind == "mcp":
+        return "mcp" if name in mcp_servers("agy") else None
     if kind in ("plugin", "plugin@marketplace"):
         return "installed" if entry["plugin"] in agy_plugins() else None
     if kind == "skills":
@@ -253,7 +326,8 @@ def copy_skills(name, entry, dest=None, also_seen=()):
     base = os.path.join(src, *entry.get("skills_dir", "skills").split("/"))
     for d in sorted(os.listdir(base)) if os.path.isdir(base) else []:
         skill = os.path.join(base, d)
-        if not os.path.isfile(os.path.join(skill, "SKILL.md")):
+        if not os.path.isfile(os.path.join(skill, "SKILL.md")) or d in entry.get("skip", ()) or (
+                entry.get("only") and d not in entry["only"]):
             continue
         target = os.path.join(dest, d)
         if any(os.path.isfile(os.path.join(seen, d, "SKILL.md")) for seen in also_seen):
@@ -296,6 +370,72 @@ def edit_opencode_plugins(path_to_add=None, path_to_remove=None):
     return cfg
 
 
+# --- MCP servers -------------------------------------------------------------------------
+
+def mcp_command(entry, app):
+    return entry["mcp"]["command"] + entry["mcp"].get("args", {}).get(app, [])
+
+
+def _json_file(path):
+    try:
+        with open(path, encoding="utf-8") as f:
+            return json.load(f)
+    except OSError:
+        return {}
+
+
+def _write_json(path, data):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+        f.write("\n")
+
+
+def agy_mcp_path():
+    return home(".gemini", "config", "mcp_config.json")
+
+
+def mcp_servers(app):
+    """{name: config} of the MCP servers the app has for every project (user level)."""
+    try:
+        if app == "claude":
+            return _json_file(home(".claude.json")).get("mcpServers") or {}
+        if app == "agy":
+            return _json_file(agy_mcp_path()).get("mcpServers") or {}
+        return _json_file(opencode_config_path()).get("mcp") or {}
+    except ValueError:  # a config file with comments: report it as unknown, never rewrite it
+        return {}
+
+
+def mcp_apply(app, action, name, entry):
+    """Add, update or remove one MCP server, user level, in one app; returns (ok, log).
+    A server with the same name that the user configured is left alone."""
+    mine = name in chosen()
+    if action == "add" and name in mcp_servers(app) and not mine:
+        return True, f"MCP server {name} already configured, left as it is"
+    if app == "claude":
+        if name in mcp_servers(app):
+            run("claude", "mcp", "remove", "--scope", "user", name)
+        if action == "remove":
+            return True, f"MCP server {name} removed"
+        cmd = ("claude", "mcp", "add", "--scope", "user", name, "--", *mcp_command(entry, app))
+        ok, out = run(*cmd)
+        return ok, f"$ {' '.join(cmd)}\n{out}"
+    path = agy_mcp_path() if app == "agy" else opencode_config_path()
+    try:
+        data = _json_file(path) or ({} if app == "agy" else {"$schema": "https://opencode.ai/config.json"})
+    except ValueError:
+        return False, f"{path} is not plain JSON (comments?): add the MCP server {name} by hand"
+    table = data.setdefault("mcpServers" if app == "agy" else "mcp", {})
+    table.pop(name, None)
+    if action != "remove":
+        cmd = mcp_command(entry, app)
+        table[name] = ({"command": cmd[0], "args": cmd[1:]} if app == "agy"
+                       else {"type": "local", "command": cmd, "enabled": True})
+    _write_json(path, data)
+    return True, f"MCP server {name} {'removed from' if action == 'remove' else 'written to'} {path}"
+
+
 def opencode_plugin_file(name):
     folder = os.path.join(clone_dir(name), ".opencode", "plugins")
     files = sorted(f for f in os.listdir(folder) if re.search(r"\.(m?js|ts)$", f)) if os.path.isdir(folder) else []
@@ -304,6 +444,8 @@ def opencode_plugin_file(name):
 
 def opencode_version(name, entry):
     kind = entry.get("opencode")
+    if kind == "mcp":
+        return "mcp" if name in mcp_servers("opencode") else None
     if kind == "skills":
         return f"{len(agy_skill_dirs(name, opencode_skills_dir()))} skills" if agy_skill_dirs(
             name, opencode_skills_dir()) else None
@@ -344,7 +486,7 @@ def opencode_apply(action, name, entry, root):
             return False, str(e)
     if kind == "ecc":
         if not root:
-            return False, "run this inside a git repository (ECC's installer starts from a project)"
+            return False, "run this inside a git repository (this installer starts from a project)"
         version = ecc_version()
         if not version:
             return False, "npm view ecc-universal failed (needs Node.js and network)"
@@ -370,7 +512,7 @@ def agy_apply(action, name, entry, root):
         return copy_skills(name, entry)
     if kind == "ecc":
         if not root:
-            return False, "ECC installs into a project in agy: run this inside a git repository"
+            return False, "this add-on installs into a project in agy: run this inside a git repository"
         version = ecc_version()
         if not version:
             return False, "npm view ecc-universal failed (needs Node.js and network)"
@@ -381,7 +523,7 @@ def agy_apply(action, name, entry, root):
         import roles
         shadow = roles.shadowed("agy", root) if ok and action != "remove" else []
         if shadow:
-            log += ("\nnote: in this project agy now uses ECC's agents instead of team-workflow's for: "
+            log += ("\nnote: in this project agy now uses the add-on's agents instead of team-workflow's for: "
                     + ", ".join(shadow))
         return ok, log
     source = (f"https://github.com/{entry['repo']}" if kind == "plugin"
@@ -414,7 +556,7 @@ def status_lines(root=None):
         agy = agy_version(name, entry) if present("agy") else None
         oc = opencode_version(name, entry) if present("opencode") else None
         mark = "*" if name in picked else " "
-        lines.append(f"{mark} {name:<16} claude: {claude or '-':<10} agy: {agy or '-':<16} "
+        lines.append(f"{mark} {name:<20} claude: {claude or '-':<10} agy: {agy or '-':<16} "
                      f"opencode: {oc or '-':<16} {entry.get('about', '')[:60]}")
     return lines
 
@@ -437,7 +579,11 @@ def apply(action, spec, apps=APPS, root=None):
         if not present(app):
             log.append(f"{app}: not installed, skipped")
             continue
-        if app == "claude" and entry.get("claude") == "skills":
+        if entry.get(app) == "mcp":
+            ok, out = mcp_apply(app, action, name, entry)
+            log.append(f"{app}: {out}")
+            ok_all &= ok
+        elif app == "claude" and entry.get("claude") == "skills":
             if action == "remove":
                 for d in agy_skill_dirs(name, claude_skills_dir()):
                     shutil.rmtree(os.path.join(claude_skills_dir(), d), ignore_errors=True)

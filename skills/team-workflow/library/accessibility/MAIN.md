@@ -2,7 +2,7 @@
 name: accessibility
 description: Design, implement, and audit accessible UI to WCAG 2.2 Level AA across Web, iOS, and Android — semantic ARIA roles and labels, accessibility traits and hints, focus management, contrast, target size, and screen-reader support. Use when building or auditing UI for accessibility compliance, keyboard navigation, or screen-reader support.
 metadata:
-  origin: ECC
+ origin: 
 ---
 
 # Accessibility (WCAG 2.2)

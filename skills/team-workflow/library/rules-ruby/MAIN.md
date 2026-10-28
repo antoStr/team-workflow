@@ -1,6 +1,6 @@
 ---
 name: rules-ruby
-description: "Coding rules from ECC, ruby rules: style, patterns, security, testing. Use when writing or reviewing ruby code."
+description: "Coding rules, ruby rules: style, patterns, security, testing. Use when writing or reviewing ruby code."
 ---
 
 # Ruby rules

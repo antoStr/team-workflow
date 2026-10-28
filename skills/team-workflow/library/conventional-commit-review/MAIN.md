@@ -2,7 +2,7 @@
 name: conventional-commit-review
 description: Reviews staged changes and drafts a Conventional Commits-compliant commit message with the right type, scope, and length. Use before committing, or when the user asks to write, fix, or review a commit message.
 metadata:
-  origin: personal
+ origin: personal
 ---
 
 # Conventional Commit Review
