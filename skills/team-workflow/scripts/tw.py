@@ -934,7 +934,13 @@ def main(argv=None):
                                                         "for a new message")
     tk.add_argument("--strict", action="store_true", help="open: exit 1 when something is open")
     tk.add_argument("--json", action="store_true")
-    args = ap.parse_args(argv)
+    args, extra = ap.parse_known_args(argv)
+    if extra:
+        if args.command == "talk" and not any(a.startswith("-") for a in extra):
+            args.text = (args.text or []) + extra
+        else:
+            unrecognized = " ".join(extra)
+            ap.error(f"unrecognized arguments: {unrecognized}")
     if args.command == "update":
         check = args.check or args.check_word
         try:

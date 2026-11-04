@@ -31,7 +31,7 @@ INJECTION = re.compile(
 HIDDEN = re.compile("[​-‏‪-‮⁠-⁤⁦-⁩﻿]")
 UNPINNED = re.compile(r"^(@[\w.-]+/)?[\w.-]+(@latest)?$")
 SECRET_KEY = re.compile(r"KEY|TOKEN|SECRET|PASSWORD")
-LOOPBACK_HOSTS = ("localhost", "127.0.0.1", "::1")
+LOOPBACK_NETLOC = re.compile(r"^(localhost|127\.0\.0\.1|\[::1\])(:\d{1,5})?$", re.I)
 
 
 def finding(severity, path, what, fix):
@@ -132,7 +132,7 @@ def plain_remote_http(url):
         _ = parsed.port
     except ValueError:
         return re.sub(r"[\x00-\x20]+", "", url).lower().startswith("http:")
-    return "\\" in parsed.netloc or parsed.hostname not in LOOPBACK_HOSTS
+    return not LOOPBACK_NETLOC.match(parsed.netloc)
 
 
 def scan_mcp(path, servers):
