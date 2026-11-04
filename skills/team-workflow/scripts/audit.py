@@ -13,6 +13,7 @@ import glob
 import json
 import os
 import re
+import urllib.parse
 
 import settings
 from memcheck import SECRETS
@@ -30,6 +31,7 @@ INJECTION = re.compile(
 HIDDEN = re.compile("[​-‏‪-‮⁠-⁤⁦-⁩﻿]")
 UNPINNED = re.compile(r"^(@[\w.-]+/)?[\w.-]+(@latest)?$")
 SECRET_KEY = re.compile(r"KEY|TOKEN|SECRET|PASSWORD")
+LOOPBACK_HOSTS = ("localhost", "127.0.0.1", "::1")
 
 
 def finding(severity, path, what, fix):
@@ -122,6 +124,17 @@ def scan_settings(path):
     return out + scan_text(path, json.dumps(data))
 
 
+def plain_remote_http(url):
+    try:
+        parsed = urllib.parse.urlsplit(url)
+        if parsed.scheme != "http":
+            return False
+        _ = parsed.port
+    except ValueError:
+        return re.sub(r"[\x00-\x20]+", "", url).lower().startswith("http:")
+    return "\\" in parsed.netloc or parsed.hostname not in LOOPBACK_HOSTS
+
+
 def scan_mcp(path, servers):
     out = []
     for name, cfg in (servers or {}).items():
@@ -134,9 +147,9 @@ def scan_mcp(path, servers):
                 out.append(finding("medium", path, f"MCP server {name} runs an unpinned package: {pkgs[0]}",
                                    "pin a reviewed version (name@1.2.3)"))
         out += scan_command(path, f"MCP server {name}", " ".join(cmd))
-        url = str(cfg.get("url") or cfg.get("serverUrl") or "")
-        if url.startswith("http://") and not re.match(r"http://(localhost|127\.0\.0\.1)", url):
-            out.append(finding("high", path, f"MCP server {name} over plain http: {url}", "use https"))
+        for url in dict.fromkeys(str(cfg.get(k) or "").strip() for k in ("url", "serverUrl")):
+            if plain_remote_http(url):
+                out.append(finding("high", path, f"MCP server {name} over plain http: {url}", "use https"))
         out += plain_secrets(path, f"MCP server {name}", cfg.get("env"))
         auth = {k: v for k, v in (cfg.get("headers") or {}).items() if k.lower() == "authorization"}
         out += [finding("high", path, f"MCP server {name} has a literal Authorization header",

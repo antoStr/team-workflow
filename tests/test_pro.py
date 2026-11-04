@@ -56,6 +56,60 @@ class ProTest(ScriptTest):
         self.assertEqual(out.returncode, 0, out.stdout + out.stderr)
         self.assertIn("no findings", out.stdout)
 
+    def test_audit_mcp_flags_remote_http_lookalikes_and_malformed_urls(self):
+        bad_servers = {
+            "lookalike_localhost": {"url": "http://localhost.example.com/mcp"},
+            "lookalike_ipv4": {"url": "http://127.0.0.1.example.com/mcp"},
+            "userinfo_trick": {"url": "http://localhost:80@evil.com/mcp"},
+            "backslash_trick": {"url": "http://evil.com\\@localhost/mcp"},
+            "uppercase_scheme": {"url": "HTTP://example.com/mcp"},
+            "padded_url": {"url": "  http://localhost.example.com/mcp  "},
+            "malformed_ipv6": {"url": "http://[::1"},
+            "malformed_ipv6_suffix": {"url": "http://[::1].example.com/mcp"},
+            "invalid_port_range": {"url": "http://localhost:99999/mcp"},
+            "invalid_port_alpha": {"url": "http://localhost:abc/mcp"},
+            "wildcard_addr": {"url": "http://0.0.0.0:8080/mcp"},
+            "non_canonical_loopback": {"url": "http://127.0.0.2:8080/mcp"},
+            "ipv4_mapped_ipv6": {"url": "http://[::ffff:127.0.0.1]/mcp"},
+            "trailing_dot_localhost": {"url": "http://localhost./mcp"},
+            "idn_homograph": {"url": "http://localh\u043est/mcp"},
+            "empty_host": {"url": "http:///mcp"},
+            "server_url_field": {"serverUrl": "http://localhost.example.com/mcp"},
+            "shadowed_server_url": {"url": "https://ok.example.com/mcp", "serverUrl": "http://evil.com/mcp"},
+        }
+        for name, cfg in bad_servers.items():
+            with self.subTest(server=name):
+                found = audit.scan_mcp(".mcp.json", {name: cfg})
+                self.assertEqual(len(found), 1, f"expected 1 finding for {name}: {found}")
+                self.assertEqual(found[0]["severity"], "high")
+                self.assertIn("plain http", found[0]["what"])
+
+        self.write(".mcp.json", json.dumps({"mcpServers": {
+            "evil": {"url": "http://localhost.example.com/mcp"}}}))
+        out = self.run_script("tw.py", "audit", "--strict", cwd=self.root)
+        self.assertEqual(out.returncode, 1, out.stdout + out.stderr)
+        self.assertIn("plain http", out.stdout)
+
+    def test_audit_mcp_allows_loopback_http_and_https(self):
+        self.write(".mcp.json", json.dumps({"mcpServers": {
+            "local_bare": {"url": "http://localhost"},
+            "local_port": {"url": "http://localhost:3000/mcp"},
+            "local_upper": {"url": "http://LOCALHOST:8080/mcp"},
+            "local_padded": {"url": "  http://localhost:3000/mcp  "},
+            "ipv4_loopback": {"url": "http://127.0.0.1:8080/mcp"},
+            "ipv6_loopback": {"url": "http://[::1]:8080/mcp"},
+            "server_url_loopback": {"serverUrl": "http://127.0.0.1:8080/mcp"},
+            "remote_https": {"url": "https://localhost.example.com/mcp"},
+            "malformed_https": {"url": "https://[::1"},
+            "null_fields": {"url": None, "serverUrl": None, "headers": None, "env": None},
+            "numeric_url": {"url": 123},
+        }}))
+        findings, _ = audit.audit(self.root)
+        self.assertEqual(findings, [])
+        out = self.run_script("tw.py", "audit", "--strict", cwd=self.root)
+        self.assertEqual(out.returncode, 0, out.stdout + out.stderr)
+        self.assertIn("no findings", out.stdout)
+
     def test_uninstall_removes_only_what_team_workflow_wrote(self):
         roles.sync("claude")
         mine = os.path.join(roles.native_dir("claude"), "my-agent.md")
@@ -113,9 +167,15 @@ class ProTest(ScriptTest):
             self.assertTrue(os.path.isfile(os.path.join(self.root, ".github", "team-workflow", name)))
         # the copied checks run on their own, as they will in GitHub Actions
         vendored = os.path.join(self.root, ".github", "team-workflow", "audit.py")
+        env = dict(os.environ, HOME=self.tmp, USERPROFILE=self.tmp)
         run = subprocess.run([sys.executable, vendored, "--root", self.root, "--strict"],
-                             capture_output=True, text=True, env=dict(os.environ, HOME=self.tmp, USERPROFILE=self.tmp))
+                             capture_output=True, text=True, env=env)
         self.assertEqual(run.returncode, 0, run.stdout + run.stderr)
+        self.write(".mcp.json", json.dumps({"mcpServers": {"bad": {"url": "http://localhost.example.com/mcp"}}}))
+        bad = subprocess.run([sys.executable, vendored, "--root", self.root, "--strict"],
+                             capture_output=True, text=True, env=env)
+        self.assertEqual(bad.returncode, 1, bad.stdout + bad.stderr)
+        self.assertIn("plain http", bad.stdout)
         self.assertNotEqual(self.run_script("tw.py", "ci-init", cwd=self.root).returncode, 0)
 
     def test_agy_update_never_loses_a_plugin(self):
