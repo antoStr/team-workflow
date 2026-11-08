@@ -27,3 +27,27 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
+
+---
+
+## Additional Security & Malware Analysis Collections
+
+### Strix Autonomous Pentesting Workflows
+Imported from usestrix/strix (Apache-2.0 License), https://github.com/usestrix/strix
+Copyright (c) 2026 Strix AI
+
+### Cloudflare Security Audit Skills
+Imported from cloudflare/security-audit-skill (Apache-2.0 License), https://github.com/cloudflare/security-audit-skill
+Copyright (c) 2026 Cloudflare, Inc.
+
+### Malware Analysis Claude Skills
+Imported from gl0bal01/malware-analysis-claude-skills (MIT License), https://github.com/gl0bal01/malware-analysis-claude-skills
+Copyright (c) 2026 gl0bal01
+
+### Malware Analysis Skills Suite
+Imported from wellingtonlee/malware-analysis-skills (MIT License), https://github.com/wellingtonlee/malware-analysis-skills
+Copyright (c) 2026 Wellington Lee
+
+### Anthropic Cybersecurity & Threat Intelligence Skills
+Imported from mukul975/Anthropic-Cybersecurity-Skills (Apache-2.0 License), https://github.com/mukul975/Anthropic-Cybersecurity-Skills
+Copyright (c) 2026 Mahipal

@@ -7,7 +7,7 @@
 **Un team autonomo di agenti esperti dentro il tuo assistente di programmazione.**<br>
 Memoria Brain Graph persistente · Verifica reale runtime "Zero Fake-Solved" · Auto-learning & Vaccini preventivi · Team avversario con canale condiviso · Report trasparente a fine lavoro.
 
-[![Release](https://img.shields.io/badge/release-v2.0.1-2ea44f)](https://github.com/antoStr/team-workflow/releases)
+[![Release](https://img.shields.io/badge/release-v2.1.0-2ea44f)](https://github.com/antoStr/team-workflow/releases)
 [![Tests](https://github.com/antoStr/team-workflow/actions/workflows/tests.yml/badge.svg)](https://github.com/antoStr/team-workflow/actions/workflows/tests.yml)
 [![License: MIT](https://img.shields.io/github/license/antoStr/team-workflow?label=licenza)](LICENSE)
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-supportato-d97757)
@@ -66,7 +66,7 @@ Con **team-workflow**, l'assistente diventa il **responsabile tecnico di un team
 | | Assistente Standard | Con team-workflow v2.0 |
 |---|---|---|
 | 🧠 **Memoria** | Ogni sessione riparte da zero | Knowledge Graph in `docs/brain/` persistente e compattazione settimanale |
-| 👥 **Competenze** | Un solo modello generalista | **129 specialisti**: core, linguaggi, framework, sicurezza offensiva e reversing |
+| 👥 **Competenze** | Un solo modello generalista | **130 specialisti**: core, linguaggi, framework, sicurezza offensiva, reversing e malware analysis |
 | 🎮 **Verifica Reale** | "Ho corretto il codice!" (senza avviare) | **Zero Fake-Solved**: smoke test runtime su processo reale, log e stabilità d'avvio |
 | 🛡️ **Auto-Apprendimento** | Ripete gli stessi bug col tempo | Registra anti-pattern e inietta **vaccini comportamentali** ad ogni prompt |
 | ⚔️ **Controllo Qualità** | Chi scrive approva se stesso | Gate avversario: costruttore contro verificatore su canale condiviso |
@@ -82,8 +82,8 @@ Con **team-workflow**, l'assistente diventa il **responsabile tecnico di un team
 - 🚦 **Zero Fake-Solved Gate**: fine delle allucinazioni in cui l'AI dice "Risolto!" ma il gioco o l'app non parte nemmeno. Il motore lancia `tw.py smoke "<cmd>"` con timeout di sicurezza e valida l'avvio reale.
 - 💉 **Continuous Auto-Learning & Vaccini**: ogni volta che un bug viene corretto o un gate avversario supera una contestazione, `tw.py learn` registra l'anti-pattern e lo inietta come vaccino nelle istruzioni del team.
 - 🧠 **Brain Knowledge Graph**: archivio in `docs/brain/` con nodi Markdown, frontmatter YAML, wikilink bidirezionali e supporto ai grafi Obsidian, con `tw.py brain rollover` per compattazione settimanale automatica.
-- 🛡️ **Pack Pentesting Strix & Cloudflare Security**: 57 nuovi playbook avanzati (42 Strix + 15 Cloudflare Security Audit) per un totale di **469 voci di libreria**.
-- 🔬 **Ruoli Pentester & Reverse Engineer**: audit di binari compilati, firmware e API con supporto a IDA Pro, Ghidra, x64dbg, Cutter e server MCP di decompilazione.
+- 🛡️ **Cybersecurity Suite (Strix, Cloudflare & Malware Intel)**: 100 playbook avanzati di sicurezza offensiva, difensiva e analisi malware (42 Strix + 15 Cloudflare + 43 Malware Analysis & URL Threat Hunting) per un totale di **512 voci di libreria**.
+- 🔬 **Ruoli Pentester, Reverse Engineer & Malware Analyst**: audit di binari compilati, firmware, API e triage di sample malware con supporto a IDA Pro, Ghidra, x64dbg, Cutter, YARA, Sigma e URLScan.io.
 - 💸 **Zero-Token Self-Update**: notifica automatica di nuovi rilasci all'avvio sessione e aggiornamento immediato con `/team upgrade`.
 
 ---
@@ -222,13 +222,13 @@ Il sistema di memoria supporta sia la modalità classica (`docs/memory/`) sia il
 
 ## 👥 Gli agenti
 
-team-workflow include **129 specialisti**:
+team-workflow include **130 specialisti**:
 - **20 nel core**: `architect`, `backend-dev`, `frontend-dev`, `tester`, `code-reviewer`, `security-reviewer`, `database-engineer`, `devops-engineer`, `performance-engineer`, `ui-ux-designer`, `product-manager`, `doc-keeper`, `e2e-tester`, `data-analyst`, `market-researcher`, `marketing-strategist`, `refactor-specialist`, `release-manager`, `technical-writer`, `accessibility-specialist`.
 - **Pack linguaggi (26 agenti)**: Python, TypeScript, Go, Rust, Java, C++, C#, Kotlin, Swift, PHP, Ruby, Dart/Flutter, F#.
-- **Pack qualità, sicurezza & reversing**: `pentester`, `reverse-engineer`, `silent-failure-hunter`, `type-design-reviewer`, e molti altri.
+- **Pack qualità, sicurezza & reversing**: `pentester`, `reverse-engineer`, `malware-analyst`, `silent-failure-hunter`, `type-design-reviewer`, e molti altri.
 - **Pack alternativi (`alt-`)**: versioni per una seconda opinione indipendente.
 
-📋 Consulta il **[Catalogo Completo](docs/CATALOG.md)** per le schede di tutti i 129 ruoli.
+📋 Consulta il **[Catalogo Completo](docs/CATALOG.md)** per le schede di tutti i 130 ruoli.
 
 ---
 
@@ -249,7 +249,7 @@ Grazie al **Gate Avversario** (`tw.py gate`), il builder non può mai approvare 
 
 ## 📚 La libreria di skill
 
-La libreria integrata comprende **469 voci** (353 skill, 94 comandi, 22 set di regole):
+La libreria integrata comprende **512 voci** (396 skill, 94 comandi, 22 set di regole):
 - Ingegneria agentica, cicli autonomi e harness di valutazione.
 - Ottimizzazione token e caching (Caveman, Ponytail, Context Mode).
 - Testing TDD, migrazioni reversibili, refactoring sicuro.
@@ -257,9 +257,9 @@ La libreria integrata comprende **469 voci** (353 skill, 94 comandi, 22 set di r
 
 ---
 
-## 🛡️ Cybersecurity & Reverse Engineering
+## 🛡️ Cybersecurity, Reversing & Malware Intel
 
-La versione 2.0 include due grandi pack di sicurezza e analisi a basso livello:
+La suite di sicurezza include quattro grandi pack specializzati:
 
 1. **Strix Autonomous Pentesting** (42 playbooks):
    - OWASP Top 10, IDOR, SSRF, SQL Injection, NoSQL Injection, Race Conditions, Prototype Pollution, JWT broken authentication, LLM Prompt Injection e Agentic Security.
@@ -270,6 +270,10 @@ La versione 2.0 include due grandi pack di sicurezza e analisi a basso livello:
 
 3. **Reverse Engineering & Decompilazione**:
    - Ruolo `reverse-engineer`: supporto per **IDA Pro**, **Ghidra**, **x64dbg**, **Cutter** e server MCP di decompilazione. Analisi di binari ELF/PE, ricostruzione strutture dati, firma delle funzioni e verifica di buffer overflow.
+
+4. **Malware Analysis & Threat Intel URL/Richieste** (43 playbooks):
+   - Ruolo `malware-analyst`: triage PE/ELF, unpacking, memory forensics, dissezione protocolli C2, YARA, Sigma, STIX 2.1.
+   - Audit link e richieste: scansione URLScan.io, ispezione header phishing, domain fronting hunting, tracking infrastrutture avversarie e analisi traffico di rete (Zeek, TShark).
 
 ---
 
@@ -305,7 +309,7 @@ Non consumare token preziosi per aggiornare il plugin:
 ## ❓ Domande frequenti
 
 <details>
-<summary><b>Devo usare tutti i 129 agenti?</b></summary>
+<summary><b>Devo usare tutti i 130 agenti?</b></summary>
 
 No! L'orchestratore sceglie solo 1 o 2 agenti strettamente necessari per il tuo compito specifico. Per compiti piccoli, l'assistente lavora da solo.
 </details>
@@ -332,7 +336,7 @@ No. Modifica solo i file inerenti al compito assegnato. Tutte le altre proposte 
 
 ## 📖 Per saperne di più
 
-- 📋 [Catalogo Completo (129 agenti, 469 skill)](docs/CATALOG.md)
+- 📋 [Catalogo Completo (130 agenti, 512 skill)](docs/CATALOG.md)
 - 👥 [Guida agli agenti e creazione ruoli](docs/AGENTS.md)
 - 📘 [Manuale di riferimento comandi e configurazione](docs/REFERENCE.md)
 - 💬 [Team Talk e protocollo di conversazione](skills/team-workflow/TALK.md)
@@ -346,5 +350,5 @@ No. Modifica solo i file inerenti al compito assegnato. Tutte le altre proposte 
 Distribuito con licenza **MIT** (vedi [LICENSE](LICENSE)). I contenuti di terze parti importati nella libreria e nei ruoli mantengono le rispettive licenze d'origine ([NOTICE](skills/team-workflow/library/NOTICE.md)).
 
 <div align="center">
-<sub>Sviluppato con dedizione per programmatori e team aumentati da AI · <b>team-workflow v2.0.1</b></sub>
+<sub>Sviluppato con dedizione per programmatori e team aumentati da AI · <b>team-workflow v2.1.0</b></sub>
 </div>

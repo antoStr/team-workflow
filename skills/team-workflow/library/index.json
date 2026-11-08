@@ -33,7 +33,9 @@
     "swift-apple": "Swift, SwiftUI, and Apple platform skills including concurrency, persistence, and design patterns.",
     "workflow-quality": "Evaluation, TDD, verification, compaction, learning, and cross-harness memory skills, including the legacy continuous-learning v1 path.",
     "strix-pentest": "Autonomous penetration testing, proof-of-concept exploit verification, vulnerability playbooks, and counter-evidence analysis from Strix.",
-    "cloudflare-sec": "Enterprise vulnerability discovery, coverage-led hunting, binary analysis, and security auditing from Cloudflare."
+    "cloudflare-sec": "Enterprise vulnerability discovery, coverage-led hunting, binary analysis, and security auditing from Cloudflare.",
+    "malware-analysis": "Specialized malware reverse engineering, binary triage, dynamic sandboxing, deobfuscation, memory forensics, YARA/Sigma rules, and threat classification.",
+    "threat-intel-url": "Suspicious URL analysis, phishing triage, urlscan.io integration, certificate transparency, and C2 infrastructure tracking."
   },
   "entries": [
     {
@@ -357,6 +359,111 @@
       "pack": "database",
       "description": "ClickHouse database patterns, query optimization, analytics, and data engineering best practices for high-performance analytical workloads. Use when writing ClickHouse schemas or queries, or when an analytical query is too slow.",
       "hash": "5f93ea1e81d8be93"
+    },
+    {
+      "id": "cloudflare-sec-ai-and-llm",
+      "kind": "skill",
+      "pack": "cloudflare-sec",
+      "description": "Security auditing for LLM and agentic systems, prompt injection, tool abuse, and data leakage.",
+      "hash": "8277517028ad4bec"
+    },
+    {
+      "id": "cloudflare-sec-attack-classes",
+      "kind": "skill",
+      "pack": "cloudflare-sec",
+      "description": "Taxonomy of core web, protocol, logic, and infrastructure attack classes for systematic audits.",
+      "hash": "a91a26b3b93a0612"
+    },
+    {
+      "id": "cloudflare-sec-client-side",
+      "kind": "skill",
+      "pack": "cloudflare-sec",
+      "description": "Client-side vulnerability hunting: DOM injection, messaging trust, UI redress, and prototype pollution.",
+      "hash": "ab594b1cef331771"
+    },
+    {
+      "id": "cloudflare-sec-cloud-and-deployment",
+      "kind": "skill",
+      "pack": "cloudflare-sec",
+      "description": "Cloud security audit: IAM, infrastructure-as-code, containers, serverless ingress, and misconfigurations.",
+      "hash": "23c7eadc5a75649d"
+    },
+    {
+      "id": "cloudflare-sec-data-isolation-lifecycle",
+      "kind": "skill",
+      "pack": "cloudflare-sec",
+      "description": "Multi-tenant data isolation, cache leaks, search index boundaries, and data lifecycle auditing.",
+      "hash": "b8e138c9e7ec4378"
+    },
+    {
+      "id": "cloudflare-sec-desktop-mobile-ipc",
+      "kind": "skill",
+      "pack": "cloudflare-sec",
+      "description": "Desktop, mobile and local IPC security: deep-links, webviews, exported components, and daemons.",
+      "hash": "3bbc2e72741f7981"
+    },
+    {
+      "id": "cloudflare-sec-hunting",
+      "kind": "skill",
+      "pack": "cloudflare-sec",
+      "description": "Coverage-led vulnerability hunting methodology, hypothesis generation, and candidate validation.",
+      "hash": "b4400148c999396d"
+    },
+    {
+      "id": "cloudflare-sec-memory-safety-binary",
+      "kind": "skill",
+      "pack": "cloudflare-sec",
+      "description": "Memory safety, binary reverse engineering, buffer overflows, and native vulnerability hunting.",
+      "hash": "c5d8d8fed38a8f64"
+    },
+    {
+      "id": "cloudflare-sec-protocols-rpc-messaging",
+      "kind": "skill",
+      "pack": "cloudflare-sec",
+      "description": "RPC, serialization, queue brokers, webhooks, and streaming protocol security testing.",
+      "hash": "a6e19d39fd2bcd27"
+    },
+    {
+      "id": "cloudflare-sec-reconnaissance",
+      "kind": "skill",
+      "pack": "cloudflare-sec",
+      "description": "Systematic reconnaissance, architecture mapping, trust boundary discovery, and input surface analysis.",
+      "hash": "dfb6d40709d8ba13"
+    },
+    {
+      "id": "cloudflare-sec-resource-exhaustion",
+      "kind": "skill",
+      "pack": "cloudflare-sec",
+      "description": "Denial-of-service, algorithmic complexity, queue worker starvation, and operator-spend exhaustion.",
+      "hash": "3977283285c94de4"
+    },
+    {
+      "id": "cloudflare-sec-supply-chain-release",
+      "kind": "skill",
+      "pack": "cloudflare-sec",
+      "description": "Software supply chain security: dependency pinning, build pipeline integrity, signing, and extensions.",
+      "hash": "d07e9e1287fdd045"
+    },
+    {
+      "id": "cloudflare-sec-validation-reporting",
+      "kind": "skill",
+      "pack": "cloudflare-sec",
+      "description": "Candidate validation discipline, falsification criteria, and structured security reporting.",
+      "hash": "1f80932f4b122f41"
+    },
+    {
+      "id": "cloudflare-sec-web-protocol-auth",
+      "kind": "skill",
+      "pack": "cloudflare-sec",
+      "description": "HTTP request framing, cache poisoning, session hijacking, and authentication protocol testing.",
+      "hash": "f0630cf41b65ef82"
+    },
+    {
+      "id": "cloudflare-security-audit",
+      "kind": "skill",
+      "pack": "cloudflare-sec",
+      "description": "Comprehensive multi-phase security audit methodology: reconnaissance, hunting, validation and reporting.",
+      "hash": "357661247b37982e"
     },
     {
       "id": "code-review",
@@ -1519,6 +1626,286 @@
       "pack": "framework-language",
       "description": "Apply concrete design-engineering details that make interfaces feel polished. Use when reviewing or improving UI spacing, typography, borders, shadows, motion, hit areas, icons, text wrapping, and interaction states.",
       "hash": "256152e86c4e71bb"
+    },
+    {
+      "id": "malware-anti-analysis-bypass-routines",
+      "kind": "skill",
+      "pack": "malware-analysis",
+      "title": "Anti-Analysis and Anti-VM Countermeasures",
+      "description": "Techniques to bypass IsDebuggerPresent, CheckRemoteDebuggerPresent, CPUID hypervisor bits, and RDTSC timing checks.",
+      "hash": "561d84fa63ab5c7b"
+    },
+    {
+      "id": "malware-automated-config-extraction",
+      "kind": "skill",
+      "pack": "malware-analysis",
+      "title": "Automated Malware Configuration Extraction",
+      "description": "Extract structured C2 lists, encryption keys, and campaign identifiers from malware memory dumps.",
+      "hash": "fa09e0e4d26dae54"
+    },
+    {
+      "id": "malware-c2-protocol-analysis",
+      "kind": "skill",
+      "pack": "malware-analysis",
+      "title": "Command and Control (C2) Protocol Analysis",
+      "description": "Dissect malware C2 channels, beaconing traffic, custom crypto handshakes, and command structures.",
+      "hash": "05d62b679b8e9240"
+    },
+    {
+      "id": "malware-code-similarity-analysis",
+      "kind": "skill",
+      "pack": "malware-analysis",
+      "title": "Malware Code Similarity and Lineage Analysis",
+      "description": "Identify code reuse, sample ancestry, and function hashing across malware variants using BinDiff and SSDEEP.",
+      "hash": "e8ac9ad9dce9b99f"
+    },
+    {
+      "id": "malware-detection-engineer",
+      "kind": "skill",
+      "pack": "malware-analysis",
+      "title": "Detection Engineering for Malware: YARA, Sigma, and IOC Extraction",
+      "description": "YARA, Sigma, and network detection engineering for malware campaigns and behavioral IOCs.",
+      "hash": "1f6db714b2154014"
+    },
+    {
+      "id": "malware-dynamic-analysis",
+      "kind": "skill",
+      "pack": "malware-analysis",
+      "title": "Malware Dynamic Behavioral Analysis and Sandbox Triage",
+      "description": "Dynamic runtime analysis in sandboxes: ProcMon, Sysmon, API interception, and anti-analysis bypass.",
+      "hash": "c98d1a2b1739a29a"
+    },
+    {
+      "id": "malware-exploit-payload-analysis",
+      "kind": "skill",
+      "pack": "malware-analysis",
+      "title": "Exploit and Shellcode Payload Analysis",
+      "description": "Analyze shellcode, return-oriented programming (ROP) chains, memory corruptions, and payload execution.",
+      "hash": "593c7dd414b5ca59"
+    },
+    {
+      "id": "malware-initial-triage",
+      "kind": "skill",
+      "pack": "malware-analysis",
+      "title": "Malware Triage: Header Inspection, Hashes and Strings",
+      "description": "Fast malware triage: file hashing, entropy, PE header parsing, packer detection, and string extraction.",
+      "hash": "43c92bacc4b77d78"
+    },
+    {
+      "id": "malware-ioc-extraction-pipeline",
+      "kind": "skill",
+      "pack": "malware-analysis",
+      "title": "Indicators of Compromise (IOC) Extraction Pipeline",
+      "description": "Systematic extraction and normalization of IP addresses, domain names, file hashes, mutexes, and registry artifacts.",
+      "hash": "1d459bbd6e7dc7c8"
+    },
+    {
+      "id": "malware-memory-forensics",
+      "kind": "skill",
+      "pack": "malware-analysis",
+      "title": "Memory Forensics for Injected Malware",
+      "description": "Analyze volatile RAM dumps, process hollowing, reflective DLL loading, and hidden kernel rootkits.",
+      "hash": "60c7e2c79f3a1309"
+    },
+    {
+      "id": "malware-mitre-attack-mapping-discipline",
+      "kind": "skill",
+      "pack": "malware-analysis",
+      "title": "MITRE ATT&CK Mapping for Malware Behaviors",
+      "description": "Translate technical reverse engineering observations into MITRE ATT&CK Enterprise matrix techniques.",
+      "hash": "a3519e42514302d1"
+    },
+    {
+      "id": "malware-network-traffic-analysis",
+      "kind": "skill",
+      "pack": "malware-analysis",
+      "title": "Malware Network Traffic and Exfiltration Analysis",
+      "description": "Inspect PCAP captures for malicious HTTP/DNS tunnels, data exfiltration, beacon patterns, and Tor traffic.",
+      "hash": "7e8fd1ffb18d3c04"
+    },
+    {
+      "id": "malware-payload-deobfuscation",
+      "kind": "skill",
+      "pack": "malware-analysis",
+      "title": "Malware Deobfuscation and Unpacking",
+      "description": "Deobfuscate obfuscated scripts, multi-stage droppers, encrypted strings, and packed executable payloads.",
+      "hash": "4faca864d86b9c24"
+    },
+    {
+      "id": "malware-pe-binary-exploration",
+      "kind": "skill",
+      "pack": "malware-analysis",
+      "title": "PE Binary Header and Section Exploration",
+      "description": "Inspect DOS/NT headers, Import Address Table (IAT), export tables, overlay payloads, and certificate stamps.",
+      "hash": "1a539c505e9fed05"
+    },
+    {
+      "id": "malware-report-writer",
+      "kind": "skill",
+      "pack": "malware-analysis",
+      "title": "Malware Analysis Reporting and MITRE ATT&CK Mapping",
+      "description": "Professional malware analysis report writing with executive summaries, technical IOCs, and MITRE ATT&CK mapping.",
+      "hash": "c92366da2b564459"
+    },
+    {
+      "id": "malware-reverse-engineering-disassembly",
+      "kind": "skill",
+      "pack": "malware-analysis",
+      "title": "Malware Disassembly and Decompilation Discipline",
+      "description": "Reverse engineer malicious algorithms, cryptographic keys, and unpacking logic using IDA Pro, Ghidra, and Cutter.",
+      "hash": "0f9180a8b76dc20e"
+    },
+    {
+      "id": "malware-runtime-behavioral-analysis",
+      "kind": "skill",
+      "pack": "malware-analysis",
+      "title": "Runtime Behavioral Analysis of Malicious Executables",
+      "description": "Inspect process creations, DLL injections, registry persistence, and network callbacks in real-time.",
+      "hash": "dcb6f556d5fd88f1"
+    },
+    {
+      "id": "malware-sandbox-evasion-detection",
+      "kind": "skill",
+      "pack": "malware-analysis",
+      "title": "Sandbox Evasion and Anti-Analysis Detection",
+      "description": "Detect anti-debugging techniques, virtual machine checks, sleep skipping countermeasures, and timing attacks.",
+      "hash": "3adf5b9eb49713e5"
+    },
+    {
+      "id": "malware-sigma-rule-development",
+      "kind": "skill",
+      "pack": "malware-analysis",
+      "title": "Sigma Detection Rule Development for Endpoint Telemetry",
+      "description": "Write robust Sigma rules for Sysmon, Windows Event Logs, and Linux auditd to detect malware behaviors.",
+      "hash": "60284c95936d5f75"
+    },
+    {
+      "id": "malware-specialized-file-analyzer",
+      "pack": "malware-analysis",
+      "title": "Specialized Malicious Document and Script Analysis",
+      "description": "Deep analysis of non-PE delivery documents, Office macros, malicious PDFs, LNK shortcuts, and obfuscated scripts.",
+      "hash": "c8e1a90f1234abcd",
+      "kind": "skill"
+    },
+    {
+      "id": "malware-static-property-analysis",
+      "kind": "skill",
+      "pack": "malware-analysis",
+      "title": "Static Property and Signature Analysis",
+      "description": "Examine compiler signatures, imphash, rich headers, digital certificates, and extracted ASCII/Unicode strings.",
+      "hash": "7f617014b87c60d3"
+    },
+    {
+      "id": "malware-stix-threat-report-generation",
+      "kind": "skill",
+      "pack": "malware-analysis",
+      "title": "STIX 2.1 Threat Report Generation",
+      "description": "Generate standardized STIX 2.1 JSON bundles linking malware observables, attack patterns, and threat actors.",
+      "hash": "31d0955b6418ba3a"
+    },
+    {
+      "id": "malware-string-decryption-routines",
+      "kind": "skill",
+      "pack": "malware-analysis",
+      "title": "Automated Malware String Decryption",
+      "description": "Identify and emulate XOR, RC4, AES, and custom rolling-key string decryption routines in malware samples.",
+      "hash": "97c53f4b45f2a50c"
+    },
+    {
+      "id": "malware-threat-intelligence-attribution",
+      "kind": "skill",
+      "pack": "malware-analysis",
+      "title": "Threat Intelligence Correlation and Attribution",
+      "description": "Correlate malware TTPs, infrastructure, and code signatures to known APT groups and cybercrime campaigns.",
+      "hash": "48cf5ac5cfef5108"
+    },
+    {
+      "id": "malware-type-apt-campaign-analysis",
+      "kind": "skill",
+      "pack": "malware-analysis",
+      "title": "Advanced Persistent Threat (APT) Analysis",
+      "description": "Analyze state-sponsored toolsets, living-off-the-land binaries (LOLBins), custom persistence, and stealth implants.",
+      "hash": "20672ada8a866285"
+    },
+    {
+      "id": "malware-type-botnet-analysis",
+      "kind": "skill",
+      "pack": "malware-analysis",
+      "title": "Botnet Architecture and Protocol Analysis",
+      "description": "Reverse engineer botnet communication architectures (P2P, IRC, HTTP), DDoS commands, and propagation routines.",
+      "hash": "b280fdcba071938d"
+    },
+    {
+      "id": "malware-type-destructive-wiper-analysis",
+      "kind": "skill",
+      "pack": "malware-analysis",
+      "title": "Destructive Wiper and Data Corruption Analysis",
+      "description": "Analyze destructive wipers, MBR overwrites, raw disk IOCTLs, and file shredding routines.",
+      "hash": "cb51c6009f9ceefb"
+    },
+    {
+      "id": "malware-type-document-payload-analysis",
+      "kind": "skill",
+      "pack": "malware-analysis",
+      "title": "Malicious Office Document and PDF Analysis",
+      "description": "Extract and deobfuscate VBA macros, Excel 4.0 (XLM) formulas, OLE objects, and embedded exploit payloads.",
+      "hash": "322f00c76e579bcb"
+    },
+    {
+      "id": "malware-type-fileless-memory-malware",
+      "kind": "skill",
+      "pack": "malware-analysis",
+      "title": "Fileless and Memory-Resident Malware Analysis",
+      "description": "Investigate registry-resident scripts, WMI persistence, scheduled tasks, and reflective memory execution.",
+      "hash": "33ca183c21123620"
+    },
+    {
+      "id": "malware-type-firmware-hardware-implants",
+      "kind": "skill",
+      "pack": "malware-analysis",
+      "title": "Firmware and Hardware Implant Analysis",
+      "description": "Analyze UEFI implants, SPI flash corruptions, embedded Linux firmware, and boot-chain persistence.",
+      "hash": "5d67392633c517e5"
+    },
+    {
+      "id": "malware-type-infostealer-analysis",
+      "kind": "skill",
+      "pack": "malware-analysis",
+      "title": "Infostealer and Credential Harvester Analysis",
+      "description": "Triage RedLine, Lumma, Vidar and Stealc stealers targeting browser credentials, crypto wallets, and 2FA tokens.",
+      "hash": "db4a74f5b5cfb0b4"
+    },
+    {
+      "id": "malware-type-kernel-rootkit-analysis",
+      "kind": "skill",
+      "pack": "malware-analysis",
+      "title": "Kernel Rootkit and Driver Analysis",
+      "description": "Identify bring-your-own-vulnerable-driver (BYOVD) exploits, SSDT/IDT hooking, and hidden kernel objects.",
+      "hash": "fa4e20af2e944355"
+    },
+    {
+      "id": "malware-type-ransomware-analysis",
+      "kind": "skill",
+      "pack": "malware-analysis",
+      "title": "Ransomware Cryptographic and Triage Analysis",
+      "description": "Analyze ransomware encryption schemes, key generation, VSS shadow copy deletion, and ransom notes.",
+      "hash": "45af2a2b17b43b17"
+    },
+    {
+      "id": "malware-type-remote-access-trojan",
+      "kind": "skill",
+      "pack": "malware-analysis",
+      "title": "Remote Access Trojan (RAT) Analysis",
+      "description": "Dissect AsyncRAT, Remcos, njRAT and AgentTesla command structures, keylogging, and surveillance modules.",
+      "hash": "f5b433ca96512e4a"
+    },
+    {
+      "id": "malware-yara-rule-development",
+      "kind": "skill",
+      "pack": "malware-analysis",
+      "title": "High-Fidelity YARA Rule Development",
+      "description": "Write, test, and optimize modular YARA rules targeting unique byte sequences, strings, and PE header logic.",
+      "hash": "f281805000e21fff"
     },
     {
       "id": "manim-video",
@@ -3138,6 +3525,70 @@
       "hash": "e46390a4b1bdde6c"
     },
     {
+      "id": "threat-intel-certificate-transparency-phishing",
+      "kind": "skill",
+      "pack": "threat-intel-url",
+      "title": "Certificate Transparency Monitoring for Phishing Domains",
+      "description": "Query public Certificate Transparency (CT) logs to discover lookalike domains, brand impersonations, and credential harvesters.",
+      "hash": "69291a3c82ffb864"
+    },
+    {
+      "id": "threat-intel-domain-fronting-c2-hunting",
+      "kind": "skill",
+      "pack": "threat-intel-url",
+      "title": "Domain Fronting and Covert C2 Traffic Hunting",
+      "description": "Detect and investigate CDN domain fronting, SNI mismatches, and obfuscated HTTP/HTTPS command channels.",
+      "hash": "d2fe5951c6731192"
+    },
+    {
+      "id": "threat-intel-http-request-proxy-audit",
+      "kind": "skill",
+      "pack": "threat-intel-url",
+      "title": "HTTP Request and Suspicious API Traffic Audit",
+      "description": "Audit suspicious outbound HTTP requests, inspect API endpoints, SSL pinning bypass, and capture covert exfiltration.",
+      "hash": "4b16bef1a7ab375f"
+    },
+    {
+      "id": "threat-intel-infrastructure-tracking",
+      "kind": "skill",
+      "pack": "threat-intel-url",
+      "title": "Adversary Infrastructure Tracking and Pivoting",
+      "description": "Map threat actor C2 clusters, staging servers, and phishing portals using passive DNS, JARM fingerprints, Shodan, and Censys.",
+      "hash": "ffc23ae0853acbbc"
+    },
+    {
+      "id": "threat-intel-phishing-header-analysis",
+      "kind": "skill",
+      "pack": "threat-intel-url",
+      "title": "Email Header Analysis for Phishing and Spoofing",
+      "description": "Trace Received relay chains, validate SPF, DKIM, DMARC authentication, and uncover email spoofing in phishing investigations.",
+      "hash": "ca630dff6af98255"
+    },
+    {
+      "id": "threat-intel-tshark-packet-analysis",
+      "kind": "skill",
+      "pack": "threat-intel-url",
+      "title": "Command-Line Packet Inspection and Threat Hunting with TShark",
+      "description": "Automated command-line network packet analysis, payload extraction, protocol dissection, and anomaly hunting using TShark.",
+      "hash": "9fadb04a24abca9b"
+    },
+    {
+      "id": "threat-intel-urlscan-analysis",
+      "kind": "skill",
+      "pack": "threat-intel-url",
+      "title": "Suspicious URL Analysis with URLScan.io API",
+      "description": "Safely scan, submit, and inspect suspicious links, redirect chains, DOM captures, and web telemetry using URLScan.io.",
+      "hash": "bbe6197d68b25ed2"
+    },
+    {
+      "id": "threat-intel-zeek-traffic-analysis",
+      "kind": "skill",
+      "pack": "threat-intel-url",
+      "title": "Network Threat Hunting with Zeek (Bro)",
+      "description": "Extract structured connection metadata, HTTP payloads, TLS fingerprints, and DNS requests from PCAP using Zeek.",
+      "hash": "d267a85c8ef58eb1"
+    },
+    {
       "id": "tinystruct-patterns",
       "kind": "skill",
       "pack": "framework-language",
@@ -3276,111 +3727,6 @@
       "pack": "social-distribution",
       "description": "X/Twitter API integration for posting tweets, threads, reading timelines, search, and analytics. Covers OAuth auth patterns, rate limits, and platform-native content posting. Use when the user wants to interact with X programmatically.",
       "hash": "d9eadc54b749bf9a"
-    },
-    {
-      "id": "cloudflare-security-audit",
-      "kind": "skill",
-      "pack": "cloudflare-sec",
-      "description": "Comprehensive multi-phase security audit methodology: reconnaissance, hunting, validation and reporting.",
-      "hash": "357661247b37982e"
-    },
-    {
-      "id": "cloudflare-sec-memory-safety-binary",
-      "kind": "skill",
-      "pack": "cloudflare-sec",
-      "description": "Memory safety, binary reverse engineering, buffer overflows, and native vulnerability hunting.",
-      "hash": "c5d8d8fed38a8f64"
-    },
-    {
-      "id": "cloudflare-sec-ai-and-llm",
-      "kind": "skill",
-      "pack": "cloudflare-sec",
-      "description": "Security auditing for LLM and agentic systems, prompt injection, tool abuse, and data leakage.",
-      "hash": "8277517028ad4bec"
-    },
-    {
-      "id": "cloudflare-sec-attack-classes",
-      "kind": "skill",
-      "pack": "cloudflare-sec",
-      "description": "Taxonomy of core web, protocol, logic, and infrastructure attack classes for systematic audits.",
-      "hash": "a91a26b3b93a0612"
-    },
-    {
-      "id": "cloudflare-sec-client-side",
-      "kind": "skill",
-      "pack": "cloudflare-sec",
-      "description": "Client-side vulnerability hunting: DOM injection, messaging trust, UI redress, and prototype pollution.",
-      "hash": "ab594b1cef331771"
-    },
-    {
-      "id": "cloudflare-sec-cloud-and-deployment",
-      "kind": "skill",
-      "pack": "cloudflare-sec",
-      "description": "Cloud security audit: IAM, infrastructure-as-code, containers, serverless ingress, and misconfigurations.",
-      "hash": "23c7eadc5a75649d"
-    },
-    {
-      "id": "cloudflare-sec-data-isolation-lifecycle",
-      "kind": "skill",
-      "pack": "cloudflare-sec",
-      "description": "Multi-tenant data isolation, cache leaks, search index boundaries, and data lifecycle auditing.",
-      "hash": "b8e138c9e7ec4378"
-    },
-    {
-      "id": "cloudflare-sec-desktop-mobile-ipc",
-      "kind": "skill",
-      "pack": "cloudflare-sec",
-      "description": "Desktop, mobile and local IPC security: deep-links, webviews, exported components, and daemons.",
-      "hash": "3bbc2e72741f7981"
-    },
-    {
-      "id": "cloudflare-sec-hunting",
-      "kind": "skill",
-      "pack": "cloudflare-sec",
-      "description": "Coverage-led vulnerability hunting methodology, hypothesis generation, and candidate validation.",
-      "hash": "b4400148c999396d"
-    },
-    {
-      "id": "cloudflare-sec-protocols-rpc-messaging",
-      "kind": "skill",
-      "pack": "cloudflare-sec",
-      "description": "RPC, serialization, queue brokers, webhooks, and streaming protocol security testing.",
-      "hash": "a6e19d39fd2bcd27"
-    },
-    {
-      "id": "cloudflare-sec-reconnaissance",
-      "kind": "skill",
-      "pack": "cloudflare-sec",
-      "description": "Systematic reconnaissance, architecture mapping, trust boundary discovery, and input surface analysis.",
-      "hash": "dfb6d40709d8ba13"
-    },
-    {
-      "id": "cloudflare-sec-resource-exhaustion",
-      "kind": "skill",
-      "pack": "cloudflare-sec",
-      "description": "Denial-of-service, algorithmic complexity, queue worker starvation, and operator-spend exhaustion.",
-      "hash": "3977283285c94de4"
-    },
-    {
-      "id": "cloudflare-sec-supply-chain-release",
-      "kind": "skill",
-      "pack": "cloudflare-sec",
-      "description": "Software supply chain security: dependency pinning, build pipeline integrity, signing, and extensions.",
-      "hash": "d07e9e1287fdd045"
-    },
-    {
-      "id": "cloudflare-sec-validation-reporting",
-      "kind": "skill",
-      "pack": "cloudflare-sec",
-      "description": "Candidate validation discipline, falsification criteria, and structured security reporting.",
-      "hash": "1f80932f4b122f41"
-    },
-    {
-      "id": "cloudflare-sec-web-protocol-auth",
-      "kind": "skill",
-      "pack": "cloudflare-sec",
-      "description": "HTTP request framing, cache poisoning, session hijacking, and authentication protocol testing.",
-      "hash": "f0630cf41b65ef82"
     }
   ]
 }
