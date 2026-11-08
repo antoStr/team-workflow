@@ -636,7 +636,6 @@ agy() {{
 {SHELL_END}
 """
 
-
 def add_shell_hook(rc):
     """Add (or refresh) the agy function in a shell rc file; returns True when it changed."""
     try:
@@ -679,6 +678,37 @@ def cmd_install_cli(args):
                 os.remove(base + ".ps1")
             except OSError:
                 pass
+        try:
+            import winreg
+            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Environment", 0, winreg.KEY_READ | winreg.KEY_WRITE)
+            try:
+                curr_path, _ = winreg.QueryValueEx(key, "Path")
+            except FileNotFoundError:
+                curr_path = ""
+            paths = [p for p in curr_path.split(";") if p]
+            if bin_dir not in paths:
+                paths.append(bin_dir)
+                winreg.SetValueEx(key, "Path", 0, winreg.REG_EXPAND_SZ, ";".join(paths))
+                print(f"added {bin_dir} to User PATH in Windows registry")
+            winreg.CloseKey(key)
+        except Exception:
+            pass
+
+        agy_cmd = (
+            '@echo off\r\n'
+            'if /I "%~1"=="plugin" if /I "%~2"=="update" (\r\n'
+            '  python "%~dp0team-workflow" agy-update %3 %4 %5 %6 %7 %8 %9\r\n'
+            '  goto :eof\r\n'
+            ')\r\n'
+            'if /I "%~1"=="plugins" if /I "%~2"=="update" (\r\n'
+            '  python "%~dp0team-workflow" agy-update %3 %4 %5 %6 %7 %8 %9\r\n'
+            '  goto :eof\r\n'
+            ')\r\n'
+            'agy.exe %*\r\n'
+        )
+        for ext in (".cmd", ".bat"):
+            with open(os.path.join(bin_dir, "agy" + ext), "w", encoding="utf-8") as f:
+                f.write(agy_cmd)
 
     print(f"written {path} and {team_path}: run `team update`, `team-workflow update`, `team-workflow settings`...")
     if bin_dir not in os.environ.get("PATH", "").split(os.pathsep):

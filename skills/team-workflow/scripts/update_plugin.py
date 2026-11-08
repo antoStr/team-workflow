@@ -235,8 +235,15 @@ def agy_update(names=None):
         shutil.rmtree(backup, ignore_errors=True)
         log.append(f"{name}: reinstalled from {source}")
         if name == NAME:  # the new version's roles, as agy subagents
+            # Clean up any legacy skills from older versions
+            skills_folder = os.path.join(folder, NAME, "skills")
+            if os.path.isdir(skills_folder):
+                allowed = {"team", "team-workflow"}
+                for item in os.listdir(skills_folder):
+                    if item not in allowed:
+                        shutil.rmtree(os.path.join(skills_folder, item), ignore_errors=True)
             script = os.path.join(folder, NAME, "skills", NAME, "scripts", "install_agy.py")
-            code, out = run("python3", script, "--agents-only")
+            code, out = run(sys.executable, script, "--agents-only")
             log.append(out if out else "agents refreshed")
     log.append("Restart agy to load the updates.")
     return ok_all, "\n".join(log)
@@ -245,6 +252,7 @@ def agy_update(names=None):
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Check and update the installed team-workflow plugin.")
     ap.add_argument("--check", action="store_true", help="only show installed and latest versions")
+    ap.add_argument("--force", action="store_true", help="force reinstall even if already latest")
     ap.add_argument("--harness", choices=("claude", "agy", "opencode", "codex", "all"), default="all")
     ap.add_argument("--source", default=REPO, help="what agy installs from (default: GitHub)")
     args = ap.parse_args(argv)
@@ -258,8 +266,8 @@ def main(argv=None):
             print(f"{harness}: not installed")
             continue
         current = bool(latest and before and vkey(before) >= vkey(latest))
-        print(f"{harness}: {before}" + (" (up to date)" if current else ""))
-        if args.check or current:
+        print(f"{harness}: {before}" + (" (up to date)" if current and not args.force else ""))
+        if args.check or (current and not args.force):
             continue
         ok, log = update(harness, args.source)
         print(log)

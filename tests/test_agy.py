@@ -66,8 +66,8 @@ class AgyPluginTest(unittest.TestCase):
             self.assertTrue(os.path.isfile(os.path.join(dest, "rules", "AGENTS.md")))
             self.assertTrue(os.path.isfile(os.path.join(dest, "skills", "team-workflow", "roles", "core", "tester.md")))
             skills = os.path.join(dest, "skills")
-            self.assertIn("team-workflow", os.listdir(skills))
-            for name in ("setup-memory", "call-team", "end-session"):  # agy loads only skills/<name>/SKILL.md
+            self.assertEqual(sorted(os.listdir(skills)), ["team", "team-workflow"])
+            for name in ("team", "team-workflow"):
                 with open(os.path.join(skills, name, "SKILL.md"), encoding="utf-8") as f:
                     self.assertIn(f"name: {name}\n", f.read())
             self.assertEqual(self.build(dest).returncode, 0)  # rebuilding replaces its own output

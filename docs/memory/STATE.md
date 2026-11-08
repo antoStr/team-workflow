@@ -1,6 +1,6 @@
 # Stato del Progetto
 
-## Versione Corrente: v2.1.0 (Release Ufficiale)
+## Versione Corrente: v2.1.1 (Release Ufficiale)
 
 ### 1. Suite Malware Analysis & URL Threat Intelligence
 - **43 nuove skill specializzate di sicurezza avanzata**:
@@ -10,9 +10,14 @@
 - **Totale libreria**: **512 voci di libreria** (396 skill, 94 comandi, 22 set di regole).
 - **Totale agenti**: **130 specialisti** con catalogo e traduzioni bilingue sincronizzati.
 
-### 2. Comando Universale Semplificato `/team`
-- Creato in `skills/team/SKILL.md` (e sincronizzato nella directory di configurazione utente): basta digitare `/team <compito>` o `/team upgrade`.
-- Elimina la necessità di ricordare 25 comandi diversi: l'orchestratore capisce l'intento, interroga il Brain Graph, sceglie le skill e coordina gli agenti.
+### 2. Comando Universale Semplificato `/team` e Pulizia Skill
+- Consolidamento architetturale (ADR-001): archiviate tutte le 24 skill granulari storiche della v1 in `archive/legacy-skills/`.
+- La cartella attiva `skills/` contiene esclusivamente **2 skill ufficiali**:
+  - `skills/team/` (`/team`): interfaccia universale per qualsiasi operazione, task e comando zero-token.
+  - `skills/team-workflow/` (`/team-workflow`): orchestratore, session wizard, grafo e ruoli.
+- Eliminato alla radice il problema dell'autocomplete intasato in Antigravity (`agy`), che scansiona le sottocartelle prive di namespace.
+- Router di fallback zero-token in `prompt_command.py` e in `tw.py` per gestire con compatibilità totale qualsiasi digitazione di vecchi comandi (`doctor`, `audit`, `settings`, `fix-bug`, ecc.).
+- Auto-clean e pruning automatico delle skill orfane implementato in `doctor.py --fix`, `install_agy.py` e `update_plugin.py`.
 
 ### 3. Live Execution & Smoke Test Gate (`tw.py smoke`) — Zero Fake-Solved
 - Creato `skills/team-workflow/scripts/smoke.py`: esegue il processo reale per un intervallo controllato (es. 5-10s) con monitoraggio di exit code, stderr e stabilità di boot.
@@ -38,9 +43,10 @@
 - Nodi Markdown con frontmatter YAML e wikilink bidirezionali compatibili Obsidian (`docs/brain/`).
 - `tw.py brain rollover`: compattazione e archiviazione dello stato delle settimane passate in journal dedicati (`docs/brain/journal/week-YYYY-WXX.md`), garantendo supporto per sessioni di settimane/mesi senza saturare il contesto.
 
-### 9. Aggiornamenti a Zero Token & Notifiche
-- All'avvio di ogni sessione, verifica non invasiva di nuovi rilasci.
-- Comando `/team upgrade` (o `tw.py upgrade`) per allineare file e cataloghi a costo zero token senza passare da inferenze LLM.
+### 9. Aggiornamenti a Zero Token, Wrapper Win32 & `agy plugin update`
+- Risolto il supporto all'aggiornamento da terminale Windows: `tw.py install-cli` registra i wrapper `team.cmd`, `team.bat`, `agy.cmd` e `agy.bat` in `~/.local/bin` e aggiunge la cartella alla variabile utente `PATH` nel registro di Windows (`HKCU\Environment\Path`).
+- Il comando `agy plugin update team-workflow` (o `agy.bat plugin update`) intercetta la richiesta ed esegue `tw.py agy-update` a costo zero token, reinstallando e sincronizzando gli agenti con `sys.executable` (risolto il bug di `python3` non trovato su Windows).
+- Supporto flag `--force` in `update_plugin.py` per forzare l'allineamento e il ripristino istantaneo anche a parità di versione.
 
 ### 10. Documentazione Bilingue & Cataloghi
 - `README.md` (Italiano) e `README.en.md` (Inglese) aggiornati con badge e dettagli v2.1.0.

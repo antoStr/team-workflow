@@ -157,7 +157,11 @@ class RepositoryTest(unittest.TestCase):
         text = self.read("README.md") + self.read("skills/team-workflow/SKILL.md")
         for name in set(re.findall(r"/team-workflow:([a-z-]+)", text)):
             path = os.path.join(REPO, "skills", name, "SKILL.md")
+            if not os.path.isfile(path):
+                path = os.path.join(REPO, "archive", "legacy-skills", name, "SKILL.md")
             self.assertTrue(os.path.isfile(path), f"/team-workflow:{name} has no skill")
+        active = {os.path.basename(os.path.dirname(p)) for p in glob.glob(os.path.join(REPO, "skills", "*", "SKILL.md"))}
+        self.assertEqual(active, {"team", "team-workflow"})
         for path in glob.glob(os.path.join(REPO, "skills", "*", "SKILL.md")):
             with open(path, encoding="utf-8") as f:
                 self.assertIn(f"\nname: {os.path.basename(os.path.dirname(path))}\n", f.read())

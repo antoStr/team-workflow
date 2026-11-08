@@ -13,8 +13,16 @@ Non serve ricordare comandi lunghi o configurazioni complesse: scrivi sempliceme
 
 Quando ricevi il comando `/team $ARGUMENTS`:
 
-- **Se l'argomento è `upgrade` o `update`**:
-  Esegui immediatamente il comando di sistema `python skills/team-workflow/scripts/tw.py update`. Non spawnare subagenti e non consumare token inutili: mostra l'esito dell'aggiornamento e termina.
+- **Se l'argomento è un'azione zero-token di sistema**:
+  - `upgrade` o `update`: esegui immediatamente `python skills/team-workflow/scripts/tw.py update`. Mostra l'esito e termina.
+  - `doctor`: esegui immediatamente `python skills/team-workflow/scripts/tw.py doctor`. Se richiesto fix: `tw.py doctor --fix`.
+  - `audit`: esegui immediatamente `python skills/team-workflow/scripts/tw.py audit`.
+  - `settings`: esegui `python skills/team-workflow/scripts/tw.py settings`.
+  - `status`, `hardware` o `thermal`: esegui `python skills/team-workflow/scripts/tw.py hardware`.
+  - Per queste azioni zero-token non spawnare subagenti e non consumare inferenze inutili.
+
+- **Comandi storici incorporati in `/team`**:
+  I vecchi comandi v1 (`fix-bug`, `new-feature`, `call-team`, `review-changes`, `setup-memory`, `start`, `release`, `ci-init`, `end-session`) sono ora completamente integrati in `/team`: basta digitare ad es. `/team fix-bug <problema>`, `/team new-feature <idea>` o `/team call-team <ruoli>` per avviare il flusso corrispondente.
 
 ### 1. Orientamento Istantaneo su Codebase Enormi (Brain Engine)
 - **Non leggere file a caso e non consumare decine di migliaia di token.**

@@ -54,6 +54,11 @@ def build(dest):
         shutil.rmtree(dest)  # a previous build of this same plugin
     shutil.copytree(os.path.join(PLUGIN, "skills"), os.path.join(dest, "skills"),
                     ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+    skills_dest = os.path.join(dest, "skills")
+    allowed = {"team", "team-workflow"}
+    for item in os.listdir(skills_dest):
+        if item not in allowed:
+            shutil.rmtree(os.path.join(skills_dest, item), ignore_errors=True)
     shutil.copytree(os.path.join(PLUGIN, "rules"), os.path.join(dest, "rules"))
     for name in ("plugin.json", "hooks.json"):  # agy's manifest and hooks, kept at the repo root
         shutil.copy(os.path.join(PLUGIN, name), dest)

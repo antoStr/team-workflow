@@ -272,15 +272,20 @@ def install(workspace=None, source=None):
     scripts = os.path.join(payload, "scripts")
     remove_skills(conf)
     written = []
-    for name in sorted(os.listdir(os.path.join(PLUGIN, "skills"))):
-        path = os.path.join(PLUGIN, "skills", name, "SKILL.md")
-        if name == NAME or not os.path.isfile(path):
-            continue
-        target = os.path.join(conf, "skills", f"{NAME}-{name}")
-        os.makedirs(target, exist_ok=True)
-        with open(os.path.join(target, "SKILL.md"), "w", encoding="utf-8") as f:
-            f.write(workflow_text(name, read_text(path), scripts, python))
-        written.append(name)
+    folders = [os.path.join(PLUGIN, "skills")]
+    archive_dir = os.path.join(PLUGIN, "archive", "legacy-skills")
+    if os.path.isdir(archive_dir):
+        folders.append(archive_dir)
+    for folder in folders:
+        for name in sorted(os.listdir(folder)):
+            path = os.path.join(folder, name, "SKILL.md")
+            if name == NAME or not os.path.isfile(path):
+                continue
+            target = os.path.join(conf, "skills", f"{NAME}-{name}")
+            os.makedirs(target, exist_ok=True)
+            with open(os.path.join(target, "SKILL.md"), "w", encoding="utf-8") as f:
+                f.write(workflow_text(name, read_text(path), scripts, python))
+            written.append(name)
     install_opencode.write_block(agents_md(workspace), instructions_block(scripts, python))
     write_rules(scripts, python, workspace)
     agents = roles.sync("codex", dest=roles.native_dir("codex", workspace))

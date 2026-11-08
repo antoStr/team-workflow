@@ -13,11 +13,12 @@ import sys
 from common import read_hook_input
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-COMMANDS = {"update-plugin": "update", "settings": "settings", "models": "models",
+COMMANDS = {"update-plugin": "update", "update": "update", "upgrade": "upgrade",
+            "settings": "settings", "models": "models",
             "addons": "addons", "agents": "agents", "profile": "profile", "audit": "audit",
             "doctor": "doctor", "ci-init": "ci-init", "options": "options",
-            "library": "library", "talk": "talk"}
-PATTERN = re.compile(r"\A\s*/team-workflow:(" + "|".join(COMMANDS) + r")(?![\w-])(.*)\Z", re.S)
+            "library": "library", "talk": "talk", "hardware": "hardware", "thermal": "thermal"}
+PATTERN = re.compile(r"\A\s*/(?:team-workflow:|team[:\s]+)(" + "|".join(COMMANDS) + r")(?![\w-])(.*)\Z", re.S)
 
 
 def tw_args(prompt):

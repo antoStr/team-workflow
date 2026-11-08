@@ -239,15 +239,20 @@ def install(workspace=None, source=None, version=None):
     removed = remove_commands(conf)  # first: an old empty `team-workflow` file blocks the folder
     os.makedirs(commands, exist_ok=True)
     wanted = set()
-    for name in sorted(os.listdir(os.path.join(PLUGIN, "skills"))):
-        path = os.path.join(PLUGIN, "skills", name, "SKILL.md")
-        if name == NAME or not os.path.isfile(path):
-            continue
-        with open(path, encoding="utf-8") as f:
-            text = command_text(name, f.read(), scripts, python, v2)
-        wanted.add(name + ".md")
-        with open(os.path.join(commands, name + ".md"), "w", encoding="utf-8") as f:
-            f.write(text)
+    folders = [os.path.join(PLUGIN, "skills")]
+    archive_dir = os.path.join(PLUGIN, "archive", "legacy-skills")
+    if os.path.isdir(archive_dir):
+        folders.append(archive_dir)
+    for folder in folders:
+        for name in sorted(os.listdir(folder)):
+            path = os.path.join(folder, name, "SKILL.md")
+            if name == NAME or not os.path.isfile(path):
+                continue
+            with open(path, encoding="utf-8") as f:
+                text = command_text(name, f.read(), scripts, python, v2)
+            wanted.add(name + ".md")
+            with open(os.path.join(commands, name + ".md"), "w", encoding="utf-8") as f:
+                f.write(text)
     removed = [r for r in removed if r.split("/")[-1] not in wanted]
 
     plugin = os.path.join(conf, "plugins", "team-workflow.js")
