@@ -181,6 +181,25 @@ def update(harness, source):
     return True, "\n".join(log)
 
 
+def safe_rmtree(path):
+    """Safely remove a directory tree, clearing read-only flags on Windows."""
+    if not os.path.exists(path):
+        return
+
+    def on_error(func, p, excinfo):
+        import stat
+        try:
+            os.chmod(p, stat.S_IWRITE)
+            func(p)
+        except Exception:
+            pass
+
+    try:
+        shutil.rmtree(path, onerror=on_error)
+    except Exception:
+        pass
+
+
 def agy_plugins_dir():
     return os.path.join(os.path.expanduser("~"), ".gemini", "config", "plugins")
 
@@ -193,7 +212,7 @@ def agy_source(name):
 
 
 def agy_update(names=None):
-    """`agy plugin update`: reinstall each plugin from where it came from. Returns (ok, log)."""
+    """`agy plugin update`: update each installed plugin. Returns (ok, log)."""
     folder = agy_plugins_dir()
     installed_names = sorted(n for n in os.listdir(folder) if os.path.isdir(os.path.join(folder, n))) \
         if os.path.isdir(folder) else []
@@ -204,6 +223,32 @@ def agy_update(names=None):
             log.append(f"{name}: not installed in agy ({', '.join(installed_names) or 'none'})")
             ok_all = False
             continue
+        plugin_path = os.path.join(folder, name)
+        git_dir = os.path.join(plugin_path, ".git")
+
+        # In-place git update: fast, safe, avoids deleting files under active execution
+        if os.path.isdir(git_dir):
+            code, out = run("git", "-C", plugin_path, "fetch", "--all", "--tags")
+            if code == 0:
+                code2, out2 = run("git", "-C", plugin_path, "reset", "--hard", "origin/main")
+                if code2 != 0:
+                    code2, out2 = run("git", "-C", plugin_path, "reset", "--hard", "origin/master")
+                if code2 != 0:
+                    code2, out2 = run("git", "-C", plugin_path, "pull", "--ff-only")
+                if code2 == 0:
+                    log.append(f"{name}: successfully updated via git")
+                    if name == NAME:
+                        skills_folder = os.path.join(folder, NAME, "skills")
+                        if os.path.isdir(skills_folder):
+                            allowed = {"team", "team-workflow"}
+                            for item in os.listdir(skills_folder):
+                                if item not in allowed:
+                                    safe_rmtree(os.path.join(skills_folder, item))
+                        script = os.path.join(folder, NAME, "skills", NAME, "scripts", "install_agy.py")
+                        code_a, out_a = run(sys.executable, script, "--agents-only")
+                        log.append(out_a if out_a else "agents refreshed")
+                    continue
+
         source = agy_source(name)
         if not source:
             log.append(f"{name}: agy did not keep its source; reinstall it once with "
@@ -217,8 +262,14 @@ def agy_update(names=None):
                 ok_all = False
                 continue
         backup = os.path.join(os.path.expanduser("~"), ".team-workflow", "agy-backup", name)
-        shutil.rmtree(backup, ignore_errors=True)
-        shutil.copytree(os.path.join(folder, name), backup, symlinks=True)
+        safe_rmtree(backup)
+        try:
+            shutil.copytree(plugin_path, backup, symlinks=True, dirs_exist_ok=True)
+        except Exception as e:
+            log.append(f"{name}: failed to create backup ({e})")
+            ok_all = False
+            continue
+
         code, out = run("agy", "plugin", "uninstall", name)
         if code:
             log.append(f"{name}: uninstall failed, nothing changed\n{out}")
@@ -232,7 +283,7 @@ def agy_update(names=None):
                           f"restore it with: agy plugin install {backup}") + f"\n{out}")
             ok_all = False
             continue
-        shutil.rmtree(backup, ignore_errors=True)
+        safe_rmtree(backup)
         log.append(f"{name}: reinstalled from {source}")
         if name == NAME:  # the new version's roles, as agy subagents
             # Clean up any legacy skills from older versions
@@ -241,7 +292,7 @@ def agy_update(names=None):
                 allowed = {"team", "team-workflow"}
                 for item in os.listdir(skills_folder):
                     if item not in allowed:
-                        shutil.rmtree(os.path.join(skills_folder, item), ignore_errors=True)
+                        safe_rmtree(os.path.join(skills_folder, item))
             script = os.path.join(folder, NAME, "skills", NAME, "scripts", "install_agy.py")
             code, out = run(sys.executable, script, "--agents-only")
             log.append(out if out else "agents refreshed")

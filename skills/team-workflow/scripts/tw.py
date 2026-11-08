@@ -660,16 +660,15 @@ def cmd_install_cli(args):
     os.makedirs(bin_dir, exist_ok=True)
     path = os.path.join(bin_dir, "team-workflow")
     team_path = os.path.join(bin_dir, "team")
-    with open(path, "w", encoding="utf-8") as f:
-        f.write(LAUNCHER)
-    os.chmod(path, 0o755)
-    with open(team_path, "w", encoding="utf-8") as f:
-        f.write(LAUNCHER)
-    os.chmod(team_path, 0o755)
+    tw_path = os.path.join(bin_dir, "tw")
+    for p in (path, team_path, tw_path):
+        with open(p, "w", encoding="utf-8") as f:
+            f.write(LAUNCHER)
+        os.chmod(p, 0o755)
 
     if sys.platform == "win32":
         cmd_content = '@echo off\r\npython "%~dp0team-workflow" %*\r\n'
-        for base in (path, team_path):
+        for base in (path, team_path, tw_path):
             with open(base + ".cmd", "w", encoding="utf-8") as f:
                 f.write(cmd_content)
             with open(base + ".bat", "w", encoding="utf-8") as f:
@@ -710,7 +709,7 @@ def cmd_install_cli(args):
             with open(os.path.join(bin_dir, "agy" + ext), "w", encoding="utf-8") as f:
                 f.write(agy_cmd)
 
-    print(f"written {path} and {team_path}: run `team update`, `team-workflow update`, `team-workflow settings`...")
+    print(f"written {path}, {team_path} and {tw_path}: run `tw update`, `team update`, `tw settings`...")
     if bin_dir not in os.environ.get("PATH", "").split(os.pathsep):
         print(f"{bin_dir} is not in PATH: add it to your shell profile")
     if getattr(args, "no_shell", False):
@@ -1124,9 +1123,11 @@ def main(argv=None):
     sub = ap.add_subparsers(dest="command", required=True)
     up = sub.add_parser("update", help="update the plugin in Claude Code and agy")
     up.add_argument("--check", action="store_true", help="only show the versions")
+    up.add_argument("--force", action="store_true", help="force reinstall even if already latest")
     up.add_argument("check_word", nargs="?", choices=("check",), help=argparse.SUPPRESS)
     ug = sub.add_parser("upgrade", help="alias for update: update to the latest version")
     ug.add_argument("--check", action="store_true", help="only show the versions")
+    ug.add_argument("--force", action="store_true", help="force reinstall even if already latest")
     ug.add_argument("check_word", nargs="?", choices=("check",), help=argparse.SUPPRESS)
     st = sub.add_parser("settings", help="show or change the settings")
     st.add_argument("action", nargs="?", choices=("show", "set", "reset"), default="show")
@@ -1257,8 +1258,13 @@ def main(argv=None):
             ap.error(f"unrecognized arguments: {unrecognized}")
     if args.command in ("update", "upgrade"):
         check = args.check or args.check_word
+        opts = []
+        if check:
+            opts.append("--check")
+        if getattr(args, "force", False):
+            opts.append("--force")
         try:
-            update_plugin.main(["--check"] if check else [])
+            update_plugin.main(opts)
         except SystemExit as e:
             if e.code:
                 print("team-workflow update failed")
