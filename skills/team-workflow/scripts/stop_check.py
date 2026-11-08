@@ -14,9 +14,17 @@ from common import (MEMORY_DIR, dirty_paths, git, is_agy, read_hook_input, repo_
                     snapshot_path)
 
 STATE = f"{MEMORY_DIR}/STATE.md"
-REASON = ("team-workflow: files changed after docs/memory/STATE.md was last updated. Before "
-          "stopping, update STATE.md (and the area card, MAP.md or DECISIONS.md when they are "
+BRAIN_STATE = "docs/brain/STATE.md"
+REASON = ("team-workflow: files changed after STATE.md was last updated. Before "
+          "stopping, update STATE.md (and the area card, MAP.md, DECISIONS.md or Brain Graph when they are "
           "affected), then give the end-of-task report in the user's language.")
+
+
+def locate_state(root):
+    for candidate in (BRAIN_STATE, STATE):
+        if os.path.isfile(os.path.join(root, candidate)):
+            return candidate
+    return STATE
 
 
 def changed_this_session(root, snap):
@@ -40,8 +48,10 @@ def decide(data):
     if again or os.environ.get("TEAM_WORKFLOW_STOP_CHECK") == "0":
         return None
     root = repo_root(data)
+    state_rel = locate_state(root) if root else STATE
+    state_full = os.path.join(root, state_rel) if root else ""
     config = settings.load(root) if root else {}
-    if (not root or not os.path.isfile(os.path.join(root, STATE)) or not config["stop_check"]
+    if (not root or not os.path.isfile(state_full) or not config["stop_check"]
             or config["activation"] == "manual"):
         return None
     try:
@@ -50,11 +60,11 @@ def decide(data):
     except (OSError, ValueError):
         snap = {}
     changed = changed_this_session(root, snap)
-    work = [p for p in changed if not p.startswith(MEMORY_DIR + "/")]
+    work = [p for p in changed if not p.startswith(MEMORY_DIR + "/") and not p.startswith("docs/brain/")]
     if not work:
         return None
     newest = newest_mtime(root, work)
-    if STATE in changed and os.path.getmtime(os.path.join(root, STATE)) >= newest:
+    if state_rel in changed and os.path.getmtime(state_full) >= newest:
         return None
     # Ask once per state of the files, whatever the tool's own loop counter does.
     mark, fingerprint = snapshot_path(session_id(data)) + ".asked", f"{sorted(work)}|{newest}"

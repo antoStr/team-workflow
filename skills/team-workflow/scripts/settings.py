@@ -27,6 +27,10 @@ DEFAULTS = {
     # verify each other; talk_rounds is how many rounds of replies the orchestrator runs at most.
     "talk": True,
     "talk_rounds": 3,
+    "talk_digest_threshold": 20,
+    # Memory engine: "brain" (Obsidian knowledge graph in docs/brain) or "classic" (docs/memory)
+    "memory_engine": "brain",
+    "brain_dir": "docs/brain",
     # Model per role, per app. Claude Code: haiku, sonnet, opus, fable or a model id.
     # agy subagents: inherit (the session's model), flash or pro. OpenCode: inherit or
     # provider/model from `opencode models`. "default" covers the roles not listed.
@@ -81,6 +85,7 @@ CHOICES = {
     "wizard": ("quick", "full", "off"),
     "launch": ("native", "worker"),
     "end_report": ("full", "short"),
+    "memory_engine": ("brain", "classic"),
     "models.agy": ("inherit", "flash", "pro"),
     "effort": ("low", "medium", "high", "xhigh", "max"),
     "type.claude": ("custom", "worker", "general-purpose", "Explore", "Plan"),

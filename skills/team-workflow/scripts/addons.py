@@ -134,6 +134,22 @@ CATALOG.update({
         "mcp": {"command": ["npx", "-y", "@modelcontextprotocol/server-sequential-thinking"]},
         "license": "MIT", "about": "step-by-step reasoning tool for hard problems",
     },
+    "strix": {
+        "repo": "usestrix/strix", "marketplace": "strix", "plugin": "strix",
+        "agy": "skills", "opencode": "skills", "skills_dir": "skills", "license": "Apache-2.0",
+        "about": "autonomous AI penetration testing, PoC vulnerability validation, and OWASP Top 10",
+    },
+    "cloudflare-security-audit": {
+        "repo": "cloudflare/security-audit-skill", "marketplace": "cloudflare-security-audit",
+        "plugin": "security-audit", "agy": "skills", "opencode": "skills", "skills_dir": "skills",
+        "license": "BSD-3-Clause",
+        "about": "Cloudflare multi-phase security audit: recon, coverage-led hunting, validation, and reporting",
+    },
+    "ida-mcp": {
+        "repo": "mcp-servers/ida", "claude": "mcp", "agy": "mcp", "opencode": "mcp",
+        "mcp": {"command": ["python", "-m", "ida_mcp"]},
+        "license": "MIT", "about": "IDA Pro & Ghidra headless decompilation, AST recovery and disassembly MCP bridge",
+    },
 })
 BUNDLES = {
     "frontend": ("impeccable", "taste", "frontend-design", "solar-icons", "cloudflare"),
@@ -141,6 +157,8 @@ BUNDLES = {
     "mcp": ("context7", "playwright", "serena", "sequential-thinking"),
     "popular": ("superpowers", "anthropic-docs", "anthropic-examples", "karpathy", "ui-ux-pro-max",
                 "context7"),
+    "security": ("strix", "cloudflare", "cloudflare-security-audit"),
+    "reverse-engineering": ("strix", "cloudflare-security-audit", "ida-mcp"),
 }
 APPS = ("claude", "agy", "opencode", "codex")
 

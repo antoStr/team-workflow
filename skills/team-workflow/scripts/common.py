@@ -2,11 +2,42 @@
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
 
 MEMORY_DIR = "docs/memory"
+BRAIN_DIR = "docs/brain"
+
+
+def python_executable():
+    """Return a reliable path/command for the Python interpreter, avoiding Windows Store stubs."""
+    candidates = []
+    if sys.executable:
+        candidates.append(sys.executable)
+    for name in ("python3", "python", "py"):
+        found = shutil.which(name)
+        if found and found not in candidates:
+            candidates.append(found)
+
+    for cand in candidates:
+        if os.name == "nt" and "WindowsApps" in cand.replace("/", "\\"):
+            try:
+                if os.path.getsize(cand) == 0:
+                    continue
+            except OSError:
+                continue
+        try:
+            res = subprocess.run([cand, "-c", "import sys; sys.exit(0)"],
+                                 capture_output=True, timeout=5)
+            if res.returncode == 0:
+                return cand
+        except (OSError, subprocess.SubprocessError):
+            continue
+
+    return sys.executable or "python3"
+
 
 
 def utf8_output():

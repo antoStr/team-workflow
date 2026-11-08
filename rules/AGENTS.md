@@ -24,5 +24,15 @@
   rules; give each agent the paths it needs.
 - End every task with a report: done, verified with evidence, findings, decisions. Ask before
   applying anything the user did not request.
+- Live Execution Gate (Zero Fake-Solved): never claim an application, game, or UI bug is solved
+  without actually launching the process (`tw.py smoke "<command>" --timeout 5`) and capturing
+  real runtime proof that it booted and ran stably without crashes or fatal exceptions.
+- WSL Bridge: On Windows, WSL (Windows Subsystem for Linux) is fully available and should be
+  used whenever Linux-specific features (`/proc`, systemd, ext4), Linux ELF binaries, POSIX tools,
+  or Linux test environments are required (`wsl <command>` or `tw.py smoke "<cmd>" --wsl`).
+- Large Codebase Navigation: use `tw.py brain context <module>` to inspect 1-hop dependencies
+  and active vaccines instead of scanning entire codebases with grep.
+- Auto-Learning: whenever a bug is fixed or an adversarial gate passes after a challenge,
+  record the anti-pattern with `tw.py learn record` so the team never repeats it.
 - When files change, update `docs/memory/STATE.md`.
 - Answer in the language the user writes in.

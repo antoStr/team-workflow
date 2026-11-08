@@ -1,0 +1,277 @@
+#!/usr/bin/env python3
+"""Autonomous Self-Improvement and Continuous Learning Engine for team-workflow.
+
+Extracts anti-patterns, bug fixes, performance optimizations, and security lessons from:
+1. Team Talk challenges and accepted fixes (builder ⚔️ breaker interactions).
+2. Git fix/revert commits and test failure patterns.
+3. Explicit agent/human recordings.
+
+Saves learnings into docs/brain/learnings/ as Obsidian graph nodes, mirrors them into
+docs/memory/LEARNINGS.md, and injects 'vaccines' (preventive constraints) into agent prompts.
+"""
+from datetime import datetime, timezone
+import fnmatch
+import json
+import os
+import re
+import sys
+
+VAULT_DIR = "docs/brain"
+LEARNINGS_DIR = os.path.join(VAULT_DIR, "learnings")
+INDEX_FILE = "index.json"
+MEM_LEARNINGS = os.path.join("docs", "memory", "LEARNINGS.md")
+
+
+def _slug(text):
+    clean = re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
+    return clean[:50] or "learning"
+
+
+def _ensure_dir(path):
+    os.makedirs(path, exist_ok=True)
+
+
+def learnings_path(root="."):
+    return os.path.join(root, LEARNINGS_DIR)
+
+
+def load_index(root="."):
+    path = os.path.join(learnings_path(root), INDEX_FILE)
+    if os.path.isfile(path):
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except (OSError, json.JSONDecodeError):
+            pass
+    return {"learnings": []}
+
+
+def save_index(index_data, root="."):
+    lp = learnings_path(root)
+    _ensure_dir(lp)
+    path = os.path.join(lp, INDEX_FILE)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(index_data, f, indent=2, ensure_ascii=False)
+
+
+def record_learning(
+    root=".",
+    title="",
+    trigger="",
+    anti_pattern="",
+    solution="",
+    applies_to=None,
+    category="bug",
+    confidence=1,
+    source="manual"
+):
+    """Save a new learning node and update the active vaccine index."""
+    if not title:
+        raise ValueError("Learning requires a title.")
+
+    lp = learnings_path(root)
+    _ensure_dir(lp)
+
+    slug_base = _slug(title)
+    item_id = f"learn-{slug_base}"
+
+    now_iso = datetime.now(timezone.utc).isoformat()
+    if isinstance(applies_to, str):
+        applies_list = [x.strip() for x in applies_to.split(",") if x.strip()]
+    elif isinstance(applies_to, (list, tuple)):
+        applies_list = list(applies_to)
+    else:
+        applies_list = ["*"]
+
+    item = {
+        "id": item_id,
+        "title": title,
+        "category": category,
+        "trigger": trigger or "Identified during development/testing",
+        "anti_pattern": anti_pattern,
+        "solution": solution,
+        "applies_to": applies_list,
+        "confidence": confidence,
+        "source": source,
+        "created_at": now_iso
+    }
+
+    # 1. Write Obsidian node in docs/brain/learnings/<item_id>.md
+    clean_title = title.replace("\n", " ").replace('"', '\\"')
+    clean_source = source.replace("\n", " ").replace('"', '\\"')
+    md_path = os.path.join(lp, f"{item_id}.md")
+    roles_spans = [f"`{r}`" for r in applies_list if not r.startswith("*") and not "." in r]
+    files_spans = [f"`{f}`" for f in applies_list if "." in f]
+
+    md_content = [
+        "---",
+        f"id: {item_id}",
+        f"title: \"{clean_title}\"",
+        "type: learning",
+        f"category: {category}",
+        f"tags: [\"#learning\", \"#{category}\"]",
+        f"applies_to: {json.dumps(applies_list)}",
+        f"confidence: {confidence}",
+        f"source: \"{clean_source}\"",
+        f"created: \"{now_iso}\"",
+        "---",
+        "",
+        f"# Learning: {title}",
+        "",
+        "> [!WARNING] Anti-Pattern / What to Avoid",
+        f"> **Trigger**: {trigger}",
+        "> ```",
+        f"> {anti_pattern}",
+        "> ```",
+        "",
+        "> [!TIP] Verified Solution / Required Pattern",
+        "> ```",
+        f"> {solution}",
+        "> ```",
+        "",
+        "## Connected Context",
+        f"- Target Roles: {', '.join(roles_spans) or 'All roles'}",
+        f"- Target Modules: {', '.join(files_spans) or 'All modules'}",
+        ""
+    ]
+
+    with open(md_path, "w", encoding="utf-8") as f:
+        f.write("\n".join(md_content))
+
+    # 2. Update docs/brain/learnings/index.json
+    idx = load_index(root)
+    existing = False
+    for i, e in enumerate(idx["learnings"]):
+        if e["id"] == item_id:
+            idx["learnings"][i] = item
+            existing = True
+            break
+    if not existing:
+        idx["learnings"].append(item)
+    save_index(idx, root)
+
+    # 3. Mirror into docs/memory/LEARNINGS.md for classic memory compatibility
+    _mirror_to_memory(idx["learnings"], root)
+
+    return item
+
+
+def _mirror_to_memory(learnings, root="."):
+    mem_file = os.path.join(root, MEM_LEARNINGS)
+    os.makedirs(os.path.dirname(mem_file), exist_ok=True)
+
+    lines = [
+        "# Team Learned Knowledge & Vaccines",
+        "",
+        "<!-- Auto-generated by autolearn.py: lessons learned across tasks and reviews -->",
+        "",
+        f"Total active learnings: **{len(learnings)}**.",
+        "",
+        "| ID | Titolo | Categoria | Si applica a | Azione richiesta |",
+        "|---|---|---|---|---|"
+    ]
+
+    for item in sorted(learnings, key=lambda x: x.get("created_at", ""), reverse=True):
+        scope_str = ", ".join(item.get("applies_to", []))
+        sol_summary = item.get("solution", "").replace("\n", " ")[:90]
+        lines.append(f"| `{item['id']}` | **{item['title']}** | `{item['category']}` | `{scope_str}` | {sol_summary} |")
+
+    lines.append("")
+    with open(mem_file, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines))
+
+
+def get_vaccines(root=".", file_path=None, role=None, limit=5):
+    """Retrieve active vaccines matching the given file path or role."""
+    idx = load_index(root)
+    matched = []
+
+    clean_file = os.path.normpath(file_path).replace("\\", "/") if file_path else ""
+
+    for item in idx.get("learnings", []):
+        scopes = item.get("applies_to", [])
+        is_match = False
+
+        if "*" in scopes or "all" in scopes:
+            is_match = True
+
+        if role and any(s.lower() == role.lower() for s in scopes):
+            is_match = True
+
+        if clean_file:
+            for s in scopes:
+                clean_s = s.replace("\\", "/")
+                if clean_s == clean_file or fnmatch.fnmatch(clean_file, f"*{clean_s}*") or fnmatch.fnmatch(os.path.basename(clean_file), clean_s):
+                    is_match = True
+                    break
+
+        if is_match:
+            matched.append(item)
+
+    matched.sort(key=lambda x: x.get("confidence", 1), reverse=True)
+    return matched[:limit]
+
+
+def format_vaccine_prompt(vaccines):
+    """Render a compact GitHub alert block with preventive rules for agent prompts."""
+    if not vaccines:
+        return ""
+
+    out = [
+        "> [!CAUTION] TEAM AUTO-LEARN VACCINES (Do Not Repeat Past Mistakes):"
+    ]
+    for v in vaccines:
+        out.append(f"> - **{v['title']}** (Applies to: {', '.join(v['applies_to'])}):")
+        if v.get("anti_pattern"):
+            out.append(f">   ❌ Avoid: {v['anti_pattern'][:120]}")
+        if v.get("solution"):
+            out.append(f">   ✅ Require: {v['solution'][:140]}")
+    return "\n".join(out)
+
+
+def auto_learn_from_talk(root=".", topic=""):
+    """Extract lessons from accepted verdicts and fixes in a talk topic (or all topics if empty)."""
+    import talk
+    if topic:
+        topics_list = [(topic, talk.read(topic, cwd=root))]
+    else:
+        topics_list = talk.topics(cwd=root)
+
+    new_learnings = []
+    for t_name, messages in topics_list:
+        if not messages:
+            continue
+
+        # Map challenges and verdicts
+        challenges = {m["id"]: m for m in messages if m.get("kind") == "challenge"}
+        verdicts = [m for m in messages if m.get("kind") == "verdict" and m.get("re") in challenges]
+
+        for v in verdicts:
+            text = v.get("text", "").lower()
+            if "accepted" in text or "approved" in text or "fixed" in text:
+                cid = v["re"]
+                cmsg = challenges[cid]
+                challenger = cmsg.get("from", "reviewer")
+                builder = cmsg.get("to") or "developer"
+
+                trigger = f"Challenged by {challenger}: {cmsg.get('text', '')[:120]}"
+                solution = v.get("text", "")[:150]
+
+                learning = record_learning(
+                    root=root,
+                    title=f"Prevent: {cmsg.get('text', '')[:35]}",
+                    trigger=trigger,
+                    anti_pattern=cmsg.get("text", "")[:120],
+                    solution=solution,
+                    applies_to=[builder, "*.py"],
+                    category="bug",
+                    source=f"talk:{t_name}:{cid}"
+                )
+                new_learnings.append(learning)
+
+    return new_learnings
+
+
+def list_learnings(root="."):
+    idx = load_index(root)
+    return idx.get("learnings", [])

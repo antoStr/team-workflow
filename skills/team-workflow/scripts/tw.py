@@ -63,8 +63,12 @@ import opencode_cli
 import roles
 import settings
 import talk
+import brain
+import autolearn
+import gate
+import smoke
 import update_plugin
-from common import utf8_output
+from common import python_executable, utf8_output
 from usage import load_pricing
 
 EFFORTS = ("low", "medium", "high", "xhigh", "max")
@@ -528,8 +532,44 @@ def cmd_uninstall(args):
 
 
 def cmd_learn(args):
-    data = learn.analyze(repo_root() or os.getcwd(), args.max)
-    print(json.dumps(data, indent=2) if args.json else learn.report(data))
+    root = repo_root() or os.getcwd()
+    action = getattr(args, "action", None)
+    if action == "record":
+        if not args.title:
+            raise SystemExit("usage: tw.py learn record --title TITLE --trigger TRIGGER --anti-pattern AVOID --solution REQUIRE [--applies-to ROLES/FILES]")
+        item = autolearn.record_learning(
+            root=root,
+            title=args.title,
+            trigger=args.trigger or "",
+            anti_pattern=args.anti_pattern or "",
+            solution=args.solution or "",
+            applies_to=args.applies_to or "*",
+            category=args.category or "bug"
+        )
+        print(f"Recorded learning [{item['id']}]: {item['title']}")
+    elif action == "vaccine":
+        vaccines = autolearn.get_vaccines(root=root, file_path=args.file, role=args.role)
+        if args.json:
+            print(json.dumps(vaccines, indent=2))
+        else:
+            txt = autolearn.format_vaccine_prompt(vaccines)
+            print(txt if txt else "No active vaccines matching criteria.")
+    elif action == "auto":
+        res = autolearn.auto_learn_from_talk(root=root, topic=args.topic or "")
+        print(f"Auto-learned {len(res)} lessons from talk topic '{args.topic or 'all'}'.")
+        for it in res:
+            print(f"  - [{it['id']}] {it['title']}")
+    elif action == "list":
+        items = autolearn.list_learnings(root=root)
+        if args.json:
+            print(json.dumps(items, indent=2))
+        else:
+            print(f"Team Learnings ({len(items)} active):")
+            for it in items:
+                print(f"  [{it['id']}] {it['title']} ({it['category']}) -> applies to: {', '.join(it.get('applies_to', []))}")
+    else:
+        data = learn.analyze(root, args.max)
+        print(json.dumps(data, indent=2) if args.json else learn.report(data))
 
 
 CI_WORKFLOW = """name: team-workflow
@@ -802,8 +842,101 @@ def cmd_talk(args):
                 raise SystemExit(1)
         elif args.action == "clear":
             print("cleared" if talk.clear(args.topic) else "no such channel")
+        elif args.action == "digest":
+            d = talk.compact_topic(args.topic, threshold=0, force=True)
+            if d:
+                print(talk.line(d))
+            else:
+                print("nothing to compact")
     except (ValueError, TimeoutError) as e:
         raise SystemExit(str(e))
+
+
+def cmd_brain(args):
+    root = repo_root() or "."
+    vault_dir = args.vault_dir or "docs/brain"
+    if args.action == "init":
+        res = brain.init_vault(vault_dir, root=root, force=args.force)
+        print(f"Brain vault {res['status']}: {res['path']}")
+    elif args.action == "map":
+        res = brain.map_repo(root=root, vault_dir=vault_dir, incremental=args.incremental)
+        print(f"Brain mapped: {res['files_scanned']} files scanned, {res['nodes_written']} nodes written to {res['vault']}")
+    elif args.action == "query":
+        if not args.target:
+            raise SystemExit("usage: tw.py brain query TARGET [--hops N] [--format prompt|json|markdown]")
+        out = brain.query_context(args.target, vault_dir=vault_dir, root=root, hops=args.hops, format=args.format)
+        print(out)
+    elif args.action == "context":
+        if not args.target:
+            raise SystemExit("usage: tw.py brain context TARGET [--role ROLE] [--hops N]")
+        out = brain.context_briefing(args.target, vault_dir=vault_dir, root=root, hops=args.hops, role=getattr(args, "role", None))
+        print(out)
+    elif args.action == "rollover":
+        res = brain.rollover_state(root=root, vault_dir=vault_dir)
+        print(f"Brain rollover [{res.get('week')}]: archived to {res.get('archive_path')}")
+    elif args.action == "check":
+        res = brain.check_vault(vault_dir=vault_dir, root=root, strict=args.strict)
+        if args.json:
+            print(json.dumps(res, indent=2))
+        else:
+            print(f"Brain check: {'OK' if res['ok'] else 'ISSUES FOUND'} ({res['total_nodes']} nodes, {res['total_issues']} issues)")
+            for k, items in res["findings"].items():
+                if items:
+                    print(f"  {k} ({len(items)}):")
+                    for it in items[:5]:
+                        print(f"    - {it}")
+                    if len(items) > 5:
+                        print(f"    ... and {len(items) - 5} more")
+        if args.strict and not res["ok"]:
+            raise SystemExit(1)
+
+
+def cmd_gate(args):
+    root = repo_root() or "."
+    action = getattr(args, "action", "status") or "status"
+    if action == "create":
+        if not args.target:
+            raise SystemExit("usage: tw.py gate create --target TARGET [--builder ROLE] [--breaker ROLE] [--topic TOPIC]")
+        g = gate.create_gate(
+            root=root,
+            target=args.target,
+            builder=args.builder or "backend-dev",
+            breaker=args.breaker or "pentester",
+            topic=args.topic or "",
+            hypothesis=args.hypothesis or ""
+        )
+        print(f"Adversarial Gate [{g['id']}] CREATED. Status: {g['status']} (Breaker: {g['breaker']} ⚔️ Builder: {g['builder']})")
+    elif action == "block":
+        if not args.gate_id or not args.poc:
+            raise SystemExit("usage: tw.py gate block --gate-id ID --poc POC_DETAILS")
+        g = gate.block_gate(root=root, gate_id=args.gate_id, poc=args.poc)
+        print(f"Gate [{g['id']}] BLOCKED! Status: {g['status']}. Flaw verified with PoC.")
+    elif action == "pass":
+        if not args.gate_id:
+            raise SystemExit("usage: tw.py gate pass --gate-id ID [--evidence EVIDENCE]")
+        g = gate.pass_gate(root=root, gate_id=args.gate_id, evidence=args.evidence or "Verified clean.")
+        print(f"Gate [{g['id']}] PASSED! Status: {g['status']}.")
+    elif action in ("list", "status"):
+        all_gates = gate.list_gates(root=root, topic=args.topic)
+        if args.json:
+            print(json.dumps(all_gates, indent=2))
+        else:
+            blocking = [g for g in all_gates if g["status"] in ("PENDING_BREAKER", "BLOCKED")]
+            print(f"Adversarial Gates ({len(all_gates)} total, {len(blocking)} blocking):")
+            for g in all_gates:
+                flag = "🔴" if g["status"] == "BLOCKED" else ("🟡" if g["status"] == "PENDING_BREAKER" else "🟢")
+                print(f"  {flag} [{g['id']}] {g['status']}: target='{g['target']}' (Builder: {g['builder']}, Breaker: {g['breaker']})")
+
+
+def cmd_smoke(args):
+    cmd_str = " ".join(args.cmd) if isinstance(args.cmd, list) else args.cmd
+    res = smoke.run_smoke(cmd_str, timeout=args.timeout, cwd=args.cwd, wsl=getattr(args, "wsl", False))
+    if args.json:
+        print(json.dumps(res, indent=2))
+    else:
+        print(smoke.format_report(res))
+    if args.strict and not res["ok"]:
+        raise SystemExit(1)
 
 
 SETUP_GROUPS = (
@@ -865,6 +998,9 @@ def main(argv=None):
     up = sub.add_parser("update", help="update the plugin in Claude Code and agy")
     up.add_argument("--check", action="store_true", help="only show the versions")
     up.add_argument("check_word", nargs="?", choices=("check",), help=argparse.SUPPRESS)
+    ug = sub.add_parser("upgrade", help="alias for update: update to the latest version")
+    ug.add_argument("--check", action="store_true", help="only show the versions")
+    ug.add_argument("check_word", nargs="?", choices=("check",), help=argparse.SUPPRESS)
     st = sub.add_parser("settings", help="show or change the settings")
     st.add_argument("action", nargs="?", choices=("show", "set", "reset"), default="show")
     st.add_argument("key", nargs="?")
@@ -897,8 +1033,18 @@ def main(argv=None):
     do.add_argument("--fix", action="store_true", help="repair what can be repaired")
     un = sub.add_parser("uninstall", help="remove what team-workflow wrote outside the plugins")
     un.add_argument("--all", action="store_true", help="also ~/.team-workflow (settings, ledger)")
-    le = sub.add_parser("learn", help="habits of this repository from its git history")
-    le.add_argument("--max", type=int, default=2000)
+    le = sub.add_parser("learn", help="habits, auto-learning, and preventive vaccines")
+    le.add_argument("action", nargs="?", default=None, choices=("record", "vaccine", "auto", "list"))
+    le.add_argument("--title", help="record: learning title")
+    le.add_argument("--trigger", help="record: what failed or prompted the learning")
+    le.add_argument("--anti-pattern", dest="anti_pattern", help="record: anti-pattern to avoid")
+    le.add_argument("--solution", help="record: required solution or pattern")
+    le.add_argument("--applies-to", dest="applies_to", help="record: comma-separated roles or file globs")
+    le.add_argument("--category", choices=("bug", "security", "performance", "architecture", "process"), default="bug")
+    le.add_argument("--file", help="vaccine: target file path")
+    le.add_argument("--role", help="vaccine: target role")
+    le.add_argument("--topic", help="auto: talk topic to learn from")
+    le.add_argument("--max", type=int, default=2000, help="git history max commits")
     le.add_argument("--json", action="store_true")
     sub.add_parser("ci-init", help="GitHub Actions workflow for memory and audit checks")
     op = sub.add_parser("options", help="what the session wizard can offer in an app")
@@ -920,7 +1066,7 @@ def main(argv=None):
     li.add_argument("rest", nargs="*", help="PACK..., WORDS..., ID or PACK")
     li.add_argument("--project", action="store_true", help="enable/disable: this repository only")
     tk = sub.add_parser("talk", help="team talk: the channel where agents talk to each other")
-    tk.add_argument("action", nargs="?", default="list", choices=("list", "join", "who", "post", "read", "open", "clear"))
+    tk.add_argument("action", nargs="?", default="list", choices=("list", "join", "who", "post", "read", "open", "clear", "digest"))
     tk.add_argument("topic", nargs="?")
     tk.add_argument("text", nargs="*")
     tk.add_argument("--from", "--as", dest="sender", help="post, join: your role (orchestrator, user, a role)")
@@ -934,14 +1080,45 @@ def main(argv=None):
                                                         "for a new message")
     tk.add_argument("--strict", action="store_true", help="open: exit 1 when something is open")
     tk.add_argument("--json", action="store_true")
+    br = sub.add_parser("brain", help="Obsidian graph vault: init, map, query, check, context, rollover")
+    br.add_argument("action", choices=("init", "map", "query", "check", "context", "rollover"))
+    br.add_argument("target", nargs="?", help="query/context: node name, file or search term")
+    br.add_argument("--role", help="context: target role to filter vaccines")
+    br.add_argument("--vault-dir", default=None, help="vault folder (default: docs/brain)")
+    br.add_argument("--force", action="store_true", help="init: overwrite existing vault")
+    br.add_argument("--incremental", action="store_true", help="map: only parse modified files")
+    br.add_argument("--hops", type=int, default=1, help="query: BFS expansion depth (default: 1)")
+    br.add_argument("--format", choices=("prompt", "json", "markdown"), default="prompt")
+    br.add_argument("--strict", action="store_true", help="check: exit 1 on errors")
+    br.add_argument("--json", action="store_true")
+    gt = sub.add_parser("gate", help="adversarial gating: builder ⚔️ breaker verification")
+    gt.add_argument("action", nargs="?", default="status", choices=("create", "block", "pass", "list", "status"))
+    gt.add_argument("--gate-id", dest="gate_id", help="block, pass: gate id")
+    gt.add_argument("--target", help="create: file or feature under verification")
+    gt.add_argument("--builder", help="create: builder role (default: backend-dev)")
+    gt.add_argument("--breaker", help="create: breaker role (default: pentester)")
+    gt.add_argument("--topic", help="create, list: talk topic channel")
+    gt.add_argument("--poc", help="block: proof-of-concept flaw")
+    gt.add_argument("--evidence", help="pass: verification evidence")
+    gt.add_argument("--hypothesis", help="create: attack hypothesis")
+    gt.add_argument("--json", action="store_true")
+    sm = sub.add_parser("smoke", help="live execution smoke test: verify apps/games boot without crashes")
+    sm.add_argument("cmd", nargs="+", help="command to execute (e.g. 'python main.py' or 'npm start')")
+    sm.add_argument("--timeout", type=float, default=5.0, help="seconds to monitor process (default: 5.0)")
+    sm.add_argument("--cwd", default=None, help="working directory")
+    sm.add_argument("--wsl", action="store_true", help="execute smoke test inside WSL (Linux)")
+    sm.add_argument("--strict", action="store_true", help="exit 1 if test fails")
+    sm.add_argument("--json", action="store_true")
     args, extra = ap.parse_known_args(argv)
     if extra:
         if args.command == "talk" and not any(a.startswith("-") for a in extra):
             args.text = (args.text or []) + extra
+        elif args.command == "smoke":
+            args.cmd = (args.cmd or []) + extra
         else:
             unrecognized = " ".join(extra)
             ap.error(f"unrecognized arguments: {unrecognized}")
-    if args.command == "update":
+    if args.command in ("update", "upgrade"):
         check = args.check or args.check_word
         try:
             update_plugin.main(["--check"] if check else [])
@@ -964,7 +1141,7 @@ def main(argv=None):
          "agy-update": cmd_agy_update, "install-opencode": cmd_install_opencode,
          "install-codex": cmd_install_codex,
          "options": cmd_options, "setup": cmd_setup, "library": cmd_library,
-         "talk": cmd_talk}[args.command](args)
+         "talk": cmd_talk, "brain": cmd_brain, "gate": cmd_gate, "smoke": cmd_smoke}[args.command](args)
 
 
 if __name__ == "__main__":

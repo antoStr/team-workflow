@@ -70,11 +70,56 @@ def codex_notes():
             f'using `sandbox_permissions="require_escalated"`{win}.')
 
 
-def memory_context(root):
+def memory_context(root, config=None):
+    engine = config.get("memory_engine", "brain") if config else "brain"
+    brain_dir_rel = config.get("brain_dir", "docs/brain") if config else "docs/brain"
+    brain_dir = os.path.join(root, brain_dir_rel)
+
+    # 1. Dual Loader: Brain Engine (Obsidian vault)
+    if engine == "brain" and os.path.isdir(brain_dir):
+        nodes_dir = os.path.join(brain_dir, "nodes")
+        node_count = len([f for f in os.listdir(nodes_dir) if f.endswith(".md")]) if os.path.isdir(nodes_dir) else 0
+        areas_dir = os.path.join(brain_dir, "areas")
+        area_count = len([f for f in os.listdir(areas_dir) if f.endswith(".md")]) if os.path.isdir(areas_dir) else 0
+        dec_dir = os.path.join(brain_dir, "decisions")
+        dec_count = len([f for f in os.listdir(dec_dir) if f.endswith(".md")]) if os.path.isdir(dec_dir) else 0
+
+        parts = [PROTOCOL]
+        brain_summary = (
+            f"team-workflow: Memory Engine active: Brain (Obsidian vault at {brain_dir_rel}).\n"
+            f"Graph summary: {node_count} nodes, {area_count} areas, {dec_count} decisions.\n"
+            "Use `tw.py brain query <target>` to fetch 1-hop subgraph context (~85-90% token savings).\n"
+            "Obsidian graph: open docs/brain/ in Obsidian to view architecture graph."
+        )
+        parts.append(brain_summary)
+
+        # Check for STATE.md
+        state_path = os.path.join(brain_dir, "STATE.md")
+        if not os.path.isfile(state_path):
+            state_path = os.path.join(root, MEMORY_DIR, "STATE.md")
+        if os.path.isfile(state_path):
+            with open(state_path, encoding="utf-8", errors="replace") as f:
+                parts.append(f"--- STATE ---\n{f.read()}")
+
+        # Inject active team vaccines from autolearn
+        try:
+            import autolearn
+            vaccines = autolearn.get_vaccines(root=root, limit=3)
+            if vaccines:
+                parts.append(autolearn.format_vaccine_prompt(vaccines))
+        except Exception:
+            pass
+
+        text = "\n\n".join(parts)
+        if len(text) > MAX_CHARS:
+            text = text[:MAX_CHARS] + "\n[truncated]"
+        return text
+
+    # 2. Dual Loader: Fallback trasparente su memoria classica (docs/memory)
     mem = os.path.join(root, MEMORY_DIR)
     if not os.path.isfile(os.path.join(mem, "INDEX.md")):
-        return ("team-workflow: this repository has no docs/memory. If the user starts "
-                "development work, offer to create it (/team-workflow:setup-memory).")
+        return ("team-workflow: this repository has no docs/memory or docs/brain. If the user starts "
+                "development work, offer to initialize Brain (`tw.py brain init`).")
     parts = [PROTOCOL]
     for name in ("INDEX.md", "STATE.md"):
         path = os.path.join(mem, name)
@@ -131,7 +176,7 @@ def main():
         print("{}")
         return
     manual = config["activation"] == "manual"
-    context = MANUAL if manual else (memory_context(root) + "\n\n" + settings.summary(config)
+    context = MANUAL if manual else (memory_context(root, config=config) + "\n\n" + settings.summary(config)
                                      + ("\n" + TALK if config["talk"] else ""))
     missing = [s for s in roles.detect(root) if not roles.is_enabled(config, "", s)]
     if missing and not manual:
@@ -155,8 +200,7 @@ def main():
         notes.append(f"team-workflow: {len(changed)} agents updated; restart {name} to use them.")
     newer = update_plugin.newer_version() if config["update_check"] else None
     if newer:
-        notes.append(f"team-workflow {newer} is available (installed "
-                     f"{update_plugin.own_version()}): /team-workflow:update-plugin")
+        notes.append(f"🔔 Nuova versione team-workflow {newer} disponibile (installata {update_plugin.own_version()}). Per aggiornare a zero token esegui: `tw.py upgrade` oppure `/team upgrade`.")
     if text_mode:
         print("\n".join([context] + notes))
         return

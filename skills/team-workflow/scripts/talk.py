@@ -21,7 +21,7 @@ import time
 
 import settings
 
-KINDS = ("join", "note", "finding", "question", "answer", "challenge", "fix", "verdict", "decision")
+KINDS = ("join", "note", "finding", "question", "answer", "challenge", "fix", "verdict", "decision", "digest")
 REPLIES = ("answer", "fix", "verdict")  # they need --re
 CLOSED_BY = {"question": ("answer", "fix", "verdict"), "challenge": ("verdict",)}
 TOPIC = re.compile(r"[a-z0-9][a-z0-9-]{0,63}")
@@ -114,7 +114,8 @@ def post(topic, sender, text, kind="note", to=None, re_id=None, cwd=None):
             raise Unread(pending)
         if re_id and not any(m["id"] == re_id for m in msgs):
             raise ValueError(f"no message #{re_id} in {topic}")
-        msg = {"id": len(msgs) + 1, "time": time.strftime("%Y-%m-%dT%H:%M:%S"), "from": sender,
+        next_id = max((m["id"] for m in msgs), default=0) + 1
+        msg = {"id": next_id, "time": time.strftime("%Y-%m-%dT%H:%M:%S"), "from": sender,
                "to": to or None, "kind": kind, "re": re_id or None, "text": text.strip()}
         with open(file, "a", encoding="utf-8") as f:
             f.write(json.dumps(msg, ensure_ascii=False) + "\n")
@@ -225,6 +226,73 @@ def clear(topic, cwd=None):
     except FileNotFoundError:
         pass
     return True
+
+
+def compact_topic(topic, threshold=20, cwd=None, force=False):
+    """Compact old messages into a digest, preserving sliding window + ALL open threads."""
+    file = path(topic, cwd)
+    if not os.path.isfile(file):
+        return None
+    with _Lock(file):
+        msgs = read(topic, cwd)
+        if len(msgs) <= threshold and not force:
+            return None
+
+        open_list = open_threads(msgs)
+        open_ids = {m["id"] for m in open_list}
+
+        # Sliding window for recent messages
+        window_size = max(5, min(10, threshold // 2 if threshold else 5))
+        recent_msgs = msgs[-window_size:] if len(msgs) > window_size else msgs
+        recent_ids = {m["id"] for m in recent_msgs}
+
+        # Messages eligible for archiving
+        to_archive = [m for m in msgs if m["id"] not in recent_ids and m["id"] not in open_ids]
+        if not to_archive:
+            return None
+
+        # Archive old messages
+        archive_file = file[:-len(".jsonl")] + ".archive.jsonl"
+        with open(archive_file, "a", encoding="utf-8") as af:
+            for m in to_archive:
+                af.write(json.dumps(m, ensure_ascii=False) + "\n")
+
+        # Build digest text
+        replies = {m["re"]: m for m in msgs if m.get("re")}
+        closed_q = [m for m in to_archive if m["kind"] == "question" and m["id"] in replies]
+        closed_c = [m for m in to_archive if m["kind"] == "challenge" and m["id"] in replies]
+        decisions = [m for m in to_archive if m["kind"] == "decision"]
+
+        summary = [f"Rolling Digest ({len(to_archive)} messages archived, #{to_archive[0]['id']}-#{to_archive[-1]['id']}):"]
+        if closed_q:
+            summary.append(f"- Answered questions: {len(closed_q)}")
+        if closed_c:
+            summary.append(f"- Resolved challenges: {len(closed_c)}")
+        if decisions:
+            summary.append(f"- Key decisions recorded: {len(decisions)}")
+        summary.append(f"- Preserved open threads: {len(open_list)} | Retained recent: {len(recent_msgs)}")
+        digest_text = "\n".join(summary)
+
+        digest_id = to_archive[0]["id"]
+        digest_msg = {
+            "id": digest_id,
+            "time": time.strftime("%Y-%m-%dT%H:%M:%S"),
+            "from": "orchestrator",
+            "to": None,
+            "kind": "digest",
+            "re": None,
+            "text": digest_text
+        }
+
+        # Rebuild topic messages: digest + open threads not in recent + recent messages
+        preserved_open = [m for m in open_list if m["id"] not in recent_ids]
+        active_msgs = sorted([digest_msg] + preserved_open + recent_msgs, key=lambda m: m["id"])
+
+        with open(file, "w", encoding="utf-8") as f:
+            for m in active_msgs:
+                f.write(json.dumps(m, ensure_ascii=False) + "\n")
+
+        return digest_msg
 
 
 def line(m):

@@ -1,3 +1,11 @@
 __pycache__/
 *.pyc
 evals/results/
+.pytest_cache/
+*.log
+thermal_status.json
+hardware_status.json
+THERMAL_ALERT.json
+HARDWARE_ALERT.json
+tools/cloudflared.exe
+
