@@ -66,10 +66,10 @@ class AgyPluginTest(unittest.TestCase):
             self.assertTrue(os.path.isfile(os.path.join(dest, "rules", "AGENTS.md")))
             self.assertTrue(os.path.isfile(os.path.join(dest, "skills", "team-workflow", "roles", "core", "tester.md")))
             skills = os.path.join(dest, "skills")
-            self.assertEqual(sorted(os.listdir(skills)), ["team", "team-workflow"])
-            for name in ("team", "team-workflow"):
-                with open(os.path.join(skills, name, "SKILL.md"), encoding="utf-8") as f:
-                    self.assertIn(f"name: {name}\n", f.read())
+            self.assertIn("doctor", os.listdir(skills))
+            self.assertIn("fix-bug", os.listdir(skills))
+            self.assertNotIn("team", os.listdir(skills))
+            self.assertFalse(os.path.isfile(os.path.join(skills, "team-workflow", "SKILL.md")))
             self.assertEqual(self.build(dest).returncode, 0)  # rebuilding replaces its own output
 
     def test_never_replaces_a_foreign_folder(self):

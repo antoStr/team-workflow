@@ -1,6 +1,6 @@
 # Stato del Progetto
 
-## Versione Corrente: v2.1.2 (Release Ufficiale)
+## Versione Corrente: v2.1.3 (Release Ufficiale)
 
 ### 1. Suite Malware Analysis & URL Threat Intelligence
 - **43 nuove skill specializzate di sicurezza avanzata**:

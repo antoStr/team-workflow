@@ -109,12 +109,8 @@ def checks(root=None):
 
     agy_skills = os.path.join(os.path.expanduser("~"), ".gemini", "config", "plugins", "team-workflow", "skills")
     if os.path.isdir(agy_skills):
-        allowed = {"team", "team-workflow"}
-        legacy = [item for item in os.listdir(agy_skills) if item not in allowed and os.path.isdir(os.path.join(agy_skills, item))]
-        if legacy:
-            add("warn", "agy skills", f"{len(legacy)} legacy skill folders in agy ({', '.join(legacy[:3])}...): tw.py doctor --fix")
-        else:
-            add("ok", "agy skills", "clean (only team and team-workflow)")
+        skills_count = len([s for s in os.listdir(agy_skills) if os.path.isdir(os.path.join(agy_skills, s))])
+        add("ok", "agy skills", f"{skills_count} skills installed")
 
     for path in [settings.user_file()] + ([settings.project_file(root)] if root else []):
         if not os.path.isfile(path):
@@ -196,15 +192,13 @@ def repair(root=None):
         r = roles.sync(app, root=root)
         if r["written"] or r["removed"]:
             done.append(f"{app}: {len(r['written'])} agents written, {len(r['removed'])} removed")
-    agy_skills = os.path.join(os.path.expanduser("~"), ".gemini", "config", "plugins", "team-workflow", "skills")
-    if os.path.isdir(agy_skills):
-        allowed = {"team", "team-workflow"}
-        for item in os.listdir(agy_skills):
-            if item not in allowed:
-                p = os.path.join(agy_skills, item)
-                if os.path.isdir(p):
-                    shutil.rmtree(p, ignore_errors=True)
-                    done.append(f"removed legacy agy skill {item}")
+    tw_skill = os.path.join(os.path.expanduser("~"), ".gemini", "config", "plugins", "team-workflow", "skills", "team-workflow", "SKILL.md")
+    if os.path.isfile(tw_skill):
+        try:
+            os.remove(tw_skill)
+            done.append("removed duplicate team-workflow SKILL.md")
+        except OSError:
+            pass
     return done or ["nothing to repair"]
 
 

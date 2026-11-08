@@ -47,18 +47,49 @@ def sync_agents(dest, config=None):
     return roles.sync("agy", config=config, dest=dest)["written"]
 
 
+def safe_rmtree(path):
+    if not os.path.exists(path):
+        return
+
+    def on_error(func, p, excinfo):
+        import stat
+        try:
+            os.chmod(p, stat.S_IWRITE)
+            func(p)
+        except Exception:
+            pass
+
+    try:
+        shutil.rmtree(path, onerror=on_error)
+    except Exception:
+        pass
+
+
 def build(dest):
     if os.path.exists(dest):
         if not ours(dest):
             raise SystemExit(f"{dest} exists and is not a team-workflow plugin: not touching it")
-        shutil.rmtree(dest)  # a previous build of this same plugin
+        safe_rmtree(dest)  # a previous build of this same plugin
     shutil.copytree(os.path.join(PLUGIN, "skills"), os.path.join(dest, "skills"),
                     ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
-    skills_dest = os.path.join(dest, "skills")
-    allowed = {"team", "team-workflow"}
-    for item in os.listdir(skills_dest):
-        if item not in allowed:
-            shutil.rmtree(os.path.join(skills_dest, item), ignore_errors=True)
+    # In the plugin, remove skills/team so agy does NOT register duplicate /team-workflow:team
+    plugin_team = os.path.join(dest, "skills", "team")
+    if os.path.isdir(plugin_team):
+        shutil.rmtree(plugin_team, ignore_errors=True)
+    # Ensure team-workflow folder does not contain SKILL.md so it does not create duplicate slash command
+    tw_skill = os.path.join(dest, "skills", "team-workflow", "SKILL.md")
+    if os.path.isfile(tw_skill):
+        try:
+            os.remove(tw_skill)
+        except OSError:
+            pass
+    # Install top-level /team skill directly into agy's global skills directory (~/.gemini/config/skills/team)
+    top_team_dir = os.path.join(os.path.expanduser("~"), ".gemini", "config", "skills", "team")
+    try:
+        shutil.rmtree(top_team_dir, ignore_errors=True)
+        shutil.copytree(os.path.join(PLUGIN, "skills", "team"), top_team_dir)
+    except Exception:
+        pass
     shutil.copytree(os.path.join(PLUGIN, "rules"), os.path.join(dest, "rules"))
     for name in ("plugin.json", "hooks.json"):  # agy's manifest and hooks, kept at the repo root
         shutil.copy(os.path.join(PLUGIN, name), dest)

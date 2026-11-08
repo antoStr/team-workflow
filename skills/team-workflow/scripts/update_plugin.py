@@ -238,12 +238,20 @@ def agy_update(names=None):
                 if code2 == 0:
                     log.append(f"{name}: successfully updated via git")
                     if name == NAME:
-                        skills_folder = os.path.join(folder, NAME, "skills")
-                        if os.path.isdir(skills_folder):
-                            allowed = {"team", "team-workflow"}
-                            for item in os.listdir(skills_folder):
-                                if item not in allowed:
-                                    safe_rmtree(os.path.join(skills_folder, item))
+                        # Remove plugin skills/team to avoid duplicate /team-workflow:team
+                        safe_rmtree(os.path.join(folder, NAME, "skills", "team"))
+                        tw_skill = os.path.join(folder, NAME, "skills", NAME, "SKILL.md")
+                        if os.path.isfile(tw_skill):
+                            try:
+                                os.remove(tw_skill)
+                            except OSError:
+                                pass
+                        top_team = os.path.join(os.path.expanduser("~"), ".gemini", "config", "skills", "team")
+                        try:
+                            shutil.rmtree(top_team, ignore_errors=True)
+                            shutil.copytree(os.path.join(folder, NAME, "skills", "team"), top_team)
+                        except Exception:
+                            pass
                         script = os.path.join(folder, NAME, "skills", NAME, "scripts", "install_agy.py")
                         code_a, out_a = run(sys.executable, script, "--agents-only")
                         log.append(out_a if out_a else "agents refreshed")
@@ -286,13 +294,18 @@ def agy_update(names=None):
         safe_rmtree(backup)
         log.append(f"{name}: reinstalled from {source}")
         if name == NAME:  # the new version's roles, as agy subagents
-            # Clean up any legacy skills from older versions
-            skills_folder = os.path.join(folder, NAME, "skills")
-            if os.path.isdir(skills_folder):
-                allowed = {"team", "team-workflow"}
-                for item in os.listdir(skills_folder):
-                    if item not in allowed:
-                        safe_rmtree(os.path.join(skills_folder, item))
+            tw_skill = os.path.join(folder, NAME, "skills", NAME, "SKILL.md")
+            if os.path.isfile(tw_skill):
+                try:
+                    os.remove(tw_skill)
+                except OSError:
+                    pass
+            top_team = os.path.join(os.path.expanduser("~"), ".gemini", "config", "skills", "team")
+            try:
+                shutil.rmtree(top_team, ignore_errors=True)
+                shutil.copytree(os.path.join(folder, NAME, "skills", "team"), top_team)
+            except Exception:
+                pass
             script = os.path.join(folder, NAME, "skills", NAME, "scripts", "install_agy.py")
             code, out = run(sys.executable, script, "--agents-only")
             log.append(out if out else "agents refreshed")
