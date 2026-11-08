@@ -1,6 +1,6 @@
 # Stato del Progetto
 
-## Versione Corrente: v2.1.1 (Release Ufficiale)
+## Versione Corrente: v2.1.2 (Release Ufficiale)
 
 ### 1. Suite Malware Analysis & URL Threat Intelligence
 - **43 nuove skill specializzate di sicurezza avanzata**:
@@ -43,13 +43,14 @@
 - Nodi Markdown con frontmatter YAML e wikilink bidirezionali compatibili Obsidian (`docs/brain/`).
 - `tw.py brain rollover`: compattazione e archiviazione dello stato delle settimane passate in journal dedicati (`docs/brain/journal/week-YYYY-WXX.md`), garantendo supporto per sessioni di settimane/mesi senza saturare il contesto.
 
-### 9. Aggiornamenti a Zero Token, Wrapper Win32 & `agy plugin update`
-- Risolto il supporto all'aggiornamento da terminale Windows: `tw.py install-cli` registra i wrapper `team.cmd`, `team.bat`, `agy.cmd` e `agy.bat` in `~/.local/bin` e aggiunge la cartella alla variabile utente `PATH` nel registro di Windows (`HKCU\Environment\Path`).
-- Il comando `agy plugin update team-workflow` (o `agy.bat plugin update`) intercetta la richiesta ed esegue `tw.py agy-update` a costo zero token, reinstallando e sincronizzando gli agenti con `sys.executable` (risolto il bug di `python3` non trovato su Windows).
-- Supporto flag `--force` in `update_plugin.py` per forzare l'allineamento e il ripristino istantaneo anche a parità di versione.
+### 9. Aggiornamenti a Zero Token, Wrapper Win32 & In-Place Git Update (v2.1.2)
+- Risolto il supporto all'aggiornamento da terminale Windows: `tw.py install-cli` registra i wrapper `tw.cmd`, `tw.bat`, `team.cmd`, `team.bat`, `agy.cmd` e `agy.bat` in `~/.local/bin` e aggiunge la cartella alla variabile utente `PATH` nel registro di Windows (`HKCU\Environment\Path`).
+- Riscritto il motore di aggiornamento `agy_update`: i plugin git vengono aggiornati in-place tramite `git pull/fetch`, evitando rimozioni premature, file locks e l'errore `FileExistsError [WinError 183]` su Windows.
+- Gestione sicura dei permessi read-only nei file `.git` su Windows (`safe_rmtree`).
+- Aggiunto supporto diretto al comando CLI `tw` (`tw update`, `tw doctor`, `tw settings`, `tw thermal`) e flag `--force`.
 
 ### 10. Documentazione Bilingue & Cataloghi
-- `README.md` (Italiano) e `README.en.md` (Inglese) aggiornati con badge e dettagli v2.1.0.
+- `README.md` (Italiano) e `README.en.md` (Inglese) aggiornati con badge e dettagli v2.1.2.
 - Catalogo completo sincronizzato in `docs/CATALOG.md` (130 agenti, 512 risorse).
 - Suite di test: 102 test passati (100 ok, 2 skipped, 0 errori).
 - Strict brain check: OK (0 problemi).
