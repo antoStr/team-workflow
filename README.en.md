@@ -304,7 +304,7 @@ Keep your plugin up to date without wasting context tokens:
 
 - **Upfront Estimation**: the wizard provides estimated token cost before agents start executing.
 - **Smart Tiering**: assigns lightweight models (`haiku`, `flash`) to routine tasks while reserving flagship models (`sonnet`, `opus`, `pro`) for high-stakes architecture and security auditing.
-- **Usage Auditing**: inspect per-role, per-model, and per-session spending with `tw.py usage` (or `/team-workflow:usage-costs`).
+- **Usage Auditing**: inspect per-role, per-model, and per-session spending with `tw.py usage` (or `/team:usage-costs`).
 
 ---
 

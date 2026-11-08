@@ -5,9 +5,9 @@ argument-hint: "[version or notes]"
 disable-model-invocation: true
 ---
 
-Use the team-workflow skill to release: $ARGUMENTS
+Use the team skill to release: $ARGUMENTS
 
-1. The changes need the tester's `APPROVED` verdict; without it, run `/team-workflow:review-changes`
+1. The changes need the tester's `APPROVED` verdict; without it, run `/team:review-changes`
    first.
 2. `release-manager` runs the pipeline from `PLAYBOOKS.md` and prepares version, commit, tag
    and notes.

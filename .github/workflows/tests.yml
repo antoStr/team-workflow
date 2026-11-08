@@ -19,6 +19,6 @@ jobs:
         run: python -m unittest discover -s tests -v
       - name: JSON manifests parse
         run: |
-          for f in plugin.json hooks.json hooks/hooks.json .claude-plugin/*.json skills/team-workflow/pricing.json; do
+          for f in plugin.json hooks.json hooks/hooks.json .claude-plugin/*.json skills/team/pricing.json; do
             python -m json.tool "$f" > /dev/null || { echo "invalid JSON: $f"; exit 1; }
           done

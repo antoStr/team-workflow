@@ -116,7 +116,7 @@ def command_text(name, skill_md, scripts, python, v2=True):
         return (head + "team-workflow ran this command without you. Show the user the output below "
                 "exactly as it is, in a code block, and add nothing else.\n\n"
                 f"!`{tw}`\n")
-    body = m.group(2).strip().replace("<team-workflow skill folder>", posix(os.path.dirname(scripts)))
+    body = m.group(2).strip().replace("<team-workflow skill folder>", posix(os.path.dirname(scripts))).replace("<team skill folder>", posix(os.path.dirname(scripts)))
     return head + with_python(body, python) + "\n"
 
 

@@ -5,7 +5,7 @@ argument-hint: "[team] <task description>"
 disable-model-invocation: true
 ---
 
-Use the team-workflow skill. Read `TEAMS.md` in the skill's folder, then assemble a team for:
+Use the team skill. Read `TEAMS.md` in the skill's folder, then assemble a team for:
 $ARGUMENTS
 
 1. If the first word names a team in `TEAMS.md`, start from that team's roles. Otherwise the

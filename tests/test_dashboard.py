@@ -6,7 +6,7 @@ import sys
 import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                "..", "skills", "team-workflow", "scripts"))
+                                "..", "skills", "team", "scripts"))
 import dashboard  # noqa: E402
 import usage  # noqa: E402
 from test_usage import PRICING, Fixture, assistant  # noqa: E402

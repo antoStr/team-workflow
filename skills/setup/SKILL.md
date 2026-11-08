@@ -1,11 +1,11 @@
 ---
 name: setup
-description: Set up team-workflow in one place - activation (on its own in every project, only in this project, or only when you call it), session wizard, team size and launch, models and effort, roles and packs, the library, agents that talk to each other, checks, add-ons and presets
+description: Set up team in one place - activation (on its own in every project, only in this project, or only when you call it), session wizard, team size and launch, models and effort, roles and packs, the library, agents that talk to each other, checks, add-ons and presets
 argument-hint: "[area to change, for example activation or library]"
 disable-model-invocation: true
 ---
 
-Run `python3 <team-workflow skill folder>/scripts/tw.py setup` from the repository root and
+Run `python3 <team skill folder>/scripts/tw.py setup` from the repository root and
 show its output as it is. It is the current configuration: every value says whether it comes
 from the project file, the user file or the defaults.
 
@@ -21,7 +21,7 @@ there and skip the questions about the others.
    - "Only when I call it": `settings set activation manual` (add `--project` when the user
      wants it for this repository alone).
    Auto loads the memory, the protocol and the Stop check at every session; manual keeps
-   team-workflow quiet until `/team-workflow:<name>`. In agy the plugin's rules always load:
+   team quiet until `/team:<name>`. In agy the plugin's rules always load:
    manual there only turns off the Stop check.
 2. **What else to change** (multi-select, at most four options per question, so ask two
    questions in one call): session setup and questions; team size and launch; models and
@@ -55,5 +55,5 @@ there and skip the questions about the others.
 4. Run `tw.py setup` again, show the lines that changed, and say what needs a restart of the
    app (new or changed agents and library skills load at the next session).
 
-The commands are `python3 <team-workflow skill folder>/scripts/tw.py <command>`; on Windows
+The commands are `python3 <team skill folder>/scripts/tw.py <command>`; on Windows
 use the Python the install names when `python3` is the Microsoft Store placeholder.

@@ -4,7 +4,7 @@ description: Close the session - update the project memory, record lessons and d
 disable-model-invocation: true
 ---
 
-Use the team-workflow skill to close this session.
+Use the team skill to close this session.
 
 1. List what changed in this session: `git status` and the commits made since it started.
 2. Update the memory: yourself for a small change, `doc-keeper` for a larger one (give it the

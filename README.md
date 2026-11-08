@@ -304,7 +304,7 @@ Non consumare token preziosi per aggiornare il plugin:
 
 - **Stima preventiva**: il wizard calcola il costo previsto in base ai token e ai modelli assegnati a ciascun ruolo.
 - **Ottimizzazione intelligente**: i ruoli secondari possono usare modelli rapidi ed economici (`haiku`, `flash`), riservando i modelli di punta (`sonnet`, `opus`, `pro`) ai compiti critici di architettura e sicurezza.
-- **Trasparenza**: il comando `tw.py usage` (o `/team-workflow:usage-costs`) mostra i consumi esatti divisi per agente, modello e sessione.
+- **Trasparenza**: il comando `tw.py usage` (o `/team:usage-costs`) mostra i consumi esatti divisi per agente, modello e sessione.
 
 ---
 

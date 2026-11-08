@@ -5,7 +5,7 @@ import sys
 import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                "..", "skills", "team-workflow", "scripts"))
+                                "..", "skills", "team", "scripts"))
 import update_plugin  # noqa: E402
 
 

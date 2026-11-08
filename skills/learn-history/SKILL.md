@@ -5,13 +5,13 @@ argument-hint: "[max commits, default 2000]"
 disable-model-invocation: true
 ---
 
-Use the team-workflow skill to learn from the history of this repository: $ARGUMENTS
+Use the team skill to learn from the history of this repository: $ARGUMENTS
 
-1. Run `python3 <team-workflow skill folder>/scripts/tw.py learn --json` (add `--max <n>` when
+1. Run `python3 <team skill folder>/scripts/tw.py learn --json` (add `--max <n>` when
    the user gave a number) from the repository root. It reads git locally; nothing leaves the
    machine.
 2. Read `docs/memory` (MAP, the area cards, PLAYBOOKS). If it is missing, offer
-   `/team-workflow:setup-memory` first.
+   `/team:setup-memory` first.
 3. Turn the facts into proposals, each tied to the evidence (the files and commits):
    - bug-prone files and reverts: a "Known traps" entry in the area card, after reading the
      fix commits (`git show <hash>`) to state the trap in one line;

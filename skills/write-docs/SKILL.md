@@ -5,10 +5,10 @@ argument-hint: "[architecture | onboarding | changelog | readme | all]"
 disable-model-invocation: true
 ---
 
-Use the team-workflow skill to write documentation from the project memory: $ARGUMENTS
+Use the team skill to write documentation from the project memory: $ARGUMENTS
 
 1. Read `docs/memory` (INDEX, STATE, MAP, the area cards, DECISIONS, PLAYBOOKS, ACCESS). If it
-   is missing, offer `/team-workflow:setup-memory` first; if it looks outdated, have `doc-keeper` fix it
+   is missing, offer `/team:setup-memory` first; if it looks outdated, have `doc-keeper` fix it
    before writing anything from it.
 2. Agree what to write, where and in which language (AskUserQuestion; `ask_question` in agy):
    architecture overview (for example `docs/ARCHITECTURE.md`), onboarding or contributing guide,

@@ -15,7 +15,7 @@ import subprocess
 import sys
 import time
 
-NAME = "team-workflow"
+NAME = "team"
 REPO = "https://github.com/antoStr/team-workflow"
 AGY_DIR = os.path.join(os.path.expanduser("~"), ".gemini", "config", "plugins", NAME)
 PLUGIN = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".."))
@@ -93,17 +93,20 @@ def newer_version(max_age=86400):
 
 
 def claude_version(plugin_list):
-    """Version of team-workflow in the output of `claude plugin list`."""
-    m = re.search(rf"{NAME}@\S+\s+Version:\s*(\S+)", plugin_list)
+    """Version of team in the output of `claude plugin list`."""
+    m = re.search(rf"(?:{NAME}|team-workflow)@\S+\s+Version:\s*(\S+)", plugin_list)
     return m.group(1) if m else None
 
 
 def agy_version():
-    try:
-        with open(os.path.join(AGY_DIR, "plugin.json"), encoding="utf-8") as f:
-            return json.load(f).get("version", "older than 0.4.0")
-    except (OSError, ValueError):
-        return None
+    for dir_name in (NAME, "team-workflow"):
+        p = os.path.join(os.path.expanduser("~"), ".gemini", "config", "plugins", dir_name, "plugin.json")
+        try:
+            with open(p, encoding="utf-8") as f:
+                return json.load(f).get("version", "older than 0.4.0")
+        except (OSError, ValueError):
+            continue
+    return None
 
 
 def opencode_payload():
@@ -238,20 +241,16 @@ def agy_update(names=None):
                 if code2 == 0:
                     log.append(f"{name}: successfully updated via git")
                     if name == NAME:
-                        # Remove plugin skills/team to avoid duplicate /team-workflow:team
-                        safe_rmtree(os.path.join(folder, NAME, "skills", "team"))
-                        tw_skill = os.path.join(folder, NAME, "skills", NAME, "SKILL.md")
-                        if os.path.isfile(tw_skill):
-                            try:
-                                os.remove(tw_skill)
-                            except OSError:
-                                pass
                         top_team = os.path.join(os.path.expanduser("~"), ".gemini", "config", "skills", "team")
                         try:
-                            shutil.rmtree(top_team, ignore_errors=True)
+                            safe_rmtree(top_team)
                             shutil.copytree(os.path.join(folder, NAME, "skills", "team"), top_team)
                         except Exception:
                             pass
+                        # Clean up legacy team-workflow plugin if still present
+                        legacy_tw = os.path.join(folder, "team-workflow")
+                        if os.path.isdir(legacy_tw):
+                            safe_rmtree(legacy_tw)
                         script = os.path.join(folder, NAME, "skills", NAME, "scripts", "install_agy.py")
                         code_a, out_a = run(sys.executable, script, "--agents-only")
                         log.append(out_a if out_a else "agents refreshed")

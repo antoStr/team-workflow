@@ -7,7 +7,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/skills/team-workflow/scripts/session_start.py\"",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/skills/team/scripts/session_start.py\"",
             "timeout": 10
           }
         ]
@@ -18,7 +18,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/skills/team-workflow/scripts/stop_check.py\"",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/skills/team/scripts/stop_check.py\"",
             "timeout": 10
           }
         ]
@@ -29,7 +29,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/skills/team-workflow/scripts/prompt_command.py\"",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/skills/team/scripts/prompt_command.py\"",
             "timeout": 300
           }
         ]

@@ -27,7 +27,7 @@ from common import utf8_output
 HERE = os.path.dirname(os.path.abspath(__file__))
 SKILL = os.path.normpath(os.path.join(HERE, ".."))
 PLUGIN = os.path.normpath(os.path.join(SKILL, "..", ".."))
-NAME = "team-workflow"
+NAME = "team"
 
 
 def ours(dest):
@@ -68,31 +68,27 @@ def safe_rmtree(path):
 def build(dest):
     if os.path.exists(dest):
         if not ours(dest):
-            raise SystemExit(f"{dest} exists and is not a team-workflow plugin: not touching it")
+            raise SystemExit(f"{dest} exists and is not a {NAME} plugin: not touching it")
         safe_rmtree(dest)  # a previous build of this same plugin
     shutil.copytree(os.path.join(PLUGIN, "skills"), os.path.join(dest, "skills"),
                     ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
-    # In the plugin, remove skills/team so agy does NOT register duplicate /team-workflow:team
-    plugin_team = os.path.join(dest, "skills", "team")
-    if os.path.isdir(plugin_team):
-        shutil.rmtree(plugin_team, ignore_errors=True)
-    # Ensure team-workflow folder does not contain SKILL.md so it does not create duplicate slash command
-    tw_skill = os.path.join(dest, "skills", "team-workflow", "SKILL.md")
-    if os.path.isfile(tw_skill):
-        try:
-            os.remove(tw_skill)
-        except OSError:
-            pass
     # Install top-level /team skill directly into agy's global skills directory (~/.gemini/config/skills/team)
     top_team_dir = os.path.join(os.path.expanduser("~"), ".gemini", "config", "skills", "team")
     try:
-        shutil.rmtree(top_team_dir, ignore_errors=True)
+        safe_rmtree(top_team_dir)
         shutil.copytree(os.path.join(PLUGIN, "skills", "team"), top_team_dir)
     except Exception:
         pass
     shutil.copytree(os.path.join(PLUGIN, "rules"), os.path.join(dest, "rules"))
     for name in ("plugin.json", "hooks.json"):  # agy's manifest and hooks, kept at the repo root
         shutil.copy(os.path.join(PLUGIN, name), dest)
+    # Clean up legacy team-workflow plugin folder if present
+    try:
+        old_tw = os.path.join(os.path.expanduser("~"), ".gemini", "config", "plugins", "team-workflow")
+        if os.path.isdir(old_tw):
+            safe_rmtree(old_tw)
+    except Exception:
+        pass
 
 
 def main():

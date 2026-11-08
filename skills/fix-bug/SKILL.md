@@ -5,7 +5,7 @@ argument-hint: "<bug description or issue link>"
 disable-model-invocation: true
 ---
 
-Use the team-workflow skill to fix this bug: $ARGUMENTS
+Use the team skill to fix this bug: $ARGUMENTS
 
 1. `tester` reproduces the bug as a failing regression test (verdict `REPRODUCED`). If it
    cannot, report what was tried and ask the user for details.

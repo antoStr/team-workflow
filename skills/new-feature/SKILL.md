@@ -5,7 +5,7 @@ argument-hint: "<what to build>"
 disable-model-invocation: true
 ---
 
-Use the team-workflow skill to build this feature: $ARGUMENTS
+Use the team skill to build this feature: $ARGUMENTS
 
 1. Read the memory and the cards of the areas involved.
 2. Size the task. If it is structural, start with `architect` and let the user choose an

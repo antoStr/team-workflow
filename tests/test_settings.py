@@ -59,6 +59,9 @@ class NoModelCommandTest(ScriptTest):
     def test_only_our_commands_are_intercepted(self):
         self.assertEqual(prompt_command.tw_args("/team-workflow:settings set wizard full"),
                          ["settings", "set", "wizard", "full"])
+        self.assertEqual(prompt_command.tw_args("/team:settings set wizard full"),
+                         ["settings", "set", "wizard", "full"])
+        self.assertEqual(prompt_command.tw_args("  /team:update check"), ["update", "check"])
         self.assertEqual(prompt_command.tw_args("  /team-workflow:update-plugin check"),
                          ["update", "check"])
         for prompt in ("/team-workflow:setup-memory", "/team-workflow:settingsx",
@@ -118,7 +121,10 @@ class AgySubagentTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as dest:
             config = settings._merge(settings.DEFAULTS, {"models": {"agy": {"tester": "flash"}}})
             roles = install_agy.sync_agents(dest, config=config)
-            self.assertEqual(len(roles), len(glob.glob(os.path.join(REPO, "skills", "team-workflow", "roles", "core", "*.md"))))
+            roles_pattern = os.path.join(REPO, "skills", "team", "roles", "core", "*.md")
+            if not glob.glob(roles_pattern):
+                roles_pattern = os.path.join(REPO, "skills", "team-workflow", "roles", "core", "*.md")
+            self.assertEqual(len(roles), len(glob.glob(roles_pattern)))
             for path in glob.glob(os.path.join(dest, "*.md")):
                 with open(path, encoding="utf-8") as f:
                     head = f.read().split("---\n")[1]
@@ -154,10 +160,11 @@ class RepositoryTest(unittest.TestCase):
         self.assertEqual(claude, agy)
 
     def test_every_named_command_exists_with_its_name(self):
-        text = self.read("README.md") + self.read("skills/team-workflow/SKILL.md")
-        for name in set(re.findall(r"/team-workflow:([a-z-]+)", text)):
+        skill_file = "skills/team/SKILL.md" if os.path.isfile(os.path.join(REPO, "skills/team/SKILL.md")) else "skills/team-workflow/SKILL.md"
+        text = self.read("README.md") + self.read(skill_file)
+        for name in set(re.findall(r"/(?:team|team-workflow):([a-z-]+)", text)):
             path = os.path.join(REPO, "skills", name, "SKILL.md")
-            self.assertTrue(os.path.isfile(path), f"/team-workflow:{name} has no skill")
+            self.assertTrue(os.path.isfile(path), f"command {name} has no skill")
         for path in glob.glob(os.path.join(REPO, "skills", "*", "SKILL.md")):
             with open(path, encoding="utf-8") as f:
                 self.assertIn(f"\nname: {os.path.basename(os.path.dirname(path))}\n", f.read())

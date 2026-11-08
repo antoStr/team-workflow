@@ -204,6 +204,7 @@ def workflow_text(name, skill_md, scripts, python):
                 f'skill name>` from the repository root (`exec_command` with `sandbox_permissions="require_escalated"`{win}) '
                 "and show the user its output exactly as it is, in a code block. Add nothing else.\n")
     body = m.group(2).strip().replace("<team-workflow skill folder>",
+                                      install_opencode.posix(os.path.dirname(scripts))).replace("<team skill folder>",
                                       install_opencode.posix(os.path.dirname(scripts)))
     body = body.replace("$ARGUMENTS", "(what the user wrote after the skill name)")
     return head + install_opencode.with_python(body, python) + "\n"

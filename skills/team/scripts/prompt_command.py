@@ -18,7 +18,7 @@ COMMANDS = {"update-plugin": "update", "update": "update", "upgrade": "upgrade",
             "addons": "addons", "agents": "agents", "profile": "profile", "audit": "audit",
             "doctor": "doctor", "ci-init": "ci-init", "options": "options",
             "library": "library", "talk": "talk", "hardware": "hardware", "thermal": "thermal"}
-PATTERN = re.compile(r"\A\s*/(?:team-workflow:|team[:\s]+)(" + "|".join(COMMANDS) + r")(?![\w-])(.*)\Z", re.S)
+PATTERN = re.compile(r"\A\s*/(?:team:|team-workflow:|team[:\s-]+)(" + "|".join(COMMANDS) + r")(?![\w-])(.*)\Z", re.S)
 
 
 def tw_args(prompt):

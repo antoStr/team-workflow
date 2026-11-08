@@ -101,13 +101,15 @@ def checks(root=None):
         if not shutil.which(app):
             continue
         if version is None:
-            add("warn", app, "team-workflow is not installed in this app")
+            add("warn", app, f"{update_plugin.NAME} is not installed in this app")
         elif newer and version != newer:
-            add("warn", app, f"team-workflow {version} installed, {newer} available: tw.py update")
+            add("warn", app, f"{update_plugin.NAME} {version} installed, {newer} available: tw.py update")
         else:
-            add("ok", app, f"team-workflow {version}")
+            add("ok", app, f"{update_plugin.NAME} {version}")
 
-    agy_skills = os.path.join(os.path.expanduser("~"), ".gemini", "config", "plugins", "team-workflow", "skills")
+    agy_skills = os.path.join(os.path.expanduser("~"), ".gemini", "config", "plugins", "team", "skills")
+    if not os.path.isdir(agy_skills):
+        agy_skills = os.path.join(os.path.expanduser("~"), ".gemini", "config", "plugins", "team-workflow", "skills")
     if os.path.isdir(agy_skills):
         skills_count = len([s for s in os.listdir(agy_skills) if os.path.isdir(os.path.join(agy_skills, s))])
         add("ok", "agy skills", f"{skills_count} skills installed")

@@ -8,7 +8,7 @@ import tempfile
 import unittest
 
 SCRIPT = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                      "..", "skills", "team-workflow", "scripts", "run_worker.py")
+                      "..", "skills", "team", "scripts", "run_worker.py")
 
 FAKE = """#!/usr/bin/env python3
 import json, sys

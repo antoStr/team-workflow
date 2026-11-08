@@ -1,17 +1,17 @@
 {
-  "team-workflow": {
+  "team": {
     "PreInvocation": [
       {
         "type": "command",
         "timeout": 10,
-        "command": "python3 skills/team-workflow/scripts/session_start.py"
+        "command": "python skills/team/scripts/session_start.py"
       }
     ],
     "Stop": [
       {
         "type": "command",
         "timeout": 10,
-        "command": "python3 skills/team-workflow/scripts/stop_check.py"
+        "command": "python skills/team/scripts/stop_check.py"
       }
     ]
   }

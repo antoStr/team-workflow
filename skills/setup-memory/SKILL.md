@@ -5,10 +5,10 @@ argument-hint: "[notes about the project]"
 disable-model-invocation: true
 ---
 
-Use the team-workflow skill to set up the project memory of this repository.
+Use the team skill to set up the project memory of this repository.
 
 1. If `docs/memory/INDEX.md` already exists, say so, run memcheck and stop.
-2. Run `python3 <team-workflow skill folder>/scripts/init_memory.py --root <repository root>`.
+2. Run `python3 <team skill folder>/scripts/init_memory.py --root <repository root>`.
 3. Fill the memory from the real code, facts only:
    - `STATE.md`: version and the file that holds it, CI, known limits.
    - `PLAYBOOKS.md`: run the detected commands to confirm them; add the release steps.

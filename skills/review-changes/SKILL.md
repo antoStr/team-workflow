@@ -5,7 +5,7 @@ argument-hint: "[commit range, PR number or files; default: uncommitted and unpu
 disable-model-invocation: true
 ---
 
-Use the team-workflow skill to review: $ARGUMENTS
+Use the team skill to review: $ARGUMENTS
 (With no argument: the uncommitted changes and the commits not pushed yet.)
 
 1. Collect the diff and tell each reviewer exactly what it covers.

@@ -80,20 +80,23 @@ paths = []
 try:
     with open(os.path.join(home, ".claude", "plugins", "installed_plugins.json")) as f:
         data = json.load(f)
+    paths += [e["installPath"] for e in data.get("plugins", data).get("team@team", [])]
     paths += [e["installPath"] for e in data.get("plugins", data).get("team-workflow@team-workflow", [])]
 except (OSError, ValueError, KeyError, AttributeError):
     pass
+paths.append(os.path.join(home, ".gemini", "config", "plugins", "team"))
 paths.append(os.path.join(home, ".gemini", "config", "plugins", "team-workflow"))
 paths.append(os.path.join(home, ".config", "opencode"))  # skills/team-workflow lives there
 paths.append(os.environ.get("CODEX_HOME") or os.path.join(home, ".codex"))  # and here for Codex
 for p in paths:
-    tw = os.path.join(p, "skills", "team-workflow", "scripts", "tw.py")
-    if os.path.isfile(tw):
-        if sys.platform == "win32":
-            sys.exit(subprocess.call([sys.executable, tw, *sys.argv[1:]]))
-        else:
-            os.execv(sys.executable, [sys.executable, tw, *sys.argv[1:]])
-sys.exit("team-workflow: plugin not found in Claude Code, agy, OpenCode or Codex")
+    for sub in ("team", "team-workflow"):
+        tw = os.path.join(p, "skills", sub, "scripts", "tw.py")
+        if os.path.isfile(tw):
+            if sys.platform == "win32":
+                sys.exit(subprocess.call([sys.executable, tw, *sys.argv[1:]]))
+            else:
+                os.execv(sys.executable, [sys.executable, tw, *sys.argv[1:]])
+sys.exit("team: plugin not found in Claude Code, agy, OpenCode or Codex")
 '''
 
 

@@ -10,14 +10,13 @@
 - **Totale libreria**: **512 voci di libreria** (396 skill, 94 comandi, 22 set di regole).
 - **Totale agenti**: **130 specialisti** con catalogo e traduzioni bilingue sincronizzati.
 
-### 2. Comando Universale Semplificato `/team` e Pulizia Skill
-- Consolidamento architetturale (ADR-001): archiviate tutte le 24 skill granulari storiche della v1 in `archive/legacy-skills/`.
-- La cartella attiva `skills/` contiene esclusivamente **2 skill ufficiali**:
-  - `skills/team/` (`/team`): interfaccia universale per qualsiasi operazione, task e comando zero-token.
-  - `skills/team-workflow/` (`/team-workflow`): orchestratore, session wizard, grafo e ruoli.
-- Eliminato alla radice il problema dell'autocomplete intasato in Antigravity (`agy`), che scansiona le sottocartelle prive di namespace.
-- Router di fallback zero-token in `prompt_command.py` e in `tw.py` per gestire con compatibilità totale qualsiasi digitazione di vecchi comandi (`doctor`, `audit`, `settings`, `fix-bug`, ecc.).
-- Auto-clean e pruning automatico delle skill orfane implementato in `doctor.py --fix`, `install_agy.py` e `update_plugin.py`.
+### 2. Rinominazione Completa in `team` e Comandi `/team` & `/team:<comando>`
+- Il plugin è stato rinominato ufficialmente in `team` (in `plugin.json` e `.claude-plugin/plugin.json`).
+- Consolidamento: `skills/team-workflow` è stato unificato e fuso interamente in `skills/team/`, eliminando del tutto ogni riferimento e comando obsoleto con nome `team-workflow`.
+- Tutte le 24 skill specialistiche sono attive in `skills/` e namespaciate nativamente sotto `/team:<comando>` in Antigravity (`agy`), ad esempio `/team:doctor`, `/team:audit`, `/team:fix-bug`, `/team:settings`, `/team:update-plugin`.
+- Il comando universale `/team` è disponibile come skill di primo livello in `~/.gemini/config/skills/team/SKILL.md`.
+- Zero duplicati e zero comandi con prefisso `team-workflow` residui nell'autocompletamento di agy.
+- Router di fallback zero-token in `prompt_command.py` e in `tw.py` per gestire con compatibilità totale qualsiasi digitazione di comandi (`tw doctor`, `team doctor`, `/team doctor`, ecc.).
 
 ### 3. Live Execution & Smoke Test Gate (`tw.py smoke`) — Zero Fake-Solved
 - Creato `skills/team-workflow/scripts/smoke.py`: esegue il processo reale per un intervallo controllato (es. 5-10s) con monitoraggio di exit code, stderr e stabilità di boot.

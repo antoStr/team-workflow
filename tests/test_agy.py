@@ -60,16 +60,16 @@ class AgyPluginTest(unittest.TestCase):
             out = self.build(dest)
             self.assertEqual(out.returncode, 0, out.stderr)
             with open(os.path.join(dest, "plugin.json"), encoding="utf-8") as f:
-                self.assertEqual(json.load(f)["name"], "team-workflow")
+                self.assertEqual(json.load(f)["name"], "team")
             with open(os.path.join(dest, "hooks.json"), encoding="utf-8") as f:
-                self.assertEqual(sorted(json.load(f)["team-workflow"]), ["PreInvocation", "Stop"])
+                self.assertEqual(sorted(json.load(f)["team"]), ["PreInvocation", "Stop"])
             self.assertTrue(os.path.isfile(os.path.join(dest, "rules", "AGENTS.md")))
-            self.assertTrue(os.path.isfile(os.path.join(dest, "skills", "team-workflow", "roles", "core", "tester.md")))
+            self.assertTrue(os.path.isfile(os.path.join(dest, "skills", "team", "roles", "core", "tester.md")))
             skills = os.path.join(dest, "skills")
             self.assertIn("doctor", os.listdir(skills))
             self.assertIn("fix-bug", os.listdir(skills))
-            self.assertNotIn("team", os.listdir(skills))
-            self.assertFalse(os.path.isfile(os.path.join(skills, "team-workflow", "SKILL.md")))
+            self.assertIn("team", os.listdir(skills))
+            self.assertNotIn("team-workflow", os.listdir(skills))
             self.assertEqual(self.build(dest).returncode, 0)  # rebuilding replaces its own output
 
     def test_never_replaces_a_foreign_folder(self):
