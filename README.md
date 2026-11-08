@@ -174,12 +174,14 @@ Non c'è più bisogno di ricordare decine di comandi. Usa semplicemente `/team`:
 | **Aggiornare il plugin** | `/team upgrade` | Scarica e aggiorna l'ultima versione a **zero token** |
 | **Leggere la memoria** | `/team status` o `/team memory` | Mostra stato, grafi della conoscenza e vaccini attivi |
 
-I comandi dettagliati rimangono sempre disponibili per chi preferisce il controllo manuale:
-- `/team-workflow:start [compito]`
-- `/team-workflow:fix-bug <bug>`
-- `/team-workflow:review-changes`
-- `/team-workflow:call-team <ruoli>`
-- `/team-workflow:release [versione]`
+I comandi dettagliati e le utility a costo zero token sono integrati in `/team`:
+- `/team start [compito]` (o `/team fix-bug <bug>`)
+- `/team doctor` (healthcheck del plugin, harness e ruoli con auto-fix: `doctor --fix`)
+- `/team audit` (audit di sicurezza e conformità configurazioni)
+- `/team review-changes` (revisione approfondita del diff)
+- `/team call-team <ruoli>` (convocazione manuale di specifici specialisti)
+- `/team release [versione]` (gestione versionamento e rilascio)
+- `agy plugin update team-workflow` (aggiornamento trasparente da terminale Windows, macOS e Linux)
 
 ---
 

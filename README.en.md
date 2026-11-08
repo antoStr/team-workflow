@@ -174,12 +174,14 @@ Forget memorizing dozens of syntax variations. Simply use `/team`:
 | **Update plugin** | `/team upgrade` | Fast git pull and sync at **zero token cost** |
 | **Check memory** | `/team status` or `/team memory` | Displays active knowledge graph nodes and learned vaccines |
 
-Granular workflow commands remain available for advanced manual orchestration:
-- `/team-workflow:start [task]`
-- `/team-workflow:fix-bug <bug>`
-- `/team-workflow:review-changes`
-- `/team-workflow:call-team <roles>`
-- `/team-workflow:release [version]`
+Granular workflow commands and zero-token utilities are fully integrated into `/team`:
+- `/team start [task]` (or `/team fix-bug <bug>`)
+- `/team doctor` (health check for plugin, harnesses and agents with auto-repair: `doctor --fix`)
+- `/team audit` (security and configuration compliance audit)
+- `/team review-changes` (deep adversarial diff review)
+- `/team call-team <roles>` (explicitly invoke specific agents)
+- `/team release [version]` (semantic versioning and release automation)
+- `agy plugin update team-workflow` (frictionless update from Windows, macOS and Linux terminals)
 
 ---
 

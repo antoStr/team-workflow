@@ -269,17 +269,20 @@ agy plugin update team-workflow     # o `agy plugin update` per tutti i plugin, 
 python3 skills/team-workflow/scripts/install_agy.py --workspace /percorso/repo   # un solo progetto
 ```
 
-agy non ha `plugin update`: `install-cli` crea il comando `team-workflow` in `~/.local/bin` e
-aggiunge a `~/.zshrc` e `~/.bashrc` una funzione `agy` che gestisce solo `agy plugin update
-[nome...]` e passa ogni altro comando ad agy invariato (per toglierla, cancella il blocco
-`team-workflow` dal file; `install-cli --no-shell` non la aggiunge). L'aggiornamento vale per
-qualsiasi plugin: lo reinstalla dall'origine da cui agy l'aveva clonato, controlla prima che
-l'origine risponda e, se la reinstallazione fallisce, rimette la versione precedente.
+agy non ha `plugin update`: `install-cli` crea i comandi `team` e `team-workflow` in `~/.local/bin`.
+Su Windows genera automaticamente wrapper nativi `agy.cmd`, `agy.bat`, `team.cmd` e `team.bat`
+e registra `~/.local/bin` nel PATH dell'utente nel Registro (`HKCU\Environment\Path`), consentendo
+di eseguire `agy plugin update [nome...]` da qualsiasi terminale (PowerShell, CMD, Bash).
+Su Linux/macOS aggiunge a `~/.zshrc` e `~/.bashrc` una funzione shell trasparente.
+L'aggiornamento vale per qualsiasi plugin: lo reinstalla dall'origine da cui agy l'aveva clonato,
+controlla prima che l'origine risponda, ripulisce automaticamente eventuali skill orfane/legacy
+e, se la reinstallazione fallisce, rimette la versione precedente.
 
 Il repository e' anche un plugin agy (`plugin.json`, `hooks.json` e `rules/` nella radice, che
-Claude Code ignora). agy lo installa in `~/.gemini/config/plugins/team-workflow/` con le skill
-(`team-workflow` e un workflow per skill in `skills/<nome>/`: `setup-memory`, `call-team`,
-`new-feature`, ...), le regole che portano la memoria e gli hook nel formato di agy.
+Claude Code ignora). agy lo installa in `~/.gemini/config/plugins/team-workflow/` con le due skill
+ufficiali in `skills/` (`team` per l'interfaccia universale e `team-workflow` per il motore/ruoli),
+le regole che portano la memoria e gli hook nel formato di agy. I vecchi comandi v1 sono archiviati
+in `archive/legacy-skills/` e continuano a essere gestiti trasparentemente senza intasare i menu.
 
 agy non usa gli agenti di un plugin come sub-agenti: li prende da `~/.gemini/config/agents/`,
 nel suo formato (e scarta in silenzio un file con `model: sonnet` o con una descrizione senza
