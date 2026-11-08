@@ -359,17 +359,17 @@ class DashboardHandler(BaseHTTPRequestHandler):
                     if os.path.exists(fpath):
                         curr_mtime = max(curr_mtime, os.path.getmtime(fpath))
 
-                if curr_mtime > _status_cache["mtime"] or not _status_cache["data"].get("timestamp"):
+                if curr_mtime > _status_cache["mtime"] or not (_status_cache["data"].get("Timestamp") or _status_cache["data"].get("timestamp")):
                     data = {"status": "OK", "timestamp": "", "alerts": []}
                     if os.path.exists(STATUS_FILE):
                         try:
-                            with open(STATUS_FILE, "r", encoding="utf-8") as f:
+                            with open(STATUS_FILE, "r", encoding="utf-8-sig") as f:
                                 data = json.load(f)
                         except Exception:
                             pass
                     elif os.path.exists(THERMAL_FILE):
                         try:
-                            with open(THERMAL_FILE, "r", encoding="utf-8") as f:
+                            with open(THERMAL_FILE, "r", encoding="utf-8-sig") as f:
                                 th = json.load(f)
                                 data["status"] = th.get("Status", "OK")
                                 data["timestamp"] = th.get("Timestamp", "")
@@ -378,11 +378,17 @@ class DashboardHandler(BaseHTTPRequestHandler):
                         except Exception:
                             pass
 
+                    # Normalize keys
+                    if "Timestamp" in data and "timestamp" not in data:
+                        data["timestamp"] = data["Timestamp"]
+                    if "Status" in data and "status" not in data:
+                        data["status"] = data["Status"]
+
                     # Merge any alerts from either HARDWARE_ALERT or THERMAL_ALERT
                     for af in (ALERT_FILE, THERMAL_ALERT_FILE):
                         if os.path.exists(af):
                             try:
-                                with open(af, "r", encoding="utf-8") as f:
+                                with open(af, "r", encoding="utf-8-sig") as f:
                                     al = json.load(f)
                                     data["status"] = al.get("Severity", al.get("Status", "CRITICAL"))
                                     msgs = al.get("Messages", [f"Allerta da {os.path.basename(af)}"])
