@@ -1013,6 +1013,82 @@ def cmd_setup(_args):
     print("change one value: settings set KEY VALUE [--project] | settings reset KEY [--project]")
 
 
+def cmd_hardware(args):
+    root = repo_root() or os.getcwd()
+    mode_file = os.path.join(root, "hardware_mode.json")
+    status_file = os.path.join(root, "hardware_status.json")
+
+    if getattr(args, "home", False):
+        try:
+            with open(mode_file, "w", encoding="utf-8") as f:
+                json.dump({"mode": "home", "updated_at": time.strftime("%Y-%m-%dT%H:%M:%S%z")}, f, indent=2)
+            print("Modalita Presenza impostata su: A CASA")
+            print("  -> Allarmi sonori (Beep acustici) ATTIVI su temperature critiche CPU/GPU.")
+        except OSError as e:
+            print(f"Errore scrittura {mode_file}: {e}")
+
+    if getattr(args, "remote", False):
+        try:
+            with open(mode_file, "w", encoding="utf-8") as f:
+                json.dump({"mode": "remote", "updated_at": time.strftime("%Y-%m-%dT%H:%M:%S%z")}, f, indent=2)
+            print("Modalita Presenza impostata su: FUORI CASA / REMOTO")
+            print("  -> Modalita Silenziosa ATTIVA (Zero beep, allarmi instradati su dashboard remota e log).")
+        except OSError as e:
+            print(f"Errore scrittura {mode_file}: {e}")
+
+    if getattr(args, "start", False):
+        script = os.path.join(root, "tools", "hardware_guard.ps1")
+        if os.path.isfile(script):
+            flags = subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0
+            subprocess.Popen(["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", script],
+                             creationflags=flags)
+            print(f"Hardware Guard avviato in background da {script}")
+
+    data = {}
+    if os.path.isfile(status_file):
+        try:
+            with open(status_file, "r", encoding="utf-8-sig") as f:
+                data = json.load(f)
+        except Exception:
+            pass
+
+    if getattr(args, "json", False):
+        print(json.dumps(data, indent=2))
+        return
+
+    if not data:
+        print("Hardware Guard non ha ancora generato dati di telemetria.")
+        print("Avvialo con: `tw.py hardware --start`")
+        return
+
+    mode = str(data.get("Mode", "home")).upper()
+    silent = data.get("SilentMode", False)
+    status = data.get("Status", "OK")
+    cpu = data.get("CPU", {})
+    gpu = data.get("GPU", {})
+    ram = data.get("RAM", {})
+    disks = data.get("Disks", {})
+    alerts = data.get("Alerts", [])
+
+    status_icon = "OK" if status == "OK" else ("WARNING" if status == "WARNING" else "CRITICAL")
+    mode_desc = f"{mode} (Silenzioso: {silent})"
+
+    print(f"Hardware & Thermal Telemetry [{status_icon}]")
+    print(f"  Modalita Presenza: {mode_desc}")
+    print(f"  CPU Temp: {cpu.get('Temp_C', '?')} C (Carico: {cpu.get('LoadPercent', '?')}%, Max: {cpu.get('Max_Temp_C', '?')} C)")
+    if gpu:
+        print(f"  GPU Temp: {gpu.get('Temp_C', '?')} C ({gpu.get('Name', 'GPU')}, Max: {gpu.get('Max_Temp_C', '?')} C)")
+    print(f"  RAM: {ram.get('PercentUsed', '?')}% ({ram.get('UsedGB', '?')} GB / {ram.get('TotalGB', '?')} GB)")
+    print(f"  Disco {disks.get('Drive', 'C')}: {disks.get('PercentUsed', '?')}% in uso ({disks.get('FreeGB', '?')} GB liberi)")
+    if alerts:
+        print(f"  Allerte attive ({len(alerts)}):")
+        for a in alerts:
+            print(f"    - {a}")
+    else:
+        print("  Allerte attive: Nessuna allerta.")
+    print("  Dashboard remota: https://payments-baghdad-oakland-dsc.trycloudflare.com (locale: http://127.0.0.1:8080)")
+
+
 def main(argv=None):
     utf8_output()
     ap = argparse.ArgumentParser(prog="team-workflow", description=__doc__.split("\n")[0])
@@ -1131,6 +1207,16 @@ def main(argv=None):
     sm.add_argument("--wsl", action="store_true", help="execute smoke test inside WSL (Linux)")
     sm.add_argument("--strict", action="store_true", help="exit 1 if test fails")
     sm.add_argument("--json", action="store_true")
+    hw = sub.add_parser("hardware", help="hardware, thermal telemetry & presence mode (home/remote)")
+    hw.add_argument("--home", action="store_true", help="presence: HOME (enable acoustic beeps on critical overheating)")
+    hw.add_argument("--remote", action="store_true", help="presence: REMOTE (silent mode, telemetry to dashboard & log)")
+    hw.add_argument("--start", action="store_true", help="start hardware guard daemon if not running")
+    hw.add_argument("--json", action="store_true", help="output status in JSON format")
+    th = sub.add_parser("thermal", help="alias for hardware: temperature & thermal guard")
+    th.add_argument("--home", action="store_true", help="presence: HOME")
+    th.add_argument("--remote", action="store_true", help="presence: REMOTE")
+    th.add_argument("--start", action="store_true", help="start hardware guard daemon")
+    th.add_argument("--json", action="store_true", help="output status in JSON format")
     args, extra = ap.parse_known_args(argv)
     if extra:
         if args.command == "talk" and not any(a.startswith("-") for a in extra):
@@ -1163,7 +1249,8 @@ def main(argv=None):
          "agy-update": cmd_agy_update, "install-opencode": cmd_install_opencode,
          "install-codex": cmd_install_codex,
          "options": cmd_options, "setup": cmd_setup, "library": cmd_library,
-         "talk": cmd_talk, "brain": cmd_brain, "gate": cmd_gate, "smoke": cmd_smoke}[args.command](args)
+         "talk": cmd_talk, "brain": cmd_brain, "gate": cmd_gate, "smoke": cmd_smoke,
+         "hardware": cmd_hardware, "thermal": cmd_hardware}[args.command](args)
 
 
 if __name__ == "__main__":

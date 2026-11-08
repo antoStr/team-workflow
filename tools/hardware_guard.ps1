@@ -178,6 +178,25 @@ while ($true) {
         $alerts += "RAM Elevata: $($mem.PercentUsed)% utilizzata"
     }
 
+    $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+
+    # Dynamic Presence Mode Detection (Home vs Remote)
+    $modeFile = "hardware_mode.json"
+    $effectiveSilent = [bool]$Silent
+    $currentMode = if ($Silent) { "remote" } else { "home" }
+    if (Test-Path $modeFile) {
+        try {
+            $mJson = Get-Content -Raw $modeFile -ErrorAction SilentlyContinue | ConvertFrom-Json
+            if ($mJson.mode -eq "home") {
+                $effectiveSilent = $false
+                $currentMode = "home"
+            } elseif ($mJson.mode -eq "remote") {
+                $effectiveSilent = $true
+                $currentMode = "remote"
+            }
+        } catch {}
+    }
+
     # Verifica se è necessario scrivere su disco (riduzione usura SSD / delta threshold)
     $shouldWrite = ($status -ne $lastStatus) -or ($alerts.Count -gt 0) -or `
                    (($now - $lastWriteTime).TotalSeconds -ge 10) -or `
@@ -188,6 +207,8 @@ while ($true) {
         $systemState = [PSCustomObject]@{
             Timestamp = $now.ToString("yyyy-MM-dd HH:mm:ss")
             Status = $status
+            Mode = $currentMode
+            SilentMode = $effectiveSilent
             Alerts = $alerts
             CPU = [PSCustomObject]@{
                 Temp_C = $cpuTemp
@@ -211,15 +232,15 @@ while ($true) {
             } else { $null }
             RAM = $mem
             Disks = $disks
-            SilentMode = [bool]$Silent
         }
 
-        $systemState | ConvertTo-Json -Depth 5 | Set-Content -Path $StatusFile -Encoding UTF8
+        [System.IO.File]::WriteAllText((Join-Path (Get-Location) $StatusFile), ($systemState | ConvertTo-Json -Depth 5), $utf8NoBom)
 
         # Salva thermal_status.json retrocompatibile
         $legacyThermal = [PSCustomObject]@{
             Timestamp = $now.ToString("yyyy-MM-dd HH:mm:ss")
             Status = $status
+            Mode = $currentMode
             CPU_Temp_C = $cpuTemp
             GPU_Temp_C = $gpuTemp
             Max_CPU_C = $maxCpu
@@ -227,7 +248,7 @@ while ($true) {
             WarnThreshold_C = $WarnTempCpu
             CritThreshold_C = $CritTempCpu
         }
-        $legacyThermal | ConvertTo-Json | Set-Content -Path $ThermalStatusFile -Encoding UTF8
+        [System.IO.File]::WriteAllText((Join-Path (Get-Location) $ThermalStatusFile), ($legacyThermal | ConvertTo-Json), $utf8NoBom)
 
         $lastWriteTime = $now
         $lastCpuTemp = $cpuTemp
@@ -240,16 +261,17 @@ while ($true) {
         $alertObj = [PSCustomObject]@{
             Timestamp = $now.ToString("yyyy-MM-dd HH:mm:ss")
             Severity = $status
+            Mode = $currentMode
             Messages = $alerts
             State = $systemState
         }
-        $alertObj | ConvertTo-Json -Depth 5 | Set-Content -Path $AlertFile -Encoding UTF8
+        [System.IO.File]::WriteAllText((Join-Path (Get-Location) $AlertFile), ($alertObj | ConvertTo-Json -Depth 5), $utf8NoBom)
 
         Rotate-LogFile -path $LogFile -maxBytes 5MB
-        "[$($now.ToString('s'))] [$status] $($alerts -join ' | ')" | Add-Content -Path $LogFile -Encoding UTF8
+        "[$($now.ToString('s'))] [$status] [$currentMode] $($alerts -join ' | ')" | Add-Content -Path $LogFile -Encoding UTF8
 
-        if (-not $Silent) {
-            try { [console]::Beep(1500, 300) } catch {}
+        if (-not $effectiveSilent) {
+            try { [console]::Beep(1800, 350) } catch {}
         }
     } else {
         if (Test-Path $AlertFile) {

@@ -68,7 +68,16 @@ Se il compito tocca GitHub (`issue`, `pr`, `review`, `ci`, `release`):
 - **CI/CD Debugging**: se un workflow GitHub Actions fallisce, scarica i log con `gh run view --log-failed` e delega a `build-fixer`.
 - **Release Management**: `release-manager` cura versioning semantico, changelog, tag e pubblicazione via `gh release create`.
 
-### 6. Report Finale
+### 6. Hardware & Thermal Guard (A Casa vs Fuori Casa / Remoto)
+Monitoraggio hardware e termico continuo a **zero token** per prevenire surriscaldamenti e monitorare lo stato dell'host:
+- **Controllo stato istantaneo**:
+  `python skills/team-workflow/scripts/tw.py hardware` (oppure `team hardware` da terminale).
+- **Se l'utente è A CASA** (`tw.py hardware --home`):
+  Modalita allarme sonoro ATTIVA: se la CPU o la GPU superano le soglie critiche (CPU > 85°C, GPU > 80°C) viene emesso un segnale acustico immediato per allertare l'utente alla scrivania.
+- **Se l'utente è FUORI CASA / REMOTO** (`tw.py hardware --remote`):
+  Modalita silenziosa ATTIVA: zero suoni o beep, telemetria e alert indirizzati automaticamente alla dashboard web remota via Cloudflare Tunnel per consultazione da smartphone: `https://payments-baghdad-oakland-dsc.trycloudflare.com`.
+
+### 7. Report Finale
 Mostra all'utente solo l'essenziale:
 - **Cosa è stato fatto** (in modo chiaro e conciso, nella lingua dell'utente).
 - **La prova di esecuzione reale** (output dello smoke test / tempo di esecuzione senza crash).

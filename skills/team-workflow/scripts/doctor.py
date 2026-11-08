@@ -158,6 +158,22 @@ def checks(root=None):
     serious = [f for f in findings if f["severity"] in ("critical", "high")]
     add("fail" if serious else "warn" if findings else "ok", "audit",
         f"{len(findings)} findings, {len(serious)} critical or high, in {scanned} files (tw.py audit)")
+
+    hw_file = os.path.join(root or os.getcwd(), "hardware_status.json")
+    if os.path.isfile(hw_file):
+        try:
+            with open(hw_file, "r", encoding="utf-8-sig") as f:
+                hw = json.load(f)
+            hw_status = hw.get("Status", "OK")
+            cpu = hw.get("CPU", {}).get("Temp_C", "?")
+            gpu = hw.get("GPU", {}).get("Temp_C", "?") if hw.get("GPU") else None
+            mode = hw.get("Mode", "home")
+            gpu_str = f", GPU {gpu}°C" if gpu else ""
+            add("fail" if hw_status == "CRITICAL" else ("warn" if hw_status == "WARNING" else "ok"),
+                "hardware & thermal",
+                f"Status: {hw_status} (CPU {cpu}°C{gpu_str}, Mode: {mode})")
+        except Exception:
+            pass
     return out
 
 

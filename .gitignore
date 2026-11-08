@@ -7,5 +7,6 @@ thermal_status.json
 hardware_status.json
 THERMAL_ALERT.json
 HARDWARE_ALERT.json
+hardware_mode.json
 tools/cloudflared.exe
 
