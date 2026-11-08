@@ -670,16 +670,15 @@ def cmd_install_cli(args):
 
     if sys.platform == "win32":
         cmd_content = '@echo off\r\npython "%~dp0team-workflow" %*\r\n'
-        with open(path + ".cmd", "w", encoding="utf-8") as f:
-            f.write(cmd_content)
-        with open(team_path + ".cmd", "w", encoding="utf-8") as f:
-            f.write(cmd_content)
-
-        ps1_content = '& python (Join-Path $PSScriptRoot "team-workflow") @args\r\n'
-        with open(path + ".ps1", "w", encoding="utf-8") as f:
-            f.write(ps1_content)
-        with open(team_path + ".ps1", "w", encoding="utf-8") as f:
-            f.write(ps1_content)
+        for base in (path, team_path):
+            with open(base + ".cmd", "w", encoding="utf-8") as f:
+                f.write(cmd_content)
+            with open(base + ".bat", "w", encoding="utf-8") as f:
+                f.write(cmd_content)
+            try:
+                os.remove(base + ".ps1")
+            except OSError:
+                pass
 
     print(f"written {path} and {team_path}: run `team update`, `team-workflow update`, `team-workflow settings`...")
     if bin_dir not in os.environ.get("PATH", "").split(os.pathsep):
