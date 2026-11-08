@@ -31,12 +31,22 @@ def run(*cmd, timeout=180):
 
 
 def vkey(v):
-    return tuple(int(x) for x in v.split("."))
+    if not v:
+        return (0, 0, 0, (0, ""))
+    m = re.match(r"^(\d+)(?:\.(\d+))?(?:\.(\d+))?(?:-([a-zA-Z0-9.]+))?", v)
+    if not m:
+        return (0, 0, 0, (0, ""))
+    major = int(m.group(1) or 0)
+    minor = int(m.group(2) or 0)
+    patch = int(m.group(3) or 0)
+    pre = m.group(4)
+    pre_score = (1, "") if not pre else (0, pre)
+    return (major, minor, patch, pre_score)
 
 
 def latest_tag(ls_remote):
-    """Highest X.Y.Z among the vX.Y.Z tags printed by `git ls-remote --tags`."""
-    tags = re.findall(r"refs/tags/v(\d+\.\d+\.\d+)$", ls_remote, re.M)
+    """Highest SemVer among the vX.Y.Z tags printed by `git ls-remote --tags`."""
+    tags = re.findall(r"refs/tags/v(\d+\.\d+\.\d+(?:-[a-zA-Z0-9.]+)?)$", ls_remote, re.M)
     return max(tags, key=vkey) if tags else None
 
 
@@ -247,7 +257,7 @@ def main(argv=None):
         if before is None:
             print(f"{harness}: not installed")
             continue
-        current = latest and re.fullmatch(r"\d+\.\d+\.\d+", before) and vkey(before) >= vkey(latest)
+        current = bool(latest and before and vkey(before) >= vkey(latest))
         print(f"{harness}: {before}" + (" (up to date)" if current else ""))
         if args.check or current:
             continue

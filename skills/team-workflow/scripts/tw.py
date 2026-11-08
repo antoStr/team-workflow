@@ -74,7 +74,7 @@ from usage import load_pricing
 EFFORTS = ("low", "medium", "high", "xhigh", "max")
 LAUNCHER = '''#!/usr/bin/env python3
 """team-workflow launcher: runs tw.py from the installed plugin (Claude Code, agy, OpenCode, Codex)."""
-import json, os, sys
+import json, os, subprocess, sys
 home = os.path.expanduser("~")
 paths = []
 try:
@@ -89,7 +89,10 @@ paths.append(os.environ.get("CODEX_HOME") or os.path.join(home, ".codex"))  # an
 for p in paths:
     tw = os.path.join(p, "skills", "team-workflow", "scripts", "tw.py")
     if os.path.isfile(tw):
-        os.execv(sys.executable, [sys.executable, tw, *sys.argv[1:]])
+        if sys.platform == "win32":
+            sys.exit(subprocess.call([sys.executable, tw, *sys.argv[1:]]))
+        else:
+            os.execv(sys.executable, [sys.executable, tw, *sys.argv[1:]])
 sys.exit("team-workflow: plugin not found in Claude Code, agy, OpenCode or Codex")
 '''
 
@@ -654,14 +657,33 @@ def add_shell_hook(rc):
 
 
 def cmd_install_cli(args):
-    path = os.path.join(os.path.expanduser("~"), ".local", "bin", "team-workflow")
-    os.makedirs(os.path.dirname(path), exist_ok=True)
+    bin_dir = os.path.join(os.path.expanduser("~"), ".local", "bin")
+    os.makedirs(bin_dir, exist_ok=True)
+    path = os.path.join(bin_dir, "team-workflow")
+    team_path = os.path.join(bin_dir, "team")
     with open(path, "w", encoding="utf-8") as f:
         f.write(LAUNCHER)
     os.chmod(path, 0o755)
-    print(f"written {path}: run `team-workflow update`, `team-workflow settings`...")
-    if os.path.dirname(path) not in os.environ.get("PATH", "").split(os.pathsep):
-        print(f"{os.path.dirname(path)} is not in PATH: add it to your shell profile")
+    with open(team_path, "w", encoding="utf-8") as f:
+        f.write(LAUNCHER)
+    os.chmod(team_path, 0o755)
+
+    if sys.platform == "win32":
+        cmd_content = '@echo off\r\npython "%~dp0team-workflow" %*\r\n'
+        with open(path + ".cmd", "w", encoding="utf-8") as f:
+            f.write(cmd_content)
+        with open(team_path + ".cmd", "w", encoding="utf-8") as f:
+            f.write(cmd_content)
+
+        ps1_content = '& python (Join-Path $PSScriptRoot "team-workflow") @args\r\n'
+        with open(path + ".ps1", "w", encoding="utf-8") as f:
+            f.write(ps1_content)
+        with open(team_path + ".ps1", "w", encoding="utf-8") as f:
+            f.write(ps1_content)
+
+    print(f"written {path} and {team_path}: run `team update`, `team-workflow update`, `team-workflow settings`...")
+    if bin_dir not in os.environ.get("PATH", "").split(os.pathsep):
+        print(f"{bin_dir} is not in PATH: add it to your shell profile")
     if getattr(args, "no_shell", False):
         return
     for rc in (".zshrc", ".bashrc"):

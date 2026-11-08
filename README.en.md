@@ -7,7 +7,7 @@
 **An autonomous team of specialist AI agents inside your coding assistant.**<br>
 Persistent Brain Graph Memory · "Zero Fake-Solved" Live Runtime Verification · Auto-learning & Preventive Vaccines · Adversarial Shared Channel · Transparent End-of-Task Report.
 
-[![Release](https://img.shields.io/badge/release-v2.0.0--alpha.2%20(pre--release)-2ea44f)](https://github.com/antoStr/team-workflow/releases)
+[![Release](https://img.shields.io/badge/release-v2.0.0-2ea44f)](https://github.com/antoStr/team-workflow/releases)
 [![Tests](https://github.com/antoStr/team-workflow/actions/workflows/tests.yml/badge.svg)](https://github.com/antoStr/team-workflow/actions/workflows/tests.yml)
 [![License: MIT](https://img.shields.io/github/license/antoStr/team-workflow?label=license)](LICENSE)
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-supported-d97757)
@@ -346,5 +346,5 @@ No. It only touches files directly relevant to your assigned task. All other pro
 Distributed under the **MIT License** (see [LICENSE](LICENSE)). Imported third-party resources retain their original licenses ([NOTICE](skills/team-workflow/library/NOTICE.md)).
 
 <div align="center">
-<sub>Built with precision for software engineers and AI-augmented teams · <b>team-workflow v2.0.0-alpha.2</b></sub>
+<sub>Built with precision for software engineers and AI-augmented teams · <b>team-workflow v2.0.0</b></sub>
 </div>
