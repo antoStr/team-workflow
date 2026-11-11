@@ -5,13 +5,13 @@ layer: tests
 tags: [code, py]
 aliases: [tests/test_autolearn_gate_smoke.py, test_autolearn_gate_smoke.py]
 upstream:
-  - "[[skills-team-workflow-scripts-autolearn]]"
-  - "[[skills-team-workflow-scripts-gate]]"
-  - "[[skills-team-workflow-scripts-smoke]]"
+  - "[[skills-team-scripts-autolearn]]"
+  - "[[skills-team-scripts-gate]]"
+  - "[[skills-team-scripts-smoke]]"
 downstream:
 files: [tests/test_autolearn_gate_smoke.py]
 status: active
-last_updated: 2026-11-08T16:54:25
+last_updated: 2026-11-11T22:06:53
 ---
 
 # test_autolearn_gate_smoke.py
@@ -27,9 +27,8 @@ Tests for autolearn, adversarial gate, and smoke live execution verification.
 
 ## Dependencies
 ### Upstream
-- [[skills-team-workflow-scripts-autolearn]]
-- [[skills-team-workflow-scripts-gate]]
-- [[skills-team-workflow-scripts-smoke]]
-- None
+- [[skills-team-scripts-autolearn]]
+- [[skills-team-scripts-gate]]
+- [[skills-team-scripts-smoke]]
 ### Downstream
 - None

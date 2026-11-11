@@ -5,13 +5,13 @@ layer: tests
 tags: [code, py]
 aliases: [tests/test_dashboard.py, test_dashboard.py]
 upstream:
-  - "[[skills-team-workflow-scripts-dashboard]]"
-  - "[[skills-team-workflow-scripts-usage]]"
+  - "[[skills-team-scripts-dashboard]]"
+  - "[[skills-team-scripts-usage]]"
   - "[[tests-isolate_home]]"
 downstream:
 files: [tests/test_dashboard.py]
 status: active
-last_updated: 2026-11-08T16:54:25
+last_updated: 2026-11-11T22:06:53
 ---
 
 # test_dashboard.py
@@ -25,9 +25,8 @@ Offline tests for dashboard.py on a fake Claude Code history and worker ledger.
 
 ## Dependencies
 ### Upstream
-- [[skills-team-workflow-scripts-dashboard]]
-- [[skills-team-workflow-scripts-usage]]
+- [[skills-team-scripts-dashboard]]
+- [[skills-team-scripts-usage]]
 - [[tests-isolate_home]]
-- None
 ### Downstream
 - None

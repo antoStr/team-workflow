@@ -1,55 +1,83 @@
 # Stato del Progetto
 
-## Versione Corrente: v2.1.3 (Release Ufficiale)
+## Versione Corrente: v2.3.0 (Release Ufficiale)
 
-### 1. Suite Malware Analysis & URL Threat Intelligence
-- **43 nuove skill specializzate di sicurezza avanzata**:
-  - `malware-analysis` (35 skill): triage binari (PE, ELF), payload deobfuscation, memory forensics, C2 protocol decoding, YARA e Sigma rule development, STIX 2.1 threat reporting, MITRE ATT&CK mapping, e tassonomie per APT, botnet, ransomware, wiper, rootkit, infostealer, RAT, macro/document payload e fileless memory malware.
-  - `threat-intel-url` (8 skill): scansione e audit interattivo con URLScan.io API, analisi header email phishing (SPF, DKIM, DMARC), certificate transparency log hunting, C2 domain fronting detection, adversary infrastructure tracking, Zeek network analysis, TShark packet extraction e HTTP request proxy audit.
-- **Nuovo ruolo specialista**: `malware-analyst` (`skills/team/roles/quality/malware-analyst.md`).
-- **Totale libreria**: **512 voci di libreria** (396 skill, 94 comandi, 22 set di regole).
-- **Totale agenti**: **130 specialisti** con catalogo e traduzioni bilingue sincronizzati.
+### 1. Nuove Funzionalità Core (v2.3.0)
+- **Preview Server Manager (`tw.py preview`)**:
+  - Avvio (`tw.py preview start`), monitoraggio (`tw.py preview status`) e arresto (`tw.py preview stop`) dei dev server di progetto.
+  - Rilevamento automatico dello stack: static HTML (`python -m http.server`), Node/Vite/Next.js (`npm run dev`), Django (`manage.py runserver`).
+  - Ricerca automatica di porte libere (a partire da 8080) e gestione trasparente dei processi daemon con memorizzazione di PID, porta e timestamp.
+- **Patch-Bridge Atomico (`tw.py patch`)**:
+  - Applicazione atomica di diff unificati standard (`git diff`, `diff -u` o blocchi markdown ` ```diff `) con parsing sicuro di hunk e validazione preventiva (`--dry-run`).
+  - Consente ai subagent esecutivi di proporre modifiche multi-file senza rischiare corruzioni parziali o conflitti di IO.
+- **Component Scaffolding CLI (`tw.py component`)**:
+  - Comando CLI `tw.py component list` e `tw.py component add <name>` per generare e iniettare istantaneamente componenti moderni e accessibili:
+    `cmdk`, `sonner`, `number-flow`, `vaul`, `spotlight`, `marquee`, `dot-grid`.
+- **Auditor Responsive & Visivo (`tw.py visual-check`)**:
+  - Controllo automatico di conformità mobile e responsive: presenza del meta tag viewport, assenza di larghezze fisse rischiose per overflow orizzontale (`width > 500px` senza max-width), presenza di `@media (prefers-reduced-motion)` e gerarchia corretta degli heading (`<h1>`).
+- **Chiusura Rapida Canali Team Talk (`tw.py talk close`)**:
+  - Comando one-shot `tw.py talk close <topic> [--summary "..."]` che auto-risolve tutti i thread pendenti e registra una decisione finale di chiusura nel log JSONL del canale.
 
-### 2. Rinominazione Completa in `team` e Comandi `/team` & `/team:<comando>`
-- Il plugin è stato rinominato ufficialmente in `team` (in `plugin.json` e `.claude-plugin/plugin.json`).
-- Consolidamento: `skills/team-workflow` è stato unificato e fuso interamente in `skills/team/`, eliminando del tutto ogni riferimento e comando obsoleto con nome `team-workflow`.
-- Tutte le 24 skill specialistiche sono attive in `skills/` e namespaciate nativamente sotto `/team:<comando>` in Antigravity (`agy`), ad esempio `/team:doctor`, `/team:audit`, `/team:fix-bug`, `/team:settings`, `/team:update-plugin`.
-- Il comando universale `/team` è disponibile come skill di primo livello in `~/.gemini/config/skills/team/SKILL.md`.
-- Zero duplicati e zero comandi con prefisso `team-workflow` residui nell'autocompletamento di agy.
-- Router di fallback zero-token in `prompt_command.py` e in `tw.py` per gestire con compatibilità totale qualsiasi digitazione di comandi (`tw doctor`, `team doctor`, `/team doctor`, ecc.).
+### 2. Suite Componenti Frontend Avanzata (`frontend-components`)
+- **13 nuove skill specializzate per ingegneria frontend e design engineering**:
+  - `pick-ui-library`: Motore di selezione e matrice decisionale (ispirato ad Emil Kowalski). Ispeziona `package.json`, previene l'anti-pattern di reinventare primitive accessibili da zero e seleziona la libreria migliore per ogni categoria.
+  - `shadcn-ui`: Architettura completa shadcn/ui (CLI, `components.json`, utility `cn()`, variabili CSS HSL/OKLCH, validazione form React Hook Form + Zod e registri remoti).
+  - `base-ui`: Primitive accessibili headless sviluppate dal team MUI, rendering DOM pulito senza wrapper inutili, transizioni CSS native con `@starting-style` e integrazione Tailwind.
+  - `radix-ui`: Primitives accessibili WAI-ARIA (`@radix-ui/react-*`), navigazione da tastiera, focus trap, Slot API e pattern di composizione `asChild`.
+  - `sonner-toast`: Sistema di notifiche Sonner di Emil Kowalski (toast basati su promise, schede impilate con swipe dismiss, rich colors, custom styling e pulsanti d'azione).
+  - `vaul-drawer`: Componente drawer e bottom sheet di Emil Kowalski con fisica dei gesti (trascinamento a molla, snap point multipli, drawer annidati e background scale iOS).
+  - `cmdk-palette`: Command menu palette (⌘K) di Paco Coursey con ricerca fuzzy rapida, navigazione da tastiera, sotto-pagine e dialog overlay.
+  - `number-flow`: Componente di Max Barvian per transizioni continue e contatori animati con rolling digits, formattazione valute/percentuali `Intl` e prevenzione di layout shift.
+  - `beautiful-ui`: Pattern estetici moderni (glassmorphism, griglie bento responsive, input con bordi luminosi, micro-ombre e contrasto WCAG).
+  - `rare-ui`: Micro-animazioni interattive uniche (pulsanti magnetici con fisica del cursore, schede con tilt 3D interattivo, griglie spotlight con mouse tracker radiale).
+  - `magic-ui`: Libreria di effetti visivi per design engineer (Bento grid, Animated Beam, Marquee continuo, particelle, Border Beam e Shimmer button via registry shadcn).
+  - `aceternity-ui`: Effetti dinamici di Manu Arora (3D cards, Sparkles canvas, Lamp hero section, Tracing Beam, Aurora background e Floating Dock macOS).
+  - `registry-21st-dev`: Architettura e marketplace dei componenti 21st.dev ("The npm for Design Engineers"), con consumo e pubblicazione diretta via CLI shadcn.
+- **Nuovo ruolo specialista**: `design-engineer` (`skills/team/roles/frameworks/design-engineer.md`).
+- **Include condiviso aggiornato**: `skills/team/roles/_shared/frontend-skills.md` sincronizzato con tutte le nuove skill.
+- **Totale libreria**: **525 voci di libreria** (409 skill, 94 comandi, 22 set di regole) in 31 pack.
+- **Totale agenti**: **131 specialisti** con catalogo e traduzioni bilingue sincronizzati.
 
-### 3. Live Execution & Smoke Test Gate (`tw.py smoke`) — Zero Fake-Solved
-- Creato `skills/team/scripts/smoke.py`: esegue il processo reale per un intervallo controllato (es. 5-10s) con monitoraggio di exit code, stderr e stabilità di boot.
-- Regola ferrea "Zero Fake-Solved" codificata in `rules/AGENTS.md`: nessun bug o funzione su app/giochi/UI può essere dichiarata risolta senza prova empirica di avvio reale.
+### 3. Zero-Ghosting per Domande Intercalate ("writing-in-between")
+- Codificata la regola tassativa in `rules/AGENTS.md` e `skills/team/SKILL.md`:
+  Qualora l'utente inserisca considerazioni, dubbi, perplessità o domande intercalate nel testo della richiesta ("writing-in-between"), l'orchestratore e tutti gli agenti DEVONO prima identificare ciascuna domanda e rispondere esaurientemente all'inizio della risposta prima o contestualmente all'avvio dei task operativi.
+- È severamente vietato ignorare le domande dell'utente per eseguire solo il comando primario.
 
-### 4. Continuous Auto-Learning & Vaccini Preventivi (`tw.py learn`)
-- Creato `skills/team/scripts/autolearn.py` collegato a `docs/brain/learnings/`.
-- Registra gli anti-pattern identificati e inietta automaticamente "vaccini comportamentali" mirati nei prompt degli agenti a ogni avvio sessione (`session_start.py`).
+### 4. Scelta Dinamica e Catalogo Flessibile degli Agenti (Superamento Limite 4 Scelte)
+- Abolito il vincolo rigido a 4 scelte e superata l'imposizione dei preset prefissati (`solo`, `duo`, `trio`).
+- Aggiunta azione CLI `tw.py agents catalog` per consultare l'intero catalogo di 131 agenti specializzati suddivisi per pack funzionale.
+- Rispettato alla lettera il numero e i ruoli esatti richiesti dall'utente con massima precisione (es. "voglio 3 agenti: frontend-dev, tester, pentester").
+- Supporto alla riconfigurazione dinamica in qualsiasi momento: l'utente può aggiungere, rimuovere o sostituire agenti durante il workflow.
 
-### 5. Adversarial Gating Protocol (Builder ⚔️ Breaker)
-- Creato `skills/team/scripts/gate.py`: separa categoricamente chi scrive il codice da chi lo valida, richiedendo controprove prima del merge.
+### 5. Repository Scan & Stack Profiler (`tw.py scan`)
+- Creato `skills/team/scripts/scan.py` e integrato come comando `tw.py scan`:
+  - Rileva branch git, stato del working tree e ultimo commit.
+  - Rileva linguaggi e framework (Next.js, React, Vue, Tailwind, Python, pytest, Rust, Go, .NET).
+  - Rileva stack UI moderno in `package.json` (shadcn, radix, base-ui, sonner, vaul, cmdk, number-flow, framer-motion, lucide).
+  - Ottimizzazione cross-platform Windows / WSL con gestione timeout per filesystem bridge `/mnt/c`.
+  - Verifica la presenza e la salute della documentazione di progetto (`INDEX.md`, `STATE.md`, Brain vault, vaccini attivi).
+  - Obbligatorio all'avvio di ogni chiamata `/team`.
 
-### 6. Cybersecurity & Binary Reverse Engineering Ingestion
-- **Strix Autonomous Pentesting** (`usestrix/strix`): 42 playbook di vulnerabilità e exploit verification (`strix-pentest`).
-- **Cloudflare Security Audit** (`cloudflare/security-audit-skill`): 15 playbook di audit avanzato (`cloudflare-sec`).
-- **Specialisti dedicati**: `pentester` (CVSS, PoC, counter-evidence), `reverse-engineer` (IDA Pro, Ghidra, x64dbg, Cutter, decompilazione MCP) e `malware-analyst`.
+### 6. Gate di Verifica Documentale & Workflow Proof (`tw.py verify-docs`)
+- Creato `skills/team/scripts/verify_docs.py` e integrato come comando `tw.py verify-docs`:
+  - Accerta che `docs/memory/STATE.md` esista e sia aggiornato rispetto alle modifiche reali del codice.
+  - Accerta l'integrità del grafo Brain Obsidian (0 broken link, 0 file mancanti).
+  - Valida la sincronizzazione del catalogo (`docs/CATALOG.md`).
+  - Flag `--strict` per bloccare release o conclusioni di task se la documentazione non è allineata.
 
-### 7. WSL Bridge (Supporto Linux Nativo su Windows)
-- Integrato supporto WSL in `skills/team/scripts/smoke.py` (`tw.py smoke "<cmd>" --wsl`) con mapping automatico dei percorsi Windows/WSL (`C:\...` -> `/mnt/c/...`).
-- Codificato in `rules/AGENTS.md`, `skills/team/SKILL.md` e configurazione globale: su host Windows, WSL2 (Ubuntu Linux) è sempre attivo e disponibile per utility POSIX, test di rete, binari ELF e tool di sicurezza/reversing Linux.
+### 7. Test Suite Completa & Verifiche di Integrità
+- Suite pytest: **110 passed, 2 skipped** (112 test totali).
+- 2 test skipped gestiti intenzionalmente per compatibilità OS (Linux `/proc/self` vs Windows NTFS colon naming).
+- Brain Graph Vault: **54 nodi** verificati, 0 issue.
 
-### 8. Brain Knowledge Graph & Compattazione Settimanale
-- Nodi Markdown con frontmatter YAML e wikilink bidirezionali compatibili Obsidian (`docs/brain/`).
-- `tw.py brain rollover`: compattazione e archiviazione dello stato delle settimane passate in journal dedicati (`docs/brain/journal/week-YYYY-WXX.md`), garantendo supporto per sessioni di settimane/mesi senza saturare il contesto.
+### 6. WSL Bridge & Collaudo Nativo Linux
+- Verificata la compatibilità multipiattaforma in ambiente Linux Ubuntu via WSL (Python 3.14.4).
+- `tw.py smoke "<cmd>" --wsl` validato per test live di comandi e processi Linux su Windows.
+- `tw.py doctor`, `tw.py audit`, `tw.py scan`, `tw.py verify-docs` e suite di test verificate con successo sia in ambiente Windows (Python 3.15.2) sia in ambiente WSL.
 
-### 9. Aggiornamenti a Zero Token, Wrapper Win32 & In-Place Git Update (v2.1.2)
-- Risolto il supporto all'aggiornamento da terminale Windows: `tw.py install-cli` registra i wrapper `tw.cmd`, `tw.bat`, `team.cmd`, `team.bat`, `agy.cmd` e `agy.bat` in `~/.local/bin` e aggiunge la cartella alla variabile utente `PATH` nel registro di Windows (`HKCU\Environment\Path`).
-- Riscritto il motore di aggiornamento `agy_update`: i plugin git vengono aggiornati in-place tramite `git pull/fetch`, evitando rimozioni premature, file locks e l'errore `FileExistsError [WinError 183]` su Windows.
-- Gestione sicura dei permessi read-only nei file `.git` su Windows (`safe_rmtree`).
-- Aggiunto supporto diretto al comando CLI `tw` (`tw update`, `tw doctor`, `tw settings`, `tw thermal`) e flag `--force`.
-
-### 10. Documentazione Bilingue & Cataloghi
-- `README.md` (Italiano) e `README.en.md` (Inglese) aggiornati con badge e dettagli v2.1.2.
-- Catalogo completo sincronizzato in `docs/CATALOG.md` (130 agenti, 512 risorse).
-- Suite di test: 102 test passati (100 ok, 2 skipped, 0 errori).
-- Strict brain check: OK (0 problemi).
+### 7. Suite Test & Validazione
+- Test suite completa: **107 test passati** (105 ok, 2 skipped, 0 errori).
+- Aggiunti test dedicati in `tests/test_scan_verify_catalog.py` (scan stack, verify-docs, ricerca libreria frontend, ruolo design-engineer).
+- Strict brain check: **OK (54 nodi, 0 problemi)**.
+- Audit prompt agenti: **OK (0 problemi critici o alti)**.
+- Documentazione e cataloghi: bilingue, allineati in `docs/CATALOG.md` e `docs/catalog.it.json`.

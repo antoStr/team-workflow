@@ -5,13 +5,13 @@ layer: tests
 tags: [code, py]
 aliases: [tests/test_usage.py, test_usage.py]
 upstream:
-  - "[[skills-team-workflow-scripts-estimate]]"
-  - "[[skills-team-workflow-scripts-usage]]"
+  - "[[skills-team-scripts-estimate]]"
+  - "[[skills-team-scripts-usage]]"
   - "[[tests-isolate_home]]"
 downstream:
 files: [tests/test_usage.py]
 status: active
-last_updated: 2026-11-08T16:54:25
+last_updated: 2026-11-11T22:06:53
 ---
 
 # test_usage.py
@@ -30,9 +30,8 @@ Offline tests for usage.py and estimate.py:  python3 -m unittest discover -s tes
 
 ## Dependencies
 ### Upstream
-- [[skills-team-workflow-scripts-estimate]]
-- [[skills-team-workflow-scripts-usage]]
+- [[skills-team-scripts-estimate]]
+- [[skills-team-scripts-usage]]
 - [[tests-isolate_home]]
-- None
 ### Downstream
 - None

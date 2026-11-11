@@ -5,14 +5,14 @@ layer: tests
 tags: [code, py]
 aliases: [tests/test_codex.py, test_codex.py]
 upstream:
-  - "[[skills-team-workflow-scripts-addons]]"
-  - "[[skills-team-workflow-scripts-install_codex]]"
-  - "[[skills-team-workflow-scripts-roles]]"
+  - "[[skills-team-scripts-addons]]"
+  - "[[skills-team-scripts-install_codex]]"
+  - "[[skills-team-scripts-roles]]"
   - "[[tests-isolate_home]]"
 downstream:
 files: [tests/test_codex.py]
 status: active
-last_updated: 2026-11-08T16:54:25
+last_updated: 2026-11-11T22:06:53
 ---
 
 # test_codex.py
@@ -26,10 +26,9 @@ Offline tests for Codex: install, agents in config.toml, MCP servers, uninstall.
 
 ## Dependencies
 ### Upstream
-- [[skills-team-workflow-scripts-addons]]
-- [[skills-team-workflow-scripts-install_codex]]
-- [[skills-team-workflow-scripts-roles]]
+- [[skills-team-scripts-addons]]
+- [[skills-team-scripts-install_codex]]
+- [[skills-team-scripts-roles]]
 - [[tests-isolate_home]]
-- None
 ### Downstream
 - None

@@ -12,7 +12,10 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.normpath(os.path.join(HERE, ".."))
-sys.path.insert(0, os.path.join(ROOT, "skills", "team-workflow", "scripts"))
+scripts_dir = os.path.join(ROOT, "skills", "team", "scripts")
+if not os.path.isdir(scripts_dir):
+    scripts_dir = os.path.join(ROOT, "skills", "team-workflow", "scripts")
+sys.path.insert(0, scripts_dir)
 import library  # noqa: E402
 import roles  # noqa: E402
 

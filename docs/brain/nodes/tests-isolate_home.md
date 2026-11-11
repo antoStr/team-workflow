@@ -14,6 +14,7 @@ downstream:
   - "[[tests-test_opencode]]"
   - "[[tests-test_pro]]"
   - "[[tests-test_roles]]"
+  - "[[tests-test_scan_verify_catalog]]"
   - "[[tests-test_scripts]]"
   - "[[tests-test_settings]]"
   - "[[tests-test_setup_library_talk]]"
@@ -22,7 +23,7 @@ downstream:
   - "[[tests-test_worker]]"
 files: [tests/isolate_home.py]
 status: active
-last_updated: 2026-11-08T16:54:25
+last_updated: 2026-11-11T22:06:53
 ---
 
 # isolate_home.py
@@ -46,10 +47,10 @@ the home from USERPROFILE, not HOME, so both are set.
 - [[tests-test_opencode]]
 - [[tests-test_pro]]
 - [[tests-test_roles]]
+- [[tests-test_scan_verify_catalog]]
 - [[tests-test_scripts]]
 - [[tests-test_settings]]
 - [[tests-test_setup_library_talk]]
 - [[tests-test_update]]
 - [[tests-test_usage]]
 - [[tests-test_worker]]
-- None

@@ -5,12 +5,12 @@ layer: tools
 tags: [code, py]
 aliases: [tools/readme_catalog.py, readme_catalog.py]
 upstream:
-  - "[[skills-team-workflow-scripts-library]]"
-  - "[[skills-team-workflow-scripts-roles]]"
+  - "[[skills-team-scripts-library]]"
+  - "[[skills-team-scripts-roles]]"
 downstream:
 files: [tools/readme_catalog.py]
 status: active
-last_updated: 2026-11-08T16:54:25
+last_updated: 2026-11-11T22:06:53
 ---
 
 # readme_catalog.py
@@ -37,8 +37,7 @@ rules) by pack, from the plugin's own files, so the documentation never drifts f
 
 ## Dependencies
 ### Upstream
-- [[skills-team-workflow-scripts-library]]
-- [[skills-team-workflow-scripts-roles]]
-- None
+- [[skills-team-scripts-library]]
+- [[skills-team-scripts-roles]]
 ### Downstream
 - None

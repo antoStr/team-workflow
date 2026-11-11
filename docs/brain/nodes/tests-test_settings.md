@@ -5,14 +5,14 @@ layer: tests
 tags: [code, py]
 aliases: [tests/test_settings.py, test_settings.py]
 upstream:
-  - "[[skills-team-workflow-scripts-install_agy]]"
-  - "[[skills-team-workflow-scripts-prompt_command]]"
-  - "[[skills-team-workflow-scripts-settings]]"
+  - "[[skills-team-scripts-install_agy]]"
+  - "[[skills-team-scripts-prompt_command]]"
+  - "[[skills-team-scripts-settings]]"
   - "[[tests-isolate_home]]"
 downstream:
 files: [tests/test_settings.py]
 status: active
-last_updated: 2026-11-08T16:54:25
+last_updated: 2026-11-11T22:06:53
 ---
 
 # test_settings.py
@@ -30,10 +30,9 @@ Offline tests for the settings, the no-model commands and the agy subagent files
 
 ## Dependencies
 ### Upstream
-- [[skills-team-workflow-scripts-install_agy]]
-- [[skills-team-workflow-scripts-prompt_command]]
-- [[skills-team-workflow-scripts-settings]]
+- [[skills-team-scripts-install_agy]]
+- [[skills-team-scripts-prompt_command]]
+- [[skills-team-scripts-settings]]
 - [[tests-isolate_home]]
-- None
 ### Downstream
 - None

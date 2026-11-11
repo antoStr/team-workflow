@@ -5,16 +5,16 @@ layer: tests
 tags: [code, py]
 aliases: [tests/test_pro.py, test_pro.py]
 upstream:
-  - "[[skills-team-workflow-scripts-audit]]"
-  - "[[skills-team-workflow-scripts-doctor]]"
-  - "[[skills-team-workflow-scripts-learn]]"
-  - "[[skills-team-workflow-scripts-roles]]"
-  - "[[skills-team-workflow-scripts-settings]]"
+  - "[[skills-team-scripts-audit]]"
+  - "[[skills-team-scripts-doctor]]"
+  - "[[skills-team-scripts-learn]]"
+  - "[[skills-team-scripts-roles]]"
+  - "[[skills-team-scripts-settings]]"
   - "[[tests-isolate_home]]"
 downstream:
 files: [tests/test_pro.py]
 status: active
-last_updated: 2026-11-08T16:54:25
+last_updated: 2026-11-11T22:06:53
 ---
 
 # test_pro.py
@@ -28,12 +28,11 @@ Offline tests for the local Pro tools: audit, doctor and uninstall, learn, profi
 
 ## Dependencies
 ### Upstream
-- [[skills-team-workflow-scripts-audit]]
-- [[skills-team-workflow-scripts-doctor]]
-- [[skills-team-workflow-scripts-learn]]
-- [[skills-team-workflow-scripts-roles]]
-- [[skills-team-workflow-scripts-settings]]
+- [[skills-team-scripts-audit]]
+- [[skills-team-scripts-doctor]]
+- [[skills-team-scripts-learn]]
+- [[skills-team-scripts-roles]]
+- [[skills-team-scripts-settings]]
 - [[tests-isolate_home]]
-- None
 ### Downstream
 - None

@@ -5,14 +5,14 @@ layer: tests
 tags: [code, py]
 aliases: [tests/test_brain.py, test_brain.py]
 upstream:
-  - "[[skills-team-workflow-scripts-brain]]"
-  - "[[skills-team-workflow-scripts-settings]]"
-  - "[[skills-team-workflow-scripts-talk]]"
+  - "[[skills-team-scripts-brain]]"
+  - "[[skills-team-scripts-settings]]"
+  - "[[skills-team-scripts-talk]]"
   - "[[tests-isolate_home]]"
 downstream:
 files: [tests/test_brain.py]
 status: active
-last_updated: 2026-11-08T16:54:25
+last_updated: 2026-11-11T22:06:53
 ---
 
 # test_brain.py
@@ -26,10 +26,9 @@ Unit tests for the Brain (Obsidian vault) engine and Talk Digest.
 
 ## Dependencies
 ### Upstream
-- [[skills-team-workflow-scripts-brain]]
-- [[skills-team-workflow-scripts-settings]]
-- [[skills-team-workflow-scripts-talk]]
+- [[skills-team-scripts-brain]]
+- [[skills-team-scripts-settings]]
+- [[skills-team-scripts-talk]]
 - [[tests-isolate_home]]
-- None
 ### Downstream
 - None

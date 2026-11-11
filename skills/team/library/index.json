@@ -35,7 +35,8 @@
     "strix-pentest": "Autonomous penetration testing, proof-of-concept exploit verification, vulnerability playbooks, and counter-evidence analysis from Strix.",
     "cloudflare-sec": "Enterprise vulnerability discovery, coverage-led hunting, binary analysis, and security auditing from Cloudflare.",
     "malware-analysis": "Specialized malware reverse engineering, binary triage, dynamic sandboxing, deobfuscation, memory forensics, YARA/Sigma rules, and threat classification.",
-    "threat-intel-url": "Suspicious URL analysis, phishing triage, urlscan.io integration, certificate transparency, and C2 infrastructure tracking."
+    "threat-intel-url": "Suspicious URL analysis, phishing triage, urlscan.io integration, certificate transparency, and C2 infrastructure tracking.",
+    "frontend-components": "Modern frontend UI component engineering: shadcn/ui, Base UI, Radix UI, Sonner, Vaul, cmdk, NumberFlow, Magic UI, Aceternity UI, 21st.dev, and intelligent library selection."
   },
   "entries": [
     {
@@ -3727,6 +3728,97 @@
       "pack": "social-distribution",
       "description": "X/Twitter API integration for posting tweets, threads, reading timelines, search, and analytics. Covers OAuth auth patterns, rate limits, and platform-native content posting. Use when the user wants to interact with X programmatically.",
       "hash": "d9eadc54b749bf9a"
+    },
+    {
+      "id": "pick-ui-library",
+      "kind": "skill",
+      "pack": "frontend-components",
+      "description": "Intelligent UI component & library selection engine inspired by Emil Kowalski. Audits package.json, prevents hand-rolling complex primitives, and selects battle-tested frontend packages.",
+      "hash": "84a5ee90a714a205"
+    },
+    {
+      "id": "shadcn-ui",
+      "kind": "skill",
+      "pack": "frontend-components",
+      "description": "Complete shadcn/ui framework guide: CLI workflow, components.json, cn() utility, CSS variables theming, Radix/Base UI primitives integration, and remote registries.",
+      "hash": "3d85da50c323400d"
+    },
+    {
+      "id": "base-ui",
+      "kind": "skill",
+      "pack": "frontend-components",
+      "description": "Architecture and usage of Base UI by MUI: unstyled accessible primitives, zero-wrapper clean DOM, CSS transition states (@starting-style), and Tailwind integration.",
+      "hash": "b479e9f7ffed561f"
+    },
+    {
+      "id": "radix-ui",
+      "kind": "skill",
+      "pack": "frontend-components",
+      "description": "Radix UI Primitives architecture: WAI-ARIA compliance, keyboard navigation, focus management, Slot API, asChild composition pattern, and state data attributes.",
+      "hash": "4280fb9e25a0c414"
+    },
+    {
+      "id": "sonner-toast",
+      "kind": "skill",
+      "pack": "frontend-components",
+      "description": "Sonner toast notification component by Emil Kowalski: promise toasts, stacked swipe dismiss, custom actions, rich colors, positions, and Tailwind integration.",
+      "hash": "8ea7273a42c39ac4"
+    },
+    {
+      "id": "vaul-drawer",
+      "kind": "skill",
+      "pack": "frontend-components",
+      "description": "Vaul drawer component for React by Emil Kowalski: physics-based gestures, snap points, nested drawers, iOS background scaling, and mobile/desktop responsiveness.",
+      "hash": "c671b1d9d46043d3"
+    },
+    {
+      "id": "cmdk-palette",
+      "kind": "skill",
+      "pack": "frontend-components",
+      "description": "cmdk command palette component by Paco Coursey: fuzzy search, keyboard navigation, grouped lists, sub-pages, shortcuts, and dialog wrapper.",
+      "hash": "d31aca789ef570ae"
+    },
+    {
+      "id": "number-flow",
+      "kind": "skill",
+      "pack": "frontend-components",
+      "description": "NumberFlow component by Max Barvian: smooth animated number transitions, rolling digits columns, Intl formatting for currencies/percentages, and layout shift prevention.",
+      "hash": "695e98306d29322e"
+    },
+    {
+      "id": "beautiful-ui",
+      "kind": "skill",
+      "pack": "frontend-components",
+      "description": "Curated modern aesthetic patterns: glassmorphism, responsive bento grids, gradient borders, glowing inputs, floating cards, and micro-shadows.",
+      "hash": "6bffc5aa8817b0fc"
+    },
+    {
+      "id": "rare-ui",
+      "kind": "skill",
+      "pack": "frontend-components",
+      "description": "Unique interactive UI patterns from RareUI: magnetic buttons, 3D tilt hover cards, spotlight mouse-tracking grids, fluid cursors, and morphing SVG tabs.",
+      "hash": "16a0270c9db53cef"
+    },
+    {
+      "id": "magic-ui",
+      "kind": "skill",
+      "pack": "frontend-components",
+      "description": "Visual effects library for design engineers: Bento Grids, Animated Beam, Marquee, Particles, Orbiting Circles, Shimmer Button, Border Beam, and Meteors.",
+      "hash": "3b2e7286eae20d8c"
+    },
+    {
+      "id": "aceternity-ui",
+      "kind": "skill",
+      "pack": "frontend-components",
+      "description": "Aceternity UI dynamic animation library by Manu Arora: 3D Cards, Sparkles, Lamp Hero, Tracing Beam, Aurora Background, Floating Dock, and Canvas Reveal.",
+      "hash": "7d9d102b35ae7dd2"
+    },
+    {
+      "id": "registry-21st-dev",
+      "kind": "skill",
+      "pack": "frontend-components",
+      "description": "21st.dev registry architecture: 'The npm for Design Engineers'. Discovering, consuming, and publishing shadcn-compatible components, AI input bars, and landing blocks.",
+      "hash": "4ac8e166a98930f0"
     }
   ]
 }

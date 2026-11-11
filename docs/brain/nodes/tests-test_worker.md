@@ -9,7 +9,7 @@ upstream:
 downstream:
 files: [tests/test_worker.py]
 status: active
-last_updated: 2026-11-08T16:54:25
+last_updated: 2026-11-11T22:06:53
 ---
 
 # test_worker.py
@@ -24,6 +24,5 @@ Offline tests for run_worker.py with fake claude and agy CLIs.
 ## Dependencies
 ### Upstream
 - [[tests-isolate_home]]
-- None
 ### Downstream
 - None

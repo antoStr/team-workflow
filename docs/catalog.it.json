@@ -64,7 +64,8 @@
     "type-design-reviewer": "Rivede tipi, schemi e modelli dei dati: quanto bene impediscono gli stati impossibili.",
     "pentester": "Esegue penetration testing offensivo e red-team ispirato a Strix: formula exploit, verifica con PoC riproducibili, calibra CVSS ed elimina falsi positivi tramite contro-prove.",
     "reverse-engineer": "Esegue reverse engineering e analisi statica/dinamica di binari nativi (PE, ELF, firmware) con IDA Pro, Ghidra, x64dbg e MCP di decompilazione per scovare vulnerabilità di memoria.",
-    "malware-analyst": "Specialista in analisi malware e threat intelligence: triage statico e dinamico, deoffuscamento, protocolli C2, YARA/Sigma e audit link sospetti."
+    "malware-analyst": "Specialista in analisi malware e threat intelligence: triage statico e dinamico, deoffuscamento, protocolli C2, YARA/Sigma e audit link sospetti.",
+    "design-engineer": "Ingegnere di design UI/UX e frontend: specialista in micro-interazioni, fisica dei gesti, animazioni con spring, sistemi di design moderni (shadcn, Base UI, Radix, Sonner, Vaul) e conformità WCAG 2.2 AA."
   },
   "packs": {
     "agentic-patterns": "Ingegneria con agenti: cicli autonomi, costruzione di harness, pipeline LLM.",
@@ -96,7 +97,8 @@
     "strix-pentest": "Penetration testing offensivo, verifica di exploit tramite PoC, playbook di vulnerabilità e analisi di contro-prove ispirati a Strix.",
     "cloudflare-sec": "Audit di sicurezza enterprise, caccia alle vulnerabilità guidata da copertura e analisi binaria di Cloudflare.",
     "malware-analysis": "Analisi malware specializzata, deoffuscamento, protocolli C2, memoria e regole YARA/Sigma.",
-    "threat-intel-url": "Analisi link sospetti, urlscan.io, phishing header investigation e tracciamento infrastrutture C2."
+    "threat-intel-url": "Analisi link sospetti, urlscan.io, phishing header investigation e tracciamento infrastrutture C2.",
+    "frontend-components": "Architettura avanzata di componenti UI moderni: shadcn/ui, Base UI, Radix, Sonner, Vaul, cmdk, NumberFlow, Magic UI, Aceternity UI, 21st.dev e selezione intelligente delle librerie."
   },
   "library": {
     "accessibility": "Progettare, realizzare e verificare interfacce accessibili (WCAG 2.2 AA) su web, iOS e Android.",
@@ -588,6 +590,19 @@
     "threat-intel-zeek-traffic-analysis": "Analisi di traffico di rete e threat hunting con Zeek: estrazione log DNS, transazioni HTTP e handshake TLS.",
     "threat-intel-tshark-packet-analysis": "Analisi di pacchetti di rete da riga di comando con TShark: estrazione payload e rilevamento anomalie.",
     "threat-intel-http-request-proxy-audit": "Audit di richieste HTTP e traffico API sospetto tramite proxy: ispezione payload e bypass SSL pinning.",
-    "malware-specialized-file-analyzer": "Analisi di documenti malevoli, macro Office, PDF compromessi, collegamenti LNK e script offuscati."
+    "malware-specialized-file-analyzer": "Analisi di documenti malevoli, macro Office, PDF compromessi, collegamenti LNK e script offuscati.",
+    "pick-ui-library": "Motore di selezione intelligente delle librerie UI (matrice Emil Kowalski): analizza le dipendenze, evita di reinventare primitive complesse e seleziona i componenti più performanti.",
+    "shadcn-ui": "Architettura di componenti shadcn/ui: workflow CLI, configurazione components.json, utility cn(), variabili CSS HSL/OKLCH, primitive Radix/Base UI e registri remoti.",
+    "base-ui": "Architettura ed uso di Base UI (MUI): primitive accessibili senza stile, DOM pulito senza wrapper inutili, stati di animazione CSS nativi (@starting-style) e integrazione Tailwind.",
+    "radix-ui": "Architettura di Radix UI Primitives: conformità WAI-ARIA, navigazione da tastiera, gestione del focus, Slot API, pattern di composizione asChild e attributi data-state.",
+    "sonner-toast": "Sistema di notifiche Sonner di Emil Kowalski: notifiche promise-based, schede impilate con swipe dismiss, azioni personalizzate, colori rich e integrazione Tailwind.",
+    "vaul-drawer": "Componente drawer e bottom-sheet Vaul di Emil Kowalski: fisica dei gesti, snap point multipli, drawer annidati, effetto background scaling iOS e reattività mobile/desktop.",
+    "cmdk-palette": "Componente command palette cmdk di Paco Coursey: ricerca fuzzy, navigazione da tastiera, liste raggruppate, sotto-pagine, scorciatoie e wrapper dialog.",
+    "number-flow": "Componente NumberFlow di Max Barvian: transizioni fluide di numeri e contatori, colonne di cifre a scorrimento, formattazione Intl per valute/percentuali e prevenzione layout shift.",
+    "beautiful-ui": "Pattern estetici moderni di Beautiful UI: glassmorphism, griglie bento responsive, bordi sfumati a gradiente, input luminosi, schede flottanti e micro-ombre.",
+    "rare-ui": "Micro-animazioni e pattern interattivi unici di RareUI: pulsanti magnetici, schede con tilt 3D interattivo, griglie spotlight con tracciamento mouse e cursori fluidi.",
+    "magic-ui": "Libreria di effetti visivi Magic UI per design engineer: Bento Griglie, Animated Beam, Marquee continuo, particelle, cerchi orbitali, Shimmer Button e Border Beam.",
+    "aceternity-ui": "Libreria Aceternity UI di Manu Arora per animazioni dinamiche ad alto impatto: 3D Cards, Sparkles, Lamp Hero, Tracing Beam, Aurora Background e Floating Dock.",
+    "registry-21st-dev": "Architettura di registro 21st.dev ('npm per Design Engineer'): ricerca, consumo e pubblicazione di componenti compatibili con shadcn, barre di input AI e blocchi landing."
   }
 }

@@ -1,6 +1,11 @@
 # team
 
 - Project memory: read `docs/memory/INDEX.md` first, then `STATE.md` and the area card of your task.
+- Zero-Ghosting for In-Between Questions ("writing-in-between"): if the user's prompt contains questions, doubts, curiosities, or remarks interleaved in the text, you MUST answer each and every one of them explicitly and thoroughly at the start of your response before or alongside executing actions. Never skip or ghost an in-between question.
+- Dynamic Agent Selection & Full Catalog: never limit the user to 4 fixed options or rigid agent presets. The user has access to the full catalog of 131 specialists (`tw.py agents catalog`). Strictly respect the exact number and roles of agents requested by the user. Support dynamic addition, removal, and modification of agents at any time.
+- Mandatory Repository Scan (`tw.py scan`): on every `/team` invocation, run `python skills/team/scripts/tw.py scan` to survey repository status, branch, detected stack (Next.js, React, Tailwind, Python, etc.), frontend UI component stack, and memory health.
+- Mandatory Documentation & Workflow Verification Gate (`tw.py verify-docs`): before concluding any team task or workflow, run `python skills/team/scripts/tw.py verify-docs` to ensure `STATE.md`, Brain nodes, and project documentation have been created or updated accurately matching the work performed.
+- Modern Frontend Components: for frontend and UI tasks, leverage the `frontend-components` library pack (`pick-ui-library`, `shadcn-ui`, `base-ui`, `radix-ui`, `sonner-toast`, `vaul-drawer`, `cmdk-palette`, `number-flow`, `beautiful-ui`, `rare-ui`, `magic-ui`, `aceternity-ui`, `registry-21st-dev`) and assign to `design-engineer` or `frontend-dev`.
 - Before spawning agents, run the assignment wizard of the team skill (`WIZARD.md`);
   at the first team-workflow task of each conversation start with its session setup: where the
   choices go (this conversation, user defaults, this project), preset, roles, model and effort

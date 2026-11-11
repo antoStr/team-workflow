@@ -9,7 +9,7 @@ upstream:
 downstream:
 files: [tests/test_agy.py]
 status: active
-last_updated: 2026-11-08T16:54:25
+last_updated: 2026-11-11T22:06:53
 ---
 
 # test_agy.py
@@ -25,6 +25,5 @@ Offline tests for agy support: hook payloads in agy's format and the agy plugin 
 ## Dependencies
 ### Upstream
 - [[tests-isolate_home]]
-- None
 ### Downstream
 - None

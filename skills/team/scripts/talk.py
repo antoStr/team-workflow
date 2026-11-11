@@ -228,6 +228,59 @@ def clear(topic, cwd=None):
     return True
 
 
+def close_topic(topic, summary=None, from_role="orchestrator", cwd=None):
+    """Close a channel topic cleanly: resolve all open items and append final verdict/decision."""
+    file = path(topic, cwd)
+    if not os.path.isfile(file):
+        return {"ok": False, "error": f"Topic '{topic}' does not exist."}
+    with _Lock(file):
+        msgs = read(topic, cwd)
+        open_list = open_threads(msgs)
+        closing_msgs = []
+        next_id = (msgs[-1]["id"] + 1) if msgs else 1
+
+        # Automatically resolve open threads
+        for item in open_list:
+            item_id = item["id"]
+            kind = "verdict" if item["kind"] == "challenge" else "answer"
+            resolution = f"Closed during channel wrap-up by {from_role}"
+            resolve_msg = {
+                "id": next_id,
+                "time": time.strftime("%Y-%m-%dT%H:%M:%S"),
+                "from": from_role,
+                "to": item["from"],
+                "kind": kind,
+                "re": item_id,
+                "text": resolution
+            }
+            closing_msgs.append(resolve_msg)
+            next_id += 1
+
+        # Final wrap-up decision message
+        summary_text = summary or "Topic successfully closed. All tasks verified and done."
+        final_msg = {
+            "id": next_id,
+            "time": time.strftime("%Y-%m-%dT%H:%M:%S"),
+            "from": from_role,
+            "to": None,
+            "kind": "decision",
+            "re": None,
+            "text": f"CHANNEL CLOSED: {summary_text}"
+        }
+        closing_msgs.append(final_msg)
+
+        with open(file, "a", encoding="utf-8") as f:
+            for m in closing_msgs:
+                f.write(json.dumps(m, ensure_ascii=False) + "\n")
+
+    return {
+        "ok": True,
+        "topic": topic,
+        "resolved_threads": len(open_list),
+        "final_message": final_msg
+    }
+
+
 def compact_topic(topic, threshold=20, cwd=None, force=False):
     """Compact old messages into a digest, preserving sliding window + ALL open threads."""
     file = path(topic, cwd)

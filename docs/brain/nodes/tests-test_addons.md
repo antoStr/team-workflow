@@ -5,13 +5,13 @@ layer: tests
 tags: [code, py]
 aliases: [tests/test_addons.py, test_addons.py]
 upstream:
-  - "[[skills-team-workflow-scripts-addons]]"
-  - "[[skills-team-workflow-scripts-settings]]"
+  - "[[skills-team-scripts-addons]]"
+  - "[[skills-team-scripts-settings]]"
   - "[[tests-isolate_home]]"
 downstream:
 files: [tests/test_addons.py]
 status: active
-last_updated: 2026-11-08T16:54:25
+last_updated: 2026-11-11T22:06:53
 ---
 
 # test_addons.py
@@ -26,9 +26,8 @@ Offline tests for the add-on manager (no network, no real apps).
 
 ## Dependencies
 ### Upstream
-- [[skills-team-workflow-scripts-addons]]
-- [[skills-team-workflow-scripts-settings]]
+- [[skills-team-scripts-addons]]
+- [[skills-team-scripts-settings]]
 - [[tests-isolate_home]]
-- None
 ### Downstream
 - None

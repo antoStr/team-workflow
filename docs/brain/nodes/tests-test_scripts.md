@@ -9,7 +9,7 @@ upstream:
 downstream:
 files: [tests/test_scripts.py]
 status: active
-last_updated: 2026-11-08T16:54:25
+last_updated: 2026-11-11T22:06:53
 ---
 
 # test_scripts.py
@@ -28,6 +28,5 @@ Offline tests for the team-workflow scripts:  python3 -m unittest discover -s te
 ## Dependencies
 ### Upstream
 - [[tests-isolate_home]]
-- None
 ### Downstream
 - None

@@ -8,7 +8,7 @@ upstream:
 downstream:
 files: [tools/remote_dashboard.py]
 status: active
-last_updated: 2026-11-08T16:54:25
+last_updated: 2026-11-11T22:06:53
 ---
 
 # remote_dashboard.py
@@ -22,10 +22,10 @@ remote monitoring from smartphones and external devices.
 ## Contracts
 
 ### Classes
-- `DashboardHandler` (methods: do_GET, log_message)
+- `DashboardHandler` (methods: _send_security_headers, do_GET, log_message)
 
 ### Functions
-- `run_server(port)`
+- `run_server(port, host)`
 
 ## Dependencies
 ### Upstream

@@ -5,12 +5,12 @@ layer: tests
 tags: [code, py]
 aliases: [tests/test_update.py, test_update.py]
 upstream:
-  - "[[skills-team-workflow-scripts-update_plugin]]"
+  - "[[skills-team-scripts-update_plugin]]"
   - "[[tests-isolate_home]]"
 downstream:
 files: [tests/test_update.py]
 status: active
-last_updated: 2026-11-08T16:54:25
+last_updated: 2026-11-11T22:06:53
 ---
 
 # test_update.py
@@ -24,8 +24,7 @@ Offline tests for the version parsing in update_plugin.py.
 
 ## Dependencies
 ### Upstream
-- [[skills-team-workflow-scripts-update_plugin]]
+- [[skills-team-scripts-update_plugin]]
 - [[tests-isolate_home]]
-- None
 ### Downstream
 - None

@@ -4,7 +4,17 @@ Run it every time you are about to spawn one or more agents: a team, a feature, 
 review, a release, or a direct request. It turns "call the team" into one precise brief per
 agent, with the model, the effort and the expected cost agreed before anything starts.
 
+## Dynamic Agent Selection & Catalog Access
+
+Never clamp the user into artificial 4-choice limits or rigid presets (`solo`, `duo`, `trio`).
+- **Comprehensive Catalog**: The entire catalog of 131 specialists (`tw.py agents catalog`) is always accessible to the user.
+- **Exact User Allocation**: If the user requests a specific number of agents (e.g., 2, 3, 5, 8) and specific roles, respect that exact roster with 100% precision. Never override user preferences with default presets.
+- **Dynamic Reconfiguration**: The user can modify, add, replace, or scale roles at any time ("Aggiungi un tester", "Sostituisci X con Y", "Cambia modello per Z").
+- **Zero Ghosting for In-Between Questions ("writing-in-between")**: If the user asks questions or raises doubts in their prompt or during the wizard, answer each question immediately, explicitly and thoroughly before proceeding.
+
 ## Session setup (first team-workflow task of every conversation)
+
+Before proposing roles, always run `python3 <skill>/scripts/tw.py scan` to ground yourself in the actual codebase, frameworks, dependencies, and memory status.
 
 When the setting `session_wizard` is true (the default), before the first agent of a
 conversation is launched, agree with the user which agents this conversation uses and how,
@@ -26,8 +36,8 @@ it and go straight to the board. Skip it when the user says "defaults" or "skip 
 4. For **every** chosen role, a **model** and an **effort** question, never merged across
    roles: two roles per call (four questions), repeated until all chosen roles are asked.
    Only values from step 1. The role's current value is the first option, marked
-   "(current)"; fill the other options with the closest alternatives (a question has at most
-   four options: the rest of the step 1 list stays available through the free-text answer).
+   "(current)"; fill the other options with relevant alternatives without artificial 4-choice limits
+   (the full step 1 list is available, and `tw.py agents catalog` provides the full functional taxonomy).
    Each option says how it runs:
    - Claude Code: any model through the Agent tool's `model` parameter (native); an effort
      different from the agent file's runs as a worker in this conversation. haiku has no
@@ -120,10 +130,9 @@ Never fake a question as a markdown list with `[ ]` boxes.
 
 ## 1. Roles
 
-Propose the roles this task needs (`TEAMS.md`), from any team, and let the user pick several
-at once (multi-select). Ask "Who builds?" and "Who checks?" in the same call, at most four
-options each, the roles the task needs first and marked "(Recommended)"; the user can name
-other roles in the free-text answer.
+Propose the roles this task needs (`TEAMS.md` or `tw.py agents catalog`), from any pack or category,
+and let the user pick freely (multi-select). Propose relevant roles without limiting to 4 options;
+strictly respect the exact number and roles requested by the user, and allow dynamic reconfiguration anytime.
 
 ## 2. Questions per agent (`wizard: full`, or the agents the user wants to change)
 

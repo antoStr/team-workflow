@@ -5,15 +5,15 @@ layer: tests
 tags: [code, py]
 aliases: [tests/test_setup_library_talk.py, test_setup_library_talk.py]
 upstream:
-  - "[[skills-team-workflow-scripts-library]]"
-  - "[[skills-team-workflow-scripts-roles]]"
-  - "[[skills-team-workflow-scripts-settings]]"
-  - "[[skills-team-workflow-scripts-talk]]"
+  - "[[skills-team-scripts-library]]"
+  - "[[skills-team-scripts-roles]]"
+  - "[[skills-team-scripts-settings]]"
+  - "[[skills-team-scripts-talk]]"
   - "[[tests-isolate_home]]"
 downstream:
 files: [tests/test_setup_library_talk.py]
 status: active
-last_updated: 2026-11-08T16:54:25
+last_updated: 2026-11-11T22:06:53
 ---
 
 # test_setup_library_talk.py
@@ -31,11 +31,10 @@ Offline tests for 0.9: activation (auto or manual), the library and team talk.
 
 ## Dependencies
 ### Upstream
-- [[skills-team-workflow-scripts-library]]
-- [[skills-team-workflow-scripts-roles]]
-- [[skills-team-workflow-scripts-settings]]
-- [[skills-team-workflow-scripts-talk]]
+- [[skills-team-scripts-library]]
+- [[skills-team-scripts-roles]]
+- [[skills-team-scripts-settings]]
+- [[skills-team-scripts-talk]]
 - [[tests-isolate_home]]
-- None
 ### Downstream
 - None

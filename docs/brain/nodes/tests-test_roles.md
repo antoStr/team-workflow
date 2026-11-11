@@ -5,13 +5,13 @@ layer: tests
 tags: [code, py]
 aliases: [tests/test_roles.py, test_roles.py]
 upstream:
-  - "[[skills-team-workflow-scripts-roles]]"
-  - "[[skills-team-workflow-scripts-settings]]"
+  - "[[skills-team-scripts-roles]]"
+  - "[[skills-team-scripts-settings]]"
   - "[[tests-isolate_home]]"
 downstream:
 files: [tests/test_roles.py]
 status: active
-last_updated: 2026-11-08T16:54:25
+last_updated: 2026-11-11T22:06:53
 ---
 
 # test_roles.py
@@ -25,9 +25,8 @@ Offline tests for the modular roles: packs, overrides and the native files of bo
 
 ## Dependencies
 ### Upstream
-- [[skills-team-workflow-scripts-roles]]
-- [[skills-team-workflow-scripts-settings]]
+- [[skills-team-scripts-roles]]
+- [[skills-team-scripts-settings]]
 - [[tests-isolate_home]]
-- None
 ### Downstream
 - None

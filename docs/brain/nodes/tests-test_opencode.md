@@ -5,18 +5,18 @@ layer: tests
 tags: [code, py]
 aliases: [tests/test_opencode.py, test_opencode.py]
 upstream:
-  - "[[skills-team-workflow-scripts-addons]]"
-  - "[[skills-team-workflow-scripts-install_opencode]]"
-  - "[[skills-team-workflow-scripts-opencode_cli]]"
-  - "[[skills-team-workflow-scripts-roles]]"
-  - "[[skills-team-workflow-scripts-run_worker]]"
-  - "[[skills-team-workflow-scripts-settings]]"
-  - "[[skills-team-workflow-scripts-usage]]"
+  - "[[skills-team-scripts-addons]]"
+  - "[[skills-team-scripts-install_opencode]]"
+  - "[[skills-team-scripts-opencode_cli]]"
+  - "[[skills-team-scripts-roles]]"
+  - "[[skills-team-scripts-run_worker]]"
+  - "[[skills-team-scripts-settings]]"
+  - "[[skills-team-scripts-usage]]"
   - "[[tests-isolate_home]]"
 downstream:
 files: [tests/test_opencode.py]
 status: active
-last_updated: 2026-11-08T16:54:25
+last_updated: 2026-11-11T22:06:53
 ---
 
 # test_opencode.py
@@ -31,14 +31,13 @@ and the options the session wizard offers.
 
 ## Dependencies
 ### Upstream
-- [[skills-team-workflow-scripts-addons]]
-- [[skills-team-workflow-scripts-install_opencode]]
-- [[skills-team-workflow-scripts-opencode_cli]]
-- [[skills-team-workflow-scripts-roles]]
-- [[skills-team-workflow-scripts-run_worker]]
-- [[skills-team-workflow-scripts-settings]]
-- [[skills-team-workflow-scripts-usage]]
+- [[skills-team-scripts-addons]]
+- [[skills-team-scripts-install_opencode]]
+- [[skills-team-scripts-opencode_cli]]
+- [[skills-team-scripts-roles]]
+- [[skills-team-scripts-run_worker]]
+- [[skills-team-scripts-settings]]
+- [[skills-team-scripts-usage]]
 - [[tests-isolate_home]]
-- None
 ### Downstream
 - None

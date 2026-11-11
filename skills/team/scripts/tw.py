@@ -267,6 +267,23 @@ def cmd_agents(args):
                   + (f", not ours so left alone: {', '.join(r['skipped'])}" if r["skipped"] else ""))
         print("Restart the app to load new or changed agents.")
         return
+    if action == "catalog":
+        cat = roles.catalog(root)
+        by_pack = {}
+        for role, info in cat.items():
+            by_pack.setdefault(info["pack"], []).append(role)
+        print("=" * 60)
+        print(f"👥 AGENTS & ROLES CATALOG ({len(cat)} specialists available)")
+        print("=" * 60)
+        for pack in sorted(by_pack.keys()):
+            role_list = sorted(by_pack[pack])
+            print(f"\n📦 Pack: {pack} ({len(role_list)} agents)")
+            for r in role_list:
+                meta, _ = roles.parse(roles.read(cat[r]))
+                desc = meta.get("description", "").split(".")[0].strip()
+                print(f"  • {r:<26} : {desc}")
+        print("\n💡 Pick any number of agents dynamically: /team <compito> specificando i ruoli desiderati.")
+        return
     if not rest:
         raise SystemExit(f"usage: agents {action} ROLE ...")
     name, target = rest[0], (root if args.project else None)
@@ -901,6 +918,16 @@ def cmd_talk(args):
                 print(talk.line(d))
             else:
                 print("nothing to compact")
+        elif args.action == "close":
+            summary = " ".join(args.text) if args.text else getattr(args, "summary", None)
+            res = talk.close_topic(args.topic, summary=summary, from_role=args.sender or "orchestrator")
+            if args.json:
+                print(json.dumps(res, indent=1, ensure_ascii=False))
+            elif res["ok"]:
+                print(f"Topic '{args.topic}' closed successfully ({res['resolved_threads']} threads auto-resolved).")
+                print(talk.line(res["final_message"]))
+            else:
+                print(f"Failed to close topic: {res.get('error')}")
     except (ValueError, TimeoutError) as e:
         raise SystemExit(str(e))
 
@@ -1120,6 +1147,133 @@ def cmd_hardware(args):
     print("  Dashboard remota: https://payments-baghdad-oakland-dsc.trycloudflare.com (locale: http://127.0.0.1:8080)")
 
 
+def cmd_scan(args):
+    import scan
+    report = scan.scan_repository(args.root)
+    if args.json:
+        print(json.dumps(report, indent=2))
+    else:
+        scan.print_scan_report(report)
+
+
+def cmd_verify_docs(args):
+    import verify_docs
+    res = verify_docs.verify_documentation(args.root, args.strict)
+    if args.json:
+        print(json.dumps(res, indent=2))
+    else:
+        verify_docs.print_verify_report(res)
+    if args.strict and not res["passed"]:
+        sys.exit(1)
+
+
+def cmd_preview(args):
+    import preview
+    root = args.root or repo_root()
+    action = args.action or "start"
+    if action == "start":
+        cmd_override = args.cmd if getattr(args, "cmd", None) else None
+        res = preview.start_preview(root=root, port=args.port, cmd=cmd_override)
+        if args.json:
+            print(json.dumps(res, indent=2))
+        else:
+            print(f"🚀 Preview Server: {res['status']}")
+            print(f"Local URL: {res['url']}")
+            print(f"PID:       {res['pid']}")
+            print(f"Root:      {res['root']}")
+    elif action == "stop":
+        res = preview.stop_preview(root=root)
+        if args.json:
+            print(json.dumps(res, indent=2))
+        else:
+            print(res["message"])
+    elif action == "status":
+        res = preview.get_status(root=root)
+        if args.json:
+            print(json.dumps(res, indent=2))
+        else:
+            if res.get("running"):
+                print(f"🟢 Preview Server running on {res['url']} (PID: {res['pid']})")
+            else:
+                print(f"⚪ No active preview server in {root}")
+
+
+def cmd_patch(args):
+    import patch_bridge
+    root = args.root or repo_root()
+    patch_source = args.patch_file
+    if not patch_source or patch_source == "-":
+        diff_text = sys.stdin.read()
+    else:
+        if not os.path.isfile(patch_source):
+            sys.exit(f"Patch file not found: {patch_source}")
+        with open(patch_source, "r", encoding="utf-8", errors="replace") as f:
+            diff_text = f.read()
+
+    res = patch_bridge.apply_patch(diff_text, root=root, dry_run=args.dry_run)
+    if args.json:
+        print(json.dumps(res, indent=2))
+    else:
+        if res["ok"]:
+            mode = "(dry-run)" if args.dry_run else ""
+            print(f"🟢 Patch applied successfully {mode}:")
+            for f in res["applied_files"]:
+                print(f"  ✓ {f}")
+        else:
+            print("🔴 Failed to apply patch:")
+            for err in res["errors"]:
+                print(f"  ✗ {err}")
+            sys.exit(1)
+
+
+def cmd_component(args):
+    import components_cli
+    root = args.root or repo_root()
+    action = args.action or "list"
+    if action == "list":
+        items = components_cli.list_components()
+        if args.json:
+            print(json.dumps(items, indent=2))
+        else:
+            print(f"{'Component':<16} {'Title':<45} {'Files'}")
+            print("-" * 80)
+            for item in items:
+                print(f"{item['id']:<16} {item['title']:<45} {', '.join(item['files'])}")
+    elif action == "add":
+        if not args.name:
+            sys.exit("Usage: tw.py component add <name> [--dest DIR]")
+        res = components_cli.add_component(args.name, dest_dir=args.dest, root=root)
+        if args.json:
+            print(json.dumps(res, indent=2))
+        else:
+            if res["ok"]:
+                print(f"🟢 {res['message']}")
+                print(f"Destination: {res['destination']}")
+                for f in res["files"]:
+                    print(f"  ✓ {f}")
+            else:
+                print(f"🔴 Error: {res.get('error')}")
+                sys.exit(1)
+
+
+def cmd_visual_check(args):
+    import visual_check
+    root = args.root or repo_root()
+    res = visual_check.run_visual_check(root=root)
+    if args.json:
+        print(json.dumps(res, indent=2))
+    else:
+        status_icon = "🟢" if res["ok"] else "🔴"
+        print(f"Visual & Responsive Audit: {status_icon} {'PASSED' if res['ok'] else 'FAILED'}")
+        print(f"Audited: {res['pages_audited']} HTML pages, {res['css_audited']} CSS stylesheets")
+        print(f"Issues:  {res['total_issues']} (High: {res['high_severity']}, Med: {res['medium_severity']}, Low: {res['low_severity']})")
+        for iss in res["issues"]:
+            prefix = "🔴" if iss["severity"] == "HIGH" else ("🟡" if iss["severity"] == "MEDIUM" else "ℹ️")
+            print(f"  {prefix} [{iss['severity']}] {iss.get('page') or iss.get('file')}: {iss['message']}")
+        if not res["ok"] and args.strict:
+            sys.exit(1)
+
+
 def main(argv=None):
     utf8_output()
     ap = argparse.ArgumentParser(prog="team-workflow", description=__doc__.split("\n")[0])
@@ -1143,9 +1297,9 @@ def main(argv=None):
     mo.add_argument("--provider", help="OpenCode: the models of this provider (for example nano-gpt)")
     mo.add_argument("--search", nargs="+", help="OpenCode: the models whose id or name has these words")
     mo.add_argument("--json", action="store_true")
-    ag = sub.add_parser("agents", help="roles: list, set type/model/effort, enable, new, sync")
+    ag = sub.add_parser("agents", help="roles: list, set type/model/effort, enable, new, sync, catalog")
     ag.add_argument("action", nargs="?", default="list",
-                    choices=("list", "show", "set", "enable", "disable", "new", "sync"))
+                    choices=("list", "show", "set", "enable", "disable", "new", "sync", "catalog"))
     ag.add_argument("rest", nargs="*", help="ROLE [model=... effort=... type=...]")
     ag.add_argument("--app", choices=roles.APPS, help="set: only this app")
     ag.add_argument("--project", action="store_true", help="this repository only")
@@ -1197,7 +1351,7 @@ def main(argv=None):
     li.add_argument("rest", nargs="*", help="PACK..., WORDS..., ID or PACK")
     li.add_argument("--project", action="store_true", help="enable/disable: this repository only")
     tk = sub.add_parser("talk", help="team talk: the channel where agents talk to each other")
-    tk.add_argument("action", nargs="?", default="list", choices=("list", "join", "who", "post", "read", "open", "clear", "digest"))
+    tk.add_argument("action", nargs="?", default="list", choices=("list", "join", "who", "post", "read", "open", "clear", "digest", "close"))
     tk.add_argument("topic", nargs="?")
     tk.add_argument("text", nargs="*")
     tk.add_argument("--from", "--as", dest="sender", help="post, join: your role (orchestrator, user, a role)")
@@ -1209,6 +1363,7 @@ def main(argv=None):
                                                 "what that role has not read yet)")
     tk.add_argument("--wait", type=int, default=0, help="read, or post then read: wait up to SECONDS "
                                                         "for a new message")
+    tk.add_argument("--summary", help="close: final summary description")
     tk.add_argument("--strict", action="store_true", help="open: exit 1 when something is open")
     tk.add_argument("--json", action="store_true")
     br = sub.add_parser("brain", help="Obsidian graph vault: init, map, query, check, context, rollover")
@@ -1250,6 +1405,35 @@ def main(argv=None):
     th.add_argument("--remote", action="store_true", help="presence: REMOTE")
     th.add_argument("--start", action="store_true", help="start hardware guard daemon")
     th.add_argument("--json", action="store_true", help="output status in JSON format")
+    sc = sub.add_parser("scan", help="scan repository structure, stack, frontend components, and memory health")
+    sc.add_argument("--json", action="store_true", help="output report in JSON format")
+    sc.add_argument("--root", default=None, help="repository root folder")
+    vd = sub.add_parser("verify-docs", help="verify documentation, memory integrity, and workflow execution proofs")
+    vd.add_argument("--strict", action="store_true", help="exit with non-zero code if issues found")
+    vd.add_argument("--json", action="store_true", help="output report in JSON format")
+    vd.add_argument("--root", default=None, help="repository root folder")
+    pv = sub.add_parser("preview", help="manage local preview & dev servers (start, stop, status)")
+    pv.add_argument("action", nargs="?", default="start", choices=("start", "stop", "status"))
+    pv.add_argument("--port", type=int, default=None, help="server port")
+    pv.add_argument("--root", default=None, help="repository root folder")
+    pv.add_argument("--cmd", nargs="*", help="override server command")
+    pv.add_argument("--json", action="store_true")
+    pt = sub.add_parser("patch", help="apply unified diffs and subagent patches atomically")
+    pt.add_argument("action", nargs="?", default="apply", choices=("apply", "check"))
+    pt.add_argument("patch_file", nargs="?", help="path to patch file or '-' for stdin")
+    pt.add_argument("--root", default=None, help="repository root folder")
+    pt.add_argument("--dry-run", action="store_true", help="validate without applying changes")
+    pt.add_argument("--json", action="store_true")
+    cp = sub.add_parser("component", help="scaffold modern frontend components (cmdk, sonner, vaul, etc.)")
+    cp.add_argument("action", nargs="?", default="list", choices=("list", "add"))
+    cp.add_argument("name", nargs="?", help="component name (e.g. cmdk, sonner, number-flow, vaul)")
+    cp.add_argument("--dest", default=None, help="destination folder")
+    cp.add_argument("--root", default=None, help="repository root folder")
+    cp.add_argument("--json", action="store_true")
+    vc = sub.add_parser("visual-check", help="audit responsive breakpoints, overflow, and layout integrity")
+    vc.add_argument("--root", default=None, help="repository root folder")
+    vc.add_argument("--strict", action="store_true", help="exit 1 if high-severity issues found")
+    vc.add_argument("--json", action="store_true")
     args, extra = ap.parse_known_args(argv)
     if extra:
         if args.command == "talk" and not any(a.startswith("-") for a in extra):
@@ -1281,6 +1465,18 @@ def main(argv=None):
         cmd_addons(args)
     elif args.command == "agents":
         cmd_agents(args)
+    elif args.command == "scan":
+        cmd_scan(args)
+    elif args.command == "verify-docs":
+        cmd_verify_docs(args)
+    elif args.command == "preview":
+        cmd_preview(args)
+    elif args.command == "patch":
+        cmd_patch(args)
+    elif args.command == "component":
+        cmd_component(args)
+    elif args.command == "visual-check":
+        cmd_visual_check(args)
     else:
         {"profile": cmd_profile, "audit": cmd_audit, "doctor": cmd_doctor, "uninstall": cmd_uninstall,
          "learn": cmd_learn, "ci-init": cmd_ci_init, "install-cli": cmd_install_cli,
