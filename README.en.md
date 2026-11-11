@@ -23,7 +23,7 @@ Persistent Brain Graph Memory · "Zero Fake-Solved" Live Runtime Verification ·
 
 1. [Overview](#-overview)
 2. [Why Use It](#-why-use-it)
-3. [What's New in v2.0](#-whats-new-in-v20)
+3. [What's New in v2.3 and v2.0](#-whats-new-in-v23-and-v20)
 4. [How It Works](#️-how-it-works)
 5. [Installation](#-installation)
 6. [The Universal `/team` Command & First 5 Minutes](#-the-universal-team-command--first-5-minutes)
@@ -76,7 +76,19 @@ With **team-workflow**, your coding assistant becomes the **lead engineer of a s
 
 ---
 
-## 🚀 What's New in v2.0
+## 🚀 What's New in v2.3 and v2.0
+
+### v2.3
+- 🎨 **`frontend-components` pack**: 13 skills (shadcn/ui, Base UI, Radix, Sonner, Vaul, cmdk, NumberFlow, pick-ui-library, Beautiful UI, RareUI, Magic UI, Aceternity UI, 21st.dev) and the `design-engineer` role.
+- 🧩 **`tw.py component add <name>`**: scaffolds cmdk, sonner, number-flow, vaul, spotlight, marquee and dot-grid with accessible code.
+- 👀 **`tw.py preview`**: starts, checks and stops the project's dev server (static HTML, Node, Django) on a free port.
+- 🩹 **`tw.py patch`**: applies a unified diff atomically, with `--dry-run`, handy for subagents without write permissions.
+- 📱 **`tw.py visual-check`**: checks viewport, overflow risks, `prefers-reduced-motion` and `<h1>` structure.
+- 💬 **`tw.py talk close`**: closes a channel by resolving open threads and recording the final decision.
+- 🧭 **`tw.py scan` and `tw.py verify-docs`**: repository scan on every `/team` and a documentation gate at the end.
+- 🎛️ **Dynamic agent choice and zero-ghosting**: the full catalog of 131 roles with no 4-choice cap, and every in-between question gets an answer.
+
+### v2.0
 
 - 🎯 **Universal `/team` Command**: just run `/team add oauth login`, `/team fix menu crash`, or `/team audit security`. Legacy commands remain fully supported as backwards-compatible aliases.
 - 🚦 **Zero Fake-Solved Gate**: eliminates the classic AI hallucination where an agent declares success without testing. The engine runs `tw.py smoke "<cmd>"` with process watchdogs to guarantee boot stability.

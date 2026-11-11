@@ -23,7 +23,7 @@ Memoria Brain Graph persistente · Verifica reale runtime "Zero Fake-Solved" · 
 
 1. [Cos'è, in due parole](#-cosè-in-due-parole)
 2. [Perché usarlo](#-perché-usarlo)
-3. [Le novità di v2.0](#-le-novità-di-v20)
+3. [Le novità di v2.3 e v2.0](#-le-novità-di-v23-e-v20)
 4. [Come funziona](#️-come-funziona)
 5. [Installazione](#-installazione)
 6. [Il comando universale `/team` e i primi 5 minuti](#-il-comando-universale-team-e-i-primi-5-minuti)
@@ -76,7 +76,19 @@ Con **team-workflow**, l'assistente diventa il **responsabile tecnico di un team
 
 ---
 
-## 🚀 Le novità di v2.0
+## 🚀 Le novità di v2.3 e v2.0
+
+### v2.3
+- 🎨 **Pack rontend-components**: 13 skill (shadcn/ui, Base UI, Radix, Sonner, Vaul, cmdk, NumberFlow, pick-ui-library, Beautiful UI, RareUI, Magic UI, Aceternity UI, 21st.dev) e il ruolo design-engineer.
+- 🧩 **`tw.py component add <nome>`**: genera subito cmdk, sonner, number-flow, vaul, spotlight, marquee e dot-grid, con codice accessibile.
+- 👀 **`tw.py preview`**: avvia, controlla e ferma il server di sviluppo del progetto (HTML statico, Node, Django) su una porta libera.
+- 🩹 **`tw.py patch`**: applica un diff unificato in modo atomico, con `--dry-run`, utile per i subagent senza permessi di scrittura.
+- 📱 **`tw.py visual-check`**: controlla viewport, rischi di overflow, `prefers-reduced-motion` e struttura degli `<h1>`.
+- 💬 **`tw.py talk close`**: chiude un canale risolvendo i thread aperti e registrando la decisione finale.
+- 🧭 **`tw.py scan` e `tw.py verify-docs`**: scan del repository a ogni `/team` e gate sulla documentazione a fine lavoro.
+- 🎛️ **Scelta agenti dinamica e zero-ghosting**: catalogo completo di 131 ruoli senza limite a 4 scelte, e ogni domanda intercalata nel testo riceve risposta.
+
+### v2.0
 
 - 🎯 **Comando Universale `/team`**: basta `/team aggiungi login`, `/team correggi crash del menu` o `/team audit sicurezza`. Tutti i vecchi comandi lunghi restano supportati come alias retrocompatibili.
 - 🚦 **Zero Fake-Solved Gate**: fine delle allucinazioni in cui l'AI dice "Risolto!" ma il gioco o l'app non parte nemmeno. Il motore lancia `tw.py smoke "<cmd>"` con timeout di sicurezza e valida l'avvio reale.

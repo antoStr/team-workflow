@@ -81,3 +81,5 @@
 - Strict brain check: **OK (54 nodi, 0 problemi)**.
 - Audit prompt agenti: **OK (0 problemi critici o alti)**.
 - Documentazione e cataloghi: bilingue, allineati in `docs/CATALOG.md` e `docs/catalog.it.json`.
+
+- README.md e README.en.md: nuova sezione novita v2.3 (comandi preview, patch, component, visual-check, talk close, scan, verify-docs, pack frontend-components).
