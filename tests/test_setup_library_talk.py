@@ -150,6 +150,24 @@ class TalkTest(unittest.TestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
+    def test_channel_moves_into_the_worktree_when_git_is_read_only(self):
+        import subprocess
+        repo = os.path.join(self.cwd, "repo")
+        subprocess.run(["git", "init", "-q", repo], check=True)
+        talk.post("t", "orchestrator", "kickoff", cwd=repo)
+        shared = talk.channel_dir(repo)
+        self.assertIn(os.path.join(".git", "team-workflow"), shared)
+        real = talk._writable
+        with mock.patch.object(talk, "_writable", lambda d: False if d == shared else real(d)):
+            talk.post("t", "backend-dev", "API ready", "join", cwd=repo)  # e.g. Codex: .git read-only
+        local = os.path.join(os.path.realpath(repo), ".team-workflow", "talk")
+        self.assertEqual(os.path.normcase(os.path.realpath(talk.channel_dir(repo))), os.path.normcase(local))
+        self.assertEqual([m["text"] for m in talk.read("t", repo)], ["kickoff", "API ready"])
+        with open(os.path.join(local, ".gitignore"), encoding="utf-8") as f:
+            self.assertEqual(f.read(), "*\n")
+        out = subprocess.run(["git", "status", "--porcelain"], cwd=repo, capture_output=True, text=True)
+        self.assertEqual(out.stdout, "")  # the moved channel is never committed
+
     def test_challenge_stays_open_until_the_challenger_gives_a_verdict(self):
         talk.post("t", "tester", "pytest red on auth", "challenge", to="backend-dev", cwd=self.cwd)
         self.assertEqual(len(talk.open_threads(talk.read("t", self.cwd))), 1)

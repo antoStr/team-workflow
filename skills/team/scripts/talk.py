@@ -16,6 +16,7 @@ who takes part and what they own; a newcomer reads the whole history first.
 import json
 import os
 import re
+import shutil
 import subprocess
 import time
 
@@ -27,16 +28,47 @@ CLOSED_BY = {"question": ("answer", "fix", "verdict"), "challenge": ("verdict",)
 TOPIC = re.compile(r"[a-z0-9][a-z0-9-]{0,63}")
 
 
-def channel_dir(cwd=None):
+def _git(cwd, *args):
     try:
-        out = subprocess.run(["git", "rev-parse", "--path-format=absolute", "--git-common-dir"],
+        out = subprocess.run(["git", "rev-parse", "--path-format=absolute", *args],
                              capture_output=True, text=True, encoding="utf-8", errors="replace",
                              timeout=10, cwd=cwd, stdin=subprocess.DEVNULL)
-        common = out.stdout.strip() if out.returncode == 0 else ""
+        return out.stdout.strip() if out.returncode == 0 else ""
     except (OSError, subprocess.SubprocessError):
-        common = ""
-    base = os.path.join(common, "team-workflow") if common else settings.home_dir()
-    return os.path.join(base, "talk")
+        return ""
+
+
+def _writable(folder):
+    try:
+        os.makedirs(folder, exist_ok=True)
+        probe = os.path.join(folder, f".probe-{os.getpid()}")
+        os.close(os.open(probe, os.O_CREAT | os.O_EXCL | os.O_WRONLY))
+        os.remove(probe)
+        return True
+    except OSError:
+        return False
+
+
+def channel_dir(cwd=None):
+    """<git common dir>/team-workflow/talk, shared by every worktree. When an agent cannot write
+    there (Codex's sandbox keeps .git read-only), the channel moves, with its messages, to
+    <worktree>/.team-workflow/talk (ignored by git), and from then on everybody uses that one."""
+    common = _git(cwd, "--git-common-dir")
+    if not common:
+        return os.path.join(settings.home_dir(), "talk")
+    shared = os.path.join(common, "team-workflow", "talk")
+    top = _git(cwd, "--show-toplevel")
+    local = os.path.join(top, ".team-workflow", "talk") if top else ""
+    if local and (os.path.isdir(local) or not _writable(shared)):
+        if not os.path.isdir(local):
+            os.makedirs(local)
+            with open(os.path.join(local, ".gitignore"), "w", encoding="utf-8") as f:
+                f.write("*\n")  # never committed, like the channel in .git
+            for name in (os.listdir(shared) if os.path.isdir(shared) else []):
+                if name.endswith((".jsonl", ".seen.json")):
+                    shutil.copy2(os.path.join(shared, name), os.path.join(local, name))
+        return local
+    return shared
 
 
 def path(topic, cwd=None):

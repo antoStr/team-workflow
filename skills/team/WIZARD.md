@@ -64,6 +64,10 @@ it and go straight to the board. Skip it when the user says "defaults" or "skip 
      role, as the user chose. Never answer "only these models exist" from the short list.
    - Codex: each agent runs with the model (`inherit` = the session's model, or a model id from
      step 1) and reasoning effort of its `.toml` file; saved choices apply after restarting Codex.
+     A model passed to `spawn_agent` changes the model of that launch, never the effort: when
+     the user asks for another effort, save it (`tw.py agents set <role> effort=<e>`), say it
+     applies after a restart, and report the effort the agent really ran (the `turn_context`
+     lines of its rollout in `~/.codex/sessions`), never the one asked for.
 5. One call, up to two multi-select questions: the **skills** and the **add-ons** for this
    conversation. Skills: run `tw.py library search <words of the task, or the repository's
    languages> --json` and offer the three best entries plus `rules-<language>` of the
