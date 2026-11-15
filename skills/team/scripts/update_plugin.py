@@ -68,9 +68,22 @@ def own_version():
     return None
 
 
+def is_older(version, latest):
+    try:
+        return bool(version and latest) and vkey(version) < vkey(latest)
+    except ValueError:  # "older than 0.4.0" and other non-SemVer text
+        return False
+
+
 def newer_version(max_age=86400):
     """The latest version when it is newer than this plugin, asking GitHub at most once a day
     (~/.team-workflow/update-check.json); None otherwise or on any error."""
+    latest = latest_version(max_age)
+    return latest if is_older(own_version(), latest) else None
+
+
+def latest_version(max_age=86400):
+    """The highest release tag, from the cache when it is younger than max_age seconds."""
     cache = os.path.join(os.path.expanduser("~"), ".team-workflow", "update-check.json")
     try:
         with open(cache, encoding="utf-8") as f:
@@ -85,19 +98,17 @@ def newer_version(max_age=86400):
                 json.dump(data, f)
         except OSError:
             pass
-    latest, mine = data.get("latest"), own_version()
-    try:
-        return latest if latest and mine and vkey(latest) > vkey(mine) else None
-    except ValueError:
-        return None
+    return data.get("latest")
 
 
 def auto_update(max_age=3600, home=None):
-    """Zero-token self update: when a newer version is out, run this script for every installed
-    app in a detached process (log: ~/.team-workflow/update.log) and return that version; None
-    when there is nothing to do or it cannot start. One start per 15 minutes at most."""
-    newer = newer_version(max_age)
-    if not newer:
+    """Zero-token self update: when this plugin or any other installed app (agy, OpenCode, Codex:
+    version files only, nothing slow) is behind the latest release, run this script for every
+    installed app in a detached process (log: ~/.team-workflow/update.log) and return that
+    version; None when there is nothing to do or it cannot start. One start per 15 minutes."""
+    newer = latest_version(max_age)
+    found = (own_version(), agy_version(), payload_version("opencode"), payload_version("codex"))
+    if not any(is_older(v, newer) for v in found):
         return None
     base = os.path.join(home or os.path.expanduser("~"), ".team-workflow")
     lock = os.path.join(base, "update.lock")
@@ -142,12 +153,13 @@ def agy_version():
 
 
 def opencode_payload():
-    return os.path.join(os.path.expanduser("~"), ".config", "opencode", "skills", NAME)
+    import install_opencode  # its folder, not a copy of it: they drifted apart in the 2.4 rename
+    return install_opencode.payload_dir()
 
 
 def codex_payload():
-    home = os.environ.get("CODEX_HOME") or os.path.join(os.path.expanduser("~"), ".codex")
-    return os.path.join(home, "skills", NAME)
+    import install_codex
+    return install_codex.payload_dir()
 
 
 PAYLOADS = {"opencode": (opencode_payload, "install_opencode.py"), "codex": (codex_payload, "install_codex.py")}
