@@ -180,17 +180,20 @@ def cmd_models(args):
             print("  (no Codex model catalog found in ~/.codex)")
         return
     pricing = load_pricing()
-    print("Claude Code (native subagents and workers; the Agent tool's model and effort override the file for one launch):")
-    for alias, mid in pricing.get("aliases", {}).items():
-        efforts = pricing["models"].get(mid, {}).get("effort", EFFORTS)
-        print(f"  {alias:<7} {mid:<18} effort: {', '.join(efforts) or 'none'}")
-    print("agy native subagents: model inherit (the session's model), flash or pro")
-    if shutil.which("agy"):
-        ids = [line.split("\t")[0] for line in output(["agy", "models"]).splitlines() if "\t" in line]
-        print("agy workers (exact model, effort in the name): " + (", ".join(ids) or "agy models failed"))
-    else:
-        print("agy: not installed")
-    print_opencode_models(opencode_models())
+    if args.app in (None, "claude"):
+        print("Claude Code (native subagents and workers; the Agent tool's model and effort override the file for one launch):")
+        for alias, mid in pricing.get("aliases", {}).items():
+            efforts = pricing["models"].get(mid, {}).get("effort", EFFORTS)
+            print(f"  {alias:<7} {mid:<18} effort: {', '.join(efforts) or 'none'}")
+    if args.app in (None, "agy"):
+        print("agy native subagents: model inherit (the session's model), flash_lite, flash or pro; invoke_subagent's Model picks one per launch")
+        if shutil.which("agy"):
+            ids = [line.split("\t")[0] for line in output(["agy", "models"]).splitlines() if "\t" in line]
+            print("agy workers (exact model, effort in the name): " + (", ".join(ids) or "agy models failed"))
+        else:
+            print("agy: not installed")
+    if args.app is None:
+        print_opencode_models(opencode_models())
     import install_codex
     found = install_codex.models()
     print("Codex agents: inherit (the session's model) or " + (", ".join(
@@ -383,10 +386,10 @@ def app_options(app, root=None):
             effort = output(["agy", "-p", "/effort"]).strip() or None
         ids = [line.split("\t")[0] for line in output(["agy", "models"]).splitlines() if "\t" in line] \
             if shutil.which("agy") else []
-        out["native"] = {"models": ["inherit", "flash", "pro"], "session_model": session,
+        out["native"] = {"models": ["inherit", "flash_lite", "flash", "pro"], "session_model": session,
                          "session_effort": effort,
-                         "per_launch": "invoke_subagent has no model: a subagent uses its file's tier; "
-                                       "inherit = the session model (change it with /model)"}
+                         "per_launch": "invoke_subagent's Model (inherit, flash_lite, flash, pro) changes the tier "
+                                       "for one launch, never the effort; inherit = the session model"}
         out["worker"] = {"models": ids, "efforts": "part of the model id (-low, -medium, -high)"}
     elif app == "codex":
         import install_codex

@@ -261,7 +261,7 @@ class OpenCodeTest(ScriptTest):
         import tw
         with mock.patch.object(tw.shutil, "which", return_value=None):
             data = tw.app_options("agy", self.root)
-        self.assertEqual(data["native"]["models"], ["inherit", "flash", "pro"])
+        self.assertEqual(data["native"]["models"], ["inherit", "flash_lite", "flash", "pro"])
         self.assertEqual(data["roles"]["architect"]["model"], "inherit")
         self.assertIn("session effort", data["roles"]["architect"]["runs"])
         claude = tw.app_options("claude", self.root)

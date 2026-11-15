@@ -113,8 +113,9 @@ Offer only models and efforts the app really has (`tw.py models` lists them):
   one run only, pass them at launch. Check the run afterwards: the subagent transcript
   (`~/.claude/projects/<project>/<session>/subagents/agent-<id>.jsonl`) records the model id
   and the effort of every turn.
-- **agy custom subagent**: `inherit` (the session's model), `flash` or `pro`, set per role
-  (`tw.py agents set <role> model=pro --app agy`), not per launch.
+- **agy custom subagent**: `inherit` (the session's model), `flash_lite`, `flash` or `pro`, set
+  per role (`tw.py agents set <role> model=pro --app agy`) or for one launch with
+  `invoke_subagent`'s `Model`; no effort either way.
 - **agy worker**: any id from `agy models` (for example `gemini-3.8-flash-high`,
   `gemini-3.1-pro-low`, `claude-sonnet-4-6`); the effort is part of the id.
 - **OpenCode custom subagent**: `inherit` (the calling agent's model) or a `provider/model` of
@@ -213,6 +214,10 @@ settings (`type.<app>.<role>`, shown by `tw.py agents`):
   Workers are read-only unless the user agreed to `--allow-edits` for that agent (or the
   setting `worker_edits` is true). Tools that need a permission prompt are denied in headless
   runs, so roles that must run tests or builds are better launched as custom agents.
+  In agy a worker starts `agy` again, which writes `~/.gemini`: agy's command sandbox blocks
+  that, so the worker must run outside the sandbox, which only the user can approve. When
+  nobody can approve (`agy -p`, a run the user left alone), launch native subagents instead
+  (`flash` for a fast agent, `pro`, `inherit`) and say the effort cannot be chosen there.
 
 ## 5. After the run
 

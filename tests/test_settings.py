@@ -147,13 +147,17 @@ class AgySubagentTest(unittest.TestCase):
                 meta = dict(line.split(": ", 1) for line in head.splitlines())
                 self.assertEqual(meta["name"], os.path.basename(path)[:-3])
                 json.loads(meta["description"])  # quoted: agy drops a bare description with ": "
-                self.assertIn(meta["model"], ("inherit", "flash", "pro"))
+                self.assertIn(meta["model"], ("inherit", "flash_lite", "flash", "pro"))
             with open(os.path.join(dest, "tester.md")) as f:
                 self.assertIn("\nmodel: flash\n", f.read())
             with open(os.path.join(dest, "architect.md")) as f:
                 text = f.read()
-            self.assertIn('tools: ["view_file", "grep_search", "find_by_name", "list_dir"]', text)
+            self.assertIn('tools: ["read_file"]', text)  # Read, Grep, Glob: agy's names
             self.assertIn("\nmodel: inherit\n", text)  # the session model: pro is older
+            self.assertIn("\nsubagent: true\nmainAgent: false\n", text)
+            with open(os.path.join(dest, "backend-dev.md")) as f:  # every tool: never agy's read-only default
+                self.assertIn('tools: ["read_file", "edit_file", "write_file", "run_command", "manage_task", '
+                              '"search_web"]', f.read())
             self.assertEqual(install_agy.sync_agents(dest, config=config), [])  # already current
 
     def test_leaves_a_foreign_agent_alone(self):

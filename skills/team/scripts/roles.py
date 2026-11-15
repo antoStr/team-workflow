@@ -36,9 +36,12 @@ def ours(text):
     """True when team-workflow wrote this agent file (this version or an older one)."""
     return MARK in text or any(m in text for m in OLD_MARKS)
 
-AGY_TOOLS = {"Read": ["view_file"], "Grep": ["grep_search"], "Glob": ["find_by_name", "list_dir"],
-             "Bash": ["run_command"], "Edit": ["replace_file_content"], "Write": ["write_to_file"],
-             "WebSearch": ["search_web"], "WebFetch": ["read_url_content"]}
+# agy's native tool names (its migrate-agent-settings guide): an agent file without `tools` gets
+# only a small read-only set, so a role with every tool lists AGY_ALL
+AGY_TOOLS = {"Read": ["read_file"], "Grep": ["read_file"], "Glob": ["read_file"],
+             "Edit": ["edit_file"], "MultiEdit": ["edit_file"], "Write": ["write_file"],
+             "Bash": ["run_command", "manage_task"], "WebSearch": ["search_web"], "WebFetch": ["search_web"]}
+AGY_ALL = ["read_file", "edit_file", "write_file", "run_command", "manage_task", "search_web"]
 APPS = ("claude", "agy", "opencode", "codex")
 EXT = {"codex": ".toml"}  # the native agent file of each app; .md for the others
 COLORS = {"red": "#E5484D", "orange": "#F76B15", "yellow": "#FFC53D", "green": "#46A758",
@@ -240,9 +243,8 @@ def native_text(app, role, meta, body, p):
         if meta.get("color"):
             lines.append(f"color: {meta['color']}")
     elif app == "agy":
-        lines.append(f"model: {p['model']}")
-        if tools:
-            lines.append(f"tools: {json.dumps([t for n in tools for t in AGY_TOOLS.get(n, [])])}")
+        names = AGY_ALL if tools is None else list(dict.fromkeys(t for n in tools for t in AGY_TOOLS.get(n, [])))
+        lines += [f"model: {p['model']}", "subagent: true", "mainAgent: false", f"tools: {json.dumps(names)}"]
     else:  # OpenCode: a subagent; no model means the model of the agent that calls it
         lines.append("mode: subagent")
         if p["model"] and p["model"] != "inherit":

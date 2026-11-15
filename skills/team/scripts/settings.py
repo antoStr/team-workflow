@@ -90,7 +90,7 @@ CHOICES = {
     "launch": ("native", "worker"),
     "end_report": ("full", "short"),
     "memory_engine": ("brain", "classic"),
-    "models.agy": ("inherit", "flash", "pro"),
+    "models.agy": ("inherit", "flash_lite", "flash", "pro"),
     "effort": ("low", "medium", "high", "xhigh", "max"),
     "type.claude": ("custom", "worker", "general-purpose", "Explore", "Plan"),
     "type.agy": ("custom", "worker", "self", "research"),

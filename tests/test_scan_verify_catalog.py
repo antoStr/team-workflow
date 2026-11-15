@@ -24,6 +24,13 @@ class ScanVerifyCatalogTest(ScriptTest):
         self.assertTrue(report["git"]["is_git"])
         self.assertIn("Python", report["stack"]["languages"])
         self.assertEqual(report["git"]["modified_files"], 0)
+        # a tests folder alone is unittest, and new files are not "clean"
+        self.write("tests/test_app.py", "import unittest\n")
+        report = scan.scan_repository(self.root)
+        self.assertEqual(report["stack"]["testing"], ["unittest"])
+        self.assertFalse(report["git"]["is_clean"])
+        self.write("requirements.txt", "pytest==8.3.0\n")
+        self.assertEqual(scan.scan_repository(self.root)["stack"]["testing"], ["pytest"])
 
     def test_scan_detects_frontend_components_in_package_json(self):
         pkg = {

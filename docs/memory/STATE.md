@@ -20,6 +20,20 @@ A 3-agent run (2 haiku builders, 1 sonnet reviewer, team talk in review mode) sh
   exit code.
 - `team-talk` include: talk messages in English. `WIZARD.md` step 5: the usage dashboard needs
   the folder the app was started in.
+- **auto_update** (off by default): at session start, every agy invocation and every `/team`
+  prompt, a newer tag starts `update_plugin.py --harness all` detached (lock 15 min, log
+  `~/.team-workflow/update.log`), with no model.
+- Same test in **Codex** and **agy** (smart orchestrator, two fast agents):
+  - talk: when `.git` is read-only (Codex sandbox) the channel moves with its messages to
+    `<worktree>/.team-workflow/talk/` (git-ignored); TALK.md forbids posting as another role.
+  - agy agent files use agy's tool names (`read_file`, `edit_file`, `write_file`,
+    `run_command`, `manage_task`, `search_web`), list them all for roles with every tool (an
+    omitted `tools` is agy's read-only default) and carry `subagent: true`, `mainAgent: false`.
+  - agy tiers include `flash_lite`; `invoke_subagent`'s `Model` sets the tier per launch. In an
+    unattended agy run use native subagents: workers need to leave agy's sandbox.
+  - Codex: `spawn_agent` changes the model, not the effort (the `.toml`'s); report the effort the
+    rollout shows. `tw.py models --app X` lists only that app. `scan` counts new files and tells
+    unittest from pytest.
 
 ### v2.4.0 (released)
 - **English first**: `README.md`, `docs/AGENTS.md`, `docs/REFERENCE.md`, `docs/CATALOG.md` and
