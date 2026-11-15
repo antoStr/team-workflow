@@ -1,116 +1,148 @@
 ---
 name: team
-description: Il comando rapido e universale di team: risolve qualsiasi compito (bug, feature, refactoring, audit) gestendo in autonomia team di agenti, navigazione intelligente su codebase enormi e verifica reale (l'app o il gioco viene effettivamente avviato e testato prima di dichiarare il problema risolto).
-argument-hint: "<cosa vuoi fare o quale problema risolvere>"
+description: The quick, universal team command. It handles any task (bug, feature, refactor, audit, project plan) by running teams of agents on its own, navigating large codebases through the project brain and verifying for real (the app or game is started and tested before the problem is called solved).
+argument-hint: "<what you want to do or which problem to solve>"
 ---
 
 # /team — Autonomous Engineering & Live-Verified Team Execution
 
-Questo è il comando principale e semplificato di **team**.
-Non serve ricordare comandi lunghi o configurazioni complesse: scrivi semplicemente `/team <compito>` e l'orchestratore gestisce l'intero ciclo in autonomia.
+This is the main, simplified command of **team**. There are no long commands or settings to
+remember: write `/team <task>` and the orchestrator runs the whole cycle.
 
-## Come opera l'orchestratore con `/team`
+`tw.py` below is `<team skill folder>/scripts/tw.py`, run with `python3` from the repository root.
 
-Quando ricevi il comando `/team $ARGUMENTS`:
+## How the orchestrator runs `/team`
 
-- **Se l'argomento è un'azione zero-token di sistema**:
-  - `upgrade` o `update`: esegui immediatamente `python skills/team/scripts/tw.py update`. Mostra l'esito e termina.
-  - `doctor`: esegui immediatamente `python skills/team/scripts/tw.py doctor`. Se richiesto fix: `tw.py doctor --fix`.
-  - `audit`: esegui immediatamente `python skills/team/scripts/tw.py audit`.
-  - `settings`: esegui `python skills/team/scripts/tw.py settings`.
-  - `status`, `hardware` o `thermal`: esegui `python skills/team/scripts/tw.py hardware`.
-  - `scan`: esegui immediatamente `python skills/team/scripts/tw.py scan`.
-  - `verify-docs`: esegui immediatamente `python skills/team/scripts/tw.py verify-docs`.
-  - `catalog`: esegui immediatamente `python skills/team/scripts/tw.py agents catalog`.
-  - Per queste azioni zero-token non spawnare subagenti e non consumare inferenze inutili.
+When you receive `/team $ARGUMENTS`:
 
-- **Comandi storici incorporati in `/team`**:
-  I vecchi comandi v1 (`fix-bug`, `new-feature`, `call-team`, `review-changes`, `setup-memory`, `start`, `release`, `ci-init`, `end-session`) sono ora completamente integrati in `/team`: basta digitare ad es. `/team fix-bug <problema>`, `/team new-feature <idea>` o `/team call-team <ruoli>` per avviare il flusso corrispondente.
+- **If the argument is a zero-token system action**, run it and stop:
+  - `upgrade` or `update`: `tw.py update`. Show the result.
+  - `doctor`: `tw.py doctor`; `tw.py doctor --fix` when the user asks for a fix.
+  - `audit`: `tw.py audit`.
+  - `settings`: `tw.py settings`.
+  - `status`, `hardware` or `thermal`: `tw.py hardware`.
+  - `scan`: `tw.py scan`.
+  - `verify-docs`: `tw.py verify-docs`.
+  - `catalog`: `tw.py agents catalog`.
+  - Do not spawn agents or spend inference on these actions.
 
-### 0. Zero-Ghosting per Domande Intercalate ("writing-in-between")
+- **The v1 commands live inside `/team`**: `fix-bug`, `new-feature`, `call-team`,
+  `review-changes`, `setup-memory`, `start`, `release`, `ci-init` and `end-session` start their
+  flow from here, for example `/team fix-bug <problem>`, `/team new-feature <idea>` or
+  `/team call-team <roles>`.
+
+### 0. Language
+
+- Reply in the language of the user's latest message. When it is mixed or unclear, use the
+  language of the conversation so far; with no signal at all, use English.
+- Brief agents in English; they report back in English and you translate for the user.
+- Files you write follow the project, not the chat: code, comments, commits and docs keep the
+  language the repository already uses (English when it has none). A document the user asks
+  for in their language (a plan, a report, a charter) is written in that language.
+
+### 1. Never ignore a question in between
+
 > [!IMPORTANT]
-> **MAI GHOSTARE O IGNORARE LE DOMANDE DELL'UTENTE.**
-> Se l'utente inserisce considerazioni, dubbi, perplessità o domande intercalate nel testo della richiesta ("writing-in-between"), l'orchestratore e tutti gli agenti DEVONO prima identificare ciascuna domanda e rispondere esaurientemente all'inizio della risposta prima o contestualmente all'avvio dei task operativi.
+> **Never skip the user's questions.** When the request mixes doubts, remarks or questions with
+> the task ("writing in between"), the orchestrator and every agent first find each question
+> and answer it in full at the start of the reply, before or while the work starts.
 
-### 1. Scansione Iniziale della Repository & Orientamento Brain Engine
-- All'avvio di ogni chiamata `/team` su una codebase, esegui una scansione immediata dello stack e dell'ambiente:
-  `python skills/team/scripts/tw.py scan`
-- Rileva framework, linguaggi, librerie UI presenti in `package.json`, stato git e stato della memoria di progetto.
-- Se la codebase è grande o sconosciuta, consulta il Brain del progetto:
-  `python skills/team/scripts/tw.py brain context <modulo_o_area>`
-- Ottieni in meno di 2.000 token il grafo esatto: chi chiama quel modulo, da cosa dipende, e quali **vaccini/errori passati** sono stati registrati per quell'area.
-- Cerca automaticamente nella libreria le skill pertinenti al task:
-  `python skills/team/scripts/tw.py library search <parole chiave>`
+### 2. First scan of the repository and the brain
 
-### 2. Dimensionamento Flessibile & Scelta Dinamica degli Agenti (Nessun Limite a 4 Scelte)
-- **Nessuna scelta forzata**: non limitare l'utente a 4 opzioni rigide o a preset prefissati (`solo`, `duo`, `trio`).
-- **Catalogo Completo**: l'utente può consultare l'intero catalogo di 131 agenti specializzati:
-  `python skills/team/scripts/tw.py agents catalog`
-- **Precisione Assoluta**: rispetta alla lettera il numero e i ruoli esatti richiesti dall'utente (es. "voglio 3 agenti: frontend-dev, tester, pentester").
-- **Flessibilità Dinamica**: l'utente può aggiungere, rimuovere, sostituire o scalare i ruoli in qualsiasi momento in maniera interattiva.
-- **Suite Frontend Componenti (`frontend-components`)**:
-  Per task frontend, design system o UI:
-  - `pick-ui-library` per la selezione mirata senza reinventare componenti;
-  - `shadcn-ui`, `base-ui`, `radix-ui` per primitive e componenti accessibili (WCAG 2.2 AA);
-  - `sonner-toast`, `vaul-drawer`, `cmdk-palette`, `number-flow` per feedback, gesture e palette;
-  - `magic-ui`, `aceternity-ui`, `21st.dev`, `beautiful-ui`, `rare-ui` per effetti visivi e blocchi design moderni.
-  - Ruolo specialista dedicato: `design-engineer` affiancato da `frontend-dev` e `ui-ux-designer`.
+- At the start of every `/team` call on a codebase, scan the stack and the environment:
+  `tw.py scan`. It finds languages, frameworks, UI libraries, git state and project memory.
+- For a large or unknown codebase, ask the project brain: `tw.py brain context <module_or_area>`.
+  In under 2,000 tokens you get who calls the module, what it depends on and the
+  **vaccines** (past mistakes) recorded for that area.
+- Search the library for skills that fit the task: `tw.py library search <keywords>`.
 
-### 3. LA REGOLA FONDAMENTALE: Verifica Reale in Esecuzione ("Zero Fake-Solved")
+### 3. Flexible team size and free choice of agents
+
+- **No forced choice**: do not limit the user to four fixed options or preset sizes.
+- **Full catalog**: the user can browse every agent with `tw.py agents catalog`.
+- **Exactness**: follow the number and the roles the user asks for to the letter (for example
+  "I want 3 agents: frontend-dev, tester, pentester").
+- **Changes at any time**: the user can add, remove, replace or scale roles while the work runs.
+- **Frontend components (`frontend-components` pack)**, for frontend, design system or UI tasks:
+  - `pick-ui-library` to choose a library instead of reinventing components;
+  - `shadcn-ui`, `base-ui`, `radix-ui` for accessible primitives (WCAG 2.2 AA);
+  - `sonner-toast`, `vaul-drawer`, `cmdk-palette`, `number-flow` for feedback, gestures and palettes;
+  - `magic-ui`, `aceternity-ui`, `21st.dev`, `beautiful-ui`, `rare-ui` for visual effects and blocks;
+  - the `design-engineer` role, next to `frontend-dev` and `ui-ux-designer`.
+- **Project management (`pm` agent pack, `project-management` library pack)**, for plans,
+  schedules, budgets, risks, stakeholders and agile delivery: `project-manager`,
+  `project-scheduler`, `project-controller`, `risk-manager`, `stakeholder-manager`,
+  `agile-coach` (see `TEAMS.md`).
+
+### 4. The core rule: verify by running it ("zero fake-solved")
+
 > [!CAUTION]
-> **È SEVERAMENTE VIETATO DICHIARARE UN PROBLEMA RISOLTO SENZA AVER AVVIATO E TESTATO L'APPLICAZIONE REALE.**
-> Guardare il codice o far passare un unit test isolato NON è sufficiente se l'applicazione reale poi crasha al boot.
+> **Never call a problem solved without starting and testing the real application.** Reading
+> the code or passing one isolated unit test is not enough when the app then crashes at boot.
 
-Prima di dichiarare completato il lavoro:
-1. **Lancia lo Smoke Test di avvio reale**:
-   `python skills/team/scripts/tw.py smoke "<comando_avvio_app_o_gioco>" --timeout 5`
-2. **Verifica empirica di non-crash**:
-   - Controlla che il processo si avvii correttamente.
-   - Verifica che `stderr` e i log di runtime non contengano `Traceback`, `Fatal Error`, `Exception`, `NullPointer`, o `Segmentation fault`.
-   - Per un gioco o GUI: verifica che il loop principale parta e mantenga lo stato attivo per la durata del test.
-   - Per un sito web/frontend: verifica che il server risponda su localhost con codice 200 e senza errori console JS.
-3. Se l'applicazione crasha: il problema **NON è risolto**. L'agente deve analizzare il log di crash, applicare il fix e ripetere lo smoke test.
+Before you call the work done:
+1. **Run the real start-up smoke test**: `tw.py smoke "<command that starts the app or game>" --timeout 5`
+2. **Check that it does not crash**:
+   - the process starts;
+   - `stderr` and the runtime logs hold no `Traceback`, `Fatal Error`, `Exception`,
+     `NullPointer` or `Segmentation fault`;
+   - for a game or GUI: the main loop starts and stays alive for the whole test;
+   - for a website or frontend: the server answers on localhost with 200 and no JS console errors.
+3. If the application crashes, the problem is **not** solved: read the crash log, fix it and
+   run the smoke test again.
 
-### WSL Bridge (Esecuzione & Test Linux su Windows)
-Su ambienti Windows, **WSL (Windows Subsystem for Linux)** è attivo e utilizzabile direttamente:
-- Usa `wsl <comando>` per utility POSIX (`bash`, `grep`, `awk`, `sed`), binari ELF, compilatori Linux o kernel `/proc`.
-- Per smoke test e avvio di runtime Linux: `python skills/team/scripts/tw.py smoke "<comando>" --wsl`.
-- Per analisi di binari e reverse engineering su Linux: il `reverse-engineer` e il `pentester` possono sfruttare l'ambiente Linux nativo via WSL.
-- **Non saltare test o verifiche Linux su Windows**: se un tool richiede Linux, eseguilo semplicemente attraverso `wsl`.
+For work that is not code (a plan, a schedule, a report), "running it" means checking every
+number and date against its source and every formula with the inputs given.
 
-### 4. Adversarial Gate & Auto-Learning
-- Fai sfidare la modifica dal tester/pentester per verificare che i casi limite non rompano il gioco/app.
-- Ogni errore trovato ed evitato viene registrato automaticamente nel Brain per vaccinare i task futuri:
-  `python skills/team/scripts/tw.py learn record --title "..." --trigger "..." --anti-pattern "..." --solution "..."`
+### WSL bridge (Linux on Windows)
 
-### 5. Gate di Verifica Documentale & Esecuzione Workflow
-Prima di rilasciare o dichiarare concluso qualsiasi workflow:
-1. **Verifica Documentazione e Memoria**:
-   `python skills/team/scripts/tw.py verify-docs --strict`
-2. Assicurati che `docs/memory/STATE.md` sia stato aggiornato con le modifiche reali.
-3. Verifica che il grafo Brain Obsidian sia integro e che non vi siano collegamenti spezzati o file mancanti.
+On Windows, **WSL** is available:
+- use `wsl <command>` for POSIX tools (`bash`, `grep`, `awk`, `sed`), ELF binaries, Linux
+  compilers or `/proc`;
+- smoke tests of Linux runtimes: `tw.py smoke "<command>" --wsl`;
+- `reverse-engineer` and `pentester` can use the native Linux environment through WSL;
+- **do not skip Linux checks on Windows**: when a tool needs Linux, run it through `wsl`.
 
-### 6. Ciclo GitHub Integrato (Issue, PR, CI/CD, Release)
-Se il compito tocca GitHub (`issue`, `pr`, `review`, `ci`, `release`):
-- **Issue Triage & Fix**: legge l'issue con `gh issue view`, crea un branch dedicato, implementa il fix verificandolo con `tw.py smoke`, e apre la PR che la chiude (`Closes #num`).
-- **Creazione Pull Request**: crea PR professionali con `gh pr create` includendo riassunto delle modifiche, motivazione e le prove di esecuzione reale dello smoke test.
-- **Revisione PR**: `code-reviewer` esamina i diff delle PR altrui (`gh pr diff`), testando che non introducano regressioni.
-- **CI/CD Debugging**: se un workflow GitHub Actions fallisce, scarica i log con `gh run view --log-failed` e delega a `build-fixer`.
-- **Release Management**: `release-manager` cura versioning semantico, changelog, tag e pubblicazione via `gh release create`.
+### 5. Adversarial gate and auto-learning
 
-### 7. Hardware & Thermal Guard (A Casa vs Fuori Casa / Remoto)
-Monitoraggio hardware e termico continuo a **zero token** per prevenire surriscaldamenti e monitorare lo stato dell'host:
-- **Controllo stato istantaneo**:
-  `python skills/team/scripts/tw.py hardware` (oppure `team hardware` da terminale).
-- **Se l'utente è A CASA** (`tw.py hardware --home`):
-  Modalita allarme sonoro ATTIVA: se la CPU o la GPU superano le soglie critiche (CPU > 85°C, GPU > 80°C) viene emesso un segnale acustico immediato per allertare l'utente alla scrivania.
-- **Se l'utente è FUORI CASA / REMOTO** (`tw.py hardware --remote`):
-  Modalita silenziosa ATTIVA: zero suoni o beep, telemetria e alert indirizzati automaticamente alla dashboard web remota via Cloudflare Tunnel per consultazione da smartphone: `https://payments-baghdad-oakland-dsc.trycloudflare.com`.
+- Have the tester or pentester challenge the change, so edge cases do not break the app.
+- Record every mistake found and avoided in the brain, so later tasks are vaccinated:
+  `tw.py learn record --title "..." --trigger "..." --anti-pattern "..." --solution "..."`
 
-### 8. Report Finale
-Mostra all'utente solo l'essenziale:
-- **Risposta alle domande intercalate** (se presenti nel prompt dell'utente).
-- **Cosa è stato fatto** (in modo chiaro e conciso, nella lingua dell'utente).
-- **Esito scansione e documentazione** (`tw.py scan` e `tw.py verify-docs`).
-- **La prova di esecuzione reale** (output dello smoke test / tempo di esecuzione senza crash).
-- **Cosa verificare con i tuoi occhi** (il comando esatto per giocare o usare l'app).
+### 6. Documentation gate
+
+Before you release or close any workflow:
+1. `tw.py verify-docs --strict`.
+2. Make sure `docs/memory/STATE.md` was updated with the real changes.
+3. Make sure the brain graph has no broken links or missing files.
+
+### 7. GitHub cycle (issues, PRs, CI/CD, releases)
+
+When the task touches GitHub (`issue`, `pr`, `review`, `ci`, `release`):
+- **Issue fix**: read it with `gh issue view`, create a branch, fix and verify with `tw.py smoke`,
+  open the PR that closes it (`Closes #num`).
+- **Pull request**: `gh pr create` with a summary, the reason and the smoke-test evidence.
+- **PR review**: `code-reviewer` reads the diff (`gh pr diff`) and checks for regressions.
+- **CI/CD debugging**: when a GitHub Actions workflow fails, get the logs with
+  `gh run view --log-failed` and hand them to `build-fixer`.
+- **Releases**: `release-manager` handles semantic versioning, changelog, tag and
+  `gh release create`.
+
+### 8. Hardware and thermal guard (home vs away)
+
+Zero-token hardware and thermal monitoring, to prevent overheating and watch the host:
+- **Current state**: `tw.py hardware` (or `team hardware` from a terminal).
+- **User at home** (`tw.py hardware --home`): sound alarm ON; above the critical thresholds
+  (CPU > 85°C, GPU > 80°C) a beep warns the user at the desk.
+- **User away** (`tw.py hardware --remote`): silent mode, no beeps; telemetry and alerts go to
+  the dashboard on `http://127.0.0.1:8080`, which the user can expose to a phone with
+  `cloudflared tunnel --url http://127.0.0.1:8080`.
+
+### 9. Final report
+
+Show the user only what matters, in their language:
+- **Answers to the questions in between** (when the prompt had any).
+- **What was done**, clearly and briefly.
+- **Scan and documentation result** (`tw.py scan` and `tw.py verify-docs`).
+- **Evidence from the real run** (smoke-test output, run time without crashes).
+- **What to check with your own eyes** (the exact command to play or use the app).

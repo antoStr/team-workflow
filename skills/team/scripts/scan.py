@@ -200,38 +200,38 @@ def print_scan_report(report):
     
     git = report["git"]
     if git.get("is_git"):
-        clean_status = "Pulito (Clean)" if git.get("is_clean") else f"{git.get('modified_files')} file modificati"
-        print(f"🌿 Git Branch: {git.get('branch')} | Stato: {clean_status}")
-        print(f"📌 Ultimo Commit: {git.get('last_commit')}")
+        clean_status = "clean" if git.get("is_clean") else f"{git.get('modified_files')} modified files"
+        print(f"🌿 Git Branch: {git.get('branch')} | Status: {clean_status}")
+        print(f"📌 Last commit: {git.get('last_commit')}")
     else:
-        print("⚠️ Non è una repository Git")
+        print("⚠️ Not a Git repository")
 
     stack = report["stack"]
-    langs = ", ".join(stack["languages"]) or "Nessun linguaggio primario rilevato"
-    fws = ", ".join(stack["frameworks"]) or "Nessun framework rilevato"
-    ui = ", ".join(stack["ui_components"]) or "Nessuna libreria UI componente rilevata"
-    test = ", ".join(stack["testing"]) or "Nessun framework test rilevato"
+    langs = ", ".join(stack["languages"]) or "no primary language detected"
+    fws = ", ".join(stack["frameworks"]) or "no framework detected"
+    ui = ", ".join(stack["ui_components"]) or "no UI component library detected"
+    test = ", ".join(stack["testing"]) or "no test framework detected"
 
     print("\n🛠️ Tech Stack:")
-    print(f"  • Linguaggi:  {langs}")
+    print(f"  • Languages:  {langs}")
     print(f"  • Frameworks: {fws}")
     print(f"  • UI Stack:   {ui}")
     print(f"  • Test Suite: {test}")
 
     mem = report["memory"]
-    print("\n🧠 Memory & Documentazione:")
-    print(f"  • INDEX.md:        {'✅ Presente' if mem['index_md'] else '❌ Assente (crea con init_memory)'}")
-    print(f"  • STATE.md:        {'✅ Presente' if mem['state_md'] else '❌ Assente'}" + (f" (aggiornato: {mem['state_last_modified']})" if mem['state_last_modified'] else ""))
-    print(f"  • Brain Vault:     {'✅ Attivo' if mem['brain_vault'] else '❌ Inattivo'} ({mem['brain_nodes']} nodi mappati)")
-    print(f"  • Vaccini Attivi:  🛡️ {mem['active_vaccines']} anti-pattern registrati")
+    print("\n🧠 Memory & documentation:")
+    print(f"  • INDEX.md:        {'✅ present' if mem['index_md'] else '❌ missing (create it with init_memory)'}")
+    print(f"  • STATE.md:        {'✅ present' if mem['state_md'] else '❌ missing'}" + (f" (updated: {mem['state_last_modified']})" if mem['state_last_modified'] else ""))
+    print(f"  • Brain Vault:     {'✅ active' if mem['brain_vault'] else '❌ inactive'} ({mem['brain_nodes']} mapped nodes)")
+    print(f"  • Vaccines:        🛡️ {mem['active_vaccines']} recorded anti-patterns")
 
-    print("\n💡 Raccomandazioni:")
+    print("\n💡 Recommendations:")
     if not mem["state_md"]:
-        print("  - Genera docs/memory/STATE.md per tracciare lo stato del progetto.")
+        print("  - Create docs/memory/STATE.md to track the project state.")
     if "JavaScript/TypeScript" in stack["languages"] and not stack["ui_components"]:
-        print("  - Se sviluppi frontend, consulta `tw.py library search pick-ui-library shadcn-ui base-ui sonner` per un'architettura componenti moderna.")
+        print("  - For frontend work, see `tw.py library search pick-ui-library shadcn-ui base-ui sonner` for a modern component setup.")
     if git.get("modified_files", 0) > 0:
-        print(f"  - Attenzione: ci sono {git.get('modified_files')} modifiche non committate nel working tree.")
+        print(f"  - Warning: {git.get('modified_files')} uncommitted changes in the working tree.")
     print("=" * 60)
 
 

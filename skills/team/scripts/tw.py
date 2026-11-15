@@ -1072,35 +1072,40 @@ def cmd_setup(_args):
 
 
 def cmd_hardware(args):
-    root = repo_root() or os.getcwd()
-    mode_file = os.path.join(root, "hardware_mode.json")
-    status_file = os.path.join(root, "hardware_status.json")
+    data_dir = settings.hardware_dir()
+    os.makedirs(data_dir, exist_ok=True)
+    mode_file = os.path.join(data_dir, "hardware_mode.json")
+    status_file = os.path.join(data_dir, "hardware_status.json")
 
     if getattr(args, "home", False):
         try:
             with open(mode_file, "w", encoding="utf-8") as f:
                 json.dump({"mode": "home", "updated_at": time.strftime("%Y-%m-%dT%H:%M:%S%z")}, f, indent=2)
-            print("Modalita Presenza impostata su: A CASA")
-            print("  -> Allarmi sonori (Beep acustici) ATTIVI su temperature critiche CPU/GPU.")
+            print("Presence mode set to: HOME")
+            print("  -> Sound alarms (beeps) ON for critical CPU/GPU temperatures.")
         except OSError as e:
-            print(f"Errore scrittura {mode_file}: {e}")
+            print(f"Cannot write {mode_file}: {e}")
 
     if getattr(args, "remote", False):
         try:
             with open(mode_file, "w", encoding="utf-8") as f:
                 json.dump({"mode": "remote", "updated_at": time.strftime("%Y-%m-%dT%H:%M:%S%z")}, f, indent=2)
-            print("Modalita Presenza impostata su: FUORI CASA / REMOTO")
-            print("  -> Modalita Silenziosa ATTIVA (Zero beep, allarmi instradati su dashboard remota e log).")
+            print("Presence mode set to: AWAY / REMOTE")
+            print("  -> Silent mode ON (no beeps; alerts go to the remote dashboard and the log).")
         except OSError as e:
-            print(f"Errore scrittura {mode_file}: {e}")
+            print(f"Cannot write {mode_file}: {e}")
 
     if getattr(args, "start", False):
-        script = os.path.join(root, "tools", "hardware_guard.ps1")
+        # the guard ships with the plugin, not with the project being worked on
+        script = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "tools", "hardware_guard.ps1"))
         if os.path.isfile(script):
             flags = subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0
-            subprocess.Popen(["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", script],
+            subprocess.Popen(["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", script,
+                              "-DataDir", data_dir],
                              creationflags=flags)
-            print(f"Hardware Guard avviato in background da {script}")
+            print(f"Hardware Guard started in the background from {script}")
+        else:
+            print(f"Hardware Guard not found: {script}")
 
     data = {}
     if os.path.isfile(status_file):
@@ -1115,8 +1120,8 @@ def cmd_hardware(args):
         return
 
     if not data:
-        print("Hardware Guard non ha ancora generato dati di telemetria.")
-        print("Avvialo con: `tw.py hardware --start`")
+        print("Hardware Guard has not written any telemetry yet.")
+        print("Start it with: `tw.py hardware --start`")
         return
 
     mode = str(data.get("Mode", "home")).upper()
@@ -1129,22 +1134,22 @@ def cmd_hardware(args):
     alerts = data.get("Alerts", [])
 
     status_icon = "OK" if status == "OK" else ("WARNING" if status == "WARNING" else "CRITICAL")
-    mode_desc = f"{mode} (Silenzioso: {silent})"
+    mode_desc = f"{mode} (silent: {silent})"
 
     print(f"Hardware & Thermal Telemetry [{status_icon}]")
-    print(f"  Modalita Presenza: {mode_desc}")
-    print(f"  CPU Temp: {cpu.get('Temp_C', '?')} C (Carico: {cpu.get('LoadPercent', '?')}%, Max: {cpu.get('Max_Temp_C', '?')} C)")
+    print(f"  Presence mode: {mode_desc}")
+    print(f"  CPU Temp: {cpu.get('Temp_C', '?')} C (load: {cpu.get('LoadPercent', '?')}%, Max: {cpu.get('Max_Temp_C', '?')} C)")
     if gpu:
         print(f"  GPU Temp: {gpu.get('Temp_C', '?')} C ({gpu.get('Name', 'GPU')}, Max: {gpu.get('Max_Temp_C', '?')} C)")
     print(f"  RAM: {ram.get('PercentUsed', '?')}% ({ram.get('UsedGB', '?')} GB / {ram.get('TotalGB', '?')} GB)")
-    print(f"  Disco {disks.get('Drive', 'C')}: {disks.get('PercentUsed', '?')}% in uso ({disks.get('FreeGB', '?')} GB liberi)")
+    print(f"  Disk {disks.get('Drive', 'C')}: {disks.get('PercentUsed', '?')}% used ({disks.get('FreeGB', '?')} GB free)")
     if alerts:
-        print(f"  Allerte attive ({len(alerts)}):")
+        print(f"  Active alerts ({len(alerts)}):")
         for a in alerts:
             print(f"    - {a}")
     else:
-        print("  Allerte attive: Nessuna allerta.")
-    print("  Dashboard remota: https://payments-baghdad-oakland-dsc.trycloudflare.com (locale: http://127.0.0.1:8080)")
+        print("  Active alerts: none.")
+    print("  Dashboard: http://127.0.0.1:8080 (remote access: `cloudflared tunnel --url http://127.0.0.1:8080`)")
 
 
 def cmd_scan(args):

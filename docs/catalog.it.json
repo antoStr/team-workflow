@@ -65,7 +65,13 @@
     "pentester": "Esegue penetration testing offensivo e red-team ispirato a Strix: formula exploit, verifica con PoC riproducibili, calibra CVSS ed elimina falsi positivi tramite contro-prove.",
     "reverse-engineer": "Esegue reverse engineering e analisi statica/dinamica di binari nativi (PE, ELF, firmware) con IDA Pro, Ghidra, x64dbg e MCP di decompilazione per scovare vulnerabilità di memoria.",
     "malware-analyst": "Specialista in analisi malware e threat intelligence: triage statico e dinamico, deoffuscamento, protocolli C2, YARA/Sigma e audit link sospetti.",
-    "design-engineer": "Ingegnere di design UI/UX e frontend: specialista in micro-interazioni, fisica dei gesti, animazioni con spring, sistemi di design moderni (shadcn, Base UI, Radix, Sonner, Vaul) e conformità WCAG 2.2 AA."
+    "design-engineer": "Ingegnere di design UI/UX e frontend: specialista in micro-interazioni, fisica dei gesti, animazioni con spring, sistemi di design moderni (shadcn, Base UI, Radix, Sonner, Vaul) e conformità WCAG 2.2 AA.",
+    "project-manager": "Imposta e guida il progetto dall'avvio alla chiusura: charter, piano integrato e baseline, controllo delle modifiche, report di stato e lezioni apprese.",
+    "project-scheduler": "Costruisce o recupera il cronoprogramma: attività e legami, stime PERT, percorso critico e float con calcolatore, Gantt, livellamento risorse e compressione.",
+    "project-controller": "Gestisce i numeri del progetto: budget e riserve, misura dell'avanzamento, earned value (CPI, SPI, EAC) con calcolatore, previsioni e impatto delle modifiche.",
+    "risk-manager": "Identifica e analizza rischi e opportunità, assegna responsabili e risposte, dimensiona la riserva di contingenza e tiene vivo il registro dei rischi.",
+    "stakeholder-manager": "Gestisce persone e comunicazione: analisi degli stakeholder, piano di comunicazione, RACI, riunioni, conflitti e negoziazione; prepara bozze, non invia nulla.",
+    "agile-coach": "Sceglie e guida l'approccio agile o ibrido: Scrum, Kanban, backlog e user story, stime, velocity, pianificazione di sprint e rilasci, debito tecnico."
   },
   "packs": {
     "agentic-patterns": "Ingegneria con agenti: cicli autonomi, costruzione di harness, pipeline LLM.",
@@ -98,7 +104,8 @@
     "cloudflare-sec": "Audit di sicurezza enterprise, caccia alle vulnerabilità guidata da copertura e analisi binaria di Cloudflare.",
     "malware-analysis": "Analisi malware specializzata, deoffuscamento, protocolli C2, memoria e regole YARA/Sigma.",
     "threat-intel-url": "Analisi link sospetti, urlscan.io, phishing header investigation e tracciamento infrastrutture C2.",
-    "frontend-components": "Architettura avanzata di componenti UI moderni: shadcn/ui, Base UI, Radix, Sonner, Vaul, cmdk, NumberFlow, Magic UI, Aceternity UI, 21st.dev e selezione intelligente delle librerie."
+    "frontend-components": "Architettura avanzata di componenti UI moderni: shadcn/ui, Base UI, Radix, Sonner, Vaul, cmdk, NumberFlow, Magic UI, Aceternity UI, 21st.dev e selezione intelligente delle librerie.",
+    "project-management": "Project management: ciclo di vita, ambito e WBS, schedulazione, costi ed earned value, rischi, stakeholder, contratti e approcci agili."
   },
   "library": {
     "accessibility": "Progettare, realizzare e verificare interfacce accessibili (WCAG 2.2 AA) su web, iOS e Android.",
@@ -603,6 +610,14 @@
     "rare-ui": "Micro-animazioni e pattern interattivi unici di RareUI: pulsanti magnetici, schede con tilt 3D interattivo, griglie spotlight con tracciamento mouse e cursori fluidi.",
     "magic-ui": "Libreria di effetti visivi Magic UI per design engineer: Bento Griglie, Animated Beam, Marquee continuo, particelle, cerchi orbitali, Shimmer Button e Border Beam.",
     "aceternity-ui": "Libreria Aceternity UI di Manu Arora per animazioni dinamiche ad alto impatto: 3D Cards, Sparkles, Lamp Hero, Tracing Beam, Aurora Background e Floating Dock.",
-    "registry-21st-dev": "Architettura di registro 21st.dev ('npm per Design Engineer'): ricerca, consumo e pubblicazione di componenti compatibili con shadcn, barre di input AI e blocchi landing."
+    "registry-21st-dev": "Architettura di registro 21st.dev ('npm per Design Engineer'): ricerca, consumo e pubblicazione di componenti compatibili con shadcn, barre di input AI e blocchi landing.",
+    "pm-lifecycle": "Il progetto dall'avvio alla chiusura secondo ISO 21502: gruppi di processo, cicli di vita e fasi, project charter, baseline, controllo delle modifiche, qualità e lezioni apprese.",
+    "pm-scope-wbs": "Ambito e WBS: dai requisiti alla descrizione dell'ambito, regola del 100%, work package, dizionario della WBS, OBS e matrici RAM/RACI.",
+    "pm-schedule": "Schedulazione: legami FS/SS/FF/SF, stime a tre punti (PERT), percorso critico (CPM) con calcolatore incluso, Gantt, livellamento risorse, crashing, fast tracking e critical chain.",
+    "pm-control": "Costi e avanzamento: stime, budget e riserve, curva S e cash flow, regole di avanzamento, earned value (CPI, SPI, EAC, TCPI) con calcolatore incluso, report di stato.",
+    "pm-risk": "Gestione dei rischi (minacce e opportunità): identificazione, probabilità e impatto, mappa di calore, strategie di risposta, riserve di contingenza e registro dei rischi.",
+    "pm-stakeholders": "Stakeholder, comunicazione e team: griglia potere/interesse, piano di comunicazione, leadership e motivazione, sviluppo del team, negoziazione, conflitti, problem solving ed etica.",
+    "pm-procurement": "Acquisti e contratti di progetto: make or buy, ciclo di vita del contratto, tipi di contratto (prezzo fisso, rimborso costi, T&M) e ruolo del project manager.",
+    "pm-agile": "Approcci agili: scelta del ciclo di vita, Manifesto Agile, Scrum, Kanban e Lean, user story INVEST, stime, velocity, burndown, MVP e debito tecnico."
   }
 }

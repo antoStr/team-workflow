@@ -167,14 +167,25 @@ def update_opencode(harness="opencode"):
     return code == 0, out
 
 
+LEGACY = "team-workflow"  # marketplace and plugin name before 2.4
+
+
+def claude_ids(plugin_list):
+    """(marketplace, plugin id) to update: installs made before 2.4 keep team-workflow@team-workflow."""
+    if f"{NAME}@{NAME}" not in plugin_list and f"{LEGACY}@{LEGACY}" in plugin_list:
+        return LEGACY, f"{LEGACY}@{LEGACY}"
+    return NAME, f"{NAME}@{NAME}"
+
+
 def update(harness, source):
     """Run the update steps; (ok, log)."""
     if harness in PAYLOADS:
         return update_opencode(harness)
     if harness == "agy":  # safe path: source checked first, previous version restored on failure
         return agy_update([NAME])
-    steps = [("claude", "plugin", "marketplace", "update", NAME),
-             ("claude", "plugin", "update", f"{NAME}@{NAME}")]
+    market, plugin = claude_ids(run("claude", "plugin", "list")[1])
+    steps = [("claude", "plugin", "marketplace", "update", market),
+             ("claude", "plugin", "update", plugin)]
     log = []
     for cmd in steps:
         code, out = run(*cmd)

@@ -1,108 +1,110 @@
-# team-workflow: manuale completo
+# team-workflow: reference manual
 
-La guida per iniziare e' il [README](../README.md); per usare e creare agenti c'e' la
-[guida agli agenti](AGENTS.md); l'elenco di tutti gli agenti e della libreria e' in
-[CATALOG.md](CATALOG.md). Qui trovi ogni dettaglio, app per app.
+The getting-started guide is the [README](../README.md); to use and create agents there is the
+[agent guide](AGENTS.md); the list of every agent and library entry is in
+[CATALOG.md](CATALOG.md). This page has every detail, app by app.
+[Versione italiana](REFERENCE.it.md).
 
-Plugin per **Claude Code**, **agy (Antigravity)** e **OpenCode** che organizza il lavoro su un progetto come
-un piccolo team: una memoria di progetto condivisa, agenti specializzati che intervengono solo
-quando servono, e un report a fine lavoro che chiede prima di applicare modifiche non richieste.
+A plugin for **Claude Code**, **agy (Antigravity)**, **OpenCode** and **Codex** that organizes
+work on a project like a small team: a shared project memory, specialist agents that step in
+only when needed, and an end-of-task report that asks before applying changes nobody asked for.
 
-| Funzione | Claude Code | agy | OpenCode |
+| Feature | Claude Code | agy | OpenCode |
 |---|---|---|---|
-| Memoria letta a ogni sessione | hook all'avvio | regole `AGENTS.md` | 2.x: blocco in `AGENTS.md`; 1.x: plugin (prompt di sistema) |
-| Promemoria per aggiornare `STATE.md` | hook Stop | hook Stop | 2.x: nelle istruzioni; 1.x: plugin (`session.idle`) |
-| Comandi (`setup-memory`, `call-team`, `write-docs`, `usage-costs`...) | `/team-workflow:<nome>` | skill con lo stesso nome | `/team-workflow/<nome>` |
-| Agenti nativi: 20 del core + pack opzionali + i tuoi | `~/.claude/agents/` | `~/.gemini/config/agents/` (`invoke_subagent`) | `~/.config/opencode/agents/` (strumento subagent) |
-| Wizard a inizio conversazione: dove salvare le scelte (conversazione, utente, progetto), preset, agenti, modello ed effort per app, skill, add-on, team talk | si' | si' | si' |
-| Token misurati nella dashboard | sessioni e sub-agenti | solo i worker | sessioni, sub-agenti e worker |
-| Comandi senza token (impostazioni, agenti, add-on, audit, doctor...) | `/team-workflow:<comando>` | `!team-workflow <comando>` | `/team-workflow/<comando>` (1.x: 0 token; 2.x: il modello mostra solo l'output) e `!team-workflow <comando>` |
-| Add-on: skill, plugin e server MCP, anche a pacchetti (`frontend`, `token-saving`, `mcp`, `popular`) | marketplace, skill copiate, `claude mcp add` | plugin o skill copiate, `mcp_config.json` | skill copiate, plugin e `mcp` in `opencode.json` |
-| Agenti che parlano tra loro (team talk) | si' | si' | si' |
-| Libreria: 296 skill, 94 comandi, 22 set di regole | ricerca + skill native a scelta | ricerca + skill native a scelta | ricerca + skill native a scelta |
-| Attivazione automatica o solo quando la chiami | si' | solo il controllo Stop | si' |
+| Memory read at every session | start-up hook | `AGENTS.md` rules | 2.x: block in `AGENTS.md`; 1.x: plugin (system prompt) |
+| Reminder to update `STATE.md` | Stop hook | Stop hook | 2.x: in the instructions; 1.x: plugin (`session.idle`) |
+| Commands (`setup-memory`, `call-team`, `write-docs`, `usage-costs`...) | `/team:<name>` | skill with the same name | `/team-workflow/<name>` |
+| Native agents: 20 core + optional packs + yours | `~/.claude/agents/` | `~/.gemini/config/agents/` (`invoke_subagent`) | `~/.config/opencode/agents/` (subagent tool) |
+| Start-of-conversation wizard: where to save choices (conversation, user, project), preset, agents, model and effort per app, skills, add-ons, team talk | yes | yes | yes |
+| Tokens measured in the dashboard | sessions and subagents | workers only | sessions, subagents and workers |
+| Zero-token commands (settings, agents, add-ons, audit, doctor...) | `/team:<command>` | `!team-workflow <command>` | `/team-workflow/<command>` (1.x: 0 tokens; 2.x: the model only shows the output) and `!team-workflow <command>` |
+| Add-ons: skills, plugins and MCP servers, also in bundles (`frontend`, `token-saving`, `mcp`, `popular`) | marketplace, copied skills, `claude mcp add` | plugins or copied skills, `mcp_config.json` | copied skills, plugins and `mcp` in `opencode.json` |
+| Agents that talk to each other (team talk) | yes | yes | yes |
+| Library: 417 skills, 94 commands, 22 rule sets | search + native skills on demand | search + native skills on demand | search + native skills on demand |
+| Automatic activation or only when called | yes | Stop check only | yes |
 
-## Novita' della 0.9
+## What came in 0.9
 
-- **127 agenti**: 20 nel core, 26 per 13 linguaggi, e i pack frameworks, quality, planning,
-  ml, harness, gan, opensource, network, domains, ops, growth; il pack `alt` aggiunge 39
-  versioni alternative di ruoli che esistono gia' (`alt-<nome>`). Elenco completo nel
-  [Catalogo completo](CATALOG.md).
-- **Libreria di 412 voci** (296 skill, 94 comandi, 22 set di regole) che l'orchestratore cerca
-  per ogni compito e passa agli agenti; le installi come skill native a pacchetti o una alla
-  volta (`/team-workflow:library`). Contiene solo voci che funzionano da sole.
-- **Add-on, MCP e pacchetti**: `addons add frontend | token-saving | mcp | popular` installa
-  in un colpo skill, plugin e server MCP in Claude Code, agy e OpenCode (vedi [Add-on](#add-on)).
-- **Agenti che parlano tra loro**: canale condiviso per fare debug insieme, contestarsi le
-  affermazioni con le prove e verificarsi a vicenda (`/team-workflow:talk`, `TALK.md`).
-- **`/team-workflow:setup`**: tutte le impostazioni in un posto, compresa l'attivazione
-  (automatica in ogni progetto, solo in alcuni, o solo quando la chiami).
-- **Set frontend**: `addons add frontend` installa impeccable, taste, frontend-design,
-  solar-icons e le skill Cloudflare, usate dagli agenti frontend e di sicurezza.
+- **127 agents** (137 today): 20 in the core, 26 for 13 languages, and the frameworks, quality,
+  planning, ml, harness, gan, opensource, network, domains, ops, growth packs (and `pm` since
+  then); the `alt` pack adds 39 alternative versions of existing roles (`alt-<name>`). Full list
+  in the [full catalog](CATALOG.md).
+- **A library** (533 entries today) that the orchestrator searches for every task and hands to
+  the agents; install entries as native skills by pack or one at a time (`/team:library`). It
+  only holds entries that work on their own.
+- **Add-ons, MCP and bundles**: `addons add frontend | token-saving | mcp | popular` installs
+  skills, plugins and MCP servers in Claude Code, agy and OpenCode in one go (see [Add-ons](#add-ons)).
+- **Agents that talk to each other**: a shared channel to debug together, challenge claims with
+  evidence and verify each other (`/team:talk`, `TALK.md`).
+- **`/team:setup`**: every setting in one place, activation included (automatic in every
+  project, only in some, or only when you call it).
+- **Frontend set**: `addons add frontend` installs impeccable, taste, frontend-design,
+  solar-icons and the Cloudflare skills, used by the frontend and security agents.
 
-## Cosa fa
+## What it does
 
-- **Memoria condivisa (`docs/memory`)**: file Markdown dentro il repository, letti da persone
-  e da qualunque IA. All'avvio di ogni sessione un hook inietta `INDEX.md` e `STATE.md`; se i
-  file cambiano e `STATE.md` resta indietro, un hook chiede di aggiornarla.
-- **Team a richiesta**: la sessione principale fa da orchestratore e scrum master, propone il
-  team adatto al compito e tu scegli (anche scrivendo una risposta libera).
-- **Report di fine lavoro**: fatto, verificato con le prove, rilievi, decisioni. Le domande
-  arrivano solo quando serve davvero una decisione.
-- **Controlli**: `memcheck.py` verifica lunghezze, segreti e percorsi citati; `audit` controlla
-  la sicurezza della configurazione degli agenti; `ci-init` li mette in CI su ogni pull request.
-- **Tutto personalizzabile**: agenti, pack, modelli, effort, tipo di agente, profili e add-on,
-  senza toccare il plugin. `/team-workflow:setup` raccoglie tutto in un posto solo, compresa
-  l'attivazione: da sola in ogni progetto, solo in alcuni progetti, o solo quando la chiami.
-- **Agenti che parlano tra loro (team talk)**: gli agenti di un compito condividono un canale
-  (`tw.py talk`, anche tra worktree diversi). Si fanno domande, mettono in dubbio le
-  affermazioni degli altri con le prove, verificano le correzioni e danno un verdetto; il
-  lavoro non e' finito finche' resta aperta una sfida. Tre modi: debug insieme, review
-  incrociata, confronto su una decisione (`TALK.md`). Ogni ruolo legge solo i messaggi nuovi
-  per lui (`read --for <ruolo>`), chiede e aspetta la risposta in un solo comando
-  (`post ... --wait 90`), e non puo' scrivere finche' non ha letto quello che gli e' arrivato:
-  niente correzioni incrociate ne' messaggi persi. `talk open` mostra sfide aperte e messaggi non
-  letti. In una prova con un bug segnalato, il tester ne ha trovati altri due e li ha fatti
-  correggere e verificare in circa un minuto e mezzo. Leggi la conversazione con
-  `/team-workflow:talk read <topic>`.
-- **Libreria**: 296 skill, 94 comandi e 22 serie di regole che l'orchestratore cerca per ogni
-  compito e passa agli agenti, e che puoi installare come skill native a pacchetti o una alla
-  volta (`/team-workflow:library`).
+- **Shared memory (`docs/memory`)**: Markdown files inside the repository, read by people and by
+  any AI. At the start of each session a hook injects `INDEX.md` and `STATE.md`; when files
+  change and `STATE.md` falls behind, a hook asks to update it.
+- **Teams on demand**: the main session is orchestrator and scrum master; it proposes the team
+  the task needs and you choose (also with a free-text answer).
+- **End-of-task report**: done, verified with evidence, findings, decisions. Questions come only
+  when a decision is really needed.
+- **Language**: answers come in the language you write in (English when unclear); agent
+  instructions stay in English; code, commits and repository docs keep the project's language.
+- **Checks**: `memcheck.py` checks lengths, secrets and cited paths; `audit` checks the security
+  of the agent configuration; `ci-init` runs both in CI on every pull request.
+- **Everything customizable**: agents, packs, models, effort, agent type, profiles and add-ons,
+  without touching the plugin. `/team:setup` gathers it all in one place, activation included.
+- **Agents that talk to each other (team talk)**: the agents of a task share a channel
+  (`tw.py talk`, also across worktrees). They ask questions, challenge each other's claims with
+  evidence, verify fixes and give a verdict; the work is not done while a challenge is open.
+  Three modes: debugging together, cross review, debate on a decision (`TALK.md`). Each role
+  reads only the messages that are new for it (`read --for <role>`), asks and waits for the
+  answer in one command (`post ... --wait 90`), and cannot write until it has read what
+  arrived: no crossed fixes or lost messages. `talk open` shows open challenges and unread
+  messages. In a trial with one reported bug, the tester found two more and had them fixed and
+  verified in about a minute and a half. Read the conversation with `/team:talk read <topic>`.
+- **Library**: skills, commands and rule sets that the orchestrator searches for every task and
+  hands to the agents, and that you can install as native skills by pack or one at a time
+  (`/team:library`).
 
-## I team e gli agenti
+## Teams and agents
 
-Un team e' un menu, non una squadra da lanciare tutta insieme: l'orchestratore propone i ruoli
-che servono al compito, tu scegli chi costruisce e chi controlla (anche piu' figure alla volta,
-da team diversi), e partono solo quelli.
+A team is a menu, not a squad launched all at once: the orchestrator proposes the roles the task
+needs, you choose who builds and who checks (several at a time, from different teams), and only
+those start.
 
-| Team | Chi costruisce | Chi controlla |
+| Team | Who builds | Who checks |
 |---|---|---|
 | product | product-manager, ui-ux-designer, planner | market-researcher, architect |
-| frontend | frontend-dev, ui-ux-designer (con le skill del set frontend) | accessibility-specialist, e2e-tester, performance-engineer, code-reviewer, typescript-reviewer, react-reviewer, vue-reviewer, flutter-reviewer |
+| frontend | frontend-dev, ui-ux-designer (with the frontend set skills) | accessibility-specialist, e2e-tester, performance-engineer, code-reviewer, typescript-reviewer, react-reviewer, vue-reviewer, flutter-reviewer |
 | backend | backend-dev, database-engineer | tester, security-reviewer, performance-engineer, code-reviewer, `<lang>`-reviewer, database-reviewer, django-reviewer, fastapi-reviewer |
 | fullstack | backend-dev, frontend-dev, database-engineer | tester, e2e-tester, code-reviewer, security-reviewer, `<lang>`-reviewer |
 | data | data-analyst, database-engineer | tester, ml-reviewer, rag-reviewer |
 | marketing | market-researcher, marketing-strategist, seo-specialist | product-manager, ui-ux-designer |
-| quality | nessuno | tester, e2e-tester, code-reviewer, security-reviewer, accessibility-specialist, performance-engineer, silent-failure-hunter, type-design-reviewer, test-coverage-reviewer, database-reviewer, comment-analyzer, commit-reviewer |
+| quality | none | tester, e2e-tester, code-reviewer, security-reviewer, accessibility-specialist, performance-engineer, silent-failure-hunter, type-design-reviewer, test-coverage-reviewer, database-reviewer, comment-analyzer, commit-reviewer |
 | release | release-manager, devops-engineer | tester, technical-writer, open-source-sanitizer |
 | maintenance | refactor-specialist, code-simplifier, build-fixer, `<lang>`-build-fixer | tester, code-reviewer, performance-engineer |
-| docs | technical-writer, doc-keeper | nessuno |
+| docs | technical-writer, doc-keeper | none |
 | architecture | architect, code-architect, code-explorer, spec-miner, planner, docs-lookup | database-engineer, security-reviewer, performance-engineer, devops-engineer |
 | agent setup | harness-optimizer, loop-operator | security-reviewer, agent-evaluator, conversation-analyzer |
 | build loop | gan-planner, gan-generator | gan-evaluator |
 | network | network-architect, homelab-architect | network-config-reviewer, network-troubleshooter, security-reviewer |
-| domain | chi costruisce il compito | healthcare-reviewer, bengali-reviewer |
-| operations | chief-of-staff | nessuno |
+| domain | the builders of the task | healthcare-reviewer, bengali-reviewer |
+| operations | chief-of-staff | none |
+| project | project-manager, project-scheduler, project-controller, agile-coach | risk-manager, stakeholder-manager, product-manager |
 
-**Pack.** I 20 ruoli del **core** sono sempre attivi; gli altri arrivano da pack che accendi
-quando servono:
+**Packs.** The 20 **core** roles are always on; the others come from packs you switch on when
+needed:
 
-| Pack | Ruoli |
+| Pack | Roles |
 |---|---|
-| un pack per linguaggio: `go`, `rust`, `python`, `typescript`, `java`, `kotlin`, `cpp`, `csharp`, `swift`, `dart`, `php`, `ruby`, `fsharp` | `<lang>-reviewer` (idiomi, sicurezza, framework come Django, FastAPI, React, Vue, Next.js, Spring, Laravel, Rails) e `<lang>-build-fixer` (build rossa, type check, dipendenze) |
+| one pack per language: `go`, `rust`, `python`, `typescript`, `java`, `kotlin`, `cpp`, `csharp`, `swift`, `dart`, `php`, `ruby`, `fsharp` | `<lang>-reviewer` (idiom, safety, frameworks such as Django, FastAPI, React, Vue, Next.js, Spring, Laravel, Rails) and `<lang>-build-fixer` (red build, type check, dependencies) |
 | `frameworks` | react-reviewer, react-build-fixer, vue-reviewer, django-reviewer, django-build-fixer, fastapi-reviewer, flutter-reviewer, harmonyos-specialist |
 | `quality` | silent-failure-hunter, type-design-reviewer, test-coverage-reviewer, build-fixer, code-simplifier, comment-analyzer, commit-reviewer, database-reviewer |
 | `planning` | planner, code-explorer, code-architect, spec-miner, docs-lookup |
+| `pm` | project-manager, project-scheduler, project-controller, risk-manager, stakeholder-manager, agile-coach |
 | `ml` | ml-reviewer, rag-reviewer, pytorch-build-fixer |
 | `opensource` | open-source-sanitizer, open-source-forker, open-source-packager |
 | `harness` | harness-optimizer, agent-evaluator, conversation-analyzer, loop-operator |
@@ -110,369 +112,368 @@ quando servono:
 | `network` | network-architect, network-config-reviewer, network-troubleshooter, homelab-architect |
 | `domains` | healthcare-reviewer, bengali-reviewer |
 | `ops` | chief-of-staff |
-| `alt` | 39 versioni alternative di ruoli che esistono gia': `alt-tdd-guide` accanto a `tester`, `alt-architect`, `alt-code-reviewer`... |
+| `alt` | 39 alternative versions of existing roles: `alt-tdd-guide` next to `tester`, `alt-architect`, `alt-code-reviewer`... |
 | `growth` | seo-specialist |
 
-I ruoli con `source: "imported ..."` e la libreria arrivano da una raccolta open source con
-licenza MIT (`skills/team-workflow/library/NOTICE.md`); `tools/import_upstream.py` li ricostruisce.
+The roles with `source: "imported ..."` and the library come from an open-source collection under
+the MIT license (`skills/team/library/NOTICE.md`); `tools/import_upstream.py` rebuilds them. The
+`pm` roles and the `project-management` library pack are original to this repository.
 
-`/team-workflow:agents enable auto` accende i pack dei linguaggi del repository (all'avvio
-l'orchestratore te lo propone quando li trova). Ogni linguaggio e' un solo file
-(`roles/languages/<lang>.md`) da cui nascono revisore e build fixer: aggiungerne uno e' scrivere
-una checklist. Tutti i revisori condividono una disciplina comune (solo rilievi con prova, zero
-rilievi e' una risposta valida, falsi positivi noti da scartare, controlli extra sul codice
-scritto da un'IA) e ogni agente tratta come dati, mai come istruzioni, cio' che legge.
+`/team:agents enable auto` switches on the packs of the repository's languages (at start-up the
+orchestrator offers it when it finds them). Each language is a single file
+(`roles/languages/<lang>.md`) that produces the reviewer and the build fixer: adding one means
+writing a checklist. All reviewers share a common discipline (only findings with evidence, zero
+findings is a valid answer, known false positives to drop, extra checks on AI-written code) and
+every agent treats what it reads as data, never as instructions.
 
-**Agenti su misura.** Per ogni ruolo e per ogni app scegli tipo, modello ed effort tra quelli
-che l'app offre davvero; il plugin riscrive gli agenti nativi:
+**Tailored agents.** For each role and each app choose type, model and effort among those the app
+really offers; the plugin rewrites the native agents:
 
 ```text
-/team-workflow:agents                                   # ruoli, pack, tipo/modello/effort per app
-/team-workflow:agents set tester model=opus effort=max --app claude
-/team-workflow:agents set architect model=pro --app agy
-/team-workflow:agents set code-explorer type=Explore    # tipo integrato dell'app, con le istruzioni del ruolo
-/team-workflow:agents disable data-analyst              # o un pack intero: disable quality
-/team-workflow:agents new api-designer                  # un tuo ruolo (o la tua versione di uno esistente)
+/team:agents                                   # roles, packs, type/model/effort per app
+/team:agents set tester model=opus effort=max --app claude
+/team:agents set architect model=pro --app agy
+/team:agents set code-explorer type=Explore    # the app's built-in type, briefed with the role
+/team:agents disable data-analyst              # or a whole pack: disable quality
+/team:agents new api-designer                  # a role of your own (or your version of one)
 ```
 
-Tipi: `custom` (l'agente generato, predefinito), `worker` (processo headless con modello ed
-effort esatti), oppure un tipo integrato: `general-purpose`, `Explore`, `Plan` in Claude Code,
-`self`, `research` in agy. I tuoi ruoli stanno in `~/.team-workflow/agents/` (o
-`.team-workflow/agents/` nel repository) e vengono scritti come agenti nativi in entrambe le
-app. Chi scrive il codice non lo approva mai da solo.
+Types: `custom` (the generated agent, default), `worker` (headless process with the exact model
+and effort), or a built-in type: `general-purpose`, `Explore`, `Plan` in Claude Code, `self`,
+`research` in agy. Your roles live in `~/.team-workflow/agents/` (or `.team-workflow/agents/` in
+the repository) and are written as native agents in every app. Whoever writes the code never
+approves it alone.
 
-## Comandi
+## Commands
 
-| Comando | Cosa fa |
+| Command | What it does |
 |---|---|
-| `/team-workflow:setup [area]` | configura tutto: attivazione (automatica, solo in questo progetto, solo quando la chiami), wizard, team, modelli, ruoli e pack, libreria, team talk, controlli, add-on, preset |
-| `/team-workflow:setup-memory` | crea `docs/memory` e la compila leggendo il codice |
-| `/team-workflow:call-team [team] <compito>` | descrivi il compito e scegli le figure (anche piu' di una); il team (frontend, backend, data...) e' facoltativo |
-| `/team-workflow:new-feature <cosa>` | nuova funzionalita' con il team |
-| `/team-workflow:fix-bug <bug>` | test che fallisce, correzione della causa, verifica |
-| `/team-workflow:review-changes [range]` | test, review del codice e della sicurezza, un solo verdetto |
-| `/team-workflow:release [versione]` | rilascio, solo dopo la tua approvazione |
-| `/team-workflow:end-session` | chiude la sessione: memoria, lezioni apprese, punto di ripresa |
-| `/team-workflow:usage-costs [giorni\|latest]` | token e costi per agente, modello e sessione |
-| `/team-workflow:write-docs [architettura\|onboarding\|changelog\|readme]` | documentazione per le persone ricavata dalla memoria, verificata sul codice |
-| `/team-workflow:learn-history` | abitudini del repository dalla storia git (punti caldi, file fragili, accoppiamenti, convenzioni), trasformate in memoria con il tuo ok |
+| `/team <task>` | the universal command: scan, team, live verification, report (`skills/team/SKILL.md`) |
+| `/team:setup [area]` | configure everything: activation (automatic, only in this project, only when called), wizard, teams, models, roles and packs, library, team talk, checks, add-ons, presets |
+| `/team:setup-memory` | creates `docs/memory` and fills it by reading the code |
+| `/team:call-team [team] <task>` | describe the task and pick the roles (more than one is fine); the team (frontend, backend, data...) is optional |
+| `/team:new-feature <what>` | a new feature with the team |
+| `/team:fix-bug <bug>` | failing test, fix of the cause, verification |
+| `/team:review-changes [range]` | tests, code and security review, one verdict |
+| `/team:release [version]` | a release, only after your approval |
+| `/team:end-session` | closes the session: memory, lessons learned, where to resume |
+| `/team:usage-costs [days\|latest]` | tokens and costs per agent, model and session |
+| `/team:write-docs [architecture\|onboarding\|changelog\|readme]` | documentation for people built from the memory, checked against the code |
+| `/team:learn-history` | the repository's habits from git history (hot spots, fragile files, couplings, conventions), turned into memory with your ok |
 
-Senza token (in Claude Code li esegue un hook, il modello non li vede; in agy si lanciano in
-modalita' bash, `!team-workflow <comando>`):
+Zero-token (in Claude Code a hook runs them and the model never sees them; in agy run them in
+bash mode, `!team-workflow <command>`):
 
-| Comando | Cosa fa |
+| Command | What it does |
 |---|---|
-| `/team-workflow:settings [set <chiave> <valore>]` | mostra o cambia le impostazioni |
-| `/team-workflow:agents [...]` | ruoli, pack, tipo, modello ed effort per ruolo e per app, ruoli tuoi |
-| `/team-workflow:profile [nome]` | preset: `budget`, `fast`, `balanced`, `thorough`, `security`, `research` |
-| `/team-workflow:models` | modelli ed effort che ogni app offre |
-| `/team-workflow:options` | cosa puo' proporre il wizard di inizio conversazione in questa app, adesso |
-| `/team-workflow:addons [add\|remove\|update <nome>]` | plugin aggiuntivi in entrambe le app |
-| `/team-workflow:audit [--strict]` | sicurezza della configurazione degli agenti |
-| `/team-workflow:doctor [--fix]` | stato dell'installazione e riparazione |
-| `/team-workflow:ci-init` | workflow GitHub Actions: memoria e audit su ogni pull request |
-| `/team-workflow:update-plugin [check]` | aggiorna team-workflow (e gli add-on scelti) in entrambe le app |
-| `/team-workflow:library [search <parole>\|show <id>\|enable\|disable <id\|pack>]` | la libreria: pack, ricerca, installazione come skill native |
-| `/team-workflow:talk [read\|open\|clear <topic>]` | cosa si sono detti gli agenti, domande e sfide ancora aperte |
+| `/team:settings [set <key> <value>]` | shows or changes the settings |
+| `/team:agents [...]` | roles, packs, type, model and effort per role and per app, your roles |
+| `/team:profile [name]` | presets: `budget`, `fast`, `balanced`, `thorough`, `security`, `research` |
+| `/team:models` | models and effort each app offers |
+| `/team:options` | what the start-of-conversation wizard can offer in this app, right now |
+| `/team:addons [add\|remove\|update <name>]` | add-on plugins in every app |
+| `/team:audit [--strict]` | security of the agent configuration |
+| `/team:doctor [--fix]` | installation health and repair |
+| `/team:ci-init` | GitHub Actions workflow: memory and audit on every pull request |
+| `/team:update-plugin [check]` | updates team-workflow (and the chosen add-ons) in every app |
+| `/team:library [search <words>\|show <id>\|enable\|disable <id\|pack>]` | the library: packs, search, install as native skills |
+| `/team:talk [read\|open\|clear <topic>]` | what the agents said to each other, questions and challenges still open |
 
-In agy crea una volta il comando `team-workflow`:
-`python3 ~/.gemini/config/plugins/team-workflow/skills/team-workflow/scripts/tw.py install-cli`.
-Da terminale ci sono anche `team-workflow learn` e `team-workflow uninstall [--all]`.
+In agy create the `team-workflow` command once:
+`python3 ~/.gemini/config/plugins/team-workflow/skills/team/scripts/tw.py install-cli`.
+From a terminal there are also `team-workflow learn` and `team-workflow uninstall [--all]`.
 
-## Add-on
+## Add-ons
 
-`/team-workflow:addons` elenca il catalogo con le versioni installate in ogni app; `add` installa,
-`update` aggiorna, `remove` toglie, e `update-plugin` aggiorna anche gli add-on scelti.
-Pacchetti, installati con un solo comando in ogni app:
+`/team:addons` lists the catalog with the versions installed in each app; `add` installs, `update`
+updates, `remove` removes, and `update-plugin` also updates the chosen add-ons. Bundles, installed
+with one command in every app:
 
-| Pacchetto | Contiene |
+| Bundle | Contains |
 |---|---|
-| `frontend` | impeccable, taste, frontend-design, solar-icons, cloudflare: `frontend-dev`, `ui-ux-designer` e `accessibility-specialist` le usano quando ci sono; `security-reviewer`, `backend-dev` e `devops-engineer` usano le skill Cloudflare nei progetti su Cloudflare (`cloudflare-one` per Zero Trust, `turnstile-spin`, `workers-best-practices`) |
-| `token-saving` | caveman (risposte compresse), ponytail (meno codice), context-mode (output enormi fuori dal contesto), serena (navigazione per simboli invece di file interi) |
-| `mcp` | context7 (documentazione aggiornata delle librerie), playwright (browser), serena, sequential-thinking |
-| `popular` | superpowers, le skill di Anthropic (documenti ed esempi), karpathy, ui-ux-pro-max, context7 |
+| `frontend` | impeccable, taste, frontend-design, solar-icons, cloudflare: `frontend-dev`, `ui-ux-designer` and `accessibility-specialist` use them when present; `security-reviewer`, `backend-dev` and `devops-engineer` use the Cloudflare skills in Cloudflare projects (`cloudflare-one` for Zero Trust, `turnstile-spin`, `workers-best-practices`) |
+| `token-saving` | caveman (compressed answers), ponytail (less code), context-mode (huge outputs kept out of context), serena (navigation by symbols instead of whole files) |
+| `mcp` | context7 (up-to-date library docs), playwright (browser), serena, sequential-thinking |
+| `popular` | superpowers, Anthropic's skills (documents and examples), karpathy, ui-ux-pro-max, context7 |
 
-Un server MCP va al livello utente: `claude mcp add --scope user` in Claude Code,
-`~/.gemini/config/mcp_config.json` in agy, la tabella `mcp` di `~/.config/opencode/opencode.json`
-in OpenCode. Un server con lo stesso nome che hai configurato tu non viene toccato.
+An MCP server goes at user level: `claude mcp add --scope user` in Claude Code,
+`~/.gemini/config/mcp_config.json` in agy, the `mcp` table of `~/.config/opencode/opencode.json`
+in OpenCode. A server with the same name that you configured yourself is left alone.
 
-| Add-on | Cosa aggiunge | Claude Code | agy e OpenCode |
+| Add-on | What it adds | Claude Code | agy and OpenCode |
 |---|---|---|---|
-| `caveman` | risposte compresse, meno token in uscita (licenza MIT e BSL) | marketplace | le sue skill copiate in `~/.gemini/config/skills` |
-| `ponytail` | la soluzione piu' semplice che funziona, meno codice | marketplace | `agy plugin install` |
-| `impeccable` | design, critica, audit e rifinitura delle interfacce (Apache-2.0) | marketplace | le sue skill copiate |
-| `taste` | direzione artistica anti-"AI slop" per siti e schermate (MIT) | marketplace | le sue skill copiate |
-| `frontend-design` | la skill frontend-design di Anthropic (Apache-2.0) | marketplace ufficiale | la skill copiata |
-| `solar-icons` | icone Solar: nomi esatti e import per framework (MIT, icone CC BY 4.0) | skill copiata in `~/.claude/skills` | la skill copiata |
-| `cloudflare` | skill Cloudflare: Workers best practices, Zero Trust (`cloudflare-one`), Turnstile, web perf (Apache-2.0) | marketplace | le sue skill copiate |
-| `superpowers` | flusso piano, test, esecuzione, review, chiusura (MIT) | marketplace | skill copiate |
-| `anthropic-docs` | skill di Anthropic per Word, PDF, PowerPoint, Excel | marketplace | skill copiate |
-| `anthropic-examples` | skill di Anthropic: skill-creator, mcp-builder, webapp-testing... (Apache-2.0) | marketplace | skill copiate |
-| `karpathy` | linee guida di codice: modifiche semplici, mirate, verificate | marketplace | skill copiate |
-| `ui-ux-pro-max` | regole di design UI/UX, palette, font, design system (MIT) | marketplace | skill copiate |
-| `context-mode` | tiene fuori dal contesto gli output enormi degli strumenti | marketplace | server MCP |
-| `context7` | documentazione aggiornata e per versione delle librerie (MIT) | marketplace | server MCP |
-| `playwright` | un browser vero che gli agenti guidano (Apache-2.0) | server MCP | server MCP |
-| `serena` | navigazione e modifica del codice per simboli: meno file letti, meno token (serve `uv`) | server MCP | server MCP |
-| `sequential-thinking` | ragionamento passo per passo sui problemi difficili (MIT) | server MCP | server MCP |
-| qualsiasi altro | `addons add owner/repo` o `addons add plugin@marketplace` (per esempio uno del marketplace ufficiale Anthropic) | marketplace | plugin se ha `plugin.json`, altrimenti le sue skill |
+| `caveman` | compressed answers, fewer output tokens (MIT and BSL licenses) | marketplace | its skills copied to `~/.gemini/config/skills` |
+| `ponytail` | the simplest solution that works, less code | marketplace | `agy plugin install` |
+| `impeccable` | design, critique, audit and polish of interfaces (Apache-2.0) | marketplace | its skills copied |
+| `taste` | art direction against "AI slop" for sites and screens (MIT) | marketplace | its skills copied |
+| `frontend-design` | Anthropic's frontend-design skill (Apache-2.0) | official marketplace | the skill copied |
+| `solar-icons` | Solar icons: exact names and imports per framework (MIT, icons CC BY 4.0) | skill copied to `~/.claude/skills` | the skill copied |
+| `cloudflare` | Cloudflare skills: Workers best practices, Zero Trust (`cloudflare-one`), Turnstile, web perf (Apache-2.0) | marketplace | its skills copied |
+| `superpowers` | plan, test, execute, review, finish workflow (MIT) | marketplace | skills copied |
+| `anthropic-docs` | Anthropic's skills for Word, PDF, PowerPoint, Excel | marketplace | skills copied |
+| `anthropic-examples` | Anthropic's skills: skill-creator, mcp-builder, webapp-testing... (Apache-2.0) | marketplace | skills copied |
+| `karpathy` | coding guidelines: simple, targeted, verified changes | marketplace | skills copied |
+| `ui-ux-pro-max` | UI/UX design rules, palettes, fonts, design systems (MIT) | marketplace | skills copied |
+| `context-mode` | keeps huge tool outputs out of the context | marketplace | MCP server |
+| `context7` | up-to-date, versioned library documentation (MIT) | marketplace | MCP server |
+| `playwright` | a real browser the agents drive (Apache-2.0) | MCP server | MCP server |
+| `serena` | code navigation and editing by symbols: fewer files read, fewer tokens (needs `uv`) | MCP server | MCP server |
+| `sequential-thinking` | step-by-step reasoning on hard problems (MIT) | MCP server | MCP server |
+| anything else | `addons add owner/repo` or `addons add plugin@marketplace` (for example one from Anthropic's official marketplace) | marketplace | a plugin when it has `plugin.json`, otherwise its skills |
 
-## Wizard di assegnazione
+## Assignment wizard
 
-**A inizio conversazione** (impostazione `session_wizard`, attiva di default), al primo compito
-che usa gli agenti, il wizard ti mostra prima l'elenco completo (`team-workflow options`: i
-modelli e gli effort che l'app offre ad agenti nativi e worker, e per ogni ruolo tipo, modello,
-effort e come gira davvero; `--app all` per Claude Code, agy e OpenCode insieme), poi chiede il
-preset, gli agenti da usare (anche piu' di uno), e per **ogni** agente scelto modello ed effort
-(due agenti per domanda, finche' non li ha chiesti tutti). In agy `inherit` e' il modello della sessione (per esempio
-`gemini-3.8-flash-high`): i sotto-agenti di agy accettano solo `inherit`, `flash` o `pro`
-(Gemini 3.1 Pro, piu' vecchio), quindi un modello esatto diverso gira come worker; lo stesso in
-OpenCode per un modello o una variante diversi da quelli del file dell'agente, e in Claude Code
-per un effort diverso. Alla fine scegli se usare le scelte solo in questa conversazione o
-salvarle come predefinite (per tutti i progetti o per questo).
+**At the start of a conversation** (setting `session_wizard`, on by default), at the first task
+that uses agents, the wizard first shows the full list (`team-workflow options`: the models and
+efforts the app offers to native agents and workers, and for every role its type, model, effort
+and how it really runs; `--app all` for Claude Code, agy and OpenCode together), then asks for
+the preset, the agents to use (more than one is fine) and, for **each** chosen agent, model and
+effort (two agents per question, until all are asked). In agy `inherit` is the session's model
+(for example `gemini-3.8-flash-high`): agy subagents accept only `inherit`, `flash` or `pro`
+(Gemini 3.1 Pro, older), so a different exact model runs as a worker; the same holds in OpenCode
+for a model or variant different from the agent file's, and in Claude Code for a different
+effort. At the end you choose whether the choices apply to this conversation only or become the
+defaults (for all projects or for this one).
 
-Poi, ogni volta che partono degli agenti (team, feature, fix, review, rilascio) scegli i ruoli
-(anche piu' di uno alla volta), poi un riepilogo con un blocco per agente mostra su cosa lavora,
-come, modello, effort, stima di token e costo, e il totale; parte solo con il tuo ok. Con
-`wizard: quick` (predefinito) le domande arrivano solo per gli agenti che vuoi cambiare; con
-`full` per tutti; con `off` nessuna. I modelli proposti sono solo quelli che l'app offre:
-haiku, sonnet, opus, fable in Claude Code; `inherit`, `flash`, `pro` per i sub-agenti di agy e
-gli id di `agy models` (es. `gemini-3.8-flash-high`) per i worker; in OpenCode `inherit` o un
-`provider/modello` di qualsiasi provider collegato (NanoGPT, OpenRouter, ...), con la variante
-come effort (solo quelle del modello: GLM 5.3 ha `low`, `high`, `max`). Il wizard mostra i
-provider e i modelli che usi di piu'; gli altri li cerca per nome:
-`team-workflow models --app opencode --provider nano-gpt --search "glm 5.3"`.
+Then, every time agents start (team, feature, fix, review, release) you pick the roles (several
+at a time), then a summary with one block per agent shows what it works on, how, model, effort,
+token and cost estimate, and the total; it starts only with your ok. With `wizard: quick`
+(default) questions come only for the agents you want to change; with `full` for all of them;
+with `off` none. The models offered are only those the app offers: haiku, sonnet, opus, fable in
+Claude Code; `inherit`, `flash`, `pro` for agy subagents and the ids of `agy models` (e.g.
+`gemini-3.8-flash-high`) for workers; in OpenCode `inherit` or a `provider/model` of any connected
+provider (NanoGPT, OpenRouter, ...), with the variant as effort (only the model's own: GLM 5.3 has
+`low`, `high`, `max`). The wizard shows the providers and models you use most; it finds the others
+by name: `team-workflow models --app opencode --provider nano-gpt --search "glm 5.3"`.
 
-- **Stime**: `scripts/estimate.py`, tarate su esecuzioni reali; dopo due esecuzioni di un ruolo
-  nel progetto usa la mediana della sua storia.
-- **Avvio nativo** (predefinito): l'agente generato per il ruolo, con modello ed effort delle
-  impostazioni (in Claude Code `subagent_type: "<ruolo>"`, in agy `invoke_subagent`), oppure il
-  tipo integrato che hai scelto per quel ruolo.
-- **Avvio worker**: `scripts/run_worker.py` esegue `claude -p`, `agy -p` o `opencode run` con
-  modello ed effort esatti e registra i token in `~/.team-workflow/ledger/`. Sola lettura, salvo tuo consenso.
+- **Estimates**: `scripts/estimate.py`, calibrated on real runs; after two runs of a role in the
+  project it uses the median of its history.
+- **Native launch** (default): the agent generated for the role, with the model and effort of the
+  settings (in Claude Code `subagent_type: "<role>"`, in agy `invoke_subagent`), or the built-in
+  type you chose for that role.
+- **Worker launch**: `scripts/run_worker.py` runs `claude -p`, `agy -p` or `opencode run` with the
+  exact model and effort and records the tokens in `~/.team-workflow/ledger/`. Read-only unless
+  you agree otherwise.
 
-## Dashboard dei consumi
+## Usage dashboard
 
-`/team-workflow:usage-costs` (o `scripts/dashboard.py --root . --html`) mostra costo ai prezzi di
-listino API, token, quota letta dalla cache, consumi per agente, modello e sessione, salute della
-memoria e catalogo degli agenti; la pagina HTML e' autonoma, anche in tema scuro. I prezzi stanno
-in `skills/team-workflow/pricing.json` (data e fonte indicate, modificabili). Con un abbonamento
-i costi indicano consumo, non una fattura.
+`/team:usage-costs` (or `scripts/dashboard.py --root . --html`) shows cost at API list prices,
+tokens, the share read from cache, usage per agent, model and session, memory health and the agent
+catalog; the HTML page is self-contained, dark theme included, and in Italian when `LANG` starts
+with `it`. Prices live in `skills/team/pricing.json` (with date and source, editable). With a
+subscription the costs show usage, not a bill.
 
 ## agy (Antigravity)
 
 ```bash
-agy plugin install https://github.com/antoStr/team-workflow   # oppure il percorso locale del repo
-python3 ~/.gemini/config/plugins/team-workflow/skills/team-workflow/scripts/tw.py install-cli
-# da qui in poi, in un nuovo terminale:
-agy plugin update team-workflow     # o `agy plugin update` per tutti i plugin, o `agy plugin update ponytail`
-python3 skills/team-workflow/scripts/install_agy.py --workspace /percorso/repo   # un solo progetto
+agy plugin install https://github.com/antoStr/team-workflow   # or the local path of the repo
+python3 ~/.gemini/config/plugins/team-workflow/skills/team/scripts/tw.py install-cli
+# from here on, in a new terminal:
+agy plugin update team-workflow     # or `agy plugin update` for every plugin, or `agy plugin update ponytail`
+python3 skills/team/scripts/install_agy.py --workspace /path/to/repo   # one project only
 ```
 
-agy non ha `plugin update`: `install-cli` crea i comandi `team` e `team-workflow` in `~/.local/bin`.
-Su Windows genera automaticamente wrapper nativi `agy.cmd`, `agy.bat`, `team.cmd` e `team.bat`
-e registra `~/.local/bin` nel PATH dell'utente nel Registro (`HKCU\Environment\Path`), consentendo
-di eseguire `agy plugin update [nome...]` da qualsiasi terminale (PowerShell, CMD, Bash).
-Su Linux/macOS aggiunge a `~/.zshrc` e `~/.bashrc` una funzione shell trasparente.
-L'aggiornamento vale per qualsiasi plugin: lo reinstalla dall'origine da cui agy l'aveva clonato,
-controlla prima che l'origine risponda, ripulisce automaticamente eventuali skill orfane/legacy
-e, se la reinstallazione fallisce, rimette la versione precedente.
+agy has no `plugin update`: `install-cli` creates the `team` and `team-workflow` commands in
+`~/.local/bin`. On Windows it generates native `agy.cmd`, `agy.bat`, `team.cmd` and `team.bat`
+wrappers and adds `~/.local/bin` to the user's PATH in the registry (`HKCU\Environment\Path`), so
+`agy plugin update [name...]` runs from any terminal (PowerShell, CMD, Bash). On Linux/macOS it
+adds a transparent shell function to `~/.zshrc` and `~/.bashrc`. The update works for any plugin:
+it reinstalls it from the origin agy cloned it from, first checks that the origin answers, cleans
+up orphaned or legacy skills, and if the reinstall fails it puts the previous version back.
 
-Il repository e' anche un plugin agy (`plugin.json`, `hooks.json` e `rules/` nella radice, che
-Claude Code ignora). agy lo installa in `~/.gemini/config/plugins/team-workflow/` con le due skill
-ufficiali in `skills/` (`team` per l'interfaccia universale e `team-workflow` per il motore/ruoli),
-le regole che portano la memoria e gli hook nel formato di agy. I vecchi comandi v1 sono archiviati
-in `archive/legacy-skills/` e continuano a essere gestiti trasparentemente senza intasare i menu.
+The repository is also an agy plugin (`plugin.json`, `hooks.json` and `rules/` at the root, which
+Claude Code ignores). agy installs it in `~/.gemini/config/plugins/team-workflow/` with the skills
+in `skills/` (`team` for the universal interface, engine and roles, plus one skill per workflow
+command), the rules that carry the memory, and the hooks in agy's format.
 
-agy non usa gli agenti di un plugin come sub-agenti: li prende da `~/.gemini/config/agents/`,
-nel suo formato (e scarta in silenzio un file con `model: sonnet` o con una descrizione senza
-virgolette che contiene `: `). Per questo il plugin scrive li' i ruoli attivi, convertiti, a ogni
-sessione e con `!team-workflow agents sync`: l'orchestratore li lancia con `invoke_subagent`,
-anche in parallelo. Dopo la prima installazione riavvia agy una volta. I token si misurano solo
-per i worker (`run_worker.py --harness agy`).
+agy does not use a plugin's agents as subagents: it takes them from `~/.gemini/config/agents/`, in
+its own format (and silently drops a file with `model: sonnet` or with an unquoted description
+that contains `: `). That is why the plugin writes the active roles there, converted, at every
+session and with `!team-workflow agents sync`: the orchestrator launches them with
+`invoke_subagent`, in parallel too. After the first installation restart agy once. Tokens are
+measured only for workers (`run_worker.py --harness agy`).
 
-Non e' obbligatorio usarli: basta chiedere normalmente, la skill si attiva sul lavoro di
-sviluppo.
+You do not have to use them: just ask normally, the skill activates on development work.
 
 ## OpenCode
 
 ```bash
-python3 ~/Workspace/team-workflow/skills/team-workflow/scripts/install_opencode.py   # dalla copia del repository
-team-workflow install-opencode                                                      # oppure con il comando team-workflow
+python3 ~/Workspace/team-workflow/skills/team/scripts/install_opencode.py   # from the repository copy
+team-workflow install-opencode                                               # or with the team-workflow command
 ```
 
-Funziona con la CLI e con l'app desktop (OpenCode 2.x; su Windows la CLI dell'app e'
-`%LOCALAPPDATA%\Programs\@opencodedesktop\resources\opencode-cli.exe` e viene trovata da sola).
-Scrive in `~/.config/opencode/`: lo skill `team-workflow` (con script, ruoli e wizard), i
-comandi `/team-workflow/<nome>` (in una cartella: su Windows i due punti non sono ammessi nei
-nomi dei file) e gli agenti dei ruoli attivi.
+It works with the CLI and the desktop app (OpenCode 2.x; on Windows the app's CLI is
+`%LOCALAPPDATA%\Programs\@opencodedesktop\resources\opencode-cli.exe` and is found automatically).
+It writes to `~/.config/opencode/`: the `team-workflow` skill (with scripts, roles and wizard), the
+`/team-workflow/<name>` commands (in a folder: on Windows colons are not allowed in file names) and
+the agents of the active roles.
 
-- **OpenCode 2.x**: i plugin non possono piu' toccare il prompt di sistema ne' intercettare i
-  comandi, quindi l'installer aggiunge un blocco a `~/.config/opencode/AGENTS.md`: alla prima
-  richiesta di ogni conversazione il modello esegue `session_start.py --text` (memoria,
-  impostazioni, wizard di sessione). `settings`, `agents`, `profile`, `models`, `addons`,
-  `audit`, `doctor`, `ci-init`, `options` e `update-plugin` eseguono `tw.py` dentro il comando e
-  il modello mostra solo l'output (pochi token). Non c'e' un hook di fine turno: il promemoria
-  per `STATE.md` e' nelle istruzioni.
-- **OpenCode 1.x**: al posto del blocco c'e' il plugin `team-workflow.js` (memoria nel prompt di
-  sistema, comandi a 0 token, promemoria `STATE.md` a fine turno).
+- **OpenCode 2.x**: plugins can no longer touch the system prompt or intercept commands, so the
+  installer adds a block to `~/.config/opencode/AGENTS.md`: at the first request of every
+  conversation the model runs `session_start.py --text` (memory, settings, session wizard).
+  `settings`, `agents`, `profile`, `models`, `addons`, `audit`, `doctor`, `ci-init`, `options` and
+  `update-plugin` run `tw.py` inside the command and the model only shows the output (few
+  tokens). There is no end-of-turn hook: the `STATE.md` reminder is in the instructions.
+- **OpenCode 1.x**: instead of the block there is the `team-workflow.js` plugin (memory in the
+  system prompt, zero-token commands, `STATE.md` reminder at the end of the turn).
 
-L'orchestratore lancia i ruoli con lo strumento `subagent` (`task` in 1.x) e fa le domande con lo
-strumento `question`. Comandi e istruzioni usano il Python che funziona davvero sulla macchina:
-su Windows `python3` e' spesso il segnaposto del Microsoft Store, che fallisce sempre.
-`/team-workflow/update-plugin` (o `team-workflow update`) aggiorna anche OpenCode;
-`install_opencode.py --uninstall` toglie solo i file scritti da team-workflow (compreso il blocco
-in `AGENTS.md`); `team-workflow doctor` segnala le installazioni vecchie da rifare. OpenCode legge
-anche le skill in `~/.claude/skills` e `~/.agents/skills`.
+The orchestrator launches the roles with the `subagent` tool (`task` in 1.x) and asks questions
+with the `question` tool. Commands and instructions use the Python that really works on the
+machine: on Windows `python3` is often the Microsoft Store placeholder, which always fails.
+`/team-workflow/update-plugin` (or `team-workflow update`) also updates OpenCode;
+`install_opencode.py --uninstall` removes only the files team-workflow wrote (the block in
+`AGENTS.md` included); `team-workflow doctor` flags old installations to redo. OpenCode also reads
+the skills in `~/.claude/skills` and `~/.agents/skills`.
 
 ## Codex
 
 ```bash
-python3 ~/Workspace/team-workflow/skills/team-workflow/scripts/tw.py install-codex   # dalla copia del repository
-team-workflow install-codex                                                         # oppure con il comando team-workflow
-team-workflow install-codex --workspace /percorso/repo                              # un solo progetto
-team-workflow install-codex --uninstall                                             # toglie solo i file di team-workflow
+python3 ~/Workspace/team-workflow/skills/team/scripts/tw.py install-codex   # from the repository copy
+team-workflow install-codex                                               # or with the team-workflow command
+team-workflow install-codex --workspace /path/to/repo                     # one project only
+team-workflow install-codex --uninstall                                   # removes only team-workflow's files
 ```
 
-Funziona con la CLI e con l'app di Codex, e anche quando Codex passa da **opencodex** (un proxy
-che non cambia dove Codex legge skill e agenti). Scrive in `~/.codex/` (o in `CODEX_HOME`):
+It works with the Codex CLI and app, and also when Codex goes through **opencodex** (a proxy that
+does not change where Codex reads skills and agents). It writes to `~/.codex/` (or `CODEX_HOME`):
 
-- `skills/team-workflow/`: la skill principale, con script, ruoli, libreria e wizard;
-- `skills/team-workflow-<nome>/`: una skill per ogni workflow (`$team-workflow-start`,
-  `$team-workflow-setup`, `$team-workflow-agents`...). Quelle di configurazione eseguono
-  `tw.py` e il modello mostra solo l'output;
-- `agents/<ruolo>.toml`: i ruoli attivi come agenti di Codex (modello, effort, sandbox in sola
-  lettura per chi controlla), elencati in un blocco di `config.toml` tra due marcatori. Un
-  agente con lo stesso nome che hai definito tu non viene toccato;
-- un blocco in `AGENTS.md`: alla prima richiesta di ogni conversazione il modello esegue
-  `session_start.py --text --app codex` (memoria, impostazioni, wizard di sessione);
-- `rules/team-workflow.rules`: una regola `prefix_rule` che consente nella sandbox di Codex solo
-  `<python> <script di team-workflow>`, lasciando tutto il resto sotto le regole normali.
+- `skills/team/`: the main skill, with scripts, roles, library and wizard;
+- `skills/team-workflow-<name>/`: one skill per workflow (`$team-workflow-start`,
+  `$team-workflow-setup`, `$team-workflow-agents`...). The configuration ones run `tw.py` and the
+  model only shows the output;
+- `agents/<role>.toml`: the active roles as Codex agents (model, effort, read-only sandbox for the
+  checkers), listed in a block of `config.toml` between two markers. An agent with the same name
+  that you defined yourself is left alone;
+- a block in `AGENTS.md`: at the first request of every conversation the model runs
+  `session_start.py --text --app codex` (memory, settings, session wizard);
+- `rules/team-workflow.rules`: a `prefix_rule` that allows only `<python> <team-workflow script>`
+  in the Codex sandbox, leaving everything else under the normal rules.
 
-Gli add-on funzionano anche qui: le skill vanno in `~/.codex/skills`, i server MCP in un blocco
-`[mcp_servers]` di `config.toml`. Le domande usano `request_user_input` quando disponibile
-(altrimenti un elenco numerato di opzioni).
-`team-workflow update` aggiorna anche Codex.
+Add-ons work here too: skills go to `~/.codex/skills`, MCP servers to an `[mcp_servers]` block of
+`config.toml`. Questions use `request_user_input` when available (otherwise a numbered list of
+options). `team-workflow update` also updates Codex.
 
-## Installazione
+## Installation
 
-Requisiti: Claude Code e/o agy, `git` e `python3`. Claude Code:
+Requirements: Claude Code and/or agy, `git` and Python 3.10 or newer. Claude Code:
 
 ```bash
-claude plugin marketplace add antoStr/team-workflow   # oppure il percorso locale del repo
-claude plugin install team-workflow@team-workflow
+claude plugin marketplace add antoStr/team-workflow   # or the local path of the repo
+claude plugin install team@team
 ```
 
-Per provarlo senza installarlo: `claude --plugin-dir ~/Workspace/team-workflow`. Per agy vedi la
-sezione [agy (Antigravity)](#agy-antigravity).
+Installed before 2.4 as `team-workflow@team-workflow`? `/team:update-plugin` keeps updating it; to switch to the new name run `claude plugin uninstall team-workflow@team-workflow`, `claude plugin marketplace remove team-workflow`, then the two commands above.
 
-### Aggiornare
+To try it without installing: `claude --plugin-dir ~/Workspace/team-workflow`. For agy see
+[agy (Antigravity)](#agy-antigravity).
 
-La versione installata si vede con `claude plugin list` (o `/plugin`) e in agy con
-`agy plugin list`; l'ultima e' in `.claude-plugin/plugin.json` e nei tag `vX.Y.Z` del repository
-(su GitHub: Watch → Custom → Releases per ricevere un avviso).
+### Updating
 
-Il modo piu' semplice e' `/team-workflow:update-plugin` in Claude Code, o `!team-workflow update`
-in agy: aggiorna entrambi dove il plugin e' installato, senza consumare token; `check` mostra
-solo le versioni. All'avvio di Claude Code un avviso dice quando esce una nuova versione.
-Da terminale: `python3 skills/team-workflow/scripts/tw.py update [check]`. A mano:
+The installed version shows in `claude plugin list` (or `/plugin`) and in agy with
+`agy plugin list`; the latest is in `.claude-plugin/plugin.json` and in the repository's `vX.Y.Z`
+tags (on GitHub: Watch → Custom → Releases to get a notice).
+
+The easiest way is `/team:update-plugin` in Claude Code, or `!team-workflow update` in agy: it
+updates every app where the plugin is installed, without spending tokens; `check` only shows the
+versions. At Claude Code start-up a notice tells you when a new version is out. From a terminal:
+`python3 skills/team/scripts/tw.py update [check]`. By hand:
 
 ```bash
-# Claude Code (oppure attiva l'auto-update del marketplace in /plugin → Marketplaces)
-claude plugin marketplace update team-workflow
-claude plugin update team-workflow@team-workflow
-# agy, dopo `tw.py install-cli` (vedi la sezione agy)
+# Claude Code (or turn on the marketplace auto-update in /plugin → Marketplaces)
+claude plugin marketplace update team
+claude plugin update team@team
+# agy, after `tw.py install-cli` (see the agy section)
 agy plugin update team-workflow
 ```
 
-Riavvia la sessione dopo l'aggiornamento. Dalla 0.6.0 gli agenti di Claude Code si chiamano come il
-ruolo (`tester`, non piu' `team-workflow:tester`) e vengono scritti in `~/.claude/agents/` alla
-prima sessione in un repository git: Claude Code li carica dalla sessione successiva (un avviso te
-lo ricorda; nel frattempo l'orchestratore usa `general-purpose` con le istruzioni del ruolo).
-`/team-workflow:doctor` controlla che sia tutto a posto.
+Restart the session after updating. Since 0.6.0 the Claude Code agents are named like the role
+(`tester`, no longer `team-workflow:tester`) and are written to `~/.claude/agents/` at the first
+session in a git repository: Claude Code loads them from the next session (a notice reminds you;
+meanwhile the orchestrator uses `general-purpose` with the role's instructions).
+`/team:doctor` checks that everything is in place.
 
-## Impostazioni
+## Settings
 
-Tutti i comportamenti si cambiano senza toccare il plugin: `/team-workflow:settings` (in agy
-`!team-workflow settings`) li mostra con la loro origine, `settings set <chiave> <valore>` li
-cambia per tutti i progetti (`~/.team-workflow/settings.json`), con `--project` solo per il
-repository (`.team-workflow.json`); `settings reset <chiave>` torna al valore predefinito.
+Every behavior changes without touching the plugin: `/team:settings` (in agy
+`!team-workflow settings`) shows them with their origin, `settings set <key> <value>` changes them
+for all projects (`~/.team-workflow/settings.json`), with `--project` only for the repository
+(`.team-workflow.json`); `settings reset <key>` goes back to the default.
 
-| Chiave | Predefinito | Cosa decide |
+| Key | Default | What it decides |
 |---|---|---|
-| `activation` | `auto` | `auto`: ogni sessione in un repository carica memoria, protocollo e controllo Stop; `manual`: team-workflow resta zitto finche' non lo chiami. Solo in alcuni progetti: `manual` per l'utente e `auto --project` in quei progetti |
-| `talk` | `true` | gli agenti di un compito parlano tra loro sul canale condiviso (`TALK.md`) |
-| `talk_rounds` | `3` | quanti giri di risposte al massimo prima di portarti il disaccordo |
-| `library.packs.<pack>` | spenti | pack della libreria installati come skill native |
-| `library.skills.<id>` | - | una singola voce della libreria, accesa o spenta (vince sul pack) |
-| `session_wizard` | `true` | a inizio conversazione chiede dove salvare le scelte, preset, agenti, modello ed effort tra quelli offerti dall'app, skill, add-on e team talk |
-| `wizard` | `quick` | `quick`: riepilogo con le scelte consigliate, domande solo per chi vuoi cambiare; `full`: tutte le domande; `off`: nessuna |
-| `max_agents` | `4` | quanti agenti propone al massimo senza chiedere |
-| `launch` | `native` | `native` (sub-agenti dell'app) o `worker` (processi headless con modello ed effort esatti) |
-| `worker_edits` | `false` | se i worker possono modificare file senza chiedere ogni volta |
-| `auto_security_review` | `true` | aggiunge `security-reviewer` quando la modifica tocca codice sensibile |
-| `end_report` | `full` | `short`: solo fatto, verificato, decisioni |
-| `update_check` | `true` | avviso di nuova versione all'avvio |
-| `stop_check` | `true` | promemoria per aggiornare `STATE.md` |
-| `models.claude.<ruolo>` | sonnet (architect e security-reviewer opus, doc-keeper haiku) | modello in Claude Code |
-| `models.agy.<ruolo>` | inherit (il modello della sessione) | modello dei sub-agenti agy: inherit, flash o pro |
-| `models.opencode.<ruolo>` | inherit | modello dei sotto-agenti OpenCode: inherit o `provider/modello` |
-| `effort.<ruolo>` | medium (architect e security-reviewer high) | effort degli agenti di Claude Code e dei worker |
-| `type.<app>.<ruolo>` | `custom` | tipo di agente (vedi [I team e gli agenti](#i-team-e-gli-agenti)) |
-| `packs.<pack>` | solo `core` | pack di ruoli accesi |
-| `enabled.<ruolo>` | `true` | spegne un singolo ruolo |
-| `addons.<nome>` | nessuno | add-on scelti (li gestisce `addons`) |
+| `activation` | `auto` | `auto`: every session in a repository loads memory, protocol and Stop check; `manual`: team-workflow stays quiet until you call it. Only in some projects: `manual` for the user and `auto --project` in those projects |
+| `talk` | `true` | the agents of a task talk to each other on the shared channel (`TALK.md`) |
+| `talk_rounds` | `3` | the maximum rounds of replies before bringing the disagreement to you |
+| `library.packs.<pack>` | off | library packs installed as native skills |
+| `library.skills.<id>` | - | a single library entry, on or off (wins over the pack) |
+| `session_wizard` | `true` | at the start of a conversation asks where to save choices, preset, agents, model and effort among those the app offers, skills, add-ons and team talk |
+| `wizard` | `quick` | `quick`: summary with the recommended choices, questions only for whom you want to change; `full`: every question; `off`: none |
+| `max_agents` | `4` | how many agents it proposes at most without asking |
+| `launch` | `native` | `native` (the app's subagents) or `worker` (headless processes with exact model and effort) |
+| `worker_edits` | `false` | whether workers may edit files without asking every time |
+| `auto_security_review` | `true` | adds `security-reviewer` when the change touches sensitive code |
+| `end_report` | `full` | `short`: only done, verified, decisions |
+| `update_check` | `true` | new-version notice at start-up |
+| `stop_check` | `true` | reminder to update `STATE.md` |
+| `models.claude.<role>` | sonnet (architect and security-reviewer opus, doc-keeper haiku) | model in Claude Code |
+| `models.agy.<role>` | inherit (the session's model) | model of agy subagents: inherit, flash or pro |
+| `models.opencode.<role>` | inherit | model of OpenCode subagents: inherit or `provider/model` |
+| `effort.<role>` | medium (architect and security-reviewer high) | effort of Claude Code agents and workers |
+| `type.<app>.<role>` | `custom` | agent type (see [Teams and agents](#teams-and-agents)) |
+| `packs.<pack>` | `core` only | role packs switched on |
+| `enabled.<role>` | `true` | switches off a single role |
+| `addons.<name>` | none | chosen add-ons (managed by `addons`) |
 
-Cambiare un modello, un effort, un tipo o un pack riscrive subito gli agenti nativi. Esempi:
-`/team-workflow:settings set models.agy.tester flash`, `/team-workflow:profile budget`.
+Changing a model, an effort, a type or a pack rewrites the native agents at once. Examples:
+`/team:settings set models.agy.tester flash`, `/team:profile budget`.
 
-## Primo uso in un progetto
+## First use in a project
 
-1. Apri Claude Code nel repository e lancia `/team-workflow:setup-memory` (in agy: chiedi la skill
-   `setup-memory`).
-2. Il comando crea `docs/memory`, rileva i comandi di build e test (Go, Node, Rust, Python,
-   Maven, Gradle) e aggiunge un rimando in `AGENTS.md` (e in `GEMINI.md` o `CLAUDE.md` se ci
-   sono), cosi' anche Gemini, Codex e Cursor leggono la stessa memoria.
-3. Controlla cosa ha scritto: ogni file, funzione e comando citato deve esistere.
+1. Open Claude Code in the repository and run `/team:setup-memory` (in agy: ask for the
+   `setup-memory` skill).
+2. The command creates `docs/memory`, detects the build and test commands (Go, Node, Rust,
+   Python, Maven, Gradle) and adds a pointer in `AGENTS.md` (and in `GEMINI.md` or `CLAUDE.md`
+   when they exist), so Gemini, Codex and Cursor read the same memory too.
+3. Check what it wrote: every file, function and command it cites must exist.
 
-Le istruzioni per gli agenti sono in inglese; le risposte arrivano nella lingua in cui scrivi.
-Una memoria gia' esistente mantiene la sua lingua.
+The agents' instructions are in English; answers come in the language you write in (English when
+it is unclear). An existing memory keeps its language.
 
-## Hook
+## Hooks
 
-| Hook | Cosa fa | Come spegnerlo |
+| Hook | What it does | How to turn it off |
 |---|---|---|
-| SessionStart (agy: PreInvocation) | inietta `INDEX.md`, `STATE.md` e le impostazioni cambiate; scrive gli agenti nativi dalle impostazioni; propone i pack dei linguaggi del repository; avvisa se c'e' una nuova versione (al massimo una volta al giorno) | `update_check false` per l'avviso |
-| UserPromptSubmit (solo Claude Code) | risponde ai comandi senza token (`settings`, `agents`, `profile`, `models`, `addons`, `audit`, `doctor`, `ci-init`, `update-plugin`) senza il modello | disattivando il plugin |
-| Stop | se i file sono cambiati dopo `STATE.md`, chiede di aggiornarla (mai due volte di fila) | `stop_check false` (o `TEAM_WORKFLOW_STOP_CHECK=0`) |
+| SessionStart (agy: PreInvocation) | injects `INDEX.md`, `STATE.md` and the changed settings; writes the native agents from the settings; offers the packs of the repository's languages; tells you about a new version (at most once a day) | `update_check false` for the notice |
+| UserPromptSubmit (Claude Code only) | answers the zero-token commands (`settings`, `agents`, `profile`, `models`, `addons`, `audit`, `doctor`, `ci-init`, `update-plugin`) without the model | by disabling the plugin |
+| Stop | when files changed after `STATE.md`, asks to update it (never twice in a row) | `stop_check false` (or `TEAM_WORKFLOW_STOP_CHECK=0`) |
 
-## Controlli in CI
+## Checks in CI
 
-`/team-workflow:ci-init` scrive `.github/workflows/team-workflow.yml` e copia in
-`.github/team-workflow/` i tre script dei controlli (cosi' la CI non deve scaricare il plugin):
-a ogni pull request e push esegue memcheck (se c'e' `docs/memory`) e l'audit della
-configurazione degli agenti. A mano:
+`/team:ci-init` writes `.github/workflows/team-workflow.yml` and copies the three check scripts
+to `.github/team-workflow/` (so the CI does not have to download the plugin): on every pull
+request and push it runs memcheck (when there is `docs/memory`) and the audit of the agent
+configuration. By hand:
 
 ```bash
-python3 <cartella del plugin>/skills/team-workflow/scripts/memcheck.py --root . --strict
-python3 <cartella del plugin>/skills/team-workflow/scripts/tw.py audit --strict
+python3 <plugin folder>/skills/team/scripts/memcheck.py --root . --strict
+python3 <plugin folder>/skills/team/scripts/tw.py audit --strict
 ```
 
-memcheck: errori per file oltre il limite di righe e segreti; avvisi (errori con `--strict`)
-per percorsi citati che nel repository non esistono.
+memcheck: errors for files over the line limit and for secrets; warnings (errors with
+`--strict`) for cited paths that do not exist in the repository.
 
-## Licenza
+## License
 
-MIT (`LICENSE`). Il contenuto importato nella libreria e nei ruoli `source: "imported ..."`
-mantiene la sua licenza: `skills/team-workflow/library/NOTICE.md`.
+MIT (`LICENSE`). Content imported into the library and the `source: "imported ..."` roles keeps
+its license: `skills/team/library/NOTICE.md`.
 
-## Sviluppo
+## Development
 
 ```bash
 python3 -m unittest discover -s tests
-python3 tools/import_upstream.py <checkout>     # rigenera ruoli importati e libreria
-python3 tools/readme_catalog.py                  # rigenera il catalogo del README (i test lo controllano)
+python3 tools/import_upstream.py <checkout>     # rebuilds the imported roles and the library
+python3 tools/readme_catalog.py                  # rebuilds docs/CATALOG.md and CATALOG.it.md (the tests check them)
 for p in .claude-plugin/plugin.json skills; do claude plugin validate "$p" --strict; done
 agy plugin validate .
-claude plugin eval . --runs 1 --allow-tools "Bash(python3:*)"   # eval di comportamento (costano)
+claude plugin eval . --runs 1 --allow-tools "Bash(python3:*)"   # behavior evals (they cost)
 ```

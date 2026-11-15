@@ -12,10 +12,12 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.normpath(os.path.join(HERE, ".."))
-STATUS_FILE = os.path.join(ROOT, "hardware_status.json")
-ALERT_FILE = os.path.join(ROOT, "HARDWARE_ALERT.json")
-THERMAL_ALERT_FILE = os.path.join(ROOT, "THERMAL_ALERT.json")
-THERMAL_FILE = os.path.join(ROOT, "thermal_status.json")
+# written by tools/*_guard.ps1; same folder as settings.hardware_dir()
+DATA = os.path.join(os.path.expanduser("~"), ".team-workflow", "hardware")
+STATUS_FILE = os.path.join(DATA, "hardware_status.json")
+ALERT_FILE = os.path.join(DATA, "HARDWARE_ALERT.json")
+THERMAL_ALERT_FILE = os.path.join(DATA, "THERMAL_ALERT.json")
+THERMAL_FILE = os.path.join(DATA, "thermal_status.json")
 
 
 HTML_PAGE = """<!DOCTYPE html>
@@ -209,7 +211,7 @@ HTML_PAGE = """<!DOCTYPE html>
 
     <div class="card">
       <div class="card-title">
-        <span>Memoria RAM</span>
+        <span>RAM</span>
         <span id="ramPercent">--%</span>
       </div>
       <div class="value-huge">
@@ -226,7 +228,7 @@ HTML_PAGE = """<!DOCTYPE html>
 
     <div class="card">
       <div class="card-title">
-        <span>Spazio Disco (C:)</span>
+        <span>Disk space (C:)</span>
         <span id="diskPercent">--%</span>
       </div>
       <div class="value-huge">
@@ -236,7 +238,7 @@ HTML_PAGE = """<!DOCTYPE html>
         <div id="diskBar" class="progress-fill fill-green" style="width: 0%"></div>
       </div>
       <div class="sub-meta">
-        <span>Spazio Libero Rimasto</span>
+        <span>Free space left</span>
         <span>Totale: <b id="diskTotal">-- GB</b></span>
       </div>
     </div>
@@ -262,7 +264,7 @@ HTML_PAGE = """<!DOCTYPE html>
         // Alerts Banner
         const alertBox = document.getElementById('alertContainer');
         if (data.alerts && data.alerts.length > 0) {
-          alertBox.innerHTML = '<div class="alert-banner">⚠️ <b>ATTENZIONE REMOTA:</b><br>' + data.alerts.join('<br>') + '</div>';
+          alertBox.innerHTML = '<div class="alert-banner">⚠️ <b>REMOTE WARNING:</b><br>' + data.alerts.join('<br>') + '</div>';
         } else {
           alertBox.innerHTML = '';
         }
@@ -391,7 +393,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
                                 with open(af, "r", encoding="utf-8-sig") as f:
                                     al = json.load(f)
                                     data["status"] = al.get("Severity", al.get("Status", "CRITICAL"))
-                                    msgs = al.get("Messages", [f"Allerta da {os.path.basename(af)}"])
+                                    msgs = al.get("Messages", [f"Alert from {os.path.basename(af)}"])
                                     data["alerts"] = list(set(data.get("alerts", []) + msgs))
                             except Exception:
                                 pass

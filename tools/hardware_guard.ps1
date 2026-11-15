@@ -12,12 +12,17 @@ param(
     [string]$StatusFile = "hardware_status.json",
     [string]$ThermalStatusFile = "thermal_status.json",
     [string]$AlertFile = "HARDWARE_ALERT.json",
-    [string]$LogFile = "hardware_guard.log"
+    [string]$LogFile = "hardware_guard.log",
+    [string]$DataDir = (Join-Path $HOME ".team-workflow\hardware")  # shared with tw.py and the dashboard
 )
 
+# every relative file below (status, mode, alert, log) lives in $DataDir, never in a project
+New-Item -ItemType Directory -Force -Path $DataDir | Out-Null
+Set-Location $DataDir
+
 $Host.UI.RawUI.WindowTitle = "Hardware Guard - Remote Unattended Monitor"
-Write-Host "[Hardware Guard] Avvio monitoraggio hardware globale ogni $IntervalSeconds s..." -ForegroundColor Cyan
-Write-Host "[Hardware Guard] Modalita Silenziosa: $Silent (Nessun segnale acustico)" -ForegroundColor Green
+Write-Host "[Hardware Guard] Monitoring hardware every $IntervalSeconds s..." -ForegroundColor Cyan
+Write-Host "[Hardware Guard] Silent mode: $Silent (no beeps)" -ForegroundColor Green
 
 $maxCpu = 0.0
 $maxGpu = 0.0
@@ -27,14 +32,14 @@ $lastCpuTemp = 0.0
 $lastGpuTemp = 0.0
 $lastStatus = "OK"
 
-# Inizializza contatore CPU .NET ad altissime prestazioni (zero carico WMI)
+# .NET CPU counter: fast and with no WMI load
 $cpuCounter = $null
 try {
     $cpuCounter = New-Object System.Diagnostics.PerformanceCounter("Processor", "% Processor Time", "_Total")
     $null = $cpuCounter.NextValue()
 } catch {}
 
-# Verifica disponibilità nvidia-smi
+# Is nvidia-smi available?
 $hasNvidia = $false
 try {
     $null = Get-Command "nvidia-smi" -ErrorAction Stop
@@ -156,26 +161,26 @@ while ($true) {
 
     if ($cpuTemp -and $cpuTemp -ge $CritTempCpu) {
         $status = "CRITICAL"
-        $alerts += "CPU Temperatura Critica: $cpuTemp C (Soglia: $CritTempCpu C)"
+        $alerts += "CPU temperature critical: $cpuTemp C (threshold: $CritTempCpu C)"
     } elseif ($cpuTemp -and $cpuTemp -ge $WarnTempCpu) {
         if ($status -ne "CRITICAL") { $status = "WARNING" }
-        $alerts += "CPU Temperatura Elevata: $cpuTemp C (Soglia: $WarnTempCpu C)"
+        $alerts += "CPU temperature high: $cpuTemp C (threshold: $WarnTempCpu C)"
     }
 
     if ($gpuTemp -and $gpuTemp -ge $CritTempGpu) {
         $status = "CRITICAL"
-        $alerts += "GPU Temperatura Critica: $gpuTemp C (Soglia: $CritTempGpu C)"
+        $alerts += "GPU temperature critical: $gpuTemp C (threshold: $CritTempGpu C)"
     } elseif ($gpuTemp -and $gpuTemp -ge $WarnTempGpu) {
         if ($status -ne "CRITICAL") { $status = "WARNING" }
-        $alerts += "GPU Temperatura Elevata: $gpuTemp C (Soglia: $WarnTempGpu C)"
+        $alerts += "GPU temperature high: $gpuTemp C (threshold: $WarnTempGpu C)"
     }
 
     if ($mem -and $mem.PercentUsed -ge $CritRamPercent) {
         $status = "CRITICAL"
-        $alerts += "RAM Saturata: $($mem.PercentUsed)% utilizzata"
+        $alerts += "RAM saturated: $($mem.PercentUsed)% used"
     } elseif ($mem -and $mem.PercentUsed -ge $WarnRamPercent) {
         if ($status -ne "CRITICAL") { $status = "WARNING" }
-        $alerts += "RAM Elevata: $($mem.PercentUsed)% utilizzata"
+        $alerts += "RAM high: $($mem.PercentUsed)% used"
     }
 
     $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
@@ -197,7 +202,7 @@ while ($true) {
         } catch {}
     }
 
-    # Verifica se è necessario scrivere su disco (riduzione usura SSD / delta threshold)
+    # Write to disk only when something changed (less SSD wear)
     $shouldWrite = ($status -ne $lastStatus) -or ($alerts.Count -gt 0) -or `
                    (($now - $lastWriteTime).TotalSeconds -ge 10) -or `
                    ([math]::Abs($cpuTemp - $lastCpuTemp) -ge 1.0) -or `
@@ -236,7 +241,7 @@ while ($true) {
 
         [System.IO.File]::WriteAllText((Join-Path (Get-Location) $StatusFile), ($systemState | ConvertTo-Json -Depth 5), $utf8NoBom)
 
-        # Salva thermal_status.json retrocompatibile
+        # thermal_status.json, kept for older readers
         $legacyThermal = [PSCustomObject]@{
             Timestamp = $now.ToString("yyyy-MM-dd HH:mm:ss")
             Status = $status

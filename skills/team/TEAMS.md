@@ -24,6 +24,7 @@ spend it where parallel work or an independent check pays back.
 | network | `network-architect`, `homelab-architect` | `network-config-reviewer`, `network-troubleshooter`, `security-reviewer` |
 | domain | the builders of the task | `healthcare-reviewer` (clinical, PHI), `bengali-reviewer` (Bengali text and NLP) |
 | operations | `chief-of-staff` (email, chat and calendar triage, drafts) | none |
+| project | `project-manager`, `project-scheduler`, `project-controller`, `agile-coach` | `risk-manager`, `stakeholder-manager`, `product-manager` |
 
 Roles outside the core come from packs the user switches on (`tw.py agents enable <pack>`, or
 `auto` for the languages of the repository). Propose a pack role only when its pack is on; when
@@ -101,6 +102,12 @@ strongest model with high effort, `doc-keeper` the lightest, the rest the standa
 | `healthcare-reviewer` | domains | clinical safety, PHI and compliance of healthcare code | nothing |
 | `bengali-reviewer` | domains | Bengali text, NLP and localization | nothing |
 | `chief-of-staff` | ops | triage of email, chat and calendar, drafted replies | drafts |
+| `project-manager` | pm | charter, integrated plan and baselines, change control, status, closure | project documents |
+| `project-scheduler` | pm | activities, dependencies, critical path, Gantt, leveling, compression | schedule files |
+| `project-controller` | pm | budget and reserves, progress, earned value, forecasts, change impact | budget and EVM reports |
+| `risk-manager` | pm | threats and opportunities, scoring, responses, owners, risk register | risk register |
+| `stakeholder-manager` | pm | stakeholder analysis, communication plan, RACI, conflict and negotiation | plans and drafts |
+| `agile-coach` | pm | lifecycle choice, Scrum and Kanban setup, backlog, estimates, release plans | backlog and plans |
 | `alt-<name>` | alt | an alternative version of a role team-workflow already has (`alt-tdd-guide` next to `tester`, `alt-architect` next to `architect`...): propose one when the user wants a second take or a different style | as the role it mirrors |
 
 The user can add roles or override one (`tw.py agents new <role>`) and choose, per role and per

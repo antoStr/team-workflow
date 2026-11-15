@@ -6,17 +6,21 @@ on:
       - 'v*'
 
 permissions:
-  contents: write
+  contents: write  # needed to create the release; nothing else
 
 jobs:
   release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
+      # actions pinned to a commit: a moved tag cannot change what runs; Dependabot bumps them
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5.1.0
+        with:
+          persist-credentials: false
 
       - name: Create Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3  # v3.0.4
         with:
           generate_release_notes: true

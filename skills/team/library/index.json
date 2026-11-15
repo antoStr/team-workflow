@@ -36,7 +36,8 @@
     "cloudflare-sec": "Enterprise vulnerability discovery, coverage-led hunting, binary analysis, and security auditing from Cloudflare.",
     "malware-analysis": "Specialized malware reverse engineering, binary triage, dynamic sandboxing, deobfuscation, memory forensics, YARA/Sigma rules, and threat classification.",
     "threat-intel-url": "Suspicious URL analysis, phishing triage, urlscan.io integration, certificate transparency, and C2 infrastructure tracking.",
-    "frontend-components": "Modern frontend UI component engineering: shadcn/ui, Base UI, Radix UI, Sonner, Vaul, cmdk, NumberFlow, Magic UI, Aceternity UI, 21st.dev, and intelligent library selection."
+    "frontend-components": "Modern frontend UI component engineering: shadcn/ui, Base UI, Radix UI, Sonner, Vaul, cmdk, NumberFlow, Magic UI, Aceternity UI, 21st.dev, and intelligent library selection.",
+    "project-management": "Project management: lifecycle, scope and WBS, scheduling, cost and earned value, risk, stakeholders, procurement and agile delivery."
   },
   "entries": [
     {
@@ -3819,6 +3820,62 @@
       "pack": "frontend-components",
       "description": "21st.dev registry architecture: 'The npm for Design Engineers'. Discovering, consuming, and publishing shadcn-compatible components, AI input bars, and landing blocks.",
       "hash": "4ac8e166a98930f0"
+    },
+    {
+      "id": "pm-lifecycle",
+      "kind": "skill",
+      "pack": "project-management",
+      "description": "Project management end to end, following ISO 21502 and common IPMA/PMI practice - what makes work a project, project vs program vs portfolio, organization structures and the project manager's authority, the five process groups (initiating, planning, implementing, controlling, closing), lifecycles and phase gates, the project charter, baselines, change control, quality management, closure and lessons learned. Use when starting, planning, steering or closing a project, or when writing a charter or a project plan.",
+      "hash": "31e0e2cfda19c486"
+    },
+    {
+      "id": "pm-scope-wbs",
+      "kind": "skill",
+      "pack": "project-management",
+      "description": "Project scope and work breakdown - requirements to scope statement, deliverables and acceptance criteria, building a WBS (100% rule, decomposition by product, by phase or by process, work packages, coding), the WBS dictionary, the OBS and the responsibility assignment matrix (RAM/RACI). Use when the scope of a project must be defined, a WBS built or checked, or responsibilities assigned.",
+      "hash": "af1b05ce0fadc430"
+    },
+    {
+      "id": "pm-schedule",
+      "kind": "skill",
+      "pack": "project-management",
+      "description": "Project scheduling - activities and dependencies (FS, SS, FF, SF, lags and leads), duration estimating (analogous, parametric, three-point/PERT), network diagrams, the critical path method with forward and backward pass, total and free float, Gantt charts and milestones, resource leveling and smoothing, schedule compression (crashing, fast tracking) and critical chain buffers. Includes scripts/cpm.py, a tested calculator. Use when building, checking or recovering a project schedule.",
+      "hash": "c9e3437a397d263a"
+    },
+    {
+      "id": "pm-control",
+      "kind": "skill",
+      "pack": "project-management",
+      "description": "Project cost and progress control - cost types and estimating, budget, contingency and management reserves, cost baseline, S-curve and cash flow, progress measurement rules, earned value management (PV, EV, AC, CV, SV, CPI, SPI, EAC, ETC, VAC, TCPI) with interpretation and forecasts, status reporting and change impact. Includes scripts/evm.py, a tested calculator. Use when building a budget, measuring progress, writing a status report with figures or forecasting a project's final cost.",
+      "hash": "9cf1ee811dc6377b"
+    },
+    {
+      "id": "pm-risk",
+      "kind": "skill",
+      "pack": "project-management",
+      "description": "Project risk management for threats and opportunities - identification (risk breakdown structure, assumptions analysis, SWOT, checklists, lessons learned), writing risks as cause-event-effect, qualitative probability-impact scoring and heat maps, response strategies (avoid, transfer, mitigate, accept; exploit, share, enhance, accept), owners, triggers, contingency reserves, preventive vs corrective actions, issue logs and risk reviews, with a register template. Use when identifying or reviewing project risks or writing a risk register.",
+      "hash": "95927fe06a0a7483"
+    },
+    {
+      "id": "pm-stakeholders",
+      "kind": "skill",
+      "pack": "project-management",
+      "description": "The people side of projects - stakeholder identification and analysis (power/interest grid, engagement levels), context analysis, the communication plan and the number of channels, effective communication and feedback, meetings and minutes, leadership and motivation (Maslow, Herzberg, McGregor), team development (Tuckman), negotiation (interests, BATNA), conflict modes, structured problem solving, ethics and emotional intelligence. Use when planning stakeholder engagement or communication, preparing a difficult message, or dealing with team conflict.",
+      "hash": "70a976aca109f832"
+    },
+    {
+      "id": "pm-procurement",
+      "kind": "skill",
+      "pack": "project-management",
+      "description": "Project procurement and contracts - make-or-buy, the contract lifecycle (planning, tender and selection, award, administration, closure), contract types (fixed price, cost-reimbursable, time and materials, and their incentive variants) with the risk each puts on buyer and seller, statements of work, supplier evaluation criteria, contract changes and claims, and the project manager's role. Use when buying goods or services for a project, choosing a contract type or managing a supplier.",
+      "hash": "a3324f8b75781cef"
+    },
+    {
+      "id": "pm-agile",
+      "kind": "skill",
+      "pack": "project-management",
+      "description": "Agile project delivery - choosing between predictive, iterative, incremental, agile and hybrid lifecycles, the Agile Manifesto values, Scrum (accountabilities, events, artifacts, Definition of Done), Kanban (visual board, WIP limits, flow metrics, Little's law), Lean waste, XP practices, user stories (INVEST) and splitting, relative estimation, velocity and forecasting, burndown and burnup charts, MVP slicing, refactoring and technical debt. Use when choosing or running an agile approach, building a backlog or planning sprints and releases.",
+      "hash": "496a906f613ebd90"
     }
   ]
 }

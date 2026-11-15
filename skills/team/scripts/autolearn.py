@@ -167,7 +167,7 @@ def _mirror_to_memory(learnings, root="."):
         "",
         f"Total active learnings: **{len(learnings)}**.",
         "",
-        "| ID | Titolo | Categoria | Si applica a | Azione richiesta |",
+        "| ID | Title | Category | Applies to | Required action |",
         "|---|---|---|---|---|"
     ]
 
