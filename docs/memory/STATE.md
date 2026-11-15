@@ -1,6 +1,19 @@
 # Project state
 
-## Current version: v2.4.2 (released)
+## Current version: v2.4.3 (released)
+
+### v2.4.3 (released)
+- **Claude Code hooks on Windows**: `hooks/hooks.json` ran `python3`, which on many Windows PCs
+  is the Microsoft Store alias that only prints "Python was not found": no SessionStart memory,
+  no zero-token commands, no auto_update, a Stop hook error every turn. The hooks now run
+  `hooks/run-py.cmd <script>`, a batch file that is also a shell script (LF via `.gitattributes`)
+  and uses the first of python3, python, py that really runs.
+- **Team talk rules enforced**: `talk post` refuses a verdict on a challenge unless it comes from
+  who opened it, the orchestrator or the user (an OpenCode agent closed a challenge against
+  itself); a second `join` of the same role warns of two sessions on one task.
+- **OpenCode resumes crashed sessions**: after a crash its background service restarted an
+  interrupted orchestrator next to the new run (2 orchestrators, 4 agents in one folder).
+  WIZARD.md: list sessions and stop leftovers with `opencode api session.interrupt` first.
 
 ### v2.4.2 (released)
 - `update_plugin` finds the OpenCode and Codex installs through their installers' `payload_dir()`

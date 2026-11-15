@@ -198,7 +198,10 @@ settings (`type.<app>.<role>`, shown by `tw.py agents`):
     brief; independent agents go in one call and run in parallel.
   - OpenCode: the subagent tool with `agent: "<role>"`, a short `description` and the brief as
     `prompt` (OpenCode 1.x: the task tool with `subagent_type`); several calls in one message
-    run in parallel.
+    run in parallel. OpenCode 2.x resumes a session cut off by a crash as soon as its background
+    service starts: before running a task again in the same folder, list the sessions
+    (`opencode session list`) and stop a leftover one
+    (`opencode api session.interrupt --param sessionID=<id>`), or two teams work at once.
   - Codex: spawn the agent named `<role>` (for example `tester`) with the brief; independent
     agents spawned together run in parallel.
   If the role is not in the app's agent list (first session after an install or a settings

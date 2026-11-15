@@ -168,6 +168,17 @@ class TalkTest(unittest.TestCase):
         out = subprocess.run(["git", "status", "--porcelain"], cwd=repo, capture_output=True, text=True)
         self.assertEqual(out.stdout, "")  # the moved channel is never committed
 
+    def test_only_the_challenger_the_orchestrator_or_the_user_give_a_verdict(self):
+        talk.post("t", "frontend-dev", "static files 404", "challenge", to="backend-dev", cwd=self.cwd)
+        talk.unread("t", "backend-dev", cwd=self.cwd)
+        talk.post("t", "backend-dev", "fixed: served from static/", "fix", re_id=1, cwd=self.cwd)
+        with self.assertRaises(ValueError) as e:  # the challenged author cannot close its own challenge
+            talk.post("t", "backend-dev", "rejected", "verdict", re_id=1, cwd=self.cwd)
+        self.assertIn("only frontend-dev", str(e.exception))
+        talk.unread("t", "frontend-dev", cwd=self.cwd)
+        talk.post("t", "frontend-dev", "accepted: curl 200", "verdict", re_id=1, cwd=self.cwd)
+        self.assertEqual(talk.open_threads(talk.read("t", self.cwd)), [])
+
     def test_challenge_stays_open_until_the_challenger_gives_a_verdict(self):
         talk.post("t", "tester", "pytest red on auth", "challenge", to="backend-dev", cwd=self.cwd)
         self.assertEqual(len(talk.open_threads(talk.read("t", self.cwd))), 1)
@@ -222,6 +233,14 @@ class TalkTest(unittest.TestCase):
         self.assertEqual(talk.members(msgs), ["orchestrator", "dev", "tester", "user"])
         self.assertEqual(msgs[2]["text"], "joined")
         self.assertEqual([m["kind"] for m in talk.unread("g", "dev", cwd=self.cwd)], ["note", "join", "decision"])
+
+    def test_a_second_join_of_the_same_role_warns(self):
+        import subprocess
+        tw = [sys.executable, os.path.join(SCRIPTS, "tw.py"), "talk", "join", "j", "--as", "backend-dev", "api"]
+        first = subprocess.run(tw, cwd=self.cwd, capture_output=True, text=True, timeout=60)
+        second = subprocess.run(tw, cwd=self.cwd, capture_output=True, text=True, timeout=60)
+        self.assertNotIn("already joined", first.stderr)
+        self.assertIn("backend-dev already joined (#1)", second.stderr)  # e.g. a resumed old session
 
     def test_post_then_wait_in_one_command(self):
         import subprocess

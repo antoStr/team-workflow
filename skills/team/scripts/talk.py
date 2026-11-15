@@ -144,8 +144,13 @@ def post(topic, sender, text, kind="note", to=None, re_id=None, cwd=None):
         if pending:  # checked under the lock: nothing can arrive between this and the append
             mark_seen(topic, sender, msgs[-1]["id"], cwd)
             raise Unread(pending)
-        if re_id and not any(m["id"] == re_id for m in msgs):
+        target = next((m for m in msgs if m["id"] == re_id), None) if re_id else None
+        if re_id and not target:
             raise ValueError(f"no message #{re_id} in {topic}")
+        if (kind == "verdict" and target["kind"] == "challenge"
+                and sender not in (target["from"], "orchestrator", "user")):
+            raise ValueError(f"only {target['from']}, who opened #{re_id}, the orchestrator or the user gives its "
+                             "verdict: answer with --kind fix or --kind answer")
         next_id = max((m["id"] for m in msgs), default=0) + 1
         msg = {"id": next_id, "time": time.strftime("%Y-%m-%dT%H:%M:%S"), "from": sender,
                "to": to or None, "kind": kind, "re": re_id or None, "text": text.strip()}
