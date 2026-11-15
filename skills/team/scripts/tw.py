@@ -887,6 +887,10 @@ def cmd_talk(args):
                                       args.to, args.re)))
             if args.kind == "join":
                 args.action = "read"
+                twins = [m["id"] for m in talk.read(args.topic) if m["kind"] == "join" and m["from"] == args.sender]
+                if len(twins) > 1:  # e.g. an app resumed an old session of the same task
+                    print(f"warning: {args.sender} already joined (#{twins[-2]}): if that was another agent, two "
+                          "sessions work on this topic; tell the orchestrator", file=sys.stderr)
             elif args.wait:  # post, then wait for the reply in the same call
                 args.role, args.action = args.sender, "read"
         if args.action == "read":
