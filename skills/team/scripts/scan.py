@@ -43,7 +43,7 @@ def git_info(root):
         info["branch"] = branch or "detached"
         
         status = subprocess.run(
-            ["git", "-C", root, "status", "--porcelain", "-uno"],
+            ["git", "-C", root, "status", "--porcelain"],  # new files count too
             capture_output=True, text=True, timeout=30
         ).stdout.strip().splitlines()
         info["modified_files"] = len(status)
@@ -124,8 +124,17 @@ def detect_stack(root):
     )
     if has_py:
         stack["languages"].append("Python")
-        if os.path.isfile(os.path.join(root, "pytest.ini")) or os.path.isdir(os.path.join(root, "tests")):
+        def mentions(name, word):
+            try:
+                with open(os.path.join(root, name), encoding="utf-8", errors="replace") as f:
+                    return word in f.read()
+            except OSError:
+                return False
+        if (os.path.isfile(os.path.join(root, "pytest.ini")) or os.path.isfile(os.path.join(root, "conftest.py"))
+                or any(mentions(n, "pytest") for n in ("pyproject.toml", "setup.cfg", "tox.ini", "requirements.txt"))):
             stack["testing"].append("pytest")
+        elif os.path.isdir(os.path.join(root, "tests")):
+            stack["testing"].append("unittest")  # a tests folder with no pytest config or dependency
 
     # 3. Check Rust, Go, .NET
     if os.path.isfile(os.path.join(root, "Cargo.toml")):
@@ -200,7 +209,7 @@ def print_scan_report(report):
     
     git = report["git"]
     if git.get("is_git"):
-        clean_status = "clean" if git.get("is_clean") else f"{git.get('modified_files')} modified files"
+        clean_status = "clean" if git.get("is_clean") else f"{git.get('modified_files')} changed or new files"
         print(f"🌿 Git Branch: {git.get('branch')} | Status: {clean_status}")
         print(f"📌 Last commit: {git.get('last_commit')}")
     else:

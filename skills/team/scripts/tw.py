@@ -180,17 +180,20 @@ def cmd_models(args):
             print("  (no Codex model catalog found in ~/.codex)")
         return
     pricing = load_pricing()
-    print("Claude Code (native subagents and workers; a native subagent keeps its file's effort):")
-    for alias, mid in pricing.get("aliases", {}).items():
-        efforts = pricing["models"].get(mid, {}).get("effort", EFFORTS)
-        print(f"  {alias:<7} {mid:<18} effort: {', '.join(efforts) or 'none'}")
-    print("agy native subagents: model inherit (the session's model), flash or pro")
-    if shutil.which("agy"):
-        ids = [line.split("\t")[0] for line in output(["agy", "models"]).splitlines() if "\t" in line]
-        print("agy workers (exact model, effort in the name): " + (", ".join(ids) or "agy models failed"))
-    else:
-        print("agy: not installed")
-    print_opencode_models(opencode_models())
+    if args.app in (None, "claude"):
+        print("Claude Code (native subagents and workers; the Agent tool's model and effort override the file for one launch):")
+        for alias, mid in pricing.get("aliases", {}).items():
+            efforts = pricing["models"].get(mid, {}).get("effort", EFFORTS)
+            print(f"  {alias:<7} {mid:<18} effort: {', '.join(efforts) or 'none'}")
+    if args.app in (None, "agy"):
+        print("agy native subagents: model inherit (the session's model), flash_lite, flash or pro; invoke_subagent's Model picks one per launch")
+        if shutil.which("agy"):
+            ids = [line.split("\t")[0] for line in output(["agy", "models"]).splitlines() if "\t" in line]
+            print("agy workers (exact model, effort in the name): " + (", ".join(ids) or "agy models failed"))
+        else:
+            print("agy: not installed")
+    if args.app is None:
+        print_opencode_models(opencode_models())
     import install_codex
     found = install_codex.models()
     print("Codex agents: inherit (the session's model) or " + (", ".join(
@@ -372,8 +375,8 @@ def app_options(app, root=None):
         out["native"] = {"models": list(pricing.get("aliases", {})),
                          "efforts": {a: pricing["models"].get(m, {}).get("effort", []) for a, m in
                                      pricing.get("aliases", {}).items()},
-                         "per_launch": "the Agent tool's model parameter changes the model for one "
-                                       "launch; the effort is fixed in the agent file"}
+                         "per_launch": "the Agent tool's model and effort parameters change the model "
+                                       "and the effort for one launch; without them the agent file's apply"}
         out["worker"] = {"models": list(pricing.get("aliases", {})) + ["<full model id>"],
                          "efforts": ["low", "medium", "high", "xhigh", "max"]}
     elif app == "agy":
@@ -383,10 +386,10 @@ def app_options(app, root=None):
             effort = output(["agy", "-p", "/effort"]).strip() or None
         ids = [line.split("\t")[0] for line in output(["agy", "models"]).splitlines() if "\t" in line] \
             if shutil.which("agy") else []
-        out["native"] = {"models": ["inherit", "flash", "pro"], "session_model": session,
+        out["native"] = {"models": ["inherit", "flash_lite", "flash", "pro"], "session_model": session,
                          "session_effort": effort,
-                         "per_launch": "invoke_subagent has no model: a subagent uses its file's tier; "
-                                       "inherit = the session model (change it with /model)"}
+                         "per_launch": "invoke_subagent's Model (inherit, flash_lite, flash, pro) changes the tier "
+                                       "for one launch, never the effort; inherit = the session model"}
         out["worker"] = {"models": ids, "efforts": "part of the model id (-low, -medium, -high)"}
     elif app == "codex":
         import install_codex
@@ -424,7 +427,7 @@ def runs_as(app, p, native):
     if app == "claude":
         if model in native["efforts"] and not native["efforts"][model]:
             return f"native; {model} has no effort, so it is ignored"
-        return f"native: effort {effort} (agent file)"
+        return f"native: effort {effort} (agent file; the Agent tool's effort changes it for one launch)"
     if app == "agy":
         if model == "inherit":
             return (f"native: {native.get('session_model') or 'session model'}, "
@@ -1075,7 +1078,6 @@ def cmd_hardware(args):
     data_dir = settings.hardware_dir()
     os.makedirs(data_dir, exist_ok=True)
     mode_file = os.path.join(data_dir, "hardware_mode.json")
-    status_file = os.path.join(data_dir, "hardware_status.json")
 
     if getattr(args, "home", False):
         try:
@@ -1107,22 +1109,20 @@ def cmd_hardware(args):
         else:
             print(f"Hardware Guard not found: {script}")
 
-    data = {}
-    if os.path.isfile(status_file):
-        try:
-            with open(status_file, "r", encoding="utf-8-sig") as f:
-                data = json.load(f)
-        except Exception:
-            pass
+    data, age = settings.hardware_status()
+    stale = bool(data) and age > settings.HARDWARE_STALE_SECONDS
 
     if getattr(args, "json", False):
-        print(json.dumps(data, indent=2))
+        print(json.dumps(dict(data, AgeSeconds=round(age), Stale=stale) if data else {}, indent=2))
         return
 
     if not data:
         print("Hardware Guard has not written any telemetry yet.")
         print("Start it with: `tw.py hardware --start`")
         return
+    if stale:
+        print(f"STALE: last written {int(age // 60)} min ago; the Hardware Guard is not running, "
+              "so the values below are old. Start it with: `tw.py hardware --start`")
 
     mode = str(data.get("Mode", "home")).upper()
     silent = data.get("SilentMode", False)

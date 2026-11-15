@@ -1,6 +1,39 @@
 # Project state
 
-## Current version: v2.4.0 (released)
+## Current version: v2.4.0 (released) + unreleased fixes on `fix/claude-code-team-test`
+
+### Unreleased (after v2.4.0): fixes from a live team run on Claude Code
+A 3-agent run (2 haiku builders, 1 sonnet reviewer, team talk in review mode) showed:
+- **Team talk is a group conversation for real**: `talk.for_role` no longer hides `--to X`
+  messages from the others; the orchestrator and newcomers read every message (2.4.0 hid
+  questions and challenges between agents). `to` only says who must answer.
+- **Claude models**: `pricing.json` aliases are only `fable`, `opus`, `sonnet`, `haiku`, mapped to
+  `claude-fable-5-2`, `claude-opus-5-5`, `claude-sonnet-5-5`, `claude-haiku-5-5` with the
+  2026-11-15 prices; the gpt-4o, gemini-2.0 and claude-3 entries that `options --app claude`
+  listed as native models are gone. Haiku 5.5 takes an effort.
+- **Per-launch effort**: `options`, `runs_as` and `WIZARD.md` say the Agent tool's `model` and
+  `effort` override the agent file for one launch (no worker needed); the wizard explains how to
+  check the model and effort a subagent really ran from its transcript.
+- **Hardware**: `settings.hardware_status()` returns the data and its age; `tw.py hardware` and
+  doctor report telemetry older than 60 s as stale (guard not running) instead of a CRITICAL.
+- **Smoke**: a process still running at the timeout prints "still running" instead of the kill's
+  exit code.
+- `team-talk` include: talk messages in English. `WIZARD.md` step 5: the usage dashboard needs
+  the folder the app was started in.
+- **auto_update** (off by default): at session start, every agy invocation and every `/team`
+  prompt, a newer tag starts `update_plugin.py --harness all` detached (lock 15 min, log
+  `~/.team-workflow/update.log`), with no model.
+- Same test in **Codex** and **agy** (smart orchestrator, two fast agents):
+  - talk: when `.git` is read-only (Codex sandbox) the channel moves with its messages to
+    `<worktree>/.team-workflow/talk/` (git-ignored); TALK.md forbids posting as another role.
+  - agy agent files use agy's tool names (`read_file`, `edit_file`, `write_file`,
+    `run_command`, `manage_task`, `search_web`), list them all for roles with every tool (an
+    omitted `tools` is agy's read-only default) and carry `subagent: true`, `mainAgent: false`.
+  - agy tiers include `flash_lite`; `invoke_subagent`'s `Model` sets the tier per launch. In an
+    unattended agy run use native subagents: workers need to leave agy's sandbox.
+  - Codex: `spawn_agent` changes the model, not the effort (the `.toml`'s); report the effort the
+    rollout shows. `tw.py models --app X` lists only that app. `scan` counts new files and tells
+    unittest from pytest.
 
 ### v2.4.0 (released)
 - **English first**: `README.md`, `docs/AGENTS.md`, `docs/REFERENCE.md`, `docs/CATALOG.md` and

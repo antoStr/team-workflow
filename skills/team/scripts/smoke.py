@@ -173,7 +173,9 @@ def format_report(result):
     flag = "🟢 PASSED" if result["ok"] else "🔴 FAILED"
     lines = [
         f"Smoke Test: {flag} [{result['status']}]",
-        f"Duration: {result['duration']}s | Exit code: {result['exit_code']}",
+        f"Duration: {result['duration']}s | Exit code: " + (
+            "none, still running at the timeout (stopped by the test)" if result["status"] == "STABLE"
+            else str(result["exit_code"])),
         f"Summary: {result['summary']}"
     ]
     if not result["ok"] and result.get("stderr"):

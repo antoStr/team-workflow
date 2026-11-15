@@ -10,9 +10,10 @@ import shlex
 import subprocess
 import sys
 
-from common import read_hook_input
+from common import read_hook_input, repo_root
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+TEAM_PROMPT = re.compile(r"\A\s*/(?:team|team-workflow)(?:[:\s]|\Z)")
 COMMANDS = {"update-plugin": "update", "update": "update", "upgrade": "upgrade",
             "settings": "settings", "models": "models",
             "addons": "addons", "agents": "agents", "profile": "profile", "audit": "audit",
@@ -35,6 +36,14 @@ def tw_args(prompt):
 
 def main():
     data = read_hook_input()
+    if TEAM_PROMPT.match(data.get("prompt") or ""):
+        try:  # every /team call checks for a new version (GitHub at most hourly); no tokens
+            import settings
+            import update_plugin
+            if settings.load(repo_root(data)).get("auto_update"):
+                update_plugin.auto_update()
+        except Exception:  # noqa: BLE001 - an update check never blocks the prompt
+            pass
     args = tw_args(data.get("prompt"))
     if args is None:
         return

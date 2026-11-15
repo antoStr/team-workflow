@@ -54,6 +54,22 @@ class SettingsTest(unittest.TestCase):
             with self.assertRaises(ValueError, msg=key):
                 settings.parse_value(key, value)
 
+    def test_old_hardware_status_is_reported_as_stale_not_critical(self):
+        import doctor
+        self.assertEqual(settings.hardware_status(), ({}, None))
+        os.makedirs(settings.hardware_dir())
+        path = os.path.join(settings.hardware_dir(), "hardware_status.json")
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump({"Status": "CRITICAL", "CPU": {"Temp_C": 90}}, f)
+        data, age = settings.hardware_status()
+        self.assertEqual((data["Status"], age < settings.HARDWARE_STALE_SECONDS), ("CRITICAL", True))
+        old = os.path.getmtime(path) - 9 * 3600  # written 9 hours ago by a guard that stopped
+        os.utime(path, (old, old))
+        with mock.patch.object(doctor.audit, "audit", return_value=([], 0)):
+            row = [r for r in doctor.checks(self.root) if r[1] == "hardware & thermal"]
+        self.assertEqual(row[0][0], "warn")
+        self.assertIn("540 min ago", row[0][2])
+
 
 class NoModelCommandTest(ScriptTest):
     def test_only_our_commands_are_intercepted(self):
@@ -131,13 +147,17 @@ class AgySubagentTest(unittest.TestCase):
                 meta = dict(line.split(": ", 1) for line in head.splitlines())
                 self.assertEqual(meta["name"], os.path.basename(path)[:-3])
                 json.loads(meta["description"])  # quoted: agy drops a bare description with ": "
-                self.assertIn(meta["model"], ("inherit", "flash", "pro"))
+                self.assertIn(meta["model"], ("inherit", "flash_lite", "flash", "pro"))
             with open(os.path.join(dest, "tester.md")) as f:
                 self.assertIn("\nmodel: flash\n", f.read())
             with open(os.path.join(dest, "architect.md")) as f:
                 text = f.read()
-            self.assertIn('tools: ["view_file", "grep_search", "find_by_name", "list_dir"]', text)
+            self.assertIn('tools: ["read_file"]', text)  # Read, Grep, Glob: agy's names
             self.assertIn("\nmodel: inherit\n", text)  # the session model: pro is older
+            self.assertIn("\nsubagent: true\nmainAgent: false\n", text)
+            with open(os.path.join(dest, "backend-dev.md")) as f:  # every tool: never agy's read-only default
+                self.assertIn('tools: ["read_file", "edit_file", "write_file", "run_command", "manage_task", '
+                              '"search_web"]', f.read())
             self.assertEqual(install_agy.sync_agents(dest, config=config), [])  # already current
 
     def test_leaves_a_foreign_agent_alone(self):

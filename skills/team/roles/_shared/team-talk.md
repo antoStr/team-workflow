@@ -23,4 +23,5 @@ user included. You do not work alone:
 - A `decision` from the orchestrator or the user applies to everyone; your scope and files
   change only with a new assignment.
 - Disagree openly when the evidence says so; agreeing to end the discussion is a failure.
-  Keep messages short: facts, evidence, the next step.
+  Keep messages short: facts, evidence, the next step. Write them in English, whatever
+  language the user or the product uses: everybody in the channel must read them.

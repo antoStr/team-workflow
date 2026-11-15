@@ -172,6 +172,7 @@ def main():
             library.sync(app, config=config, root=root)
         except OSError:
             pass  # `tw.py library sync` retries by hand
+    updating = update_plugin.auto_update() if config.get("auto_update") else None
     if app == "agy":  # PreInvocation in agy: the memory arrives through the AGENTS.md rules
         print("{}")
         return
@@ -198,9 +199,13 @@ def main():
                     f"session: {', '.join(changed)}. In this session launch them as {builtin} "
                     "with `tw.py agents show <role>` as their instructions.")
         notes.append(f"team-workflow: {len(changed)} agents updated; restart {name} to use them.")
-    newer = update_plugin.newer_version() if config["update_check"] else None
-    if newer:
-        notes.append(f"🔔 Nuova versione team-workflow {newer} disponibile (installata {update_plugin.own_version()}). Per aggiornare a zero token esegui: `tw.py upgrade` oppure `/team upgrade`.")
+    newer = None if updating else update_plugin.newer_version() if config["update_check"] else None
+    if updating:
+        notes.append(f"team: installing {updating} in the background (log: ~/.team-workflow/update.log); "
+                     f"restart {name} to load it.")
+    elif newer:
+        notes.append(f"team {newer} is out (installed {update_plugin.own_version()}). Update with no tokens: "
+                     "`/team upgrade`, or turn on `tw.py settings set auto_update true`.")
     if text_mode:
         print("\n".join([context] + notes))
         return

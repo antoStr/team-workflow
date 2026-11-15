@@ -92,6 +92,38 @@ def newer_version(max_age=86400):
         return None
 
 
+def auto_update(max_age=3600, home=None):
+    """Zero-token self update: when a newer version is out, run this script for every installed
+    app in a detached process (log: ~/.team-workflow/update.log) and return that version; None
+    when there is nothing to do or it cannot start. One start per 15 minutes at most."""
+    newer = newer_version(max_age)
+    if not newer:
+        return None
+    base = os.path.join(home or os.path.expanduser("~"), ".team-workflow")
+    lock = os.path.join(base, "update.lock")
+    try:
+        if time.time() - os.path.getmtime(lock) < 900:  # an update is running or just failed
+            return newer
+    except OSError:
+        pass
+    try:
+        os.makedirs(base, exist_ok=True)
+        with open(lock, "w", encoding="utf-8") as f:
+            f.write(newer)
+        detach = ({"creationflags": 0x00000008 | 0x00000200} if os.name == "nt"  # DETACHED, NEW_GROUP
+                  else {"start_new_session": True})
+        with open(os.path.join(base, "update.log"), "a", encoding="utf-8") as log:
+            log.write(f"\n== {time.strftime('%Y-%m-%d %H:%M:%S')} auto update to {newer}\n")
+            log.flush()
+            # cwd outside the plugin: the update replaces the plugin folder
+            subprocess.Popen([sys.executable, os.path.abspath(__file__), "--harness", "all"],
+                             stdin=subprocess.DEVNULL, stdout=log, stderr=subprocess.STDOUT,
+                             cwd=base, **detach)
+    except OSError:
+        return None
+    return newer
+
+
 def claude_version(plugin_list):
     """Version of team in the output of `claude plugin list`."""
     m = re.search(rf"(?:{NAME}|team-workflow)@\S+\s+Version:\s*(\S+)", plugin_list)
