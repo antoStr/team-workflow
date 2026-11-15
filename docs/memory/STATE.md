@@ -1,8 +1,8 @@
 # Project state
 
-## Current version: v2.3.0 (released) + unreleased work on `main`
+## Current version: v2.4.0 (released)
 
-### Unreleased (after v2.3.0)
+### v2.4.0 (released)
 - **English first**: `README.md`, `docs/AGENTS.md`, `docs/REFERENCE.md`, `docs/CATALOG.md` and
   `ALPHA_TESTING.md` are English; the Italian copies are `*.it.md`. `tools/readme_catalog.py`
   writes both catalogs (English text from the role and entry descriptions, Italian from
