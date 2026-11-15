@@ -1,138 +1,140 @@
 <div align="center">
 
-[English](README.en.md) | [Italiano](README.md)
+[English](README.md) | [Italiano](README.it.md)
 
 # 🧭 team-workflow
 
-**Un team autonomo di agenti esperti dentro il tuo assistente di programmazione.**<br>
-Memoria Brain Graph persistente · Verifica reale runtime "Zero Fake-Solved" · Auto-learning & Vaccini preventivi · Team avversario con canale condiviso · Report trasparente a fine lavoro.
+**An autonomous team of specialist AI agents inside your coding assistant.**<br>
+Persistent Brain Graph Memory · "Zero Fake-Solved" Live Runtime Verification · Auto-learning & Preventive Vaccines · Adversarial Shared Channel · Transparent End-of-Task Report.
 
 [![Release](https://img.shields.io/badge/release-v2.3.0-2ea44f)](https://github.com/antoStr/team-workflow/releases)
 [![Tests](https://github.com/antoStr/team-workflow/actions/workflows/tests.yml/badge.svg)](https://github.com/antoStr/team-workflow/actions/workflows/tests.yml)
-[![License: MIT](https://img.shields.io/github/license/antoStr/team-workflow?label=licenza)](LICENSE)
-![Claude Code](https://img.shields.io/badge/Claude%20Code-supportato-d97757)
-![agy](https://img.shields.io/badge/agy%20(Antigravity)-supportato-4285f4)
-![OpenCode](https://img.shields.io/badge/OpenCode-supportato-6e40c9)
-![Codex](https://img.shields.io/badge/Codex%20%2F%20opencodex-supportato-10a37f)
+[![License: MIT](https://img.shields.io/github/license/antoStr/team-workflow?label=license)](LICENSE)
+![Claude Code](https://img.shields.io/badge/Claude%20Code-supported-d97757)
+![agy](https://img.shields.io/badge/agy%20(Antigravity)-supported-4285f4)
+![OpenCode](https://img.shields.io/badge/OpenCode-supported-6e40c9)
+![Codex](https://img.shields.io/badge/Codex%20%2F%20opencodex-supported-10a37f)
 
 </div>
 
 ---
 
-## 📑 Indice
+## 📑 Table of Contents
 
-1. [Cos'è, in due parole](#-cosè-in-due-parole)
-2. [Perché usarlo](#-perché-usarlo)
-3. [Le novità di v2.3 e v2.0](#-le-novità-di-v23-e-v20)
-4. [Come funziona](#️-come-funziona)
-5. [Installazione](#-installazione)
-6. [Il comando universale `/team` e i primi 5 minuti](#-il-comando-universale-team-e-i-primi-5-minuti)
+1. [Overview](#-overview)
+2. [Why Use It](#-why-use-it)
+3. [What's New in v2.3 and v2.0](#-whats-new-in-v23-and-v20)
+4. [How It Works](#️-how-it-works)
+5. [Installation](#-installation)
+6. [The Universal `/team` Command & First 5 Minutes](#-the-universal-team-command--first-5-minutes)
 7. [Zero Fake-Solved: Live Smoke Test](#-zero-fake-solved-live-smoke-test)
-8. [Auto-Learning & Vaccini Preventivi](#-auto-learning--vaccini-preventivi)
-9. [Memoria di Progetto & Brain Graph](#-memoria-di-progetto--brain-graph)
-10. [Gli agenti](#-gli-agenti)
-11. [Agenti che parlano tra loro & Gate Avversario](#-agenti-che-parlano-tra-loro--gate-avversario)
-12. [La libreria di skill](#-la-libreria-di-skill)
-13. [Cybersecurity & Reverse Engineering](#-cybersecurity--reverse-engineering)
-14. [Add-on e server MCP](#-add-on-e-server-mcp)
-15. [Aggiornamenti a Zero Token](#-aggiornamenti-a-zero-token)
-16. [Costi e consumi](#-costi-e-consumi)
-17. [Domande frequenti](#-domande-frequenti)
-18. [Per saperne di più](#-per-saperne-di-più)
-19. [Licenza](#-licenza)
+8. [Auto-Learning & Preventive Vaccines](#-auto-learning--preventive-vaccines)
+9. [Project Memory & Brain Graph](#-project-memory--brain-graph)
+10. [Specialist Agents](#-specialist-agents)
+11. [Project Management](#-project-management)
+12. [Collaborative Talk & Adversarial Gating](#-collaborative-talk--adversarial-gating)
+13. [Skills Library](#-skills-library)
+14. [Cybersecurity, Reversing & Malware Intel](#️-cybersecurity-reversing--malware-intel)
+15. [Add-ons & MCP Servers](#-add-ons--mcp-servers)
+16. [Zero-Token Upgrades](#-zero-token-upgrades)
+17. [Costs & Budget Tracking](#-costs--budget-tracking)
+18. [Frequently Asked Questions](#-frequently-asked-questions)
+19. [Further Reading](#-further-reading)
+20. [License](#-license)
 
 ---
 
-## 💡 Cos'è, in due parole
+## 💡 Overview
 
-**team-workflow** è un plugin universale per **Claude Code**, **agy (Antigravity)**, **OpenCode** e **Codex** (incluso **opencodex**).
+**team-workflow** is a universal plugin for **Claude Code**, **agy (Antigravity)**, **OpenCode**, and **Codex** (including **opencodex**).
 
-Di solito parli con un unico modello generalista che fa tutto da solo, spesso sostiene di aver risolto i problemi senza aver mai avviato l'applicazione e dimentica il contesto tra una sessione e l'altra.
+Normally, you converse with a single generalist model that works alone, frequently claims bugs are fixed without ever launching the application, and forgets architecture context across sessions.
 
-Con **team-workflow**, l'assistente diventa il **responsabile tecnico di un team**:
-- Comprende l'obiettivo e seleziona gli **specialisti dedicati** (frontend, backend, pentester, reverse engineer, tester, reviewer, architect...).
-- Mantiene la memoria di progetto con un **Brain Knowledge Graph** compatibile con Obsidian.
-- **Verifica realmente a runtime** che l'applicazione o il gioco compili, si avvii e resti stabile senza crash (**Zero Fake-Solved**).
-- **Impara automaticamente** dagli errori del team e inietta **vaccini anti-pattern** nelle sessioni future.
-- Ti consegna un **report chiaro** con prove oggettive e ti chiede il permesso prima di qualsiasi modifica irreversibile.
+With **team-workflow**, your coding assistant becomes the **lead engineer of a specialized autonomous team**:
+- Understands your goal and selects the right **specialist roles** (frontend, backend, pentester, reverse engineer, tester, reviewer, architect...).
+- Maintains project memory using an Obsidian-compatible **Brain Knowledge Graph**.
+- **Deterministically verifies at runtime** that the app or game compiles, boots, and runs stably without fatal crashes (**Zero Fake-Solved**).
+- **Continuously learns** from previous mistakes and injects **anti-pattern vaccines** into future sessions.
+- Delivers a structured **report with empirical evidence** and prompts for permission before any irreversible operation.
+- **Answers in your language**: it replies in the language you write in (English when unclear), while code, commits and repository docs keep the project's language.
 
 > [!TIP]
-> **Tutto in un solo comando**: ora basta usare `/team <il tuo compito>` per avviare il team completo senza dover memorizzare decine di comandi lunghi.
+> **One command to rule them all**: simply type `/team <your task>` to mobilize the full team without needing to remember dozens of complex commands.
 
 ---
 
-## ✨ Perché usarlo
+## ✨ Why Use It
 
-| | Assistente Standard | Con team-workflow v2.0 |
+| | Standard Assistant | With team-workflow v2.0 |
 |---|---|---|
-| 🧠 **Memoria** | Ogni sessione riparte da zero | Knowledge Graph in `docs/brain/` persistente e compattazione settimanale |
-| 👥 **Competenze** | Un solo modello generalista | **130 specialisti**: core, linguaggi, framework, sicurezza offensiva, reversing e malware analysis |
-| 🎮 **Verifica Reale** | "Ho corretto il codice!" (senza avviare) | **Zero Fake-Solved**: smoke test runtime su processo reale, log e stabilità d'avvio |
-| 🛡️ **Auto-Apprendimento** | Ripete gli stessi bug col tempo | Registra anti-pattern e inietta **vaccini comportamentali** ad ogni prompt |
-| ⚔️ **Controllo Qualità** | Chi scrive approva se stesso | Gate avversario: costruttore contro verificatore su canale condiviso |
-| ⚡ **Semplicità d'Uso** | 25 comandi diversi da ricordare | **Comando universale `/team`** per qualsiasi operazione |
-| 🔄 **Aggiornamenti** | Manuali o con consumo token | `/team upgrade` a **zero token** tramite script nativo locale |
-| 💰 **Costi & Budget** | Consumi opachi e imprevisti | Stima prima del task, split costi per modello/agente, dashboard integrata |
+| 🧠 **Memory** | Session restarts from zero context | Persistent Knowledge Graph in `docs/brain/` with weekly compaction |
+| 👥 **Expertise** | Single generalist assistant | **137 specialists**: core, languages, frameworks, offensive security, reversing & malware analysis |
+| 🎮 **Real Verification** | "Problem solved!" (without launching) | **Zero Fake-Solved**: live runtime smoke test on actual process, exit code & logs |
+| 🛡️ **Auto-Learning** | Repeats identical bugs over time | Records anti-patterns and injects **behavioral vaccines** on every prompt |
+| ⚔️ **Quality Gate** | Author approves their own code | Adversarial gate: builder vs. verifier on a shared channel |
+| ⚡ **Simplicity** | 25 distinct slash commands | **Universal `/team` command** for all workflows |
+| 🔄 **Upgrades** | Manual steps or token-heavy prompts | Zero-token `/team upgrade` via local native script |
+| 💰 **Budget & Rates** | Unpredictable token usage | Pre-task estimate, per-agent cost breakdown, integrated dashboard |
 
 ---
 
-## 🚀 Le novità di v2.3 e v2.0
+## 🚀 What's New in v2.3 and v2.0
 
 ### v2.3
-- 🎨 **Pack rontend-components**: 13 skill (shadcn/ui, Base UI, Radix, Sonner, Vaul, cmdk, NumberFlow, pick-ui-library, Beautiful UI, RareUI, Magic UI, Aceternity UI, 21st.dev) e il ruolo design-engineer.
-- 🧩 **`tw.py component add <nome>`**: genera subito cmdk, sonner, number-flow, vaul, spotlight, marquee e dot-grid, con codice accessibile.
-- 👀 **`tw.py preview`**: avvia, controlla e ferma il server di sviluppo del progetto (HTML statico, Node, Django) su una porta libera.
-- 🩹 **`tw.py patch`**: applica un diff unificato in modo atomico, con `--dry-run`, utile per i subagent senza permessi di scrittura.
-- 📱 **`tw.py visual-check`**: controlla viewport, rischi di overflow, `prefers-reduced-motion` e struttura degli `<h1>`.
-- 💬 **`tw.py talk close`**: chiude un canale risolvendo i thread aperti e registrando la decisione finale.
-- 🧭 **`tw.py scan` e `tw.py verify-docs`**: scan del repository a ogni `/team` e gate sulla documentazione a fine lavoro.
-- 🎛️ **Scelta agenti dinamica e zero-ghosting**: catalogo completo di 131 ruoli senza limite a 4 scelte, e ogni domanda intercalata nel testo riceve risposta.
+- 🎨 **`frontend-components` pack**: 13 skills (shadcn/ui, Base UI, Radix, Sonner, Vaul, cmdk, NumberFlow, pick-ui-library, Beautiful UI, RareUI, Magic UI, Aceternity UI, 21st.dev) and the `design-engineer` role.
+- 🧩 **`tw.py component add <name>`**: scaffolds cmdk, sonner, number-flow, vaul, spotlight, marquee and dot-grid with accessible code.
+- 👀 **`tw.py preview`**: starts, checks and stops the project's dev server (static HTML, Node, Django) on a free port.
+- 🩹 **`tw.py patch`**: applies a unified diff atomically, with `--dry-run`, handy for subagents without write permissions.
+- 📱 **`tw.py visual-check`**: checks viewport, overflow risks, `prefers-reduced-motion` and `<h1>` structure.
+- 💬 **`tw.py talk close`**: closes a channel by resolving open threads and recording the final decision.
+- 🧭 **`tw.py scan` and `tw.py verify-docs`**: repository scan on every `/team` and a documentation gate at the end.
+- 🎛️ **Dynamic agent choice and zero-ghosting**: the full catalog of roles with no 4-choice cap, and every in-between question gets an answer.
 
 ### v2.0
 
-- 🎯 **Comando Universale `/team`**: basta `/team aggiungi login`, `/team correggi crash del menu` o `/team audit sicurezza`. Tutti i vecchi comandi lunghi restano supportati come alias retrocompatibili.
-- 🚦 **Zero Fake-Solved Gate**: fine delle allucinazioni in cui l'AI dice "Risolto!" ma il gioco o l'app non parte nemmeno. Il motore lancia `tw.py smoke "<cmd>"` con timeout di sicurezza e valida l'avvio reale.
-- 💉 **Continuous Auto-Learning & Vaccini**: ogni volta che un bug viene corretto o un gate avversario supera una contestazione, `tw.py learn` registra l'anti-pattern e lo inietta come vaccino nelle istruzioni del team.
-- 🧠 **Brain Knowledge Graph**: archivio in `docs/brain/` con nodi Markdown, frontmatter YAML, wikilink bidirezionali e supporto ai grafi Obsidian, con `tw.py brain rollover` per compattazione settimanale automatica.
-- 🛡️ **Cybersecurity Suite (Strix, Cloudflare & Malware Intel)**: 100 playbook avanzati di sicurezza offensiva, difensiva e analisi malware (42 Strix + 15 Cloudflare + 43 Malware Analysis & URL Threat Hunting) per un totale di **512 voci di libreria**.
-- 🔬 **Ruoli Pentester, Reverse Engineer & Malware Analyst**: audit di binari compilati, firmware, API e triage di sample malware con supporto a IDA Pro, Ghidra, x64dbg, Cutter, YARA, Sigma e URLScan.io.
-- 💸 **Zero-Token Self-Update**: notifica automatica di nuovi rilasci all'avvio sessione e aggiornamento immediato con `/team upgrade`.
+- 🎯 **Universal `/team` Command**: just run `/team add oauth login`, `/team fix menu crash`, or `/team audit security`. Legacy commands remain fully supported as backwards-compatible aliases.
+- 🚦 **Zero Fake-Solved Gate**: eliminates the classic AI hallucination where an agent declares success without testing. The engine runs `tw.py smoke "<cmd>"` with process watchdogs to guarantee boot stability.
+- 💉 **Continuous Auto-Learning & Vaccines**: whenever a bug is fixed or an adversarial gate passes, `tw.py learn` captures the anti-pattern and injects it as an active vaccine into subsequent agent prompts.
+- 🧠 **Brain Knowledge Graph**: Obsidian-compatible knowledge vault in `docs/brain/` with bidirectional wikilinks, YAML frontmatter, and `tw.py brain rollover` for weekly state compaction across long-running projects.
+- 🛡️ **Cybersecurity Suite (Strix, Cloudflare & Malware Intel)**: 100 advanced security playbooks (42 Strix + 15 Cloudflare + 43 Malware Analysis & URL Threat Hunting), bringing the total library to **512 resources**.
+- 🔬 **Pentester, Reverse Engineer & Malware Analyst Roles**: binary decompilation, malware triage, and static/dynamic audit supporting IDA Pro, Ghidra, x64dbg, Cutter, YARA, Sigma, and URLScan.io.
+- 💸 **Zero-Token Self-Update**: non-invasive local startup notification when a new version is released; instant update via `/team upgrade`.
 
 ---
 
-## ⚙️ Come funziona
+## ⚙️ How It Works
 
 ```mermaid
 flowchart TD
-    A([🙋 Tu chiedi: /team ...]) --> B[🧠 Orchestratore legge il Brain Graph]
-    B --> C{Complessità del compito}
-    C -- Semplice / Rapido --> D[Risolve direttamente]
-    C -- Medio / Complesso --> E[👥 Spawna specialisti su canale condiviso]
-    E --> F[⚔️ Builder implementa]
-    F --> G[🔬 Verifier & Pentester contestano]
-    G --> H[🚦 Live Smoke Test: avvio reale processo]
-    H -- Fallito --> F
-    H -- Superato --> I[💉 Auto-Learning: registra vaccino preventivo]
-    I --> J[🧾 Report finale con prove d'avvio]
+    A([🙋 You request: /team ...]) --> B[🧠 Orchestrator loads Brain Graph]
+    B --> C{Task Complexity}
+    C -- Simple / Trivial --> D[Executes directly]
+    C -- Medium / Complex --> E[👥 Spawns specialists on shared channel]
+    E --> F[⚔️ Builder writes implementation]
+    F --> G[🔬 Verifier & Pentester challenge with proofs]
+    G --> H[🚦 Live Smoke Test: actual process boot]
+    H -- Crashed --> F
+    H -- Verified Stable --> I[💉 Auto-Learning: records vaccine]
+    I --> J[🧾 End-of-task report with execution proof]
     D --> J
-    J --> K[(🧠 Brain Graph & Memoria aggiornati)]
+    J --> K[(🧠 Brain Graph & Memory updated)]
 ```
 
 ---
 
-## 📦 Installazione
+## 📦 Installation
 
-**Requisiti:** `git`, **Python 3** e una delle quattro app supportate.
+**Prerequisites:** `git`, **Python 3**, and at least one supported host application.
 
 <details open>
-<summary><b>Claude Code</b> (consigliato)</summary>
+<summary><b>Claude Code</b> (recommended)</summary>
 
 ```bash
 claude plugin marketplace add antoStr/team-workflow
 claude plugin install team-workflow@team-workflow
 ```
 
-Riavvia Claude Code. Fatto!
+Restart Claude Code. Ready!
 
 </details>
 
@@ -141,22 +143,22 @@ Riavvia Claude Code. Fatto!
 
 ```bash
 agy plugin install https://github.com/antoStr/team-workflow
-python ~/.gemini/config/plugins/team-workflow/skills/team-workflow/scripts/tw.py install-cli
+python ~/.gemini/config/plugins/team-workflow/skills/team/scripts/tw.py install-cli
 ```
 
-Riavvia agy. Fatto!
+Restart agy. Ready!
 
 </details>
 
 <details>
-<summary><b>OpenCode</b> (CLI o app desktop)</summary>
+<summary><b>OpenCode</b> (CLI or desktop app)</summary>
 
 ```bash
 git clone https://github.com/antoStr/team-workflow
-python team-workflow/skills/team-workflow/scripts/install_opencode.py
+python team-workflow/skills/team/scripts/install_opencode.py
 ```
 
-Riavvia OpenCode. I comandi sono disponibili come `/team` o `/team-workflow/<nome>`.
+Restart OpenCode. Commands are available as `/team` or `/team-workflow/<name>`.
 
 </details>
 
@@ -165,204 +167,232 @@ Riavvia OpenCode. I comandi sono disponibili come `/team` o `/team-workflow/<nom
 
 ```bash
 git clone https://github.com/antoStr/team-workflow
-python team-workflow/skills/team-workflow/scripts/tw.py install-codex
+python team-workflow/skills/team/scripts/tw.py install-codex
 ```
 
-Riavvia Codex. I comandi sono registrati come `$team` o `$team-workflow-<nome>`.
+Restart Codex. Commands are registered as `$team` or `$team-workflow-<name>`.
 
 </details>
 
 ---
 
-## ⚡ Il comando universale `/team` e i primi 5 minuti
+## ⚡ The Universal `/team` Command & First 5 Minutes
 
-Non c'è più bisogno di ricordare decine di comandi. Usa semplicemente `/team`:
+Forget memorizing dozens of syntax variations. Simply use `/team`:
 
-| Cosa vuoi fare | Comando | Cosa fa |
+| Intent | Command | Action |
 |---|---|---|
-| **Avviare un task** | `/team crea autenticazione OAuth` | Wizard automatico, team di specialisti, implementazione e test |
-| **Risolvere un bug reale** | `/team il gioco va in crash al livello 3` | Riproduzione, fix, live smoke test reale e verifica che non crashi |
-| **Audit di sicurezza** | `/team controlla vulnerabilità e binari` | Pentester e security reviewer analizzano API, codice e dipendenze |
-| **Aggiornare il plugin** | `/team upgrade` | Scarica e aggiorna l'ultima versione a **zero token** |
-| **Leggere la memoria** | `/team status` o `/team memory` | Mostra stato, grafi della conoscenza e vaccini attivi |
+| **Build a feature** | `/team implement OAuth2 authentication` | Runs wizard, assigns specialists, writes code and tests |
+| **Fix a real bug** | `/team game crashes on stage 3 boss` | Reproduces error, patches root cause, runs real smoke test |
+| **Security audit** | `/team audit API endpoints and binary exports` | Pentester and security reviewer inspect source, memory, and deps |
+| **Update plugin** | `/team upgrade` | Fast git pull and sync at **zero token cost** |
+| **Check memory** | `/team status` or `/team memory` | Displays active knowledge graph nodes and learned vaccines |
 
-I comandi dettagliati e le utility a costo zero token sono integrati in `/team`:
-- `/team start [compito]` (o `/team fix-bug <bug>`)
-- `/team doctor` (healthcheck del plugin, harness e ruoli con auto-fix: `doctor --fix`)
-- `/team audit` (audit di sicurezza e conformità configurazioni)
-- `/team review-changes` (revisione approfondita del diff)
-- `/team call-team <ruoli>` (convocazione manuale di specifici specialisti)
-- `/team release [versione]` (gestione versionamento e rilascio)
-- `agy plugin update team-workflow` (aggiornamento trasparente da terminale Windows, macOS e Linux)
+Granular workflow commands and zero-token utilities are fully integrated into `/team`:
+- `/team start [task]` (or `/team fix-bug <bug>`)
+- `/team doctor` (health check for plugin, harnesses and agents with auto-repair: `doctor --fix`)
+- `/team audit` (security and configuration compliance audit)
+- `/team review-changes` (deep adversarial diff review)
+- `/team call-team <roles>` (explicitly invoke specific agents)
+- `/team release [version]` (semantic versioning and release automation)
+- `agy plugin update team-workflow` (frictionless update from Windows, macOS and Linux terminals)
 
 ---
 
 ## 🚦 Zero Fake-Solved: Live Smoke Test
 
-Uno dei problemi più frustranti nello sviluppo con LLM è l'agente che dichiara: *"Problema risolto con successo!"*, ma poi l'applicazione non compila, fallisce all'avvio o crasha silenziosamente.
+One of the most persistent issues in LLM coding is the agent proclaiming: *"Done! The bug is completely solved!"*, only for the developer to run the project and hit an immediate crash.
 
-team-workflow integra il motore **Live Smoke Test**:
+team-workflow enforces the **Live Smoke Test** engine:
 ```bash
-python tw.py smoke "<comando di avvio>" --timeout 5 [--strict]
+python tw.py smoke "<launch command>" --timeout 5 [--strict]
 ```
 
-- Lancia il vero processo del gioco o dell'applicazione in un sandbox controllato.
-- Monitora l'avvio, il codice di uscita, gli errori su `stderr` e la stabilità dopo 5 o 10 secondi di esecuzione.
-- **Regola Zero Fake-Solved**: l'orchestratore ha il divieto tassativo di dichiarare un task completato finché lo smoke test non produce evidenza tangibile di corretta esecuzione.
-- **WSL Bridge nativo**: su sistemi Windows, aggiungi il flag `--wsl` (`tw.py smoke "<cmd>" --wsl`) per eseguire smoke test e verifiche dentro l'ambiente Linux WSL2 reale (ad esempio per daemon di rete, ELF binari o test su `/proc`).
+- Launches the actual application or game process in an isolated execution harness.
+- Monitors startup lifecycle, exit codes, stderr output, and stability over 5 to 10 seconds of runtime.
+- **Zero Fake-Solved Rule**: the orchestrator is strictly forbidden from declaring a bug solved without empirical evidence of a healthy, stable boot.
+- **Native WSL Bridge**: on Windows systems, pass the `--wsl` flag (`tw.py smoke "<cmd>" --wsl`) to execute live smoke tests and process stability checks inside the real WSL2 Linux environment (e.g. for network daemons, Linux ELF binaries, or `/proc` dependencies).
 
 ---
 
-## 💉 Auto-Learning & Vaccini Preventivi
+## 💉 Auto-Learning & Preventive Vaccines
 
-Ad ogni sessione, gli agenti diventano più intelligenti:
+With each task, your team grows more capable:
 
-1. **Rilevamento**: quando un bug viene risolto o un test avversario intercetta un errore sottile, il team estrae l'anti-pattern.
-2. **Registrazione**: `tw.py learn record --pattern "..." --fix "..." --reason "..."` crea un nodo in `docs/brain/learnings/`.
-3. **Vaccinazione**: a ogni nuovo avvio (`session_start.py`), i vaccini pertinenti vengono iniettati nel contesto iniziale degli agenti, impedendo la regressione su errori già affrontati.
-
----
-
-## 🧠 Memoria di Progetto & Brain Graph
-
-Il sistema di memoria supporta sia la modalità classica (`docs/memory/`) sia il nuovo **Brain Graph** (`docs/brain/`), compatibile nativamente con Obsidian:
-
-- **Nodi strutturati**: architettura, moduli, decisioni (ADR), convenzioni, log settimanali e vaccini.
-- **Wikilink bidirezionali**: navigazione immediata delle dipendenze ad 1-hop senza dover scansionare l'intera codebase con grep.
-- **Compattazione automatica**: `tw.py brain rollover` archivia lo stato delle settimane precedenti in journal di riepilogo (`docs/brain/journal/week-YYYY-WXX.md`), consentendo di lavorare per mesi senza saturare la finestra di contesto.
-- **Verifica di coerenza**: `tw.py brain check --strict` valida link orfani o nodi rotti.
+1. **Detection**: when a bug is fixed or an adversarial challenge catches an edge case, the team identifies the root anti-pattern.
+2. **Recording**: `tw.py learn record --pattern "..." --fix "..." --reason "..."` writes an anti-pattern node into `docs/brain/learnings/`.
+3. **Vaccination**: on every session startup (`session_start.py`), active vaccines are injected into agent contexts, preventing recurring regressions.
 
 ---
 
-## 👥 Gli agenti
+## 🧠 Project Memory & Brain Graph
 
-team-workflow include **130 specialisti**:
-- **20 nel core**: `architect`, `backend-dev`, `frontend-dev`, `tester`, `code-reviewer`, `security-reviewer`, `database-engineer`, `devops-engineer`, `performance-engineer`, `ui-ux-designer`, `product-manager`, `doc-keeper`, `e2e-tester`, `data-analyst`, `market-researcher`, `marketing-strategist`, `refactor-specialist`, `release-manager`, `technical-writer`, `accessibility-specialist`.
-- **Pack linguaggi (26 agenti)**: Python, TypeScript, Go, Rust, Java, C++, C#, Kotlin, Swift, PHP, Ruby, Dart/Flutter, F#.
-- **Pack qualità, sicurezza & reversing**: `pentester`, `reverse-engineer`, `malware-analyst`, `silent-failure-hunter`, `type-design-reviewer`, e molti altri.
-- **Pack alternativi (`alt-`)**: versioni per una seconda opinione indipendente.
+team-workflow supports both classic memory (`docs/memory/`) and the new **Brain Graph** engine (`docs/brain/`), natively compatible with Obsidian:
 
-📋 Consulta il **[Catalogo Completo](docs/CATALOG.md)** per le schede di tutti i 130 ruoli.
+- **Structured Nodes**: architecture, modules, architectural decision records (ADRs), conventions, weekly logs, and learning vaccines.
+- **Bidirectional Wikilinks**: 1-hop dependency exploration without grep-scanning entire multi-gigabyte codebases.
+- **Weekly Compaction**: `tw.py brain rollover` condenses historical state into weekly summaries (`docs/brain/journal/week-YYYY-WXX.md`), letting you run workflows for weeks or months without context saturation.
+- **Strict Integrity Checks**: `tw.py brain check --strict` validates orphan nodes and broken wikilinks.
 
 ---
 
-## 💬 Agenti che parlano tra loro & Gate Avversario
+## 👥 Specialist Agents
 
-Per i compiti complessi, gli agenti comunicano su un canale condiviso (`tw.py talk`):
+team-workflow provides **137 specialist roles**:
+- **20 Core Roles**: `architect`, `backend-dev`, `frontend-dev`, `tester`, `code-reviewer`, `security-reviewer`, `database-engineer`, `devops-engineer`, `performance-engineer`, `ui-ux-designer`, `product-manager`, `doc-keeper`, `e2e-tester`, `data-analyst`, `market-researcher`, `marketing-strategist`, `refactor-specialist`, `release-manager`, `technical-writer`, `accessibility-specialist`.
+- **Language Packs (26 roles)**: Python, TypeScript, Go, Rust, Java, C++, C#, Kotlin, Swift, PHP, Ruby, Dart/Flutter, F#.
+- **Quality, Security & Reversing Packs**: `pentester`, `reverse-engineer`, `malware-analyst`, `silent-failure-hunter`, `type-design-reviewer`, and more.
+- **Project Management Pack (`pm`)**: `project-manager`, `project-scheduler`, `project-controller`, `risk-manager`, `stakeholder-manager`, `agile-coach` (see [Project Management](#-project-management)).
+- **Alternative Roles (`alt-`)**: second-opinion variants for independent evaluation.
+
+📋 Browse the **[Full Catalog](docs/CATALOG.md)** for details on all 137 agents.
+
+---
+
+## 📊 Project Management
+
+Not every task is code. The `pm` agent pack and the `project-management` library pack bring
+project management to the same team, following ISO 21502 and common IPMA/PMI and agile practice:
+
+| Agent | What it does |
+|---|---|
+| `project-manager` | charter, integrated plan and baselines, change control, status reports, closure and lessons learned |
+| `project-scheduler` | activities and dependencies, critical path and float, Gantt, resource leveling, crashing and fast tracking |
+| `project-controller` | budget and reserves, progress measurement, earned value (CPI, SPI, EAC, TCPI), forecasts |
+| `risk-manager` | threats and opportunities, probability-impact scoring, responses and owners, risk register |
+| `stakeholder-manager` | stakeholder analysis, communication plan, RACI, meetings, conflict and negotiation |
+| `agile-coach` | lifecycle choice, Scrum and Kanban, backlog and user stories, estimates and release planning |
 
 ```text
-#1 backend-dev → tester     [finding]   Corretto il calcolo del carrello in cart.py
-#2 tester → backend-dev     [challenge] Test fallito: con coupon SAVE5 il totale diventa negativo (-3.00 €)
-#3 backend-dev → tester     [fix]       Aggiunto vincolo min_total = 0.00 €
-#4 tester                   [verdict]   Verificato e approvato: 12 test su 12 passano
+/team:agents enable pm                         ← switch the pack on
+/team:library enable project-management        ← install its eight skills (pm-lifecycle, pm-schedule, pm-control...)
+/team plan the office move: charter, WBS, schedule with critical path, budget and risks
 ```
 
-Grazie al **Gate Avversario** (`tw.py gate`), il builder non può mai approvare il proprio codice: un verificatore indipendente deve validare la modifica prima che venga accettata.
+The numbers are never computed by the model: `pm-schedule` ships a critical-path calculator
+(`cpm.py`, with PERT estimates and a Mermaid Gantt) and `pm-control` an earned value calculator
+(`evm.py`), both tested. Documents land in `docs/project/` in the language you ask for.
 
 ---
 
-## 📚 La libreria di skill
+## 💬 Collaborative Talk & Adversarial Gating
 
-La libreria integrata comprende **512 voci** (396 skill, 94 comandi, 22 set di regole):
-- Ingegneria agentica, cicli autonomi e harness di valutazione.
-- Ottimizzazione token e caching (Caveman, Ponytail, Context Mode).
-- Testing TDD, migrazioni reversibili, refactoring sicuro.
-- Ricerca istantanea con `tw.py library search <parole>`.
+For non-trivial tasks, agents collaborate over a dedicated topic channel (`tw.py talk`):
+
+```text
+#1 backend-dev → tester     [finding]   Adjusted discount formula in cart.py
+#2 tester → backend-dev     [challenge] Test failed: applying coupon SAVE5 results in negative total (-3.00 €)
+#3 backend-dev → tester     [fix]       Added floor constraint min_total = 0.00 €
+#4 tester                   [verdict]   Verified: all 12 unit tests pass successfully
+```
+
+Under the **Adversarial Gate** protocol (`tw.py gate`), the authoring agent cannot self-approve: an independent verifier must sign off before code is accepted.
+
+---
+
+## 📚 Skills Library
+
+The built-in library contains **533 resources** (417 skills, 94 commands, 22 rule sets):
+- Agentic patterns, autonomous loops, and evaluation harnesses.
+- Token optimization and compression (Caveman, Ponytail, Context Mode).
+- TDD workflows, reversible database migrations, and safe refactoring.
+- Fast keyword search via `tw.py library search <keywords>`.
 
 ---
 
 ## 🛡️ Cybersecurity, Reversing & Malware Intel
 
-La suite di sicurezza include quattro grandi pack specializzati:
+Version 2.1 incorporates four major security toolsets:
 
 1. **Strix Autonomous Pentesting** (42 playbooks):
-   - OWASP Top 10, IDOR, SSRF, SQL Injection, NoSQL Injection, Race Conditions, Prototype Pollution, JWT broken authentication, LLM Prompt Injection e Agentic Security.
-   - Ruolo `pentester`: richiede sempre PoC funzionante, controprove e calibrazione CVSS prima di dichiarare un rischio.
+   - OWASP Top 10, IDOR, SSRF, SQL/NoSQL Injection, Race Conditions, Prototype Pollution, JWT broken auth, LLM Prompt Injection, and Agentic System Security.
+   - `pentester` role: enforces verifiable PoC reproduction, counter-evidence checks, and CVSS severity calibration.
 
 2. **Cloudflare Security Audit** (15 playbooks):
-   - Memory safety per codice compilato (C/C++, Rust, Go), Web protocol & auth, client-side, API/RPC messaging, cloud deployment e data lifecycle.
+   - Native memory safety (C/C++, Rust, Go), Web protocol & auth, client-side vulnerabilities, API/RPC messaging, cloud deployment, and data lifecycle audit.
 
-3. **Reverse Engineering & Decompilazione**:
-   - Ruolo `reverse-engineer`: supporto per **IDA Pro**, **Ghidra**, **x64dbg**, **Cutter** e server MCP di decompilazione. Analisi di binari ELF/PE, ricostruzione strutture dati, firma delle funzioni e verifica di buffer overflow.
+3. **Reverse Engineering & Decompilation**:
+   - `reverse-engineer` role: integration with **IDA Pro**, **Ghidra**, **x64dbg**, **Cutter**, and decompilation MCP servers. Static/dynamic binary analysis, struct layout reconstruction, function profiling, and exploit mitigation verification.
 
-4. **Malware Analysis & Threat Intel URL/Richieste** (43 playbooks):
-   - Ruolo `malware-analyst`: triage PE/ELF, unpacking, memory forensics, dissezione protocolli C2, YARA, Sigma, STIX 2.1.
-   - Audit link e richieste: scansione URLScan.io, ispezione header phishing, domain fronting hunting, tracking infrastrutture avversarie e analisi traffico di rete (Zeek, TShark).
+4. **Malware Analysis & URL/Request Threat Hunting** (43 playbooks):
+   - `malware-analyst` role: PE/ELF binary triage, unpacking, memory forensics, C2 protocol dissection, YARA, Sigma, and STIX 2.1 generation.
+   - Link & request audits: URLScan.io submissions, phishing email header analysis, domain fronting hunting, adversary infrastructure tracking, and PCAP network forensics (Zeek, TShark).
 
 ---
 
-## 🔌 Add-on e server MCP
+## 🔌 Add-ons & MCP Servers
 
-Installa strumenti e capacità aggiuntive in tutte le app supportate con un solo comando:
+Install extended tools across all supported hosts with one command:
 
 ```bash
-tw.py addons add popular       # Superpowers, skill Anthropic, ui-ux, context7
-tw.py addons add mcp           # Playwright (browser reale), Context7, Serena
+tw.py addons add popular       # Superpowers, Anthropic skills, ui-ux, context7
+tw.py addons add mcp           # Playwright (real browser), Context7, Serena
 tw.py addons add token-saving  # Caveman, Ponytail, Context-mode
 ```
 
 ---
 
-## 🔄 Aggiornamenti a Zero Token
+## 🔄 Zero-Token Upgrades
 
-Non consumare token preziosi per aggiornare il plugin:
+Keep your plugin up to date without wasting context tokens:
 
-- **Notifica automatica**: all'apertura di una sessione, un controllo locale non invasivo ti segnala se è disponibile una nuova versione.
-- **Aggiornamento istantaneo**: digita `/team upgrade` (o da terminale `tw.py upgrade`). Lo script esegue il pull locale da git, riallinea i file e rigenera i cataloghi senza effettuare chiamate LLM.
-
----
-
-## 💰 Costi e consumi
-
-- **Stima preventiva**: il wizard calcola il costo previsto in base ai token e ai modelli assegnati a ciascun ruolo.
-- **Ottimizzazione intelligente**: i ruoli secondari possono usare modelli rapidi ed economici (`haiku`, `flash`), riservando i modelli di punta (`sonnet`, `opus`, `pro`) ai compiti critici di architettura e sicurezza.
-- **Trasparenza**: il comando `tw.py usage` (o `/team:usage-costs`) mostra i consumi esatti divisi per agente, modello e sessione.
+- **Automatic Notifications**: non-invasive local startup check alerts you whenever a new version is published.
+- **Instant Upgrade**: execute `/team upgrade` (or run `tw.py upgrade` in terminal). The local script performs a git pull, aligns schemas, and updates catalogs without any LLM inference.
 
 ---
 
-## ❓ Domande frequenti
+## 💰 Costs & Budget Tracking
+
+- **Upfront Estimation**: the wizard provides estimated token cost before agents start executing.
+- **Smart Tiering**: assigns lightweight models (`haiku`, `flash`) to routine tasks while reserving flagship models (`sonnet`, `opus`, `pro`) for high-stakes architecture and security auditing.
+- **Usage Auditing**: inspect per-role, per-model, and per-session spending with `tw.py usage` (or `/team:usage-costs`).
+
+---
+
+## ❓ Frequently Asked Questions
 
 <details>
-<summary><b>Devo usare tutti i 130 agenti?</b></summary>
+<summary><b>Do I have to use all 137 agents?</b></summary>
 
-No! L'orchestratore sceglie solo 1 o 2 agenti strettamente necessari per il tuo compito specifico. Per compiti piccoli, l'assistente lavora da solo.
+No! The orchestrator only selects the 1 or 2 specialist agents required for your specific task. For small tasks, it works alone.
 </details>
 
 <details>
-<summary><b>Come evito che l'agente dica di aver risolto senza testare?</b></summary>
+<summary><b>How does it prevent agents from falsely claiming a bug is fixed?</b></summary>
 
-È integrato il sistema Zero Fake-Solved: l'agente ha la regola vincolante di eseguire `tw.py smoke "<comando>"` per verificare l'avvio reale del processo prima di considerare concluso il compito.
+The Live Smoke Test gate executes the actual command (`tw.py smoke "<cmd>"`) to verify the process compiles, starts, and stays stable before accepting the fix.
 </details>
 
 <details>
-<summary><b>Come fa a gestire sessioni lunghe settimane o mesi?</b></summary>
+<summary><b>How does it sustain long sessions over weeks or months?</b></summary>
 
-Grazie al motore Brain Graph (`docs/brain/`): le sessioni passate vengono riassunte in journal settimanali tramite `tw.py brain rollover`, mantenendo snello il contesto attivo senza perdere la memoria storica del progetto.
+Through the Brain Graph engine (`docs/brain/`): past activities are archived into weekly journals with `tw.py brain rollover`, keeping active context clean and responsive.
 </details>
 
 <details>
-<summary><b>Il plugin può modificare file non richiesti?</b></summary>
+<summary><b>Can the plugin modify files without asking?</b></summary>
 
-No. Modifica solo i file inerenti al compito assegnato. Tutte le altre proposte vengono inserite nel report finale e richiedono la tua autorizzazione esplicita.
+No. It only touches files directly relevant to your assigned task. All other proposed changes are presented in the final report and require your explicit consent.
 </details>
 
 ---
 
-## 📖 Per saperne di più
+## 📖 Further Reading
 
-- 📋 [Catalogo Completo (130 agenti, 512 skill)](docs/CATALOG.md)
-- 👥 [Guida agli agenti e creazione ruoli](docs/AGENTS.md)
-- 📘 [Manuale di riferimento comandi e configurazione](docs/REFERENCE.md)
-- 💬 [Team Talk e protocollo di conversazione](skills/team-workflow/TALK.md)
-- 🧠 [Brain Knowledge Graph & Struttura nodi](docs/brain/INDEX.md)
-- 📜 [Note di rilascio](https://github.com/antoStr/team-workflow/releases)
+- 📋 [Full Catalog (137 agents, 533 library entries)](docs/CATALOG.md)
+- 👥 [Agent Guide & Role Customization](docs/AGENTS.md)
+- 📘 [Reference Manual: Commands & Settings](docs/REFERENCE.md)
+- 🇮🇹 Italian versions: [README](README.it.md) · [catalog](docs/CATALOG.it.md) · [agent guide](docs/AGENTS.it.md) · [manual](docs/REFERENCE.it.md)
+- 💬 [Team Talk & Conversation Protocol](skills/team/TALK.md)
+- 🧠 [Brain Knowledge Graph & Node Layout](docs/brain/INDEX.md)
+- 📜 [Release Notes](https://github.com/antoStr/team-workflow/releases)
 
 ---
 
-## 📄 Licenza
+## 📄 License
 
-Distribuito con licenza **MIT** (vedi [LICENSE](LICENSE)). I contenuti di terze parti importati nella libreria e nei ruoli mantengono le rispettive licenze d'origine ([NOTICE](skills/team-workflow/library/NOTICE.md)).
+Distributed under the **MIT License** (see [LICENSE](LICENSE)). Imported third-party resources retain their original licenses ([NOTICE](skills/team/library/NOTICE.md)).
 
 <div align="center">
-<sub>Sviluppato con dedizione per programmatori e team aumentati da AI · <b>team-workflow v2.3.0</b></sub>
+<sub>Built with precision for software engineers and AI-augmented teams · <b>team-workflow v2.3.0</b></sub>
 </div>

@@ -10,7 +10,7 @@ param(
 )
 
 $Host.UI.RawUI.WindowTitle = "Thermal Guard - Hardware Temperature Monitor"
-Write-Host "[Thermal Guard] Avvio monitoraggio sensori ogni $IntervalSeconds secondo/i..." -ForegroundColor Cyan
+Write-Host "[Thermal Guard] Reading sensors every $IntervalSeconds s..." -ForegroundColor Cyan
 Write-Host "[Thermal Guard] Soglia Attenzione: $WarnTemp C | Soglia Critica: $CriticalTemp C" -ForegroundColor Yellow
 
 $maxCpu = 0.0
@@ -18,7 +18,7 @@ $maxGpu = 0.0
 $lastLogTime = [DateTime]::MinValue
 $lastAlertPopup = [DateTime]::MinValue
 
-# Verifica disponibilità nvidia-smi
+# Is nvidia-smi available?
 $hasNvidia = $false
 try {
     $null = Get-Command "nvidia-smi" -ErrorAction Stop
@@ -93,7 +93,7 @@ while ($true) {
 
     # Gestione Allarmi
     if ($isCrit) {
-        $alertMsg = "PERICOLO: Temperatura CRITICA rilevata! CPU: $cpu C | GPU: $gpu C a $($now.ToString('HH:mm:ss'))"
+        $alertMsg = "DANGER: CRITICAL temperature! CPU: $cpu C | GPU: $gpu C at $($now.ToString('HH:mm:ss'))"
         Write-Warning $alertMsg
         
         # Scrivi file allarme

@@ -542,19 +542,19 @@ def rollover_state(root=".", vault_dir=VAULT_DIR):
         f.write("\n".join(journal_content))
 
     lean_state = [
-        f"# Stato del Progetto ({week_str})",
+        f"# Project state ({week_str})",
         "",
-        f"> [!NOTE] Cronologia precedente archiviata in [[journal-week-{week_str}]].",
+        f"> [!NOTE] Earlier history archived in [[journal-week-{week_str}]].",
         "",
-        "## Obiettivi Attivi della Settimana",
-        "- [ ] Definire nuovi task o riprendere dal backlog.",
+        "## Goals this week",
+        "- [ ] Define new tasks or pick up from the backlog.",
         "",
-        "## Cosa Verificare",
+        "## What to verify",
         "- Test suite: `pytest tests`.",
-        "- Integrità Brain: `tw.py brain check --strict`.",
+        "- Brain integrity: `tw.py brain check --strict`.",
         "",
-        "## Punto di Ripresa",
-        f"- Inizio nuovo sprint/ciclo ({week_str}). Consultare le schede d'area (`docs/brain/areas/`) per lo stato dei singoli moduli."
+        "## Where to resume",
+        f"- New sprint or cycle ({week_str}). See the area cards (`docs/brain/areas/`) for the state of each module."
     ]
     with open(state_file, "w", encoding="utf-8") as f:
         f.write("\n".join(lean_state))

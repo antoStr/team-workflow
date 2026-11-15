@@ -1,189 +1,191 @@
 <div align="center">
 
-# 👥 Guida agli agenti
+# 👥 Agent guide
 
-**Come sono fatti, come si usano, come se ne crea uno nuovo.**<br>
-Pensata per chi inizia: ogni passo ha un esempio da copiare.
+**How agents are made, how to use them, how to create a new one.**<br>
+Written for beginners: every step has an example to copy.
 
-[⬅️ Torna al README](../README.md) · [📋 Catalogo degli agenti](CATALOG.md) · [📘 Manuale completo](REFERENCE.md)
+[⬅️ Back to the README](../README.md) · [📋 Agent catalog](CATALOG.md) · [📘 Reference manual](REFERENCE.md) · [🇮🇹 Italiano](AGENTS.it.md)
 
 </div>
 
 ---
 
-## 📑 Indice
+## 📑 Contents
 
-1. [Cos'è un agente](#-cosè-un-agente)
-2. [Dove si trovano](#-dove-si-trovano)
-3. [Vedere gli agenti disponibili](#-vedere-gli-agenti-disponibili)
-4. [Usare un agente](#-usare-un-agente)
-5. [Accendere e spegnere agenti](#-accendere-e-spegnere-agenti)
-6. [Cambiare modello e impegno](#️-cambiare-modello-e-impegno)
-7. [Creare un agente nuovo](#-creare-un-agente-nuovo)
-8. [Anatomia del file di un agente](#-anatomia-del-file-di-un-agente)
-9. [Modificare un agente esistente](#️-modificare-un-agente-esistente)
-10. [Dare skill a un agente](#-dare-skill-a-un-agente)
-11. [Farlo lavorare con gli altri](#-farlo-lavorare-con-gli-altri)
-12. [Provarlo e condividerlo](#-provarlo-e-condividerlo)
-13. [Problemi comuni](#-problemi-comuni)
-14. [Promemoria dei comandi](#-promemoria-dei-comandi)
+1. [What an agent is](#-what-an-agent-is)
+2. [Where they live](#-where-they-live)
+3. [See the available agents](#-see-the-available-agents)
+4. [Use an agent](#-use-an-agent)
+5. [Switch agents on and off](#-switch-agents-on-and-off)
+6. [Change model and effort](#️-change-model-and-effort)
+7. [Create a new agent](#-create-a-new-agent)
+8. [Anatomy of an agent file](#-anatomy-of-an-agent-file)
+9. [Change an existing agent](#️-change-an-existing-agent)
+10. [Give skills to an agent](#-give-skills-to-an-agent)
+11. [Make it work with the others](#-make-it-work-with-the-others)
+12. [Try it and share it](#-try-it-and-share-it)
+13. [Common problems](#-common-problems)
+14. [Command cheat sheet](#-command-cheat-sheet)
 
 ---
 
-## 🤖 Cos'è un agente
+## 🤖 What an agent is
 
-Un agente è un **assistente specializzato** con un compito preciso: il `tester` verifica, il
-`security-reviewer` cerca falle di sicurezza, il `frontend-dev` scrive interfacce.
+An agent is a **specialized assistant** with a precise job: the `tester` verifies, the
+`security-reviewer` looks for security holes, the `frontend-dev` writes interfaces, the
+`project-scheduler` builds schedules.
 
-Ogni agente è **un semplice file di testo** (Markdown) con due parti:
+Every agent is **a plain text file** (Markdown) with two parts:
 
 ```text
 ┌─────────────────────────────────────────┐
-│ ---                                     │  ← impostazioni: nome, descrizione, strumenti
+│ ---                                     │  ← settings: name, description, tools
 │ name: tester                            │
 │ description: Use this agent after ...   │
 │ ---                                     │
 │                                         │
-│ You are a senior test engineer...       │  ← istruzioni: chi è, come lavora,
-│ ## When to invoke                       │    cosa consegna, cosa non deve fare
+│ You are a senior test engineer...       │  ← instructions: who it is, how it works,
+│ ## When to invoke                       │    what it delivers, what it must not do
 │ ...                                     │
 └─────────────────────────────────────────┘
 ```
 
-Non lanci gli agenti a mano: lo fa l'**orchestratore**, cioè l'assistente principale. Lui sceglie
-chi serve, ti chiede conferma e passa a ogni agente un incarico preciso: cosa fare, quali file
-toccare, cosa consegnare.
+You do not launch agents by hand: the **orchestrator**, the main assistant, does it. It picks who
+is needed, asks you to confirm and gives each agent a precise brief: what to do, which files to
+touch, what to deliver.
 
 > [!TIP]
-> La **descrizione** è la parte più importante: è quella che l'orchestratore legge per decidere
-> quando usare l'agente.
+> The **description** is the most important part: the orchestrator reads it to decide when to
+> use the agent.
 
 ---
 
-## 📂 Dove si trovano
+## 📂 Where they live
 
-Gli agenti arrivano da tre posti. Se due hanno lo stesso nome, vince quello più in basso
-nella tabella:
+Agents come from three places. When two have the same name, the lower one in the table wins:
 
-| Da dove | Cartella | Per chi |
+| From | Folder | For whom |
 |---|---|---|
-| 📦 Il plugin | `skills/team-workflow/roles/<pack>/` | Tutti: i 127 agenti di team-workflow |
-| 👤 I tuoi | `~/.team-workflow/agents/` | Tu, in tutti i tuoi progetti |
-| 📁 Il progetto | `<progetto>/.team-workflow/agents/` | Chiunque lavori a quel progetto |
+| 📦 The plugin | `skills/team/roles/<pack>/` | Everyone: every agent of team |
+| 👤 Yours | `~/.team-workflow/agents/` | You, in all your projects |
+| 📁 The project | `<project>/.team-workflow/agents/` | Anyone working on that project |
 
-team-workflow trasforma questi file negli agenti "veri" di ogni app e li riscrive da solo a ogni
-avvio:
+team turns these files into the "real" agents of each app and rewrites them at every start-up:
 
-| App | Dove finiscono |
+| App | Where they end up |
 |---|---|
-| Claude Code | `~/.claude/agents/<ruolo>.md` |
-| agy | `~/.gemini/config/agents/<ruolo>.md` |
-| OpenCode | `~/.config/opencode/agents/<ruolo>.md` |
-| Codex | `~/.codex/agents/<ruolo>.toml`, elencati in `~/.codex/config.toml` |
+| Claude Code | `~/.claude/agents/<role>.md` |
+| agy | `~/.gemini/config/agents/<role>.md` |
+| OpenCode | `~/.config/opencode/agents/<role>.md` |
+| Codex | `~/.codex/agents/<role>.toml`, listed in `~/.codex/config.toml` |
 
 > [!WARNING]
-> Non modificare i file in queste ultime cartelle: verrebbero sovrascritti. Modifica sempre
-> l'originale (vedi [Modificare un agente esistente](#️-modificare-un-agente-esistente)).
+> Do not edit the files in these last folders: they would be overwritten. Always edit the
+> original (see [Change an existing agent](#️-change-an-existing-agent)).
 
 ---
 
-## 🔎 Vedere gli agenti disponibili
+## 🔎 See the available agents
 
 ```text
-/team-workflow:agents                    ← tutti gli agenti: pack, acceso o spento, modello per app
-/team-workflow:agents show tester        ← le istruzioni complete di un agente
+/team:agents                    ← every agent: pack, on or off, model per app
+/team:agents show tester        ← the full instructions of one agent
 ```
 
-Per sfogliarli con calma c'è il **[catalogo](CATALOG.md)**: ogni agente con una riga che dice cosa fa.
+To browse them at leisure there is the **[catalog](CATALOG.md)**: every agent with one line on
+what it does.
 
 ---
 
-## 🎯 Usare un agente
+## 🎯 Use an agent
 
-Hai tre modi, dal più semplice al più preciso:
+Three ways, from the simplest to the most precise:
 
-**1. Chiedi in linguaggio normale.** L'orchestratore sceglie da solo chi serve:
-
-```text
-Aggiungi il reset della password e fallo controllare anche dal punto di vista della sicurezza.
-```
-
-**2. Fai i nomi.** Se sai chi vuoi, dillo:
+**1. Ask in plain language.** The orchestrator picks who is needed:
 
 ```text
-Fai rivedere al security-reviewer e al tester le modifiche di oggi.
+Add password reset and have it checked from a security point of view too.
 ```
 
-**3. Usa un comando.** Scegli tu le figure da un menu:
+**2. Name them.** If you know whom you want, say so:
 
 ```text
-/team-workflow:call-team backend   aggiungi la paginazione all'API degli ordini
+Have the security-reviewer and the tester review today's changes.
 ```
 
-In tutti e tre i casi, prima di partire il **wizard** ti mostra chi lavora, con quale modello e
-quanto costa più o meno. Puoi cambiare tutto prima di confermare.
+**3. Use a command.** You pick the roles from a menu:
+
+```text
+/team:call-team backend   add pagination to the orders API
+```
+
+In all three cases, before starting, the **wizard** shows who works, with which model and roughly
+how much it costs. You can change everything before confirming.
 
 ---
 
-## 🔌 Accendere e spegnere agenti
+## 🔌 Switch agents on and off
 
-I 20 agenti del **core** sono sempre accesi. Gli altri stanno in **pack** spenti, così
-l'orchestratore non perde tempo a considerare figure che non ti servono.
+The 20 **core** agents are always on. The others sit in **packs** that are off, so the
+orchestrator does not waste time considering roles you do not need.
 
 ```text
-/team-workflow:agents enable auto        ← accende i pack dei linguaggi del progetto (consigliato)
-/team-workflow:agents enable frameworks  ← accende un pack intero
-/team-workflow:agents enable react-reviewer   ← accende un solo agente
-/team-workflow:agents disable data-analyst    ← ne spegne uno
+/team:agents enable auto        ← switches on the packs of the project's languages (recommended)
+/team:agents enable frameworks  ← switches on a whole pack
+/team:agents enable pm          ← the project-management agents
+/team:agents enable react-reviewer   ← switches on one agent
+/team:agents disable data-analyst    ← switches one off
 ```
 
-| Pack | Cosa contiene |
+| Pack | What it holds |
 |---|---|
-| `python`, `typescript`, `go`, `rust`... | revisore e "riparatore di build" per ogni linguaggio |
+| `python`, `typescript`, `go`, `rust`... | reviewer and build fixer for each language |
 | `frameworks` | React, Vue, Django, FastAPI, Flutter, HarmonyOS |
-| `quality` | errori nascosti, copertura dei test, semplificazione, commenti, database |
-| `planning` | piani, architettura di una funzione, specifiche, documentazione aggiornata |
-| `ml`, `network`, `opensource`, `harness`, `gan`, `domains`, `ops`, `growth` | ambiti specifici |
-| `alt` | versioni alternative di agenti esistenti, per una seconda opinione |
+| `quality` | hidden errors, test coverage, simplification, comments, databases |
+| `planning` | plans, feature architecture, specs, up-to-date documentation |
+| `pm` | project manager, scheduler, controller, risk manager, stakeholder manager, agile coach |
+| `ml`, `network`, `opensource`, `harness`, `gan`, `domains`, `ops`, `growth` | specific fields |
+| `alt` | alternative versions of existing agents, for a second opinion |
 
 ---
 
-## 🎛️ Cambiare modello e impegno
+## 🎛️ Change model and effort
 
-Ogni agente usa un **modello** (più forte e caro, o più leggero e veloce) e un livello di
-**impegno**, cioè quanto ragiona prima di rispondere:
+Every agent uses a **model** (stronger and pricier, or lighter and faster) and an **effort**
+level, that is, how much it reasons before answering:
 
 ```text
-/team-workflow:agents set tester model=opus effort=high
-/team-workflow:agents set doc-keeper model=haiku
-/team-workflow:agents set architect model=pro --app agy
+/team:agents set tester model=opus effort=high
+/team:agents set doc-keeper model=haiku
+/team:agents set architect model=pro --app agy
 ```
 
-| Valori | Claude Code | agy | OpenCode | Codex |
+| Values | Claude Code | agy | OpenCode | Codex |
 |---|---|---|---|---|
-| Modello | `haiku`, `sonnet`, `opus`, `fable` | `inherit`, `flash`, `pro` | `inherit` o `provider/modello` | `inherit` o un modello del catalogo |
-| Impegno | `low`, `medium`, `high`, `xhigh`, `max` | nel nome del modello del worker | la "variante" del modello | `model_reasoning_effort` del modello |
+| Model | `haiku`, `sonnet`, `opus`, `fable` | `inherit`, `flash`, `pro` | `inherit` or `provider/model` | `inherit` or a model from the catalog |
+| Effort | `low`, `medium`, `high`, `xhigh`, `max` | in the worker's model name | the model's "variant" | the model's `model_reasoning_effort` |
 
 > [!TIP]
-> Spendi i modelli forti dove un errore costa caro (architettura, sicurezza) e quelli leggeri
-> sul lavoro meccanico (documentazione, rinomine). Dopo una modifica **riavvia l'app**.
+> Spend strong models where a mistake is expensive (architecture, security) and light ones on
+> mechanical work (documentation, renames). After a change **restart the app**.
 
 ---
 
-## ✨ Creare un agente nuovo
+## ✨ Create a new agent
 
-Esempio: vuoi un agente che progetti API REST pulite.
+Example: you want an agent that designs clean REST APIs.
 
-**Passo 1: crea il file**
+**Step 1: create the file**
 
 ```text
-/team-workflow:agents new api-designer
+/team:agents new api-designer
 ```
 
-Viene creato `~/.team-workflow/agents/api-designer.md` con uno schema da riempire. Aggiungi
-`--project` per crearlo solo nel progetto corrente (`.team-workflow/agents/`).
+This creates `~/.team-workflow/agents/api-designer.md` with a template to fill in. Add
+`--project` to create it only in the current project (`.team-workflow/agents/`).
 
-**Passo 2: riempilo.** Ecco un esempio completo, pronto da copiare:
+**Step 2: fill it in.** Here is a complete example, ready to copy:
 
 ```markdown
 ---
@@ -218,192 +220,189 @@ to change later.
 - Ask before changing an API that is already public.
 ```
 
-**Passo 3: rendilo attivo**
+**Step 3: make it active**
 
 ```text
-/team-workflow:agents sync
+/team:agents sync
 ```
 
-Poi **riavvia l'app**. Da qui in poi l'orchestratore lo propone quando il lavoro riguarda le API,
-e puoi chiamarlo per nome.
+Then **restart the app**. From then on the orchestrator proposes it when the work is about APIs,
+and you can call it by name.
 
 > [!NOTE]
-> Il nome usa solo lettere minuscole, numeri e trattini (`api-designer`, non `API Designer`).
-> Le istruzioni vanno scritte in inglese, come gli altri agenti: le risposte arrivano comunque
-> nella tua lingua.
+> The name uses only lowercase letters, digits and dashes (`api-designer`, not `API Designer`).
+> Write the instructions in English, like the other agents: the answers still come in your
+> language.
 
 ---
 
-## 🧬 Anatomia del file di un agente
+## 🧬 Anatomy of an agent file
 
-### Le impostazioni (tra le due righe `---`)
+### The settings (between the two `---` lines)
 
-| Campo | Obbligatorio | A cosa serve | Esempio |
+| Field | Required | What it is for | Example |
 |---|:---:|---|---|
-| `name` | ✅ | Il nome dell'agente, uguale al nome del file | `api-designer` |
-| `description` | ✅ | Cosa fa e **quando usarlo**: l'orchestratore sceglie da qui | `"Use this agent to..."` |
-| `tools` | — | Gli strumenti che può usare. Senza questo campo li ha tutti | `["Read", "Grep", "Glob"]` |
-| `color` | — | Il colore nell'app | `red`, `orange`, `yellow`, `green`, `cyan`, `blue`, `purple`, `pink` |
-| `includes` | — | Blocchi di istruzioni comuni da aggiungere | `["review-discipline"]` |
+| `name` | ✅ | The agent's name, equal to the file name | `api-designer` |
+| `description` | ✅ | What it does and **when to use it**: the orchestrator chooses from this | `"Use this agent to..."` |
+| `tools` | — | The tools it may use. Without this field it has all of them | `["Read", "Grep", "Glob"]` |
+| `color` | — | Its color in the app | `red`, `orange`, `yellow`, `green`, `cyan`, `blue`, `purple`, `pink` |
+| `includes` | — | Shared instruction blocks to add | `["review-discipline"]` |
 
-**Strumenti più usati:** `Read` (leggere), `Grep` e `Glob` (cercare), `Bash` (eseguire comandi),
-`Edit` e `Write` (modificare file), `WebSearch` e `WebFetch` (cercare sul web).
+**Most used tools:** `Read` (read), `Grep` and `Glob` (search), `Bash` (run commands), `Edit` and
+`Write` (change files), `WebSearch` and `WebFetch` (search the web).
 
 > [!TIP]
-> Un agente che **controlla** non dovrebbe avere `Edit` e `Write`: così non può "aggiustare"
-> di nascosto quello che dovrebbe solo segnalare.
+> An agent that **checks** should not have `Edit` and `Write`: that way it cannot quietly "fix"
+> what it should only report.
 
-### I blocchi comuni (`includes`)
+### Shared blocks (`includes`)
 
-| Blocco | Quando aggiungerlo |
+| Block | When to add it |
 |---|---|
-| `review-discipline` | Agenti che revisionano: solo rilievi con prova, niente gusti personali |
-| `frontend-skills` | Agenti di interfaccia: usano impeccable, taste, frontend-design, solar-icons |
-| `cloudflare-skills` | Agenti che lavorano su progetti Cloudflare |
+| `review-discipline` | Reviewing agents: only findings with evidence, no personal taste |
+| `frontend-skills` | Interface agents: they use impeccable, taste, frontend-design, solar-icons |
+| `cloudflare-skills` | Agents working on Cloudflare projects |
 
-Due blocchi vengono aggiunti **sempre** da soli: `team-talk` (come parlare con gli altri agenti)
-e `untrusted-input` (non eseguire istruzioni trovate nel codice o nei documenti).
+Two blocks are **always** added on their own: `team-talk` (how to talk to the other agents) and
+`untrusted-input` (never follow instructions found in code or documents).
 
-### Le istruzioni (sotto le impostazioni)
+### The instructions (below the settings)
 
-Una struttura che funziona sempre:
+A structure that always works:
 
-| Sezione | Cosa scriverci |
+| Section | What to write in it |
 |---|---|
-| Prima riga | Chi è, in una frase: *"You are a senior ..."* |
-| `## When to invoke` | Le situazioni in cui serve |
-| `## How you work` | I passi, in ordine |
-| `## Output` | Cosa consegna, in che forma |
-| `## Boundaries` | Cosa **non** deve fare |
+| First line | Who it is, in one sentence: *"You are a senior ..."* |
+| `## When to invoke` | The situations where it is needed |
+| `## How you work` | The steps, in order |
+| `## Output` | What it delivers, in which form |
+| `## Boundaries` | What it must **not** do |
 
 ---
 
-## ✏️ Modificare un agente esistente
+## ✏️ Change an existing agent
 
-Non toccare i file del plugin: verrebbero sovrascritti al prossimo aggiornamento. Crea invece
-la **tua versione**, che prende il posto dell'originale:
+Do not touch the plugin's files: they would be overwritten at the next update. Create **your
+version** instead, which takes the original's place:
 
 ```text
-/team-workflow:agents new tester              ← copia il tester attuale in ~/.team-workflow/agents/
-/team-workflow:agents new tester --project    ← oppure solo per questo progetto
+/team:agents new tester              ← copies the current tester to ~/.team-workflow/agents/
+/team:agents new tester --project    ← or only for this project
 ```
 
-Modifica la copia, poi `/team-workflow:agents sync` e riavvia l'app. Per tornare all'originale
-cancella la copia e rilancia `sync`.
+Edit the copy, then `/team:agents sync` and restart the app. To go back to the original delete
+the copy and run `sync` again.
 
 ---
 
-## 📚 Dare skill a un agente
+## 📚 Give skills to an agent
 
-Una **skill** è un manuale che l'agente legge prima di lavorare. Ci sono tre modi per
-dargliene una:
+A **skill** is a manual the agent reads before working. There are three ways to give it one:
 
-1. **Nessuno sforzo:** l'orchestratore cerca da solo nella libreria le skill utili al compito e
-   le passa agli agenti.
-2. **Nelle istruzioni dell'agente:** cita la voce della libreria che deve leggere sempre:
+1. **No effort:** the orchestrator searches the library for the skills that fit the task and
+   hands them to the agents.
+2. **In the agent's instructions:** name the library entry it must always read:
 
    ```markdown
    Before you start, read the `api-design` library entry (`tw.py library show api-design`).
    ```
 
-3. **Installata nell'app:** così diventa disponibile a tutti gli agenti:
+3. **Installed in the app:** so it is available to every agent:
 
    ```text
-   /team-workflow:library search api design     ← trova il nome giusto
-   /team-workflow:library enable api-design     ← la installa
+   /team:library search api design     ← find the right name
+   /team:library enable api-design     ← install it
    ```
 
 ---
 
-## 🤝 Farlo lavorare con gli altri
+## 🤝 Make it work with the others
 
-Il tuo agente sa già parlare con gli altri: il blocco `team-talk` viene aggiunto da solo. Ogni
-lavoro con due o più agenti ha una conversazione di gruppo dedicata, con l'orchestratore, gli
-altri agenti e chiunque entri dopo (anche tu). Quando lavora in squadra:
+Your agent already knows how to talk to the others: the `team-talk` block is added on its own.
+Every job with two or more agents has its own group conversation, with the orchestrator, the
+other agents and anyone who joins later (you too). When it works in a team it:
 
-- entra nella conversazione (`talk join`) e legge tutto quello che è stato detto;
+- joins the conversation (`talk join`) and reads everything said so far;
+- posts what it finds, with evidence (file, line, command and result);
+- answers the questions and objections it receives;
+- challenges the claims of others that do not convince it;
+- cannot write until it has read the messages that arrived in the meantime.
 
-- pubblica quello che scopre, con le prove (file, riga, comando e risultato);
-- risponde alle domande e alle obiezioni che riceve;
-- contesta le affermazioni degli altri che non lo convincono;
-- non può scrivere finché non ha letto i messaggi arrivati nel frattempo.
-
-Puoi leggere cosa si sono detti con `/team-workflow:talk read <topic>`, vedere chi partecipa con
-`/team-workflow:talk who <topic>` e scrivere anche tu con
-`/team-workflow:talk post <topic> --from user "..."`.
+Read what they said with `/team:talk read <topic>`, see who takes part with
+`/team:talk who <topic>` and write yourself with `/team:talk post <topic> --from user "..."`.
 
 > [!TIP]
-> Per sfruttarlo bene, nella sezione `## Boundaries` scrivi cosa **non** fa l'agente e a chi
-> passa la palla ("Do not write endpoint code: the backend developer does"). Gli agenti si
-> dividono meglio il lavoro.
+> To get the most out of it, write in `## Boundaries` what the agent does **not** do and whom it
+> hands over to ("Do not write endpoint code: the backend developer does"). Agents split the
+> work better.
 
 ---
 
-## 🧪 Provarlo e condividerlo
+## 🧪 Try it and share it
 
-**Provarlo:** chiedi un lavoro piccolo e chiamalo per nome:
+**Try it:** ask for a small job and call it by name:
 
 ```text
-/team-workflow:call-team usa solo api-designer: progetta l'API per i commenti agli articoli
+/team:call-team only api-designer: design the API for article comments
 ```
 
-Controlla se ha fatto quello che dice la descrizione e se ha rispettato i suoi limiti. Se
-sbaglia, di solito la soluzione è una descrizione o una sezione `## Boundaries` più precisa.
+Check whether it did what the description says and kept to its boundaries. When it goes wrong,
+the fix is usually a more precise description or `## Boundaries` section.
 
-**Condividerlo con il team:** crealo con `--project` e fai il commit della cartella
-`.team-workflow/agents/`. Chi lavora al progetto avrà lo stesso agente alla prossima sessione.
+**Share it with the team:** create it with `--project` and commit the `.team-workflow/agents/`
+folder. Whoever works on the project gets the same agent at the next session.
 
 ---
 
-## 🩺 Problemi comuni
+## 🩺 Common problems
 
 <details>
-<summary><b>Ho creato l'agente ma l'app non lo vede</b></summary>
+<summary><b>I created the agent but the app does not see it</b></summary>
 
-Lancia `/team-workflow:agents sync` e **riavvia l'app**: gli agenti si caricano all'avvio. Se
-ancora non compare, `/team-workflow:doctor` ti dice cosa non va.
+Run `/team:agents sync` and **restart the app**: agents load at start-up. If it still does not
+show up, `/team:doctor` tells you what is wrong.
 </details>
 
 <details>
-<summary><b>L'orchestratore non lo sceglie mai</b></summary>
+<summary><b>The orchestrator never picks it</b></summary>
 
-Riscrivi la `description`: deve dire chiaramente **quando** usarlo ("Use this agent when ...").
-Controlla anche che sia acceso (`/team-workflow:agents`).
+Rewrite the `description`: it must say clearly **when** to use it ("Use this agent when ...").
+Also check that it is on (`/team:agents`).
 </details>
 
 <details>
 <summary><b>"no role or pack named ..."</b></summary>
 
-Il nome non esiste o è scritto diversamente: controlla con `/team-workflow:agents`.
+The name does not exist or is spelled differently: check with `/team:agents`.
 </details>
 
 <details>
 <summary><b>"role names use lowercase letters, digits and dashes"</b></summary>
 
-Usa solo minuscole, numeri e trattini: `api-designer`, non `Api_Designer`.
+Use only lowercase letters, digits and dashes: `api-designer`, not `Api_Designer`.
 </details>
 
 ---
 
-## 📌 Promemoria dei comandi
+## 📌 Command cheat sheet
 
-| Voglio... | Comando |
+| I want to... | Command |
 |---|---|
-| vedere tutti gli agenti | `/team-workflow:agents` |
-| leggere le istruzioni di un agente | `/team-workflow:agents show <ruolo>` |
-| accendere i pack del mio progetto | `/team-workflow:agents enable auto` |
-| accendere o spegnere un agente o un pack | `/team-workflow:agents enable\|disable <nome>` |
-| cambiare modello o impegno | `/team-workflow:agents set <ruolo> model=... effort=...` |
-| creare un agente | `/team-workflow:agents new <ruolo> [--project]` |
-| rendere attive le modifiche | `/team-workflow:agents sync`, poi riavvia l'app |
-| cercare una skill | `/team-workflow:library search <parole>` |
-| leggere cosa si sono detti gli agenti | `/team-workflow:talk read <topic>` |
-| controllare che tutto funzioni | `/team-workflow:doctor` |
+| see every agent | `/team:agents` |
+| read an agent's instructions | `/team:agents show <role>` |
+| switch on my project's packs | `/team:agents enable auto` |
+| switch an agent or a pack on or off | `/team:agents enable\|disable <name>` |
+| change model or effort | `/team:agents set <role> model=... effort=...` |
+| create an agent | `/team:agents new <role> [--project]` |
+| make changes active | `/team:agents sync`, then restart the app |
+| search for a skill | `/team:library search <words>` |
+| read what the agents said | `/team:talk read <topic>` |
+| check that everything works | `/team:doctor` |
 
-<sub>In **OpenCode** scrivi `/team-workflow/agents`; in **agy** usa `!team-workflow agents`; in **Codex** `$team-workflow-agents`.</sub>
+<sub>In **OpenCode** type `/team-workflow/agents`; in **agy** use `!team-workflow agents`; in **Codex** `$team-workflow-agents`.</sub>
 
 <div align="center">
 
-[⬅️ Torna al README](../README.md) · [📋 Catalogo](CATALOG.md) · [📘 Manuale](REFERENCE.md)
+[⬅️ Back to the README](../README.md) · [📋 Catalog](CATALOG.md) · [📘 Manual](REFERENCE.md)
 
 </div>

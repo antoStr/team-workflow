@@ -4,7 +4,7 @@
 
 Total active learnings: **2**.
 
-| ID | Titolo | Categoria | Si applica a | Azione richiesta |
+| ID | Title | Category | Applies to | Required action |
 |---|---|---|---|---|
 | `learn-gate-fix-mockup-index-html` | **Gate Fix: mockup/index.html** | `bug` | `frontend-dev, mockup/index.html` | Replaced innerHTML with textContent and validated encodeURIComponent sanitization. |
 | `learn-avoid-bare-word-nothing-in-library-descriptions` | **Avoid bare word nothing in library descriptions** | `bug` | `tools/import_strix.py, library` | Use domain-specific phrases like no immunity or zero guarantee |

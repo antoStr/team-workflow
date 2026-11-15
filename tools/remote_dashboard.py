@@ -209,7 +209,7 @@ HTML_PAGE = """<!DOCTYPE html>
 
     <div class="card">
       <div class="card-title">
-        <span>Memoria RAM</span>
+        <span>RAM</span>
         <span id="ramPercent">--%</span>
       </div>
       <div class="value-huge">
@@ -226,7 +226,7 @@ HTML_PAGE = """<!DOCTYPE html>
 
     <div class="card">
       <div class="card-title">
-        <span>Spazio Disco (C:)</span>
+        <span>Disk space (C:)</span>
         <span id="diskPercent">--%</span>
       </div>
       <div class="value-huge">
@@ -236,7 +236,7 @@ HTML_PAGE = """<!DOCTYPE html>
         <div id="diskBar" class="progress-fill fill-green" style="width: 0%"></div>
       </div>
       <div class="sub-meta">
-        <span>Spazio Libero Rimasto</span>
+        <span>Free space left</span>
         <span>Totale: <b id="diskTotal">-- GB</b></span>
       </div>
     </div>
@@ -262,7 +262,7 @@ HTML_PAGE = """<!DOCTYPE html>
         // Alerts Banner
         const alertBox = document.getElementById('alertContainer');
         if (data.alerts && data.alerts.length > 0) {
-          alertBox.innerHTML = '<div class="alert-banner">⚠️ <b>ATTENZIONE REMOTA:</b><br>' + data.alerts.join('<br>') + '</div>';
+          alertBox.innerHTML = '<div class="alert-banner">⚠️ <b>REMOTE WARNING:</b><br>' + data.alerts.join('<br>') + '</div>';
         } else {
           alertBox.innerHTML = '';
         }
@@ -391,7 +391,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
                                 with open(af, "r", encoding="utf-8-sig") as f:
                                     al = json.load(f)
                                     data["status"] = al.get("Severity", al.get("Status", "CRITICAL"))
-                                    msgs = al.get("Messages", [f"Allerta da {os.path.basename(af)}"])
+                                    msgs = al.get("Messages", [f"Alert from {os.path.basename(af)}"])
                                     data["alerts"] = list(set(data.get("alerts", []) + msgs))
                             except Exception:
                                 pass

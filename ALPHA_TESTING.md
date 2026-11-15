@@ -1,77 +1,90 @@
-# team-workflow v2.0.0-alpha.1 — Guida Alpha Testing
+# team-workflow v2.0.0-alpha.1 — Alpha testing guide
 
-Benvenuto nella release Alpha **v2.0.0-alpha.1** di `team-workflow`!
-Questa versione introduce il nuovo motore **Brain** (Obsidian-compatible Knowledge Vault), il **Dual Loader**, il **Rolling Digest** nei canali team talk e la portabilità cross-platform Windows.
+[Versione italiana](ALPHA_TESTING.it.md)
+
+Welcome to the Alpha release **v2.0.0-alpha.1** of `team-workflow`!
+This version introduces the new **Brain** engine (Obsidian-compatible knowledge vault), the
+**Dual Loader**, the **Rolling Digest** in team talk channels and Windows portability.
 
 ---
 
-## 1. Funzionalità Chiave
+## 1. Key features
 
-### 🧠 Motore Brain (Obsidian Vault in `docs/brain/`)
-- **Struttura Vault**: Cartella `docs/brain/` con sottocartelle `nodes/`, `areas/`, `decisions/`.
-- **Obsidian Graph View**: Configurazione automatica `.obsidian/graph.json` con color-coding per layer (core, area, decision, interface).
-- **Wikilinks Bidirezionali**: Connessioni `[[slug]]` generate automaticamente tra nodi upstream e downstream.
-- **Token Efficiency (~85-90%)**: `tw.py brain query` espande il contesto via BFS a 1-hop (o 2-hop) fornendo solo contratti, interfacce e topologia essenziale anziché interi file sorgente.
-- **Integrità Vault**: `tw.py brain check` verifica wikilink orfani o rotti, file mancanti e frontmatter.
+### 🧠 Brain engine (Obsidian vault in `docs/brain/`)
+- **Vault layout**: the `docs/brain/` folder with `nodes/`, `areas/`, `decisions/` subfolders.
+- **Obsidian Graph View**: automatic `.obsidian/graph.json` setup with colors per layer (core,
+  area, decision, interface).
+- **Bidirectional wikilinks**: `[[slug]]` links generated automatically between upstream and
+  downstream nodes.
+- **Token efficiency (~85-90%)**: `tw.py brain query` expands the context with a 1-hop (or
+  2-hop) breadth-first search, giving only contracts, interfaces and the essential topology
+  instead of whole source files.
+- **Vault integrity**: `tw.py brain check` finds orphaned or broken wikilinks, missing files and
+  bad frontmatter.
 
 ### 🔄 Dual Loader
-- Compatibilità retroattiva completa: se `memory_engine` è impostato su `"brain"` e `docs/brain` esiste, inietta il grafo Brain; in caso contrario effettua fallback trasparente sul formato classico `docs/memory/INDEX.md` e `STATE.md`.
+- Full backward compatibility: when `memory_engine` is `"brain"` and `docs/brain` exists, it
+  injects the Brain graph; otherwise it falls back to the classic `docs/memory/INDEX.md` and
+  `STATE.md`.
 
-### 💬 Rolling Digest (Team Talk)
-- Compattazione automatica quando i messaggi superano la soglia (default: 20).
-- Archiviazione sicura in `<topic>.archive.jsonl`.
-- Riscrittura atomica di `<topic>.jsonl` con:
-  1. Messaggio `[digest]` riassuntivo dei thread chiusi.
-  2. TUTTI i thread ancora aperti (`open_threads()` non perde mai una domanda o contestazione aperta).
-  3. Sliding window dei messaggi recenti.
+### 💬 Rolling Digest (team talk)
+- Automatic compaction when the messages pass the threshold (default: 20).
+- Safe archive in `<topic>.archive.jsonl`.
+- Atomic rewrite of `<topic>.jsonl` with:
+  1. a `[digest]` message summarizing the closed threads;
+  2. ALL the threads still open (`open_threads()` never loses an open question or challenge);
+  3. a sliding window of the recent messages.
 
-### 🪟 Windows Portability
-- Risoluzione dinamica di `python_executable()` che esclude i puntatori a 0-byte del Microsoft Store su Windows.
+### 🪟 Windows portability
+- `python_executable()` resolves the interpreter dynamically and skips the 0-byte Microsoft
+  Store placeholders on Windows.
 
 ---
 
-## 2. Quickstart per Tester
+## 2. Quickstart for testers
 
-### Test 1: Inizializzazione e Mappatura del Brain
+### Test 1: initialize and map the Brain
 ```bash
-# Inizializza il vault Obsidian in docs/brain/
-python skills/team-workflow/scripts/tw.py brain init
+# Create the Obsidian vault in docs/brain/
+python skills/team/scripts/tw.py brain init
 
-# Scansiona la codebase e genera i nodi
-python skills/team-workflow/scripts/tw.py brain map
+# Scan the codebase and generate the nodes
+python skills/team/scripts/tw.py brain map
 
-# Verifica l'integrità del grafo
-python skills/team-workflow/scripts/tw.py brain check
+# Check the graph's integrity
+python skills/team/scripts/tw.py brain check
 ```
 
-### Test 2: Query di Contesto (Token-Saving BFS)
+### Test 2: context query (token-saving search)
 ```bash
-# Esegui una query a 1-hop su un modulo
-python skills/team-workflow/scripts/tw.py brain query talk --hops 1
+# A 1-hop query on a module
+python skills/team/scripts/tw.py brain query talk --hops 1
 
-# Esegui una query in formato JSON
-python skills/team-workflow/scripts/tw.py brain query talk --format json
+# The same query as JSON
+python skills/team/scripts/tw.py brain query talk --format json
 ```
 
 ### Test 3: Obsidian Graph View
-1. Apri **Obsidian**.
-2. Seleziona **Open folder as vault** e scegli la cartella `docs/brain/`.
-3. Premi `Ctrl + G` (o apri la vista Graph View).
-4. Osserva i nodi colorati per tag (`#core`, `#area`, `#decision`, `#interface`) e i collegamenti interattivi tra i moduli.
+1. Open **Obsidian**.
+2. Choose **Open folder as vault** and pick the `docs/brain/` folder.
+3. Press `Ctrl + G` (or open the Graph View).
+4. Look at the nodes colored by tag (`#core`, `#area`, `#decision`, `#interface`) and the
+   interactive links between modules.
 
-### Test 4: Rolling Digest nei Canali Talk
+### Test 4: Rolling Digest in talk channels
 ```bash
-# Entra in un canale di test
-python skills/team-workflow/scripts/tw.py talk join test-digest --as tester "Verifica rolling digest"
+# Join a test channel
+python skills/team/scripts/tw.py talk join test-digest --as tester "Rolling digest check"
 
-# Genera compattazione manuale del canale
-python skills/team-workflow/scripts/tw.py talk digest test-digest
+# Compact the channel by hand
+python skills/team/scripts/tw.py talk digest test-digest
 
-# Verifica thread aperti
-python skills/team-workflow/scripts/tw.py talk open test-digest
+# Check the open threads
+python skills/team/scripts/tw.py talk open test-digest
 ```
 
 ---
 
-## 3. Feedback e Segnalazioni
-Segnala eventuali anomalie, wikilink non risolti o problemi di esecuzione aprendo una issue o condividendo il log di `tw.py doctor`.
+## 3. Feedback and reports
+Report anomalies, unresolved wikilinks or run problems by opening an issue or sharing the
+output of `tw.py doctor`.

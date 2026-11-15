@@ -37,7 +37,7 @@ there and skip the questions about the others.
      (`agents set ROLE model=M effort=E`).
    - Roles and packs: show `tw.py agents`; offer the packs that are off (languages of the
      repository first: `agents enable auto`; quality, planning, frameworks, harness, gan, ml,
-     opensource, network, domains, ops, growth, alt) with `agents enable PACK`.
+     opensource, network, domains, ops, growth, pm, alt) with `agents enable PACK`.
    - The library: show `tw.py library`; offer packs or entries to install as native skills
      (`library enable PACK|ID`), the language rules of this repository first
      (`library enable rules-<language>`). Say that the orchestrator can use any entry by path

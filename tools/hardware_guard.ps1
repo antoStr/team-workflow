@@ -16,8 +16,8 @@ param(
 )
 
 $Host.UI.RawUI.WindowTitle = "Hardware Guard - Remote Unattended Monitor"
-Write-Host "[Hardware Guard] Avvio monitoraggio hardware globale ogni $IntervalSeconds s..." -ForegroundColor Cyan
-Write-Host "[Hardware Guard] Modalita Silenziosa: $Silent (Nessun segnale acustico)" -ForegroundColor Green
+Write-Host "[Hardware Guard] Monitoring hardware every $IntervalSeconds s..." -ForegroundColor Cyan
+Write-Host "[Hardware Guard] Silent mode: $Silent (no beeps)" -ForegroundColor Green
 
 $maxCpu = 0.0
 $maxGpu = 0.0
@@ -34,7 +34,7 @@ try {
     $null = $cpuCounter.NextValue()
 } catch {}
 
-# Verifica disponibilità nvidia-smi
+# Is nvidia-smi available?
 $hasNvidia = $false
 try {
     $null = Get-Command "nvidia-smi" -ErrorAction Stop
@@ -156,18 +156,18 @@ while ($true) {
 
     if ($cpuTemp -and $cpuTemp -ge $CritTempCpu) {
         $status = "CRITICAL"
-        $alerts += "CPU Temperatura Critica: $cpuTemp C (Soglia: $CritTempCpu C)"
+        $alerts += "CPU temperature critical: $cpuTemp C (threshold: $CritTempCpu C)"
     } elseif ($cpuTemp -and $cpuTemp -ge $WarnTempCpu) {
         if ($status -ne "CRITICAL") { $status = "WARNING" }
-        $alerts += "CPU Temperatura Elevata: $cpuTemp C (Soglia: $WarnTempCpu C)"
+        $alerts += "CPU temperature high: $cpuTemp C (threshold: $WarnTempCpu C)"
     }
 
     if ($gpuTemp -and $gpuTemp -ge $CritTempGpu) {
         $status = "CRITICAL"
-        $alerts += "GPU Temperatura Critica: $gpuTemp C (Soglia: $CritTempGpu C)"
+        $alerts += "GPU temperature critical: $gpuTemp C (threshold: $CritTempGpu C)"
     } elseif ($gpuTemp -and $gpuTemp -ge $WarnTempGpu) {
         if ($status -ne "CRITICAL") { $status = "WARNING" }
-        $alerts += "GPU Temperatura Elevata: $gpuTemp C (Soglia: $WarnTempGpu C)"
+        $alerts += "GPU temperature high: $gpuTemp C (threshold: $WarnTempGpu C)"
     }
 
     if ($mem -and $mem.PercentUsed -ge $CritRamPercent) {
@@ -197,7 +197,7 @@ while ($true) {
         } catch {}
     }
 
-    # Verifica se è necessario scrivere su disco (riduzione usura SSD / delta threshold)
+    # Write to disk only when something changed (less SSD wear)
     $shouldWrite = ($status -ne $lastStatus) -or ($alerts.Count -gt 0) -or `
                    (($now - $lastWriteTime).TotalSeconds -ge 10) -or `
                    ([math]::Abs($cpuTemp - $lastCpuTemp) -ge 1.0) -or `

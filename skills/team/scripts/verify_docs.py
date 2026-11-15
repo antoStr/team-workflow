@@ -84,14 +84,15 @@ def verify_documentation(root=None, strict=False):
         try:
             tool_py = os.path.join(root, "tools", "readme_catalog.py")
             if os.path.isfile(tool_py):
-                res = subprocess.run([sys.executable, tool_py, "--check"], capture_output=True, timeout=10)
+                res = subprocess.run([sys.executable, tool_py, "--check"], capture_output=True, timeout=60)
                 if res.returncode == 0:
-                    checks.append(("CATALOG.md", "OK", "Catalog in sync with roles and library"))
+                    checks.append(("CATALOG.md", "OK", "Catalogs in sync with roles and library"))
                 else:
-                    issues.append("docs/CATALOG.md is out of date (run `python tools/readme_catalog.py`)")
+                    issues.append("docs/CATALOG.md or CATALOG.it.md is out of date (run `python tools/readme_catalog.py`)")
                     checks.append(("CATALOG.md", "FAIL", "Catalog out of date"))
-        except Exception:
-            pass
+        except (OSError, subprocess.SubprocessError) as e:
+            # a check that could not run must not look like a pass
+            checks.append(("CATALOG.md", "WARN", f"catalog check did not run: {e}"))
 
     passed = len(issues) == 0
     return {
@@ -106,7 +107,7 @@ def print_verify_report(res):
     print("📋 DOCUMENTATION & WORKFLOW VERIFICATION GATE")
     print("=" * 60)
     for name, status, detail in res["checks"]:
-        icon = "✅" if status == "OK" else ("⚠️" if status == "INFO" else ("⏭️" if status == "SKIP" else "❌"))
+        icon = "✅" if status == "OK" else ("⚠️" if status in ("INFO", "WARN") else ("⏭️" if status == "SKIP" else "❌"))
         print(f" {icon} {name:<16}: {detail}")
     
     print("-" * 60)
