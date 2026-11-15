@@ -38,11 +38,18 @@ class AutoUpdateTest(unittest.TestCase):
         import tempfile
         from unittest import mock
         home = tempfile.mkdtemp()
-        with mock.patch.object(update_plugin, "newer_version", return_value=None), \
+        versions = {"own_version": "9.9.9", "agy_version": None, "payload_version": None}
+        patches = [mock.patch.object(update_plugin, n, return_value=v) for n, v in versions.items()]
+        for p in patches:
+            p.start()
+            self.addCleanup(p.stop)
+        with mock.patch.object(update_plugin, "latest_version", return_value="9.9.9"), \
                 mock.patch.object(update_plugin.subprocess, "Popen") as popen:
-            self.assertIsNone(update_plugin.auto_update(home=home))
+            self.assertIsNone(update_plugin.auto_update(home=home))  # everything current
             popen.assert_not_called()
-        with mock.patch.object(update_plugin, "newer_version", return_value="9.9.9"), \
+        # this plugin is current, OpenCode is behind: still update every app
+        with mock.patch.object(update_plugin, "latest_version", return_value="9.9.9"), \
+                mock.patch.object(update_plugin, "payload_version", side_effect=lambda h: "9.9.8" if h == "opencode" else None), \
                 mock.patch.object(update_plugin.subprocess, "Popen") as popen:
             self.assertEqual(update_plugin.auto_update(home=home), "9.9.9")
             self.assertEqual(update_plugin.auto_update(home=home), "9.9.9")  # locked: no second start
@@ -59,3 +66,9 @@ class AutoUpdateTest(unittest.TestCase):
             self.assertTrue(prompt_command.TEAM_PROMPT.match(prompt), prompt)
         for prompt in ("/teams", "please /team", "/teamwork now", "fix the team page"):
             self.assertFalse(prompt_command.TEAM_PROMPT.match(prompt), prompt)
+
+    def test_finds_the_opencode_and_codex_installs_where_their_installers_put_them(self):
+        import install_codex
+        import install_opencode
+        self.assertEqual(update_plugin.opencode_payload(), install_opencode.payload_dir())
+        self.assertEqual(update_plugin.codex_payload(), install_codex.payload_dir())

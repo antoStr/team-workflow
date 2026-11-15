@@ -1,6 +1,13 @@
 # Project state
 
-## Current version: v2.4.1 (released)
+## Current version: v2.4.2 (released)
+
+### v2.4.2 (released)
+- `update_plugin` finds the OpenCode and Codex installs through their installers' `payload_dir()`
+  (since the 2.4 rename it looked in `skills/team`, they install in `skills/team-workflow`, so
+  `/team upgrade` and auto_update reported them "not installed").
+- auto_update starts when this plugin **or** any installed app (agy, OpenCode, Codex: version
+  files only) is behind the latest release, so an app left behind catches up.
 
 ### v2.4.1 (released): fixes from live team runs on Claude Code, Codex and agy
 A 3-agent run (2 haiku builders, 1 sonnet reviewer, team talk in review mode) showed:
