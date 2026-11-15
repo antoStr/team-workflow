@@ -1,0 +1,2 @@
+# a batch file that is also a shell script: LF everywhere, CR breaks the shell half
+hooks/run-py.cmd text eol=lf

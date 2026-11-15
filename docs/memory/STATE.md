@@ -1,6 +1,13 @@
 # Project state
 
-## Current version: v2.4.2 (released)
+## Current version: v2.4.3 (released)
+
+### v2.4.3 (released)
+- **Claude Code hooks on Windows**: `hooks/hooks.json` ran `python3`, which on many Windows PCs
+  is the Microsoft Store alias that only prints "Python was not found": no SessionStart memory,
+  no zero-token commands, no auto_update, a Stop hook error every turn. The hooks now run
+  `hooks/run-py.cmd <script>`, a batch file that is also a shell script (LF via `.gitattributes`)
+  and uses the first of python3, python, py that really runs.
 
 ### v2.4.2 (released)
 - `update_plugin` finds the OpenCode and Codex installs through their installers' `payload_dir()`
