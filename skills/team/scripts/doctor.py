@@ -166,7 +166,7 @@ def checks(root=None):
     add("fail" if serious else "warn" if findings else "ok", "audit",
         f"{len(findings)} findings, {len(serious)} critical or high, in {scanned} files (tw.py audit)")
 
-    hw_file = os.path.join(root or os.getcwd(), "hardware_status.json")
+    hw_file = os.path.join(settings.hardware_dir(), "hardware_status.json")
     if os.path.isfile(hw_file):
         try:
             with open(hw_file, "r", encoding="utf-8-sig") as f:
@@ -235,6 +235,6 @@ def uninstall(everything=False):
     if everything and os.path.isdir(settings.home_dir()):
         shutil.rmtree(settings.home_dir())
         done.append(f"removed {settings.home_dir()} (settings, usage ledger, add-on clones)")
-    done.append("the plugins themselves stay: claude plugin uninstall team-workflow@team-workflow; "
+    done.append("the plugins themselves stay: claude plugin uninstall team@team (before 2.4: team-workflow@team-workflow); "
                 "agy plugin uninstall team-workflow")
     return done

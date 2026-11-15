@@ -1,13 +1,18 @@
-﻿# Thermal Guard - Script di monitoraggio continuo temperature hardware
-# Zero consumo di token - Esecuzione locale continua
+﻿# Thermal Guard - continuous hardware temperature monitor
+# Zero token use - runs locally
 param(
     [int]$IntervalSeconds = 1,
     [float]$WarnTemp = 85.0,
     [float]$CriticalTemp = 93.0,
     [string]$LogFile = "thermal_guard.log",
     [string]$StatusFile = "thermal_status.json",
-    [string]$AlertFile = "THERMAL_ALERT.json"
+    [string]$AlertFile = "THERMAL_ALERT.json",
+    [string]$DataDir = (Join-Path $HOME ".team-workflow\hardware")  # shared with tw.py and the dashboard
 )
+
+# every relative file below (status, mode, alert, log) lives in $DataDir, never in a project
+New-Item -ItemType Directory -Force -Path $DataDir | Out-Null
+Set-Location $DataDir
 
 $Host.UI.RawUI.WindowTitle = "Thermal Guard - Hardware Temperature Monitor"
 Write-Host "[Thermal Guard] Reading sensors every $IntervalSeconds s..." -ForegroundColor Cyan
@@ -70,7 +75,7 @@ while ($true) {
         $status = "WARNING"
     }
 
-    # Oggetto stato JSON live
+    # live JSON status object
     $statusObj = [PSCustomObject]@{
         Timestamp = $now.ToString("yyyy-MM-dd HH:mm:ss")
         Status = $status
@@ -103,7 +108,7 @@ while ($true) {
         # Segnale acustico
         try { [console]::Beep(2000, 400) } catch {}
 
-        # Popup asincrono (non blocca il ciclo di monitoraggio)
+        # asynchronous popup (does not block the monitoring loop)
         if (($now - $lastAlertPopup).TotalSeconds -ge 60) {
             $lastAlertPopup = $now
             try {
@@ -118,7 +123,7 @@ while ($true) {
             try { [console]::Beep(1000, 200) } catch {}
         }
     } else {
-        # Log periodico ogni 60 secondi in stato normale
+        # periodic log every 60 seconds while normal
         if (($now - $lastLogTime).TotalSeconds -ge 60) {
             "[$($now.ToString('s'))] REGOLARE: CPU=$cpu GPU=$gpu (MaxCPU=$maxCpu MaxGPU=$maxGpu)" | Add-Content -Path $LogFile -Encoding UTF8
             $lastLogTime = $now

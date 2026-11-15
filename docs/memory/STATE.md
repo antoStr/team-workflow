@@ -24,15 +24,20 @@
   hard-coded trycloudflare URL removed; `tw.py hardware --start` finds the guard in the plugin,
   not in the current project; `verify-docs` reports a catalog check that could not run instead
   of skipping it; docs use the `/team:` namespace and `skills/team/` paths.
+- **Name `team` everywhere**: marketplace and plugin are `team` (install `team@team`);
+  `update_plugin.claude_ids` keeps updating old `team-workflow@team-workflow` installs.
+- **Hardware files** (status, mode, alerts, log) live in `~/.team-workflow/hardware`
+  (`settings.hardware_dir()`), shared by the guards, `tw.py hardware`, doctor and dashboard.
+- **Hardening**: workflows with least-privilege `permissions`, actions pinned to commit SHAs,
+  `persist-credentials: false`, timeouts; `.github/dependabot.yml`; `SECURITY.md`.
 - Totals: **137 agents**, **533 library entries** (417 skills, 94 commands, 22 rule sets).
 
 ### v2.3.0 (released)
 - `tw.py preview` (dev server start/status/stop), `tw.py patch` (atomic unified diffs,
   `--dry-run`), `tw.py component list|add`, `tw.py visual-check`, `tw.py talk close`.
 - `frontend-components` library pack (13 skills) and the `design-engineer` role.
-- `tw.py scan` at every `/team` call; `tw.py verify-docs [--strict]` as the documentation gate.
-- Zero-ghosting rule (answer in-between questions first) and dynamic agent choice
-  (`tw.py agents catalog`, no 4-choice cap).
+- `tw.py scan` at every `/team` call, `tw.py verify-docs [--strict]` as documentation gate,
+  zero-ghosting rule, dynamic agent choice (`tw.py agents catalog`, no 4-choice cap).
 
 ### Verify
 - `python -m unittest discover -s tests` (Python 3.10+).
@@ -42,5 +47,4 @@
 ### Where to resume
 - Release the unreleased work as v2.4.0 (version in `.claude-plugin/plugin.json` and
   `plugin.json`, tag `v2.4.0`) once CI is green on GitHub.
-- Open points: plugin name `team` in `plugin.json` vs `team-workflow` in `marketplace.json`;
-  `tw.py hardware` writes its JSON files in the current repository root.
+- `main` is protected on GitHub: changes go through a pull request with green `test` checks.

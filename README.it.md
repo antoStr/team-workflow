@@ -131,7 +131,7 @@ flowchart TD
 
 ```bash
 claude plugin marketplace add antoStr/team-workflow
-claude plugin install team-workflow@team-workflow
+claude plugin install team@team
 ```
 
 Riavvia Claude Code. Fatto!

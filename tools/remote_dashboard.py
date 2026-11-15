@@ -12,10 +12,12 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.normpath(os.path.join(HERE, ".."))
-STATUS_FILE = os.path.join(ROOT, "hardware_status.json")
-ALERT_FILE = os.path.join(ROOT, "HARDWARE_ALERT.json")
-THERMAL_ALERT_FILE = os.path.join(ROOT, "THERMAL_ALERT.json")
-THERMAL_FILE = os.path.join(ROOT, "thermal_status.json")
+# written by tools/*_guard.ps1; same folder as settings.hardware_dir()
+DATA = os.path.join(os.path.expanduser("~"), ".team-workflow", "hardware")
+STATUS_FILE = os.path.join(DATA, "hardware_status.json")
+ALERT_FILE = os.path.join(DATA, "HARDWARE_ALERT.json")
+THERMAL_ALERT_FILE = os.path.join(DATA, "THERMAL_ALERT.json")
+THERMAL_FILE = os.path.join(DATA, "thermal_status.json")
 
 
 HTML_PAGE = """<!DOCTYPE html>

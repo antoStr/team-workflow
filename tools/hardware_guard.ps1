@@ -12,8 +12,13 @@ param(
     [string]$StatusFile = "hardware_status.json",
     [string]$ThermalStatusFile = "thermal_status.json",
     [string]$AlertFile = "HARDWARE_ALERT.json",
-    [string]$LogFile = "hardware_guard.log"
+    [string]$LogFile = "hardware_guard.log",
+    [string]$DataDir = (Join-Path $HOME ".team-workflow\hardware")  # shared with tw.py and the dashboard
 )
+
+# every relative file below (status, mode, alert, log) lives in $DataDir, never in a project
+New-Item -ItemType Directory -Force -Path $DataDir | Out-Null
+Set-Location $DataDir
 
 $Host.UI.RawUI.WindowTitle = "Hardware Guard - Remote Unattended Monitor"
 Write-Host "[Hardware Guard] Monitoring hardware every $IntervalSeconds s..." -ForegroundColor Cyan
@@ -27,7 +32,7 @@ $lastCpuTemp = 0.0
 $lastGpuTemp = 0.0
 $lastStatus = "OK"
 
-# Inizializza contatore CPU .NET ad altissime prestazioni (zero carico WMI)
+# .NET CPU counter: fast and with no WMI load
 $cpuCounter = $null
 try {
     $cpuCounter = New-Object System.Diagnostics.PerformanceCounter("Processor", "% Processor Time", "_Total")
@@ -172,10 +177,10 @@ while ($true) {
 
     if ($mem -and $mem.PercentUsed -ge $CritRamPercent) {
         $status = "CRITICAL"
-        $alerts += "RAM Saturata: $($mem.PercentUsed)% utilizzata"
+        $alerts += "RAM saturated: $($mem.PercentUsed)% used"
     } elseif ($mem -and $mem.PercentUsed -ge $WarnRamPercent) {
         if ($status -ne "CRITICAL") { $status = "WARNING" }
-        $alerts += "RAM Elevata: $($mem.PercentUsed)% utilizzata"
+        $alerts += "RAM high: $($mem.PercentUsed)% used"
     }
 
     $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
@@ -236,7 +241,7 @@ while ($true) {
 
         [System.IO.File]::WriteAllText((Join-Path (Get-Location) $StatusFile), ($systemState | ConvertTo-Json -Depth 5), $utf8NoBom)
 
-        # Salva thermal_status.json retrocompatibile
+        # thermal_status.json, kept for older readers
         $legacyThermal = [PSCustomObject]@{
             Timestamp = $now.ToString("yyyy-MM-dd HH:mm:ss")
             Status = $status

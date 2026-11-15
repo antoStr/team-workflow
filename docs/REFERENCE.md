@@ -359,8 +359,10 @@ Requirements: Claude Code and/or agy, `git` and Python 3.10 or newer. Claude Cod
 
 ```bash
 claude plugin marketplace add antoStr/team-workflow   # or the local path of the repo
-claude plugin install team-workflow@team-workflow
+claude plugin install team@team
 ```
+
+Installed before 2.4 as `team-workflow@team-workflow`? `/team:update-plugin` keeps updating it; to switch to the new name run `claude plugin uninstall team-workflow@team-workflow`, `claude plugin marketplace remove team-workflow`, then the two commands above.
 
 To try it without installing: `claude --plugin-dir ~/Workspace/team-workflow`. For agy see
 [agy (Antigravity)](#agy-antigravity).
@@ -378,8 +380,8 @@ versions. At Claude Code start-up a notice tells you when a new version is out. 
 
 ```bash
 # Claude Code (or turn on the marketplace auto-update in /plugin → Marketplaces)
-claude plugin marketplace update team-workflow
-claude plugin update team-workflow@team-workflow
+claude plugin marketplace update team
+claude plugin update team@team
 # agy, after `tw.py install-cli` (see the agy section)
 agy plugin update team-workflow
 ```

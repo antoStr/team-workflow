@@ -100,6 +100,11 @@ def home_dir():
     return os.path.join(os.path.expanduser("~"), ".team-workflow")
 
 
+def hardware_dir():
+    """Where the hardware guard writes its status and tw.py reads it."""
+    return os.path.join(home_dir(), "hardware")
+
+
 def user_file():
     return os.path.join(home_dir(), "settings.json")
 

@@ -20,6 +20,14 @@ class UpdateTest(unittest.TestCase):
         self.assertEqual(update_plugin.claude_version(out), "0.3.1")
         self.assertIsNone(update_plugin.claude_version("  ❯ other@x\n    Version: 1.0.0\n"))
 
+    def test_update_targets_the_installed_plugin_id(self):
+        legacy = "  ❯ team-workflow@team-workflow\n    Version: 2.3.0\n"
+        current = "  ❯ team@team\n    Version: 2.4.0\n"
+        self.assertEqual(update_plugin.claude_ids(legacy), ("team-workflow", "team-workflow@team-workflow"))
+        self.assertEqual(update_plugin.claude_ids(current), ("team", "team@team"))
+        self.assertEqual(update_plugin.claude_ids(legacy + current), ("team", "team@team"))
+        self.assertEqual(update_plugin.claude_ids(""), ("team", "team@team"))  # not installed yet
+
 
 if __name__ == "__main__":
     unittest.main()

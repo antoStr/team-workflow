@@ -1,6 +1,6 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "team-workflow",
+  "name": "team",
   "description": "Team workflow for Claude Code and agy (Antigravity): shared project memory, an agent team and an end-of-task report.",
   "owner": {
     "name": "antoStr",
@@ -8,7 +8,7 @@
   },
   "plugins": [
     {
-      "name": "team-workflow",
+      "name": "team",
       "description": "Shared project memory, on-demand teams of specialist agents that talk to each other and verify each other's work, a searchable library of skills, commands and rules, and an end-of-task report that asks before applying changes.",
       "source": "./",
       "category": "productivity"

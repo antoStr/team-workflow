@@ -1072,9 +1072,10 @@ def cmd_setup(_args):
 
 
 def cmd_hardware(args):
-    root = repo_root() or os.getcwd()
-    mode_file = os.path.join(root, "hardware_mode.json")
-    status_file = os.path.join(root, "hardware_status.json")
+    data_dir = settings.hardware_dir()
+    os.makedirs(data_dir, exist_ok=True)
+    mode_file = os.path.join(data_dir, "hardware_mode.json")
+    status_file = os.path.join(data_dir, "hardware_status.json")
 
     if getattr(args, "home", False):
         try:
@@ -1099,7 +1100,8 @@ def cmd_hardware(args):
         script = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "tools", "hardware_guard.ps1"))
         if os.path.isfile(script):
             flags = subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0
-            subprocess.Popen(["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", script],
+            subprocess.Popen(["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", script,
+                              "-DataDir", data_dir],
                              creationflags=flags)
             print(f"Hardware Guard started in the background from {script}")
         else:
