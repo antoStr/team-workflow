@@ -36,8 +36,10 @@ class RolesTest(unittest.TestCase):
         self.assertEqual(meta["tools"], '["Read", "Grep", "Glob"]')
         self.assertIn(roles.MARK, body)
         meta, _ = self.native("claude", "doc-keeper")
-        self.assertEqual(meta["model"], "haiku")
-        self.assertNotIn("effort", meta)  # haiku has no effort
+        self.assertEqual((meta["model"], meta["effort"]), ("haiku", "medium"))  # haiku 5.5 takes effort
+        settings.save("models.claude.doc-keeper", "claude-haiku-4-5")
+        roles.sync("claude")
+        self.assertNotIn("effort", self.native("claude", "doc-keeper")[0])  # haiku 4.5 has none
 
     def test_settings_switch_type_model_and_packs(self):
         settings.save("models.claude.tester", "fable")

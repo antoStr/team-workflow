@@ -3,6 +3,7 @@
 orchestrator; changed with `tw.py settings set <key> <value>` or by editing the files."""
 import json
 import os
+import time
 
 DEFAULTS = {
     # auto = in every repository the session loads the memory, the protocol and the Stop check;
@@ -43,7 +44,7 @@ DEFAULTS = {
     },
     # Effort per role: low, medium, high, xhigh, max (Claude Code agents and workers; agy puts
     # the effort in the worker's model id; OpenCode writes it as the agent's variant, except
-    # medium). Models without effort (haiku) ignore it.
+    # medium). Models without effort ignore it.
     "effort": {"default": "medium", "architect": "high", "security-reviewer": "high"},
     # Agent type per role, per app. custom = our generated subagent (default); worker = a
     # headless process with exact model and effort; or a built-in type of the app, briefed with
@@ -103,6 +104,20 @@ def home_dir():
 def hardware_dir():
     """Where the hardware guard writes its status and tw.py reads it."""
     return os.path.join(home_dir(), "hardware")
+
+
+HARDWARE_STALE_SECONDS = 60  # the guard writes every 2 s: older data means it is not running
+
+
+def hardware_status():
+    """(data, age in seconds) of the guard's hardware_status.json; ({}, None) when missing or unreadable."""
+    path = os.path.join(hardware_dir(), "hardware_status.json")
+    try:
+        with open(path, encoding="utf-8-sig") as f:
+            data = json.load(f)
+        return (data, max(0.0, time.time() - os.path.getmtime(path))) if isinstance(data, dict) else ({}, None)
+    except (OSError, ValueError):
+        return {}, None
 
 
 def user_file():

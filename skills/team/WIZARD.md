@@ -39,9 +39,9 @@ it and go straight to the board. Skip it when the user says "defaults" or "skip 
    "(current)"; fill the other options with relevant alternatives without artificial 4-choice limits
    (the full step 1 list is available, and `tw.py agents catalog` provides the full functional taxonomy).
    Each option says how it runs:
-   - Claude Code: any model through the Agent tool's `model` parameter (native); an effort
-     different from the agent file's runs as a worker in this conversation. haiku has no
-     effort: skip the effort question for it.
+   - Claude Code: any model and effort through the Agent tool's `model` and `effort`
+     parameters (native, for this launch only). Every alias takes an effort (haiku is Haiku
+     5.5); skip the question only for a model that step 1 lists with "effort: none".
    - agy: model `inherit` = the session model (name it, for example `gemini-3.8-flash-high`),
      `flash`, `pro` (native, no effort: the effort question offers "session effort
      (current)" or an exact worker id such as `gemini-3.8-flash-low`); any other exact id
@@ -103,9 +103,12 @@ context ("team-workflow settings: ..."); elsewhere read them with
 Offer only models and efforts the app really has (`tw.py models` lists them):
 
 - **Claude Code**: `haiku`, `sonnet`, `opus`, `fable` (or a full model id); effort `low`,
-  `medium`, `high`, `xhigh`, `max` where the model supports it (haiku has none). A custom
-  agent runs at the effort of its generated file: to change it for good, `tw.py agents set
-  <role> effort=<e>`; for one run only, use a worker.
+  `medium`, `high`, `xhigh`, `max` where the model supports it. A custom agent runs at the
+  model and effort of its generated file unless the launch passes the Agent tool's `model`
+  and `effort`: to change them for good, `tw.py agents set <role> model=<m> effort=<e>`; for
+  one run only, pass them at launch. Check the run afterwards: the subagent transcript
+  (`~/.claude/projects/<project>/<session>/subagents/agent-<id>.jsonl`) records the model id
+  and the effort of every turn.
 - **agy custom subagent**: `inherit` (the session's model), `flash` or `pro`, set per role
   (`tw.py agents set <role> model=pro --app agy`), not per launch.
 - **agy worker**: any id from `agy models` (for example `gemini-3.8-flash-high`,
@@ -152,8 +155,8 @@ Then ask up to four single-choice questions in one call, recommended option firs
 3. **Model**: up to four models of this app, each description with its estimate, for example
    "~2.6M tokens, $1.20 ($0.60-1.92)". Recommend the role's model from the settings unless the
    task needs more or less.
-4. **Effort**: only where the launch can apply it (a worker, or agy where it is in the model
-   id); recommend the role's effort from the settings.
+4. **Effort**: only where the launch can apply it (Claude Code's Agent tool, a worker, or agy
+   where it is in the model id); recommend the role's effort from the settings.
 
 The user can always write their own answer instead.
 
@@ -184,7 +187,8 @@ settings (`type.<app>.<role>`, shown by `tw.py agents`):
 - **custom** (default): the generated agent named after the role, with the model and effort
   of the settings.
   - Claude Code: the Agent tool with `subagent_type: "<role>"` (for example `"tester"`); add
-    `model` only when the user chose a different model for this run.
+    `model` and `effort` when the user chose a model or an effort different from the agent
+    file for this run ("all at minimum" means `effort: "low"` for every agent, haiku included).
   - agy: `invoke_subagent` with `TypeName: "<role>"`, `Role` a short job title and `Prompt` the
     brief; independent agents go in one call and run in parallel.
   - OpenCode: the subagent tool with `agent: "<role>"`, a short `description` and the brief as
@@ -209,5 +213,7 @@ settings (`type.<app>.<role>`, shown by `tw.py agents`):
 ## 5. After the run
 
 Show real against estimated use:
-`python3 <skill>/scripts/dashboard.py --root <repository> --session latest`.
+`python3 <skill>/scripts/dashboard.py --root <folder the app was started in> --session latest`.
+Usage is filed under the conversation's start folder, not under the repository the agents
+worked on: when the team works in another folder, pass the start folder.
 The next estimates for the same role use this history.

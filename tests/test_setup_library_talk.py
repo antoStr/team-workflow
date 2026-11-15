@@ -166,9 +166,12 @@ class TalkTest(unittest.TestCase):
         talk.post("t", "a", "to everyone", cwd=self.cwd)
         talk.post("t", "a", "to b", to="b", cwd=self.cwd)
         talk.post("t", "a", "to c", to="c", cwd=self.cwd)
+        # a group conversation: b also reads what was addressed to c
         self.assertEqual([m["text"] for m in talk.for_role(talk.read("t", self.cwd), "b")],
-                         ["to everyone", "to b"])
-        self.assertEqual(talk.for_role(talk.read("t", self.cwd), "b", since=2), [])
+                         ["to everyone", "to b", "to c"])
+        self.assertEqual(talk.for_role(talk.read("t", self.cwd), "b", since=3), [])
+        self.assertEqual(talk.for_role(talk.read("t", self.cwd), "a"), [])
+        self.assertEqual(talk.unread_by_role("t", self.cwd), {"b": [2], "c": [3]})
         with self.assertRaises(ValueError):
             talk.post("t", "a", "no re", "answer", cwd=self.cwd)
         with self.assertRaises(ValueError):

@@ -166,21 +166,20 @@ def checks(root=None):
     add("fail" if serious else "warn" if findings else "ok", "audit",
         f"{len(findings)} findings, {len(serious)} critical or high, in {scanned} files (tw.py audit)")
 
-    hw_file = os.path.join(settings.hardware_dir(), "hardware_status.json")
-    if os.path.isfile(hw_file):
-        try:
-            with open(hw_file, "r", encoding="utf-8-sig") as f:
-                hw = json.load(f)
-            hw_status = hw.get("Status", "OK")
-            cpu = hw.get("CPU", {}).get("Temp_C", "?")
-            gpu = hw.get("GPU", {}).get("Temp_C", "?") if hw.get("GPU") else None
-            mode = hw.get("Mode", "home")
-            gpu_str = f", GPU {gpu}°C" if gpu else ""
-            add("fail" if hw_status == "CRITICAL" else ("warn" if hw_status == "WARNING" else "ok"),
-                "hardware & thermal",
-                f"Status: {hw_status} (CPU {cpu}°C{gpu_str}, Mode: {mode})")
-        except Exception:
-            pass
+    hw, age = settings.hardware_status()
+    if hw and age > settings.HARDWARE_STALE_SECONDS:
+        # old telemetry says nothing about now: never fail on it
+        add("warn", "hardware & thermal",
+            f"no live data: last written {int(age // 60)} min ago, the guard is not running (tw.py hardware --start)")
+    elif hw:
+        hw_status = hw.get("Status", "OK")
+        cpu = (hw.get("CPU") or {}).get("Temp_C", "?")
+        gpu = (hw.get("GPU") or {}).get("Temp_C")
+        mode = hw.get("Mode", "home")
+        gpu_str = f", GPU {gpu}°C" if gpu else ""
+        add("fail" if hw_status == "CRITICAL" else ("warn" if hw_status == "WARNING" else "ok"),
+            "hardware & thermal",
+            f"Status: {hw_status} (CPU {cpu}°C{gpu_str}, Mode: {mode})")
     return out
 
 

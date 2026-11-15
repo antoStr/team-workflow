@@ -265,8 +265,11 @@ class OpenCodeTest(ScriptTest):
         self.assertEqual(data["roles"]["architect"]["model"], "inherit")
         self.assertIn("session effort", data["roles"]["architect"]["runs"])
         claude = tw.app_options("claude", self.root)
-        self.assertIn("no effort", tw.runs_as("claude", dict(type="custom", model="haiku", effort="high"),
-                                              claude["native"]))
+        self.assertIn("effort high", tw.runs_as("claude", dict(type="custom", model="haiku", effort="high"),
+                                                claude["native"]))
+        self.assertIn("no effort", tw.runs_as("claude", dict(type="custom", model="old", effort="high"),
+                                              {"efforts": {"old": []}}))
+        self.assertEqual(claude["native"]["models"], ["fable", "opus", "sonnet", "haiku"])
         self.assertIn("worker", tw.runs_as("agy", dict(type="worker", model="x", effort="low"), {}))
         with mock.patch.object(tw.shutil, "which", return_value=None), \
                 mock.patch("sys.stdout", new_callable=io.StringIO) as out:

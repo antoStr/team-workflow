@@ -7,7 +7,7 @@ common dir is shared by every worktree of the repository, so agents in separate 
 the same channel, and it is never committed. Outside a repository: ~/.team-workflow/talk/.
 
 Message: {"id", "time", "from", "to" (a role, or null for everyone), "kind", "re" (the id it
-answers), "text"}. A question stays open until a reply with re=its id; a challenge stays open
+answers), "text"}. `to` says who must answer; everybody still reads every message. A question stays open until a reply with re=its id; a challenge stays open
 until a verdict with re=its id. `open_threads` is the orchestrator's gate before "done".
 <topic>.seen.json keeps, per role, the last message it read: `read --for ROLE` shows only what
 is new for that role, so agents never track ids nor reread the history. A `join` message says
@@ -123,8 +123,9 @@ def post(topic, sender, text, kind="note", to=None, re_id=None, cwd=None):
 
 
 def for_role(msgs, role, since=0):
-    """Messages after `since` that a role should read: to it or to everyone, not its own."""
-    return [m for m in msgs if m["id"] > since and m["from"] != role and m["to"] in (None, role)]
+    """Messages after `since` that a role should read: every message but its own (a group
+    conversation: a question to someone else is context for everybody)."""
+    return [m for m in msgs if m["id"] > since and m["from"] != role]
 
 
 def _cursors_path(topic, cwd=None):

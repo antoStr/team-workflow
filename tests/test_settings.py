@@ -54,6 +54,22 @@ class SettingsTest(unittest.TestCase):
             with self.assertRaises(ValueError, msg=key):
                 settings.parse_value(key, value)
 
+    def test_old_hardware_status_is_reported_as_stale_not_critical(self):
+        import doctor
+        self.assertEqual(settings.hardware_status(), ({}, None))
+        os.makedirs(settings.hardware_dir())
+        path = os.path.join(settings.hardware_dir(), "hardware_status.json")
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump({"Status": "CRITICAL", "CPU": {"Temp_C": 90}}, f)
+        data, age = settings.hardware_status()
+        self.assertEqual((data["Status"], age < settings.HARDWARE_STALE_SECONDS), ("CRITICAL", True))
+        old = os.path.getmtime(path) - 9 * 3600  # written 9 hours ago by a guard that stopped
+        os.utime(path, (old, old))
+        with mock.patch.object(doctor.audit, "audit", return_value=([], 0)):
+            row = [r for r in doctor.checks(self.root) if r[1] == "hardware & thermal"]
+        self.assertEqual(row[0][0], "warn")
+        self.assertIn("540 min ago", row[0][2])
+
 
 class NoModelCommandTest(ScriptTest):
     def test_only_our_commands_are_intercepted(self):
