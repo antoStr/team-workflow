@@ -414,6 +414,7 @@ for all projects (`~/.team-workflow/settings.json`), with `--project` only for t
 | `auto_security_review` | `true` | adds `security-reviewer` when the change touches sensitive code |
 | `end_report` | `full` | `short`: only done, verified, decisions |
 | `update_check` | `true` | new-version notice at start-up |
+| `auto_update` | `false` | install a new version by itself, with no model: checked at start-up, at every agy invocation and every `/team` prompt (GitHub at most hourly), installed in the background for every app (log: `~/.team-workflow/update.log`) |
 | `stop_check` | `true` | reminder to update `STATE.md` |
 | `models.claude.<role>` | sonnet (architect and security-reviewer opus, doc-keeper haiku) | model in Claude Code |
 | `models.agy.<role>` | inherit (the session's model) | model of agy subagents: inherit, flash or pro |
@@ -443,7 +444,7 @@ it is unclear). An existing memory keeps its language.
 
 | Hook | What it does | How to turn it off |
 |---|---|---|
-| SessionStart (agy: PreInvocation) | injects `INDEX.md`, `STATE.md` and the changed settings; writes the native agents from the settings; offers the packs of the repository's languages; tells you about a new version (at most once a day) | `update_check false` for the notice |
+| SessionStart (agy: PreInvocation) | injects `INDEX.md`, `STATE.md` and the changed settings; writes the native agents from the settings; offers the packs of the repository's languages; tells you about a new version (at most once a day), or installs it with `auto_update true` | `update_check false` for the notice |
 | UserPromptSubmit (Claude Code only) | answers the zero-token commands (`settings`, `agents`, `profile`, `models`, `addons`, `audit`, `doctor`, `ci-init`, `update-plugin`) without the model | by disabling the plugin |
 | Stop | when files changed after `STATE.md`, asks to update it (never twice in a row) | `stop_check false` (or `TEAM_WORKFLOW_STOP_CHECK=0`) |
 

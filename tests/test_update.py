@@ -31,3 +31,31 @@ class UpdateTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class AutoUpdateTest(unittest.TestCase):
+    def test_starts_one_detached_update_per_window_and_only_when_newer(self):
+        import tempfile
+        from unittest import mock
+        home = tempfile.mkdtemp()
+        with mock.patch.object(update_plugin, "newer_version", return_value=None), \
+                mock.patch.object(update_plugin.subprocess, "Popen") as popen:
+            self.assertIsNone(update_plugin.auto_update(home=home))
+            popen.assert_not_called()
+        with mock.patch.object(update_plugin, "newer_version", return_value="9.9.9"), \
+                mock.patch.object(update_plugin.subprocess, "Popen") as popen:
+            self.assertEqual(update_plugin.auto_update(home=home), "9.9.9")
+            self.assertEqual(update_plugin.auto_update(home=home), "9.9.9")  # locked: no second start
+            popen.assert_called_once()
+            cmd, kwargs = popen.call_args
+            self.assertEqual(cmd[0][1:], [os.path.abspath(update_plugin.__file__), "--harness", "all"])
+            self.assertEqual(kwargs["cwd"], os.path.join(home, ".team-workflow"))
+        with open(os.path.join(home, ".team-workflow", "update.log"), encoding="utf-8") as f:
+            self.assertIn("auto update to 9.9.9", f.read())
+
+    def test_only_team_prompts_trigger_the_check(self):
+        import prompt_command
+        for prompt in ("/team fix the login", "/team", "/team:doctor", " /team-workflow:talk read x"):
+            self.assertTrue(prompt_command.TEAM_PROMPT.match(prompt), prompt)
+        for prompt in ("/teams", "please /team", "/teamwork now", "fix the team page"):
+            self.assertFalse(prompt_command.TEAM_PROMPT.match(prompt), prompt)

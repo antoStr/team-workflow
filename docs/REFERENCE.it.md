@@ -418,6 +418,7 @@ repository (`.team-workflow.json`); `settings reset <chiave>` torna al valore pr
 | `auto_security_review` | `true` | aggiunge `security-reviewer` quando la modifica tocca codice sensibile |
 | `end_report` | `full` | `short`: solo fatto, verificato, decisioni |
 | `update_check` | `true` | avviso di nuova versione all'avvio |
+| `auto_update` | `false` | installa da solo una nuova versione, senza modello: controllo all'avvio, a ogni invocazione di agy e a ogni prompt `/team` (GitHub al massimo una volta l'ora), installazione in background per ogni app (log: `~/.team-workflow/update.log`) |
 | `stop_check` | `true` | promemoria per aggiornare `STATE.md` |
 | `models.claude.<ruolo>` | sonnet (architect e security-reviewer opus, doc-keeper haiku) | modello in Claude Code |
 | `models.agy.<ruolo>` | inherit (il modello della sessione) | modello dei sub-agenti agy: inherit, flash o pro |
@@ -448,7 +449,7 @@ Una memoria gia' esistente mantiene la sua lingua.
 
 | Hook | Cosa fa | Come spegnerlo |
 |---|---|---|
-| SessionStart (agy: PreInvocation) | inietta `INDEX.md`, `STATE.md` e le impostazioni cambiate; scrive gli agenti nativi dalle impostazioni; propone i pack dei linguaggi del repository; avvisa se c'e' una nuova versione (al massimo una volta al giorno) | `update_check false` per l'avviso |
+| SessionStart (agy: PreInvocation) | inietta `INDEX.md`, `STATE.md` e le impostazioni cambiate; scrive gli agenti nativi dalle impostazioni; propone i pack dei linguaggi del repository; avvisa se c'e' una nuova versione (al massimo una volta al giorno), o la installa con `auto_update true` | `update_check false` per l'avviso |
 | UserPromptSubmit (solo Claude Code) | risponde ai comandi senza token (`settings`, `agents`, `profile`, `models`, `addons`, `audit`, `doctor`, `ci-init`, `update-plugin`) senza il modello | disattivando il plugin |
 | Stop | se i file sono cambiati dopo `STATE.md`, chiede di aggiornarla (mai due volte di fila) | `stop_check false` (o `TEAM_WORKFLOW_STOP_CHECK=0`) |
 

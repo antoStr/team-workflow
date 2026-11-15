@@ -23,6 +23,9 @@ DEFAULTS = {
     "auto_security_review": True,  # add security-reviewer on sensitive changes
     "end_report": "full",          # full | short
     "update_check": True,          # tell at session start when a new version is out (daily)
+    # install a new version by itself, with no model: checked at session start, at every agy
+    # invocation and every /team prompt (GitHub at most hourly), installed in the background
+    "auto_update": False,
     "stop_check": True,            # remind to update docs/memory/STATE.md at the end of a turn
     # Team talk (TALK.md): agents of a task share a channel to debug together, challenge and
     # verify each other; talk_rounds is how many rounds of replies the orchestrator runs at most.
