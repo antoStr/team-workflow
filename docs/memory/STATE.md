@@ -1,8 +1,8 @@
 # Project state
 
-## Current version: v2.4.0 (released) + unreleased fixes on `fix/claude-code-team-test`
+## Current version: v2.4.1 (released)
 
-### Unreleased (after v2.4.0): fixes from a live team run on Claude Code
+### v2.4.1 (released): fixes from live team runs on Claude Code, Codex and agy
 A 3-agent run (2 haiku builders, 1 sonnet reviewer, team talk in review mode) showed:
 - **Team talk is a group conversation for real**: `talk.for_role` no longer hides `--to X`
   messages from the others; the orchestrator and newcomers read every message (2.4.0 hid
