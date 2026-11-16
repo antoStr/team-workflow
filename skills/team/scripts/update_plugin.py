@@ -201,13 +201,13 @@ def update_opencode(harness="opencode"):
                         "--source", source)
         return code == 0, out
     tmp = os.path.join(os.path.expanduser("~"), ".team-workflow", f"{harness}-update")
-    shutil.rmtree(tmp, ignore_errors=True)
+    safe_rmtree(tmp)  # Windows marks .git/objects/pack/* read-only
     code, out = run("git", "clone", "-q", "--depth", "1", source, tmp)
     if code:
         return False, f"cannot fetch {source}, nothing changed\n{out}"
     code, out = run(sys.executable, os.path.join(tmp, "skills", NAME, "scripts", installer),
                     "--source", source)
-    shutil.rmtree(tmp, ignore_errors=True)
+    safe_rmtree(tmp)
     return code == 0, out
 
 
@@ -356,7 +356,7 @@ def agy_update(names=None):
                     pass
             top_team = os.path.join(os.path.expanduser("~"), ".gemini", "config", "skills", "team")
             try:
-                shutil.rmtree(top_team, ignore_errors=True)
+                safe_rmtree(top_team)
                 shutil.copytree(os.path.join(folder, NAME, "skills", "team"), top_team)
             except Exception:
                 pass

@@ -72,3 +72,42 @@ class AutoUpdateTest(unittest.TestCase):
         import install_opencode
         self.assertEqual(update_plugin.opencode_payload(), install_opencode.payload_dir())
         self.assertEqual(update_plugin.codex_payload(), install_codex.payload_dir())
+
+    def test_update_opencode_clears_read_only_git_temp_dirs(self):
+        import stat
+        import tempfile
+        from unittest import mock
+
+        with tempfile.TemporaryDirectory() as home:
+            payload_dir = os.path.join(home, "payload")
+            os.makedirs(payload_dir)
+            with open(os.path.join(payload_dir, ".source"), "w", encoding="utf-8") as f:
+                f.write("https://example.invalid/team-workflow\n")
+
+            tmp = os.path.join(home, ".team-workflow", "opencode-update")
+            stale_pack = os.path.join(tmp, ".git", "objects", "pack")
+            os.makedirs(stale_pack)
+            stale_file = os.path.join(stale_pack, "pack-stale.idx")
+            with open(stale_file, "w", encoding="utf-8") as f:
+                f.write("stale")
+            os.chmod(stale_file, stat.S_IREAD)
+
+            def fake_run(*cmd, **kwargs):
+                if cmd[:2] == ("git", "clone"):
+                    self.assertFalse(os.path.exists(tmp), "stale temp dir must be removed before git clone")
+                    new_pack = os.path.join(cmd[-1], ".git", "objects", "pack")
+                    os.makedirs(new_pack)
+                    pack_file = os.path.join(new_pack, "pack-new.pack")
+                    with open(pack_file, "w", encoding="utf-8") as f:
+                        f.write("pack")
+                    os.chmod(pack_file, stat.S_IREAD)
+                    return 0, ""
+                return 0, "installed"
+
+            with mock.patch("os.path.expanduser", return_value=home), \
+                    mock.patch.dict(update_plugin.PAYLOADS, {"opencode": (lambda: payload_dir, "install_opencode.py")}), \
+                    mock.patch.object(update_plugin, "run", side_effect=fake_run) as run_mock:
+                ok, out = update_plugin.update_opencode("opencode")
+            self.assertTrue(ok, out)
+            self.assertEqual(run_mock.call_count, 2)
+            self.assertFalse(os.path.exists(tmp))
