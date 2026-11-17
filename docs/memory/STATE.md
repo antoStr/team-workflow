@@ -1,15 +1,14 @@
 # Project state
 
-## Current version: v2.4.3 (released)
+## Current version: v2.4.4 (released)
 
 ### Unreleased
-- `skills/team/scripts/update_plugin.py`: `update_opencode` and `agy_update` now use
-  `safe_rmtree` so Windows read-only `.git` pack files do not break OpenCode or Codex updates;
-  regression test added in `tests/test_update.py`.
-- `docs/memory/STATE.md`: summarized to satisfy `memcheck` size/path rules and updated
-  `Where to resume` after `v2.4.3`.
+- (none)
 
 ### Released highlights (full notes in git tags / GitHub Releases)
+- **v2.4.4**: session setup line is imperative in every app (first project reply: `tw.py scan`, then
+  `WIZARD.md` by absolute path; repos without memory get a Brain-init question); `update_plugin`
+  uses `safe_rmtree` on Windows for OpenCode and Codex updates.
 - **v2.4.3** (`e63d0a3`): Windows hook wrapper `hooks/run-py.cmd` (skips Store `python3` alias),
   `talk` challenge verdict & duplicate `join` checks, OpenCode leftover-session note in `WIZARD.md`.
 - **v2.4.2**: `update_plugin` uses OpenCode/Codex `payload_dir()` and updates any behind app.
@@ -26,7 +25,6 @@
 - `python skills/team/scripts/memcheck.py --root . --strict`, `tw.py brain check --strict`.
 
 ### Where to resume
-- Release `v2.4.3` is tagged and published on GitHub (`e63d0a3`), and all 4 apps are on `2.4.3`.
-- Merge this PR after green `test (3.10)` / `test (3.15)` checks; tag `v2.4.4` when ready to ship
-  the `update_plugin.py` Windows `safe_rmtree` fix.
+- `v2.4.4` ships the wizard parity fix and the `safe_rmtree` fix: merge the PR after green
+  `test (3.10)` / `test (3.15)` checks, then tag `v2.4.4` and publish the GitHub Release.
 - `main` is protected on GitHub (`main protection` ruleset: PR + green `test` checks).
