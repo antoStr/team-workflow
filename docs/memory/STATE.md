@@ -1,6 +1,6 @@
 # Project state
 
-## Current version: v2.4.7 (released)
+## Current version: v2.4.7 (PR #13, not released yet)
 
 ### Unreleased
 - (none)
@@ -34,5 +34,6 @@
 - `python skills/team/scripts/memcheck.py --root . --strict`, `tw.py brain check --strict`.
 
 ### Where to resume
-- `v2.4.7` is released; next work starts from `main`.
+- `v2.4.7` is PR #13: merge it (`gh pr merge 13 --squash --admin`), then tag `v2.4.7` and publish
+  the GitHub Release. The gate also counts in `tests/test_hook_wrapper.py` (4 hooks).
 - `main` is protected on GitHub (`main protection` ruleset: PR + green `test` checks).
