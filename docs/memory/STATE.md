@@ -1,11 +1,14 @@
 # Project state
 
-## Current version: v2.4.5 (released)
+## Current version: v2.4.6 (released)
 
 ### Unreleased
 - (none)
 
 ### Released highlights (full notes in git tags / GitHub Releases)
+- **v2.4.6**: `skills/team/SKILL.md` section 2 makes the session setup a numbered, mandatory step before any
+  agent (scan, brain, library, `tw.py options`, questions, recap), the same in every app as agy's
+  `rules/AGENTS.md`; roles or models named in the request pre-fill the answers, never skip them.
 - **v2.4.5**: the SessionStart hook gives the model a runnable `tw.py` (the Python that runs the hook
   plus the absolute script path), because `tw.py` is on no PATH and the model skipped the scan.
 - **v2.4.4**: session setup line is imperative in every app (first project reply: `tw.py scan`, then
@@ -27,6 +30,5 @@
 - `python skills/team/scripts/memcheck.py --root . --strict`, `tw.py brain check --strict`.
 
 ### Where to resume
-- `v2.4.5` ships the runnable `tw.py` command in the hook text: merge the PR after green
-  `test (3.10)` / `test (3.15)` checks, then tag `v2.4.5` and publish the GitHub Release.
+- `v2.4.6` is released; next work starts from `main`.
 - `main` is protected on GitHub (`main protection` ruleset: PR + green `test` checks).
