@@ -37,3 +37,5 @@
 - `v2.4.7` is released (`06f57d8`); next work starts from `main`. The setup gate is untested in an
   interactive Claude Code session: check `/team` there first.
 - `main` is protected on GitHub (`main protection` ruleset: PR + green `test` checks).
+
+- 2026-11-17: committed team skill/hooks/setup gate/questions.py locally; push to main rejected by repo rules (PR, checks, signed commits). Not pushed.
