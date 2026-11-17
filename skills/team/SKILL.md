@@ -61,7 +61,8 @@ When you receive `/team $ARGUMENTS`:
 3. Search the library for skills that fit the task: `tw.py library search <keywords>`.
 4. **Session setup** (`WIZARD.md`, "Session setup"), once per conversation while
    `session_wizard` is on: show the output of `tw.py options --app <claude|agy|opencode|codex>`
-   in a code block, then ask with the app's question tool (Claude Code `AskUserQuestion`, agy
+   in a code block, whole (when a tool such as context-mode cuts it, save it to a file and read
+   it in parts of 40 lines), then ask with the app's question tool (Claude Code `AskUserQuestion`, agy
    `ask_question`, OpenCode `question`): where the choices go and the preset; the roles; model
    and effort for **every** chosen role; skills and add-ons; team talk; then the recap and
    "Start".

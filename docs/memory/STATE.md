@@ -1,11 +1,15 @@
 # Project state
 
-## Current version: v2.4.6 (released)
+## Current version: v2.4.7 (PR #13, not released yet)
 
 ### Unreleased
 - (none)
 
 ### Released highlights (full notes in git tags / GitHub Releases)
+- **v2.4.7**: `setup_gate.py`, a Claude Code PreToolUse hook on `Agent|Task`, denies team roles until
+  the transcript shows `tw.py options` then `AskUserQuestion` (or the user said "defaults" / "skip
+  setup"); tested with Sonnet and Haiku, which skipped the setup with the SKILL.md text alone.
+  Off with `TEAM_WORKFLOW_SETUP_GATE=0` or `session_wizard=false`.
 - **v2.4.6**: `skills/team/SKILL.md` section 2 makes the session setup a numbered, mandatory step before any
   agent (scan, brain, library, `tw.py options`, questions, recap), the same in every app as agy's
   `rules/AGENTS.md`; roles or models named in the request pre-fill the answers, never skip them.
@@ -30,5 +34,6 @@
 - `python skills/team/scripts/memcheck.py --root . --strict`, `tw.py brain check --strict`.
 
 ### Where to resume
-- `v2.4.6` is released; next work starts from `main`.
+- `v2.4.7` is PR #13: merge it (`gh pr merge 13 --squash --admin`), then tag `v2.4.7` and publish
+  the GitHub Release. The gate also counts in `tests/test_hook_wrapper.py` (4 hooks).
 - `main` is protected on GitHub (`main protection` ruleset: PR + green `test` checks).

@@ -17,7 +17,7 @@ class HookWrapperTest(unittest.TestCase):
         with open(os.path.join(ROOT, "hooks", "hooks.json"), encoding="utf-8") as f:
             hooks = json.load(f)["hooks"]
         commands = [h["command"] for groups in hooks.values() for g in groups for h in g["hooks"]]
-        self.assertEqual(len(commands), 3)
+        self.assertEqual(len(commands), 4)
         for cmd in commands:  # a fixed python3 is the Microsoft Store alias on many Windows PCs
             self.assertTrue(cmd.startswith('"${CLAUDE_PLUGIN_ROOT}/hooks/run-py.cmd" '), cmd)
             self.assertTrue(os.path.isfile(os.path.join(ROOT, "skills", "team", "scripts", cmd.split()[-1])))
