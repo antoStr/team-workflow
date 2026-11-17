@@ -283,8 +283,9 @@ class OpenCodeTest(ScriptTest):
                               env={"TEAM_WORKFLOW_APP": "opencode"})
         context = json.loads(out.stdout)["hookSpecificOutput"]["additionalContext"]
         self.assertIn("session setup is on", context)
-        self.assertIn("tw.py options --app opencode", context)
-        self.assertIn("`tw.py scan`", context)  # the codebase map comes before the wizard
+        self.assertIn('tw.py" options --app opencode', context)
+        self.assertIn('/scripts/tw.py" scan`', context)  # runnable: the model has no tw.py on PATH
+        self.assertIn(sys.executable.replace(os.sep, "/"), context)
         self.assertIn("/WIZARD.md", context)  # absolute path, so the model finds it
         self.assertIn("subagent tool, agent = the role", context)
         self.assertIn("/team-workflow/<name>", context)
