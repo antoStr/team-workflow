@@ -47,21 +47,38 @@ When you receive `/team $ARGUMENTS`:
 > the task ("writing in between"), the orchestrator and every agent first find each question
 > and answer it in full at the start of the reply, before or while the work starts.
 
-### 2. First scan of the repository and the brain
+### 2. First scan and session setup (mandatory, before any agent)
 
-- At the start of every `/team` call on a codebase, scan the stack and the environment:
-  `tw.py scan`. It finds languages, frameworks, UI libraries, git state and project memory.
-- For a large or unknown codebase, ask the project brain: `tw.py brain context <module_or_area>`.
-  In under 2,000 tokens you get who calls the module, what it depends on and the
-  **vaccines** (past mistakes) recorded for that area.
-- Search the library for skills that fit the task: `tw.py library search <keywords>`.
+> [!IMPORTANT]
+> These steps are the same in every app (Claude Code, agy, OpenCode, Codex) and run in this
+> order. Never launch an agent before step 4 is done.
+
+1. At the start of every `/team` call on a codebase, scan the stack and the environment:
+   `tw.py scan`. It finds languages, frameworks, UI libraries, git state and project memory.
+2. For a large or unknown codebase, ask the project brain: `tw.py brain context <module_or_area>`.
+   In under 2,000 tokens you get who calls the module, what it depends on and the
+   **vaccines** (past mistakes) recorded for that area. Skip it only when the brain is empty.
+3. Search the library for skills that fit the task: `tw.py library search <keywords>`.
+4. **Session setup** (`WIZARD.md`, "Session setup"), once per conversation while
+   `session_wizard` is on: show the output of `tw.py options --app <claude|agy|opencode|codex>`
+   in a code block, then ask with the app's question tool (Claude Code `AskUserQuestion`, agy
+   `ask_question`, OpenCode `question`): where the choices go and the preset; the roles; model
+   and effort for **every** chosen role; skills and add-ons; team talk; then the recap and
+   "Start".
+   - Roles, models or a number of agents named in the request ("2 sonnet agents", "tester and
+     pentester") do not skip the setup: they become the first, "(Recommended)" option of the
+     matching questions.
+   - Skip it only when the user says "defaults" or "skip setup", when the request is a plain
+     question that launches no agent, or when it already ran in this conversation.
+5. Only then brief and launch the agents.
 
 ### 3. Flexible team size and free choice of agents
 
 - **No forced choice**: do not limit the user to four fixed options or preset sizes.
 - **Full catalog**: the user can browse every agent with `tw.py agents catalog`.
 - **Exactness**: follow the number and the roles the user asks for to the letter (for example
-  "I want 3 agents: frontend-dev, tester, pentester").
+  "I want 3 agents: frontend-dev, tester, pentester"). They pre-fill the session setup
+  answers (section 2, step 4); they never replace it.
 - **Changes at any time**: the user can add, remove, replace or scale roles while the work runs.
 - **Frontend components (`frontend-components` pack)**, for frontend, design system or UI tasks:
   - `pick-ui-library` to choose a library instead of reinventing components;
