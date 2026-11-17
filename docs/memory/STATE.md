@@ -3,6 +3,10 @@
 ## Current version: v2.4.3 (released)
 
 ### Unreleased
+- `skills/team/scripts/session_start.py`: the session-setup line is now imperative for every app
+  (Claude Code included): at the first reply that touches the project, run `tw.py scan` then the
+  wizard from the absolute `WIZARD.md` path, instead of only before launching agents; repos
+  without memory get the scan and a Brain-init question. Test in `tests/test_opencode.py`.
 - `skills/team/scripts/update_plugin.py`: `update_opencode` and `agy_update` now use
   `safe_rmtree` so Windows read-only `.git` pack files do not break OpenCode or Codex updates;
   regression test added in `tests/test_update.py`.

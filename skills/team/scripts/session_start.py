@@ -119,7 +119,8 @@ def memory_context(root, config=None):
     mem = os.path.join(root, MEMORY_DIR)
     if not os.path.isfile(os.path.join(mem, "INDEX.md")):
         return ("team-workflow: this repository has no docs/memory or docs/brain. If the user starts "
-                "development work, offer to initialize Brain (`tw.py brain init`).")
+                "development work, run `tw.py scan` to map the codebase and ask with the question "
+                "tool whether to initialize Brain (`tw.py brain init`), as part of the session setup.")
     parts = [PROTOCOL]
     for name in ("INDEX.md", "STATE.md"):
         path = os.path.join(mem, name)
@@ -186,10 +187,14 @@ def main():
     notes = []
     name, builtin = APP_NAMES[app]
     if config.get("session_wizard", True) and not manual:
-        context += (f"\nteam-workflow: session setup is on. Before the first agent of this "
-                    f"conversation, run the session setup in WIZARD.md: show `tw.py options --app {app}` "
-                    "to the user, then where the choices go, preset, roles, model and effort for every "
-                    "chosen role, skills and add-ons, and team talk.")
+        wizard = os.path.join(os.path.dirname(HERE), "WIZARD.md").replace(os.sep, "/")
+        context += (f"\nteam-workflow: session setup is on. At your first reply that touches this project's "
+                    "code or work (not only when you launch agents), before anything else: run "
+                    f"`tw.py scan` to map the codebase, then run the session setup in {wizard}: show "
+                    f"`tw.py options --app {app}` to the user, then ask with the question tool where the "
+                    "choices go, preset, roles, model and effort for every chosen role, skills and "
+                    "add-ons, and team talk. Do it once per conversation; skip it for a plain question "
+                    "or when the user says \"defaults\" or \"skip setup\".")
     if app == "opencode":
         context += "\n" + opencode_notes()
     elif app == "codex":
