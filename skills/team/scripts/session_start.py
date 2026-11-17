@@ -196,9 +196,11 @@ def main():
         context += (f"\nteam-workflow: session setup is on. At your first reply that touches this project's "
                     "code or work (not only when you launch agents), before anything else: run "
                     f"`{tw_cmd()} scan` to map the codebase, then run the session setup in {wizard}: show "
-                    f"`{tw_cmd()} options --app {app}` to the user, then ask with the question tool where the "
-                    "choices go, preset, roles, model and effort for every chosen role, skills and "
-                    "add-ons, and team talk. Do it once per conversation; skip it for a plain question "
+                    f"`{tw_cmd()} options --app {app}` to the user, then ask with the question tool every "
+                    f"call of `{tw_cmd()} questions --app {app} --task <words>` (where the choices go, "
+                    "preset, every role, library skills, add-ons, team talk) and of "
+                    f"`{tw_cmd()} questions --app {app} --roles <chosen>` (model and effort for every "
+                    "chosen role). Do it once per conversation; skip it for a plain question "
                     "or when the user says \"defaults\" or \"skip setup\".")
     if app == "opencode":
         context += "\n" + opencode_notes()

@@ -11,6 +11,8 @@
   choices go (this conversation, user defaults, this project), preset, roles, model and effort
   per role among what agy offers now (`tw.py options --app agy --json` shows the session model
   that `inherit` means, the tiers and the worker model ids), skills and add-ons, team talk.
+  The questions come ready from `tw.py questions --app agy --task <words>`, then
+  `tw.py questions --app agy --roles <chosen>`: ask every call as printed.
 - A request to fix, review, refactor or build something, including a detailed brief the user
   pastes, is work to dispatch: size it with the table in the team skill. Work alone
   only on trivial tasks; for anything larger choose delegation, run the wizard and launch the

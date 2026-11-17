@@ -43,7 +43,8 @@ def search(words, limit=20):
     terms = [w for w in re.split(r"\W+", " ".join(words).lower()) if len(w) > 1]
     ranked = []
     for e in entries().values():
-        eid, text = e["id"].lower(), (e["id"] + " " + e["description"] + " " + e["pack"]).lower()
+        eid = e["id"].lower()
+        text = f"{eid} {eid.replace('-', '')} {e['description']} {e['pack']}".lower()  # "codereview" finds code-review
         score = sum(3 * (t in eid) + text.count(t) for t in terms)
         hits = sum(t in text for t in terms)
         if hits:

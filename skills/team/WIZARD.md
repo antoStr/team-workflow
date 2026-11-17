@@ -26,6 +26,16 @@ it and go straight to the board. Skip it when the user says "defaults" or "skip 
    the app offers to native agents and to workers, every enabled role with its current type,
    model, effort and how it really runs, and when each can be changed. The user must see this
    before any question. (`--json` gives the same data for you; `--app all` the four apps.)
+
+   Steps 2 to 6 come ready from `tw.py questions --app <app> --task <words of the task>`: ask
+   **every** call it prints, in order, with the options as printed. Never drop, merge or
+   reorder them: every enabled role and the library skills for the task must reach the user.
+   Claude Code's AskUserQuestion takes 4 options per question and 4 questions per call, so the
+   lists come split ("Roles 1/8"...); its free-text "Other" takes any role or library id not
+   shown. Question text and labels may be in the user's language; the headers stay as
+   printed (the setup hook checks them). Add "(Recommended)" only to what the request named. After the roles are answered,
+   `tw.py questions --app <app> --roles <chosen,roles>` gives step 4: model and effort of every
+   chosen role. Library entries are given to agents by path: never call them "not installed".
 2. One call, two single-choice questions: **where the choices go**, "This conversation only
    (Recommended)", "My defaults for every project" (user file), "This project's defaults"
    (project file; in a git repository only), and the **preset**: "Keep my settings

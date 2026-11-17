@@ -63,9 +63,10 @@ When you receive `/team $ARGUMENTS`:
    `session_wizard` is on: show the output of `tw.py options --app <claude|agy|opencode|codex>`
    in a code block, whole (when a tool such as context-mode cuts it, save it to a file and read
    it in parts of 40 lines), then ask with the app's question tool (Claude Code `AskUserQuestion`, agy
-   `ask_question`, OpenCode `question`): where the choices go and the preset; the roles; model
-   and effort for **every** chosen role; skills and add-ons; team talk; then the recap and
-   "Start".
+   `ask_question`, OpenCode `question`) every call of `tw.py questions --app <app> --task <words>`
+   as printed: where the choices go and the preset; **every** enabled role; the library skills;
+   add-ons; team talk. Then every call of `tw.py questions --app <app> --roles <chosen>`: model
+   and effort for **every** chosen role. Then the recap and "Start".
    - Roles, models or a number of agents named in the request ("2 sonnet agents", "tester and
      pentester") do not skip the setup: they become the first, "(Recommended)" option of the
      matching questions.

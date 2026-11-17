@@ -60,6 +60,7 @@ import doctor
 import learn
 import library
 import opencode_cli
+import questions
 import roles
 import settings
 import talk
@@ -514,6 +515,32 @@ def cmd_options(args):
           + (f", project file {data['scope']['project_file']}" if data["scope"]["project_file"] else ""))
     if app != "all":
         print("Other apps: options --app all")
+
+
+def cmd_questions(args):
+    """The session setup questions as JSON calls for the question tool, the same in every app."""
+    app = args.app or os.environ.get("TEAM_WORKFLOW_APP") or "claude"
+    root = repo_root()
+    data = app_options(app, root)
+    if args.roles:
+        chosen = [r.strip() for r in args.roles.split(",") if r.strip()]
+        unknown = [r for r in chosen if r not in data["roles"]]
+        out = questions.model_calls(data, chosen)
+    else:
+        unknown = []
+        out = questions.setup_calls(data, args.task or [], settings.load(root), root)
+    print(json.dumps({"app": app, "unknown_roles": unknown,
+                      "required_headers": [q["header"] for c in out for q in c["questions"]
+                                           if not args.roles and q["header"].startswith(("Scope", "Preset", "Roles"))
+                                           or args.roles],
+                      "calls": out,
+                      "how": "Ask every call in order with the question tool, options as printed, none skipped "
+                             "(Claude Code's setup hook blocks the agents until every required header "
+                             "was asked); the text "
+                             "may be translated to the user's language, the headers stay as printed; add "
+                             "(Recommended) only to what the request named. After the roles, run "
+                             "`tw.py questions --roles <chosen,comma,separated>` for model and effort."},
+                     indent=1, ensure_ascii=False))
 
 
 def cmd_profile(args):
@@ -1344,6 +1371,10 @@ def main(argv=None):
     op = sub.add_parser("options", help="what the session wizard can offer in an app")
     op.add_argument("--app", choices=(*roles.APPS, "all"))
     op.add_argument("--json", action="store_true")
+    qu = sub.add_parser("questions", help="the session setup questions as JSON calls for the question tool")
+    qu.add_argument("--app", choices=roles.APPS)
+    qu.add_argument("--task", nargs="*", help="words of the task: they rank roles and pick library skills")
+    qu.add_argument("--roles", help="chosen roles, comma separated: model and effort questions")
     io = sub.add_parser("install-opencode", help="install team-workflow into OpenCode")
     io.add_argument("--workspace", help="this repository only (.opencode)")
     ix = sub.add_parser("install-codex", help="install team-workflow into Codex (also behind opencodex)")
@@ -1491,7 +1522,7 @@ def main(argv=None):
          "learn": cmd_learn, "ci-init": cmd_ci_init, "install-cli": cmd_install_cli,
          "agy-update": cmd_agy_update, "install-opencode": cmd_install_opencode,
          "install-codex": cmd_install_codex,
-         "options": cmd_options, "setup": cmd_setup, "library": cmd_library,
+         "options": cmd_options, "questions": cmd_questions, "setup": cmd_setup, "library": cmd_library,
          "talk": cmd_talk, "brain": cmd_brain, "gate": cmd_gate, "smoke": cmd_smoke,
          "hardware": cmd_hardware, "thermal": cmd_hardware}[args.command](args)
 
