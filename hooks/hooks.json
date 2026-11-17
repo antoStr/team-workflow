@@ -1,5 +1,5 @@
 {
-  "description": "team-workflow: load the project memory at session start; answer the settings, models and update-plugin commands without the model; ask for a memory update when files changed after docs/memory/STATE.md.",
+  "description": "team-workflow: load the project memory at session start; answer the settings, models and update-plugin commands without the model; hold team agents until the session setup ran; ask for a memory update when files changed after docs/memory/STATE.md.",
   "hooks": {
     "SessionStart": [
       {
@@ -8,6 +8,18 @@
           {
             "type": "command",
             "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/run-py.cmd\" session_start.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Agent|Task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/run-py.cmd\" setup_gate.py",
             "timeout": 10
           }
         ]
