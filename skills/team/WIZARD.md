@@ -14,7 +14,8 @@ Never clamp the user into artificial 4-choice limits or rigid presets (`solo`, `
 
 ## Session setup (first team-workflow task of every conversation)
 
-Before proposing roles, always run `python3 <skill>/scripts/tw.py scan` to ground yourself in the actual codebase, frameworks, dependencies, and memory status.
+Before proposing roles, always run `python3 <skill>/scripts/tw.py scan` to ground yourself in the actual codebase, frameworks, dependencies, and memory status, then run `python3 <skill>/scripts/tw.py cortex route "<task>" --app <app>` so the Neural Cortex scores available resources (hardware capacity, models, roles, library + learned skills, Brain hubs, and vaccines) against the task's domain tensor and risk.
+After completing a task, update project knowledge and self-evolving skills with `tw.py cortex assimilate`, `tw.py cortex feedback --outcome pass|fail|blocked --roles ... --skills ...`, and `tw.py cortex evolve`.
 
 When the setting `session_wizard` is true (the default), before the first agent of a
 conversation is launched, agree with the user which agents this conversation uses and how,

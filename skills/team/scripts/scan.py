@@ -187,18 +187,40 @@ def check_docs_memory(root):
     return memory
 
 
-def scan_repository(root=None):
+def scan_repository(root=None, include_cortex=True):
     root = root or repo_root() or os.getcwd()
     git = git_info(root)
     stack = detect_stack(root)
     memory = check_docs_memory(root)
-    
-    return {
+
+    report = {
         "root": root,
         "git": git,
         "stack": stack,
-        "memory": memory
+        "memory": memory,
     }
+    if include_cortex:
+        try:
+            import cortex
+            import omniscience
+            has_brain = os.path.isdir(os.path.join(root, "docs", "brain"))
+            knowledge = cortex.assimilate_project_knowledge(root, write_genome_md=has_brain, scan_report=report)
+            evolved = cortex.evolve_skills(root)
+            env_sense = omniscience.sense_environment(root)
+            anti_tamper = omniscience.audit_anti_tamper(root)
+            report["cortex"] = {
+                "hubs": len(knowledge.get("architectural_hubs") or []),
+                "co_change_rules": len(knowledge.get("co_change_clusters") or []),
+                "fragility_hotspots": len(knowledge.get("fragility_hotspots") or []),
+                "learned_skills": [s["id"] for s in evolved.get("synthesized") or []],
+                "vibecode_shield": True,
+                "missing_env_keys": env_sense.get("missing_env_keys") or [],
+                "active_ports": env_sense.get("active_ports") or [],
+                "anti_tamper_passed": bool(anti_tamper.get("passed", True)),
+            }
+        except Exception as exc:
+            report["cortex_error"] = str(exc)
+    return report
 
 
 def print_scan_report(report):
@@ -233,6 +255,20 @@ def print_scan_report(report):
     print(f"  • STATE.md:        {'✅ present' if mem['state_md'] else '❌ missing'}" + (f" (updated: {mem['state_last_modified']})" if mem['state_last_modified'] else ""))
     print(f"  • Brain Vault:     {'✅ active' if mem['brain_vault'] else '❌ inactive'} ({mem['brain_nodes']} mapped nodes)")
     print(f"  • Vaccines:        🛡️ {mem['active_vaccines']} recorded anti-patterns")
+
+    cx = report.get("cortex")
+    if cx:
+        skills_str = ", ".join(cx.get("learned_skills") or []) or "none"
+        print("\n🧬 Neural Cortex & Vibecode Shield:")
+        print(f"  • Project Genome:  {cx['hubs']} hubs, {cx['co_change_rules']} co-change rules, {cx['fragility_hotspots']} hotspots")
+        print(f"  • Evolved Skills:  {skills_str}")
+        print("  • Agent Booster:   ⚡ active by default (AST skeleton + caveman/ponytail/karpathy/context-mode)")
+        shield_str = "✅ clean" if cx.get("anti_tamper_passed", True) else "⚠️ TAMPER/BYPASS ALERT"
+        print(f"  • Anti-Tamper:     {shield_str}")
+        if cx.get("missing_env_keys"):
+            print(f"  • Env Drift (.env): missing {', '.join(cx['missing_env_keys'][:6])}")
+        if cx.get("active_ports"):
+            print(f"  • Active Ports:    {', '.join(str(p) for p in cx['active_ports'])}")
 
     print("\n💡 Recommendations:")
     if not mem["state_md"]:

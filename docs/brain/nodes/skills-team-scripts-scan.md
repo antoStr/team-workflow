@@ -9,10 +9,12 @@ upstream:
   - "[[skills-team-scripts-roles]]"
   - "[[skills-team-scripts-settings]]"
 downstream:
+  - "[[skills-team-scripts-cortex]]"
+  - "[[tests-test_cortex]]"
   - "[[tests-test_scan_verify_catalog]]"
 files: [skills/team/scripts/scan.py]
 status: active
-last_updated: 2026-11-11T22:06:53
+last_updated: 2026-11-19T12:05:00
 ---
 
 # scan.py
@@ -30,7 +32,7 @@ frontend UI components stack, and project documentation/memory health.
 - `git_info(root)`
 - `detect_stack(root)`
 - `check_docs_memory(root)`
-- `scan_repository(root)`
+- `scan_repository(root, include_cortex)`
 - `print_scan_report(report)`
 - `main(argv)`
 
@@ -40,4 +42,6 @@ frontend UI components stack, and project documentation/memory health.
 - [[skills-team-scripts-roles]]
 - [[skills-team-scripts-settings]]
 ### Downstream
+- [[skills-team-scripts-cortex]]
+- [[tests-test_cortex]]
 - [[tests-test_scan_verify_catalog]]

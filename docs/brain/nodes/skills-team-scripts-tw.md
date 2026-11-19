@@ -9,20 +9,24 @@ upstream:
   - "[[skills-team-scripts-audit]]"
   - "[[skills-team-scripts-autolearn]]"
   - "[[skills-team-scripts-brain]]"
+  - "[[skills-team-scripts-cortex]]"
   - "[[skills-team-scripts-doctor]]"
   - "[[skills-team-scripts-gate]]"
   - "[[skills-team-scripts-learn]]"
   - "[[skills-team-scripts-library]]"
+  - "[[skills-team-scripts-omniscience]]"
   - "[[skills-team-scripts-opencode_cli]]"
+  - "[[skills-team-scripts-questions]]"
   - "[[skills-team-scripts-roles]]"
   - "[[skills-team-scripts-settings]]"
   - "[[skills-team-scripts-smoke]]"
   - "[[skills-team-scripts-talk]]"
   - "[[skills-team-scripts-update_plugin]]"
 downstream:
+  - "[[tests-test_cortex]]"
 files: [skills/team/scripts/tw.py]
 status: active
-last_updated: 2026-11-11T22:06:53
+last_updated: 2026-11-19T12:01:44
 ---
 
 # tw.py
@@ -91,10 +95,10 @@ tokens. In agy, use its bash mode: !team-workflow <command>.
 - `runs_as(app, p, native)`
 - `print_options(data)`
 - `cmd_options(args)`
+- `cmd_questions(args)`
 - `cmd_profile(args)`
 - `cmd_audit(args)`
-- `cmd_doctor(args)`
-- ... and 25 more functions
+- ... and 27 more functions
 
 ## Dependencies
 ### Upstream
@@ -102,15 +106,18 @@ tokens. In agy, use its bash mode: !team-workflow <command>.
 - [[skills-team-scripts-audit]]
 - [[skills-team-scripts-autolearn]]
 - [[skills-team-scripts-brain]]
+- [[skills-team-scripts-cortex]]
 - [[skills-team-scripts-doctor]]
 - [[skills-team-scripts-gate]]
 - [[skills-team-scripts-learn]]
 - [[skills-team-scripts-library]]
+- [[skills-team-scripts-omniscience]]
 - [[skills-team-scripts-opencode_cli]]
+- [[skills-team-scripts-questions]]
 - [[skills-team-scripts-roles]]
 - [[skills-team-scripts-settings]]
 - [[skills-team-scripts-smoke]]
 - [[skills-team-scripts-talk]]
 - [[skills-team-scripts-update_plugin]]
 ### Downstream
-- None
+- [[tests-test_cortex]]

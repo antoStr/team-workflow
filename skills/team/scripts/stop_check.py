@@ -7,6 +7,7 @@ never blocks twice in a row (stop_hook_active) and is off with the setting stop_
 """
 import json
 import os
+import sys
 
 import settings
 
@@ -42,6 +43,52 @@ def newest_mtime(root, paths):
     return max((os.path.getmtime(p) for p in full if os.path.exists(p)), default=0.0)
 
 
+def _auto_evolve_session(root, work):
+    """Automatically update project genome, learned skills, and synaptic weights after code edits."""
+    try:
+        import autolearn
+        import cortex
+        import omniscience
+        autolearn.auto_learn_from_talk(root)
+        has_brain = os.path.isdir(os.path.join(root, "docs", "brain"))
+        cortex.assimilate_project_knowledge(root, write_genome_md=has_brain)
+        cortex.evolve_skills(root)
+        tamper = omniscience.audit_anti_tamper(root)
+        contracts = omniscience.check_ast_contracts(root)
+        if not tamper.get("passed", True):
+            first = (tamper.get("violations") or [{}])[0]
+            autolearn.record_learning(
+                root=root,
+                title=f"Anti-Tamper violation in {first.get('file', 'diff')}",
+                trigger=first.get("detail", "Anti-tamper shield caught violation"),
+                anti_pattern=first.get("kind", "tampering"),
+                solution="Fix implementation root cause without deleting tests, skipping assertions, or weakening security.",
+                applies_to=["backend-dev", first.get("file", "*")],
+                category="security",
+            )
+            omniscience.mutate_role_agent(
+                root=root,
+                role="backend-dev",
+                lesson=first.get("detail", "Do not tamper with tests or security guards"),
+                trigger="diff audit",
+                anti_pattern=first.get("kind", "tampering"),
+                solution="Keep test assertions and security guards intact.",
+            )
+        if not contracts.get("ok", True):
+            brk = (contracts.get("breaking_changes") or [{}])[0]
+            omniscience.mutate_role_agent(
+                root=root,
+                role="backend-dev",
+                lesson=f"Preserve signature {brk.get('before', '')} in {brk.get('file', '')}",
+                trigger="AST contract change",
+                anti_pattern=brk.get("reason", "breaking signature"),
+                solution="Preserve backward-compatible arguments/defaults or update all callers.",
+            )
+        cortex.record_feedback(root=root, outcome="pass", task_text=" ".join(work[:12]))
+    except Exception as exc:  # noqa: BLE001 - auto-evolution never blocks stop check
+        print(f"team-workflow auto-evolve warning: {exc}", file=sys.stderr)
+
+
 def decide(data):
     """Claude Code: {"decision": "block"}; agy: {"decision": "continue"}; None lets it stop."""
     again = data.get("stop_hook_active") or (data.get("executionNum") or 0) > 0  # agy counts from 0
@@ -63,6 +110,7 @@ def decide(data):
     work = [p for p in changed if not p.startswith(MEMORY_DIR + "/") and not p.startswith("docs/brain/")]
     if not work:
         return None
+    _auto_evolve_session(root, work)
     newest = newest_mtime(root, work)
     if state_rel in changed and os.path.getmtime(state_full) >= newest:
         return None

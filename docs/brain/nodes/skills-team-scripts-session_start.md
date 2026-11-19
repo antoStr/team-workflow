@@ -13,7 +13,7 @@ upstream:
 downstream:
 files: [skills/team/scripts/session_start.py]
 status: active
-last_updated: 2026-11-11T22:06:53
+last_updated: 2026-11-19T12:09:59
 ---
 
 # session_start.py
@@ -32,9 +32,11 @@ one line instead of the memory: use team-workflow only when the user calls it.
 
 
 ### Functions
+- `tw_cmd()`
 - `agents_dir(app)`
 - `opencode_notes()`
 - `codex_notes()`
+- `_omniscience_context(root)`
 - `memory_context(root, config)`
 - `save_snapshot(root, session_id)`
 - `main()`

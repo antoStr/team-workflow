@@ -12,7 +12,7 @@ const PYTHON = "__PYTHON__"; // the interpreter that ran the installer
 const NO_MODEL = {
   "update-plugin": "update", settings: "settings", models: "models", addons: "addons",
   agents: "agents", profile: "profile", audit: "audit", doctor: "doctor", "ci-init": "ci-init",
-  options: "options",
+  options: "options", cortex: "cortex",
 };
 
 function words(text) {

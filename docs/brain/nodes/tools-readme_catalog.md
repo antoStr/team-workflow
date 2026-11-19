@@ -10,16 +10,17 @@ upstream:
 downstream:
 files: [tools/readme_catalog.py]
 status: active
-last_updated: 2026-11-11T22:06:53
+last_updated: 2026-11-19T11:00:10
 ---
 
 # readme_catalog.py
 
-Write docs/CATALOG.md: every agent (role) by pack and every library entry (skills, commands,
-rules) by pack, from the plugin's own files, so the documentation never drifts from what ships.
+Write docs/CATALOG.md (English) and docs/CATALOG.it.md (Italian): every agent (role) by pack
+and every library entry (skills, commands, rules) by pack, from the plugin's own files, so the
+documentation never drifts from what ships.
 
-    python3 tools/readme_catalog.py          rewrite docs/CATALOG.md
-    python3 tools/readme_catalog.py --check  exit 1 when it is out of date (the tests run it)
+    python3 tools/readme_catalog.py          rewrite both catalogs
+    python3 tools/readme_catalog.py --check  exit 1 when one is out of date (the tests run it)
 
 ## Contracts
 
@@ -27,12 +28,15 @@ rules) by pack, from the plugin's own files, so the documentation never drifts f
 ### Functions
 - `italian()`
 - `it_text(table, key, it)`
+- `first_sentence(text)`
+- `text_for(table, key, english, it, lang)`
 - `version()`
-- `agent_it(role, meta, it)`
-- `agents_block()`
-- `library_it(e, it)`
-- `library_block()`
-- `render()`
+- `agent_text(role, meta, it, lang)`
+- `agents_block(lang, it)`
+- `library_text(e, it, lang)`
+- `library_block(lang, it)`
+- `anchor(title)`
+- `render(lang)`
 - `main(argv)`
 
 ## Dependencies

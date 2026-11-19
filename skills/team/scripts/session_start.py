@@ -75,6 +75,30 @@ def codex_notes():
             f'using `sandbox_permissions="require_escalated"`{win}.')
 
 
+def _omniscience_context(root):
+    """Compact runtime environment alerts (safe .env key drift, deps, conflicts) & learned skills."""
+    lines = []
+    try:
+        import cortex
+        import omniscience
+        env = omniscience.sense_environment(root)
+        alerts = []
+        if env.get("missing_env_keys"):
+            alerts.append("missing .env keys: " + ", ".join(env["missing_env_keys"][:6]))
+        if env.get("dependency_warnings"):
+            alerts.extend(env["dependency_warnings"])
+        if env.get("conflict_files"):
+            alerts.append("merge conflicts: " + ", ".join(env["conflict_files"][:4]))
+        if alerts:
+            lines.append("team-workflow omniscience alert: " + "; ".join(alerts))
+        learned = cortex.load_learned_skills(root)
+        if learned:
+            lines.append("team-workflow learned skills active: " + ", ".join(sorted(learned)[:8]))
+    except Exception as exc:
+        print(f"team-workflow omniscience warning: {exc}", file=sys.stderr)
+    return "\n".join(lines)
+
+
 def memory_context(root, config=None):
     engine = config.get("memory_engine", "brain") if config else "brain"
     brain_dir_rel = config.get("brain_dir", "docs/brain") if config else "docs/brain"
@@ -112,8 +136,12 @@ def memory_context(root, config=None):
             vaccines = autolearn.get_vaccines(root=root, limit=3)
             if vaccines:
                 parts.append(autolearn.format_vaccine_prompt(vaccines))
-        except Exception:
-            pass
+        except Exception as exc:
+            print(f"team-workflow vaccine warning: {exc}", file=sys.stderr)
+
+        omni = _omniscience_context(root)
+        if omni:
+            parts.append(omni)
 
         text = "\n\n".join(parts)
         if len(text) > MAX_CHARS:
@@ -132,6 +160,9 @@ def memory_context(root, config=None):
         if os.path.isfile(path):
             with open(path, encoding="utf-8", errors="replace") as f:
                 parts.append(f"--- {MEMORY_DIR}/{name} ---\n{f.read()}")
+    omni = _omniscience_context(root)
+    if omni:
+        parts.append(omni)
     text = "\n\n".join(parts)
     if len(text) > MAX_CHARS:
         text = text[:MAX_CHARS] + "\n[truncated: memory files are over their limits, run memcheck]"

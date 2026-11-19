@@ -12,7 +12,7 @@ downstream:
   - "[[tests-test_update]]"
 files: [skills/team/scripts/update_plugin.py]
 status: active
-last_updated: 2026-11-11T22:06:53
+last_updated: 2026-11-19T11:00:10
 ---
 
 # update_plugin.py
@@ -33,17 +33,17 @@ marketplace; agy has no update command, so the plugin is uninstalled and install
 - `latest_tag(ls_remote)`
 - `fetch_latest(timeout)`
 - `own_version()`
+- `is_older(version, latest)`
 - `newer_version(max_age)`
+- `latest_version(max_age)`
+- `auto_update(max_age, home)`
 - `claude_version(plugin_list)`
 - `agy_version()`
 - `opencode_payload()`
 - `codex_payload()`
 - `payload_version(harness)`
 - `opencode_version()`
-- `installed(harness)`
-- `update_opencode(harness)`
-- `update(harness, source)`
-- ... and 5 more functions
+- ... and 9 more functions
 
 ## Dependencies
 ### Upstream

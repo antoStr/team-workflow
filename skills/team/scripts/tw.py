@@ -56,9 +56,11 @@ import sys
 
 import addons
 import audit
+import cortex
 import doctor
 import learn
 import library
+import omniscience
 import opencode_cli
 import questions
 import roles
@@ -526,21 +528,37 @@ def cmd_questions(args):
         chosen = [r.strip() for r in args.roles.split(",") if r.strip()]
         unknown = [r for r in chosen if r not in data["roles"]]
         out = questions.model_calls(data, chosen)
+        cortex_boost = None
     else:
         unknown = []
         out = questions.setup_calls(data, args.task or [], settings.load(root), root)
-    print(json.dumps({"app": app, "unknown_roles": unknown,
-                      "required_headers": [q["header"] for c in out for q in c["questions"]
-                                           if not args.roles and q["header"].startswith(("Scope", "Preset", "Roles"))
-                                           or args.roles],
-                      "calls": out,
-                      "how": "Ask every call in order with the question tool, options as printed, none skipped "
-                             "(Claude Code's setup hook blocks the agents until every required header "
-                             "was asked); the text "
-                             "may be translated to the user's language, the headers stay as printed; add "
-                             "(Recommended) only to what the request named. After the roles, run "
-                             "`tw.py questions --roles <chosen,comma,separated>` for model and effort."},
-                     indent=1, ensure_ascii=False))
+        boost = cortex.vibecode_boost(" ".join(args.task or []), root=root or ".", app=app)
+        cortex_boost = {
+            "topology": boost["route"]["topology"],
+            "cost_optimization": boost["cost_optimization"],
+            "activated_neurons": [
+                {"role": n["role"], "model": n["model"], "effort": n["effort"],
+                 "skills": [s["id"] for s in n["bound_skills"]]}
+                for n in boost["route"]["activated_neurons"]
+            ],
+            "prompt_block": boost["agent_booster"]["prompt_block"],
+        }
+    payload = {
+        "app": app, "unknown_roles": unknown,
+        "required_headers": [q["header"] for c in out for q in c["questions"]
+                             if not args.roles and q["header"].startswith(("Scope", "Preset", "Roles"))
+                             or args.roles],
+        "calls": out,
+        "how": "Ask every call in order with the question tool, options as printed, none skipped "
+               "(Claude Code's setup hook blocks the agents until every required header "
+               "was asked); the text "
+               "may be translated to the user's language, the headers stay as printed; add "
+               "(Recommended) only to what the request named. After the roles, run "
+               "`tw.py questions --roles <chosen,comma,separated>` for model and effort.",
+    }
+    if cortex_boost is not None:
+        payload["cortex_boost"] = cortex_boost
+    print(json.dumps(payload, indent=1, ensure_ascii=False))
 
 
 def cmd_profile(args):
@@ -1310,6 +1328,137 @@ def cmd_visual_check(args):
             sys.exit(1)
 
 
+def cmd_cortex(args):
+    root = args.root or repo_root() or os.getcwd()
+    action = args.action or "status"
+    app = args.app or os.environ.get("TEAM_WORKFLOW_APP") or "agy"
+    if action == "route":
+        task_text = " ".join(args.task or [])
+        files = [f.strip() for f in (args.files or "").split(",") if f.strip()]
+        res = cortex.route_and_orchestrate(task_text, root=root, app=app, files=files)
+        if args.json:
+            print(json.dumps(res, indent=2, ensure_ascii=False))
+        else:
+            print(cortex.format_route_report(res))
+    elif action in ("boost", "vibecode"):
+        task_text = " ".join(args.task or [])
+        files = [f.strip() for f in (args.files or "").split(",") if f.strip()]
+        res = cortex.vibecode_boost(task_text, root=root, app=app, files=files)
+        if args.json:
+            print(json.dumps(res, indent=2, ensure_ascii=False))
+        else:
+            print(cortex.format_boost_report(res))
+    elif action == "assimilate":
+        res = cortex.assimilate_project_knowledge(root=root)
+        if args.json:
+            print(json.dumps(res, indent=2, ensure_ascii=False))
+        else:
+            print(f"Project Genome assimilated ({res['commits_scanned']} commits, "
+                  f"{len(res['architectural_hubs'])} hubs, "
+                  f"{len(res['co_change_clusters'])} co-change rules, "
+                  f"{len(res['fragility_hotspots'])} hotspots)")
+            print(f"  JSON: {res['knowledge_json']}")
+            print(f"  Docs: {res['genome_md']}")
+    elif action == "evolve":
+        res = cortex.evolve_skills(root=root, custom_name=getattr(args, "name", None))
+        if args.json:
+            print(json.dumps(res, indent=2, ensure_ascii=False))
+        else:
+            print(f"Synthesized {len(res['synthesized'])} skill(s) in {res['skills_dir']}:")
+            for sk in res["synthesized"]:
+                print(f"  - [{sk['kind']}] {sk['id']} -> {sk['path']}")
+    elif action == "feedback":
+        if not args.outcome:
+            raise SystemExit("usage: tw.py cortex feedback --outcome pass|fail|blocked --roles R1,R2 [--skills S1,S2]")
+        roles_used = [r.strip() for r in (args.roles or "").split(",") if r.strip()]
+        skills_used = [s.strip() for s in (args.skills or "").split(",") if s.strip()]
+        task_text = " ".join(args.task or [])
+        res = cortex.record_feedback(
+            root=root,
+            outcome=args.outcome,
+            roles_used=roles_used,
+            skills_used=skills_used,
+            task_text=task_text,
+        )
+        if args.json:
+            print(json.dumps(res, indent=2, ensure_ascii=False))
+        else:
+            st = res.get("stats") or {}
+            print(f"Synaptic weights updated (outcome={args.outcome}, passes={st.get('passes', 0)}, "
+                  f"failures={st.get('failures', 0)}, total_runs={st.get('total_runs', 0)}).")
+    elif action == "sense":
+        res = omniscience.sense_environment(root=root)
+        if args.json:
+            print(json.dumps(res, indent=2, ensure_ascii=False))
+        else:
+            print(f"Environment Sense | Healthy: {res['healthy']} | Missing .env: {res['missing_env_keys']} | "
+                  f"Active ports: {res['active_ports']} | Conflicts: {res['conflict_files']}")
+    elif action == "spec":
+        task_text = " ".join(args.task or [])
+        files = [f.strip() for f in (args.files or "").split(",") if f.strip()]
+        res = omniscience.synthesize_shadow_spec(task_text, root=root, files=files)
+        if args.json:
+            print(json.dumps(res, indent=2, ensure_ascii=False))
+        else:
+            print("Shadow Spec Invariants:\n  - " + "\n  - ".join(res["invariants"]))
+    elif action == "shield":
+        res = omniscience.audit_anti_tamper(root=root)
+        if args.json:
+            print(json.dumps(res, indent=2, ensure_ascii=False))
+        else:
+            print(f"Anti-Tamper Shield: {'PASSED' if res['passed'] else 'VIOLATIONS FOUND'} "
+                  f"(tamper_score={res['tamper_score']}, count={len(res['violations'])})")
+            for v in res["violations"]:
+                print(f"  - [{v['kind']}] {v['file']}: {v['detail']}")
+    elif action == "contracts":
+        files = [f.strip() for f in (args.files or "").split(",") if f.strip()]
+        res = omniscience.check_ast_contracts(root=root, files=files or None)
+        if args.json:
+            print(json.dumps(res, indent=2, ensure_ascii=False))
+        else:
+            print(f"AST Contracts: {'OK' if res['ok'] else 'BREAKING CHANGES'} ({len(res['breaking_changes'])})")
+            for b in res["breaking_changes"]:
+                print(f"  - {b['file']} :: {b['before']} -> {b['after']} ({b['reason']})")
+    elif action == "circuit":
+        task_text = " ".join(args.task or [])
+        res = omniscience.record_attempt_and_check_circuit(
+            root=root, command=task_text, error_text=getattr(args, "error", None) or ""
+        )
+        if args.json:
+            print(json.dumps(res, indent=2, ensure_ascii=False))
+        else:
+            print(f"Circuit Breaker: {res['state']} (consecutive={res['consecutive_failures']})")
+            if res.get("counterfactual_prescription"):
+                print("  " + res["counterfactual_prescription"])
+    elif action == "mutate":
+        role = (args.roles or "").split(",")[0].strip() or "backend-dev"
+        lesson = getattr(args, "lesson", None) or " ".join(args.task or []) or "Verify AST contracts and tests"
+        res = omniscience.mutate_role_agent(root=root, role=role, lesson=lesson, trigger=" ".join(args.task or []))
+        if args.json:
+            print(json.dumps(res, indent=2, ensure_ascii=False))
+        else:
+            print(f"Darwin-Godel Mutation: role={res.get('role')} mutated={res.get('mutated')} "
+                  f"path={res.get('path', '-')}")
+    else:
+        res = cortex.status_report(root=root, app=app)
+        if args.json:
+            print(json.dumps(res, indent=2, ensure_ascii=False))
+        else:
+            r = res["resources"]
+            k = res["knowledge"]
+            w = res["weights"]["stats"]
+            print(f"Neural Cortex Status ({app}) | Hardware: {r['hardware_health']['status']} "
+                  f"(capacity={r['hardware_health']['capacity_factor']:.2f}, max_agents={r['config']['effective_max_agents']})")
+            print(f"  Resources: {r['roles']['enabled_count']}/{r['roles']['total']} roles, "
+                  f"{r['skills']['library_count']} library + {r['skills']['learned_count']} learned skills, "
+                  f"{r['memory']['brain_nodes']} brain nodes, {r['memory']['active_vaccines']} vaccines")
+            print(f"  Genome:    assimilated={k['assimilated']} (hubs={k['hubs_count']}, "
+                  f"co_changes={k['co_change_rules']}, hotspots={k['hotspots_count']})")
+            print(f"  Plasticity: runs={w.get('total_runs', 0)}, passes={w.get('passes', 0)}, failures={w.get('failures', 0)}")
+            if res["learned_skills"]:
+                print("  Learned Skills: " + ", ".join(s["id"] for s in res["learned_skills"]))
+
+
 def main(argv=None):
     utf8_output()
     ap = argparse.ArgumentParser(prog="team-workflow", description=__doc__.split("\n")[0])
@@ -1474,6 +1623,21 @@ def main(argv=None):
     vc.add_argument("--root", default=None, help="repository root folder")
     vc.add_argument("--strict", action="store_true", help="exit 1 if high-severity issues found")
     vc.add_argument("--json", action="store_true")
+    cx = sub.add_parser("cortex", help="neural resource routing, vibecode booster, omniscience & meta-skill evolution")
+    cx.add_argument("action", nargs="?", default="status",
+                    choices=("status", "route", "boost", "vibecode", "assimilate", "evolve", "feedback",
+                             "sense", "spec", "shield", "contracts", "circuit", "mutate"))
+    cx.add_argument("task", nargs="*", help="route/feedback: task description words")
+    cx.add_argument("--app", choices=roles.APPS, default=None, help="target app for model/effort routing")
+    cx.add_argument("--files", default=None, help="route: comma-separated target file paths")
+    cx.add_argument("--roles", default=None, help="feedback/mutate: comma-separated roles used")
+    cx.add_argument("--skills", default=None, help="feedback: comma-separated skills used")
+    cx.add_argument("--outcome", choices=("pass", "fail", "blocked"), default=None, help="feedback outcome")
+    cx.add_argument("--error", default=None, help="circuit: normalized error text from failed attempt")
+    cx.add_argument("--lesson", default=None, help="mutate: learned TextGrad directive for role")
+    cx.add_argument("--name", default=None, help="evolve: optional custom skill name")
+    cx.add_argument("--root", default=None, help="repository root folder")
+    cx.add_argument("--json", action="store_true")
     args, extra = ap.parse_known_args(argv)
     if extra:
         if args.command == "talk" and not any(a.startswith("-") for a in extra):
@@ -1517,6 +1681,8 @@ def main(argv=None):
         cmd_component(args)
     elif args.command == "visual-check":
         cmd_visual_check(args)
+    elif args.command == "cortex":
+        cmd_cortex(args)
     else:
         {"profile": cmd_profile, "audit": cmd_audit, "doctor": cmd_doctor, "uninstall": cmd_uninstall,
          "learn": cmd_learn, "ci-init": cmd_ci_init, "install-cli": cmd_install_cli,

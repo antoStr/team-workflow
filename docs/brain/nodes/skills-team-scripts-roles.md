@@ -7,16 +7,20 @@ aliases: [skills/team/scripts/roles.py, roles.py]
 upstream:
   - "[[skills-team-scripts-settings]]"
 downstream:
+  - "[[skills-team-scripts-cortex]]"
   - "[[skills-team-scripts-dashboard]]"
   - "[[skills-team-scripts-doctor]]"
   - "[[skills-team-scripts-install_agy]]"
   - "[[skills-team-scripts-install_codex]]"
   - "[[skills-team-scripts-install_opencode]]"
+  - "[[skills-team-scripts-questions]]"
   - "[[skills-team-scripts-run_worker]]"
   - "[[skills-team-scripts-scan]]"
   - "[[skills-team-scripts-session_start]]"
+  - "[[skills-team-scripts-setup_gate]]"
   - "[[skills-team-scripts-tw]]"
   - "[[tests-test_codex]]"
+  - "[[tests-test_cortex]]"
   - "[[tests-test_opencode]]"
   - "[[tests-test_pro]]"
   - "[[tests-test_roles]]"
@@ -25,7 +29,7 @@ downstream:
   - "[[tools-readme_catalog]]"
 files: [skills/team/scripts/roles.py]
 status: active
-last_updated: 2026-11-11T22:06:53
+last_updated: 2026-11-19T11:50:06
 ---
 
 # roles.py
@@ -76,16 +80,20 @@ Native files, written only for enabled roles whose type is "custom" and marked a
 ### Upstream
 - [[skills-team-scripts-settings]]
 ### Downstream
+- [[skills-team-scripts-cortex]]
 - [[skills-team-scripts-dashboard]]
 - [[skills-team-scripts-doctor]]
 - [[skills-team-scripts-install_agy]]
 - [[skills-team-scripts-install_codex]]
 - [[skills-team-scripts-install_opencode]]
+- [[skills-team-scripts-questions]]
 - [[skills-team-scripts-run_worker]]
 - [[skills-team-scripts-scan]]
 - [[skills-team-scripts-session_start]]
+- [[skills-team-scripts-setup_gate]]
 - [[skills-team-scripts-tw]]
 - [[tests-test_codex]]
+- [[tests-test_cortex]]
 - [[tests-test_opencode]]
 - [[tests-test_pro]]
 - [[tests-test_roles]]

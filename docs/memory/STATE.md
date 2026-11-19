@@ -1,9 +1,14 @@
 # Project state
 
-## Current version: v2.4.7 (released)
+## Current version: v2.5.0 (released)
 
 ### Unreleased
-- (none)
+- **Omniscient & Neuro-Symbolic Cortex v3 (`skills/team/scripts/cortex.py`, `skills/team/scripts/omniscience.py`, `tests/test_cortex.py`)**:
+  resource-aware neural routing, AST skeleton + caveman/ponytail/karpathy/context-mode booster (`skills/team/roles/_shared/vibecode-booster.md`),
+  safe `.env`/ports/conflicts sensor (`sense`), Shadow Spec invariants (`spec`), Anti-Tamper shield (`shield`), AST contract diff (`contracts`),
+  MAST loop circuit-breaker (`circuit`), Darwin-Godel TextGrad role mutations (`mutate`), and Zero-Entropy schema hooked into
+  `skills/team/scripts/scan.py`, `questions.py`, `skills/team/scripts/session_start.py`, `skills/team/scripts/prompt_command.py`, `skills/team/scripts/stop_check.py`, `skills/cortex/SKILL.md`, and `skills/team/scripts/addons.py` (`vibecoding` bundle).
+- Synced & verified across Claude Code cache/marketplace, agy, OpenCode, Codex, and global CLI (`tw`/`team`): `tw.py cortex shield` (0 violations), `verify-docs --strict`, `memcheck --strict`, `brain check --strict`.
 
 ### Released highlights (full notes in git tags / GitHub Releases)
 - **v2.4.7**: `setup_gate.py`, a Claude Code PreToolUse hook on `Agent|Task`, denies team roles until

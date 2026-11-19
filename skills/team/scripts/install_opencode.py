@@ -40,7 +40,7 @@ REPO = "https://github.com/antoStr/team-workflow"
 NO_MODEL = {"update-plugin": "update", "settings": "settings", "models": "models", "addons": "addons",
             "agents": "agents", "profile": "profile", "audit": "audit", "doctor": "doctor",
             "ci-init": "ci-init", "options": "options",
-            "library": "library", "talk": "talk"}
+            "library": "library", "talk": "talk", "cortex": "cortex"}
 
 
 def config_dir(workspace=None):

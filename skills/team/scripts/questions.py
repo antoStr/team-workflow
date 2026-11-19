@@ -8,6 +8,7 @@ split; the tool's free-text "Other" takes any role or library id not shown.
 """
 import re
 
+import cortex
 import library
 import roles
 
@@ -51,31 +52,38 @@ def setup_calls(data, task_words, config, root):
         {"question": "Which preset for the team?", "header": "Preset", "multiSelect": False,
          "options": [{"label": "Keep my settings", "description": "The models and efforts shown above (Recommended)"}]
          + [{"label": p, "description": f"tw.py profile {p}"} for p in data["presets"] if p != "balanced"][:3]}]}]
-    words = set(re.findall(r"\w+", " ".join(task_words).lower()))
     texts = {r: role_text(r, root) for r in data["roles"]}
-    ranked = sorted(data["roles"], key=lambda r: -len(words & set(re.findall(r"\w+", (r + " " + texts[r]).lower()))))
+    task_text = " ".join(task_words or [])
+    plan = cortex.route_and_orchestrate(task_text, root=root or ".", app=data.get("app", "claude")) if task_text.strip() else None
+    activated = {n["role"] for n in (plan or {}).get("activated_neurons") or []}
+    ranked = cortex.rank_roles_for_wizard(data, task_words, config, root=root or ".", plan=plan)
     groups = chunks(ranked)
     role_qs = [{"question": f"Which roles does this conversation use? ({i}/{len(groups)}, pick any, also none here)",
                 "header": f"Roles {i}/{len(groups)}", "multiSelect": True,
-                "options": [{"label": r, "description": f"{data['roles'][r]['model']}/{data['roles'][r]['effort']}"
+                "options": [{"label": r, "description": ("[★ Cortex] " if r in activated else "")
+                             + f"{data['roles'][r]['model']}/{data['roles'][r]['effort']}"
                              + (f" - {texts[r]}" if texts[r] else "")} for r in group]}
                for i, group in enumerate(groups, 1)]
     for c in calls(role_qs):
         out.append({"step": "roles", **c})
     found, langs = library.entries(), data["languages_here"]
+    learned = cortex.load_learned_skills(root or ".")
+    merged_skills = dict(found)
+    for sid, linfo in learned.items():
+        merged_skills.setdefault(sid, linfo)
     words = [w for w in re.findall(r"\w+", " ".join(task_words)) if len(w) >= 4]  # short words match anything
-    chosen = [f"rules-{lang}" for lang in langs]
+    chosen = list(learned)[:4] + [f"rules-{lang}" for lang in langs]
     chosen += [e["id"] for e in library.search(words + langs, limit=12)] if words or langs else []
     chosen += sorted(library.wanted(config)) + ["rules-common"]
-    ids = [i for n, i in enumerate(chosen) if i in found and i not in chosen[:n]][:16]
+    ids = [i for n, i in enumerate(chosen) if i in merged_skills and i not in chosen[:n]][:16]
     on = library.wanted(config)
     skill_groups = chunks(ids) if len(ids) >= 2 else []  # the tool needs 2 options
-    skill_qs = [{"question": f"Which library skills do the agents get? ({i}/{len(skill_groups)}; all {len(found)} "
+    skill_qs = [{"question": f"Which library skills do the agents get? ({i}/{len(skill_groups)}; all {len(merged_skills)} "
                              "entries are available by path, none needs installing; Other: any id from "
                              "`tw.py library search WORDS`)",
                  "header": f"Skills {i}/{len(skill_groups)}", "multiSelect": True,
-                 "options": [{"label": s, "description": f"{found[s]['pack']}"
-                              + (", installed" if s in on else "") + f" - {short(found[s]['description'], 90)}"}
+                 "options": [{"label": s, "description": f"{merged_skills[s]['pack']}"
+                              + (", installed" if s in on else "") + f" - {short(merged_skills[s]['description'], 90)}"}
                              for s in group]}
                 for i, group in enumerate(skill_groups, 1)]
     for c in calls(skill_qs):
