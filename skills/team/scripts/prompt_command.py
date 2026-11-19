@@ -18,7 +18,8 @@ COMMANDS = {"update-plugin": "update", "update": "update", "upgrade": "upgrade",
             "settings": "settings", "models": "models",
             "addons": "addons", "agents": "agents", "profile": "profile", "audit": "audit",
             "doctor": "doctor", "ci-init": "ci-init", "options": "options",
-            "library": "library", "talk": "talk", "hardware": "hardware", "thermal": "thermal"}
+            "library": "library", "talk": "talk", "cortex": "cortex",
+            "hardware": "hardware", "thermal": "thermal"}
 PATTERN = re.compile(r"\A\s*/(?:team:|team-workflow:|team[:\s-]+)(" + "|".join(COMMANDS) + r")(?![\w-])(.*)\Z", re.S)
 
 
@@ -46,6 +47,20 @@ def main():
             pass
     args = tw_args(data.get("prompt"))
     if args is None:
+        prompt = data.get("prompt") or ""
+        if TEAM_PROMPT.match(prompt):
+            try:
+                import cortex
+                root = repo_root(data) or data.get("cwd") or "."
+                boost = cortex.vibecode_boost(prompt, root=root, app="claude")
+                print(json.dumps({
+                    "hookSpecificOutput": {
+                        "hookEventName": "UserPromptSubmit",
+                        "additionalContext": boost["agent_booster"]["prompt_block"],
+                    }
+                }))
+            except Exception as exc:  # noqa: BLE001
+                print(f"team-workflow cortex warning: {exc}", file=sys.stderr)
         return
     try:
         out = subprocess.run([sys.executable, os.path.join(HERE, "tw.py"), *args],

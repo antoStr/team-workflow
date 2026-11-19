@@ -6,11 +6,13 @@ tags: [code, py]
 aliases: [skills/team/scripts/autolearn.py, autolearn.py]
 upstream:
 downstream:
+  - "[[skills-team-scripts-cortex]]"
   - "[[skills-team-scripts-tw]]"
   - "[[tests-test_autolearn_gate_smoke]]"
+  - "[[tests-test_cortex]]"
 files: [skills/team/scripts/autolearn.py]
 status: active
-last_updated: 2026-11-11T22:06:53
+last_updated: 2026-11-19T11:00:10
 ---
 
 # autolearn.py
@@ -45,5 +47,7 @@ docs/memory/LEARNINGS.md, and injects 'vaccines' (preventive constraints) into a
 ### Upstream
 - None
 ### Downstream
+- [[skills-team-scripts-cortex]]
 - [[skills-team-scripts-tw]]
 - [[tests-test_autolearn_gate_smoke]]
+- [[tests-test_cortex]]

@@ -7,13 +7,15 @@ aliases: [skills/team/scripts/talk.py, talk.py]
 upstream:
   - "[[skills-team-scripts-settings]]"
 downstream:
+  - "[[skills-team-scripts-cortex]]"
   - "[[skills-team-scripts-tw]]"
   - "[[tests-test_brain]]"
+  - "[[tests-test_cortex]]"
   - "[[tests-test_setup_library_talk]]"
   - "[[tests-test_v230_features]]"
 files: [skills/team/scripts/talk.py]
 status: active
-last_updated: 2026-11-11T22:06:53
+last_updated: 2026-11-19T11:00:10
 ---
 
 # talk.py
@@ -27,7 +29,7 @@ common dir is shared by every worktree of the repository, so agents in separate 
 the same channel, and it is never committed. Outside a repository: ~/.team-workflow/talk/.
 
 Message: {"id", "time", "from", "to" (a role, or null for everyone), "kind", "re" (the id it
-answers), "text"}. A question stays open until a reply with re=its id; a challenge stays open
+answers), "text"}. `to` says who must answer; everybody still reads every message. A question stays open until a reply with re=its id; a challenge stays open
 until a verdict with re=its id. `open_threads` is the orchestrator's gate before "done".
 <topic>.seen.json keeps, per role, the last message it read: `read --for ROLE` shows only what
 is new for that role, so agents never track ids nor reread the history. A `join` message says
@@ -40,6 +42,8 @@ who takes part and what they own; a newcomer reads the whole history first.
 - `Unread` (methods: __init__)
 
 ### Functions
+- `_git(cwd)`
+- `_writable(folder)`
 - `channel_dir(cwd)`
 - `path(topic, cwd)`
 - `read(topic, cwd)`
@@ -53,15 +57,15 @@ who takes part and what they own; a newcomer reads the whole history first.
 - `open_threads(msgs)`
 - `unread_by_role(topic, cwd)`
 - `members(msgs)`
-- `topics(cwd)`
-- `clear(topic, cwd)`
-- ... and 3 more functions
+- ... and 5 more functions
 
 ## Dependencies
 ### Upstream
 - [[skills-team-scripts-settings]]
 ### Downstream
+- [[skills-team-scripts-cortex]]
 - [[skills-team-scripts-tw]]
 - [[tests-test_brain]]
+- [[tests-test_cortex]]
 - [[tests-test_setup_library_talk]]
 - [[tests-test_v230_features]]

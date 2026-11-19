@@ -22,6 +22,7 @@ When you receive `/team $ARGUMENTS`:
   - `settings`: `tw.py settings`.
   - `status`, `hardware` or `thermal`: `tw.py hardware`.
   - `scan`: `tw.py scan`.
+  - `cortex`: `tw.py cortex status` (or `tw.py cortex route <task>` / `tw.py cortex boost <vibe prompt>`).
   - `verify-docs`: `tw.py verify-docs`.
   - `catalog`: `tw.py agents catalog`.
   - Do not spawn agents or spend inference on these actions.
@@ -59,13 +60,21 @@ When you receive `/team $ARGUMENTS`:
    In under 2,000 tokens you get who calls the module, what it depends on and the
    **vaccines** (past mistakes) recorded for that area. Skip it only when the brain is empty.
 3. Search the library for skills that fit the task: `tw.py library search <keywords>`.
+   Also run the **Neural Cortex Router** to perceive available resources (hardware capacity,
+   models, enabled & dormant roles, library + learned skills, Brain blast radius, and project
+   genome) against required task resources:
+   `tw.py cortex route "<task>" --app <claude|agy|opencode|codex>`.
+   Use its activated neurons, model/effort allocations, bound skills, topology, and default
+   **Vibecode Agent Booster** (AST skeleton map + caveman/ponytail/karpathy/context-mode diet
+   cutting ~55-65% token cost) as the neural prior for every agent brief (`tw.py cortex boost`).
 4. **Session setup** (`WIZARD.md`, "Session setup"), once per conversation while
    `session_wizard` is on: show the output of `tw.py options --app <claude|agy|opencode|codex>`
    in a code block, whole (when a tool such as context-mode cuts it, save it to a file and read
    it in parts of 40 lines), then ask with the app's question tool (Claude Code `AskUserQuestion`, agy
-   `ask_question`, OpenCode `question`): where the choices go and the preset; the roles; model
-   and effort for **every** chosen role; skills and add-ons; team talk; then the recap and
-   "Start".
+   `ask_question`, OpenCode `question`) every call of `tw.py questions --app <app> --task <words>`
+   as printed: where the choices go and the preset; **every** enabled role; the library skills;
+   add-ons; team talk. Then every call of `tw.py questions --app <app> --roles <chosen>`: model
+   and effort for **every** chosen role. Then the recap and "Start".
    - Roles, models or a number of agents named in the request ("2 sonnet agents", "tester and
      pentester") do not skip the setup: they become the first, "(Recommended)" option of the
      matching questions.
@@ -121,11 +130,20 @@ On Windows, **WSL** is available:
 - `reverse-engineer` and `pentester` can use the native Linux environment through WSL;
 - **do not skip Linux checks on Windows**: when a tool needs Linux, run it through `wsl`.
 
-### 5. Adversarial gate and auto-learning
+### 5. Adversarial gate, neural plasticity, and self-evolving skills
 
 - Have the tester or pentester challenge the change, so edge cases do not break the app.
 - Record every mistake found and avoided in the brain, so later tasks are vaccinated:
   `tw.py learn record --title "..." --trigger "..." --anti-pattern "..." --solution "..."`
+- **Project Genome Assimilation**: extract architectural hubs, git co-change coupling rules,
+  fragility hotspots, and verification commands into `.team-workflow/project_knowledge.json` and
+  `docs/brain/PROJECT_GENOME.md`:
+  `tw.py cortex assimilate`
+- **Hebbian Feedback & Meta-Skill Evolution**: reinforce or dampen synaptic weights from the
+  outcome, and synthesize reusable project & meta-orchestration skills (`team-meta-cortex` +
+  domain guard skills in `.team-workflow/skills/`):
+  `tw.py cortex feedback --outcome pass|fail|blocked --roles "<r1,r2>" --skills "<s1,s2>"`
+  `tw.py cortex evolve`
 
 ### 6. Documentation gate
 

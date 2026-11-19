@@ -11,6 +11,8 @@
   choices go (this conversation, user defaults, this project), preset, roles, model and effort
   per role among what agy offers now (`tw.py options --app agy --json` shows the session model
   that `inherit` means, the tiers and the worker model ids), skills and add-ons, team talk.
+  The questions come ready from `tw.py questions --app agy --task <words>`, then
+  `tw.py questions --app agy --roles <chosen>`: ask every call as printed.
 - A request to fix, review, refactor or build something, including a detailed brief the user
   pastes, is work to dispatch: size it with the table in the team skill. Work alone
   only on trivial tasks; for anything larger choose delegation, run the wizard and launch the
@@ -37,7 +39,6 @@
   or Linux test environments are required (`wsl <command>` or `tw.py smoke "<cmd>" --wsl`).
 - Large Codebase Navigation: use `tw.py brain context <module>` to inspect 1-hop dependencies
   and active vaccines instead of scanning entire codebases with grep.
-- Auto-Learning: whenever a bug is fixed or an adversarial gate passes after a challenge,
-  record the anti-pattern with `tw.py learn record` so the team never repeats it.
+- Auto-Learning & Neural Cortex: before dispatching, run `tw.py cortex route "<task>" --app agy` to orchestrate based on available resources (hardware capacity, models, roles, library + learned skills) and required domain/risk signals. Whenever a bug is fixed or an adversarial gate passes after a challenge, record the anti-pattern with `tw.py learn record` and evolve project knowledge and meta-skills via `tw.py cortex assimilate`, `tw.py cortex feedback`, and `tw.py cortex evolve`.
 - When files change, update `docs/memory/STATE.md`.
 - Answer in the language the user writes in.

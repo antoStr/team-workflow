@@ -8,17 +8,20 @@ upstream:
 downstream:
   - "[[skills-team-scripts-addons]]"
   - "[[skills-team-scripts-audit]]"
+  - "[[skills-team-scripts-cortex]]"
   - "[[skills-team-scripts-dashboard]]"
   - "[[skills-team-scripts-doctor]]"
   - "[[skills-team-scripts-library]]"
   - "[[skills-team-scripts-roles]]"
   - "[[skills-team-scripts-scan]]"
   - "[[skills-team-scripts-session_start]]"
+  - "[[skills-team-scripts-setup_gate]]"
   - "[[skills-team-scripts-stop_check]]"
   - "[[skills-team-scripts-talk]]"
   - "[[skills-team-scripts-tw]]"
   - "[[tests-test_addons]]"
   - "[[tests-test_brain]]"
+  - "[[tests-test_cortex]]"
   - "[[tests-test_opencode]]"
   - "[[tests-test_pro]]"
   - "[[tests-test_roles]]"
@@ -26,7 +29,7 @@ downstream:
   - "[[tests-test_setup_library_talk]]"
 files: [skills/team/scripts/settings.py]
 status: active
-last_updated: 2026-11-11T22:06:53
+last_updated: 2026-11-19T11:00:10
 ---
 
 # settings.py
@@ -40,6 +43,8 @@ orchestrator; changed with `tw.py settings set <key> <value>` or by editing the 
 
 ### Functions
 - `home_dir()`
+- `hardware_dir()`
+- `hardware_status()`
 - `user_file()`
 - `project_file(root)`
 - `_read(path)`
@@ -59,17 +64,20 @@ orchestrator; changed with `tw.py settings set <key> <value>` or by editing the 
 ### Downstream
 - [[skills-team-scripts-addons]]
 - [[skills-team-scripts-audit]]
+- [[skills-team-scripts-cortex]]
 - [[skills-team-scripts-dashboard]]
 - [[skills-team-scripts-doctor]]
 - [[skills-team-scripts-library]]
 - [[skills-team-scripts-roles]]
 - [[skills-team-scripts-scan]]
 - [[skills-team-scripts-session_start]]
+- [[skills-team-scripts-setup_gate]]
 - [[skills-team-scripts-stop_check]]
 - [[skills-team-scripts-talk]]
 - [[skills-team-scripts-tw]]
 - [[tests-test_addons]]
 - [[tests-test_brain]]
+- [[tests-test_cortex]]
 - [[tests-test_opencode]]
 - [[tests-test_pro]]
 - [[tests-test_roles]]

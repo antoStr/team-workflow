@@ -7,7 +7,9 @@ aliases: [skills/team/scripts/library.py, library.py]
 upstream:
   - "[[skills-team-scripts-settings]]"
 downstream:
+  - "[[skills-team-scripts-cortex]]"
   - "[[skills-team-scripts-doctor]]"
+  - "[[skills-team-scripts-questions]]"
   - "[[skills-team-scripts-session_start]]"
   - "[[skills-team-scripts-tw]]"
   - "[[tests-test_scan_verify_catalog]]"
@@ -15,7 +17,7 @@ downstream:
   - "[[tools-readme_catalog]]"
 files: [skills/team/scripts/library.py]
 status: active
-last_updated: 2026-11-11T22:06:53
+last_updated: 2026-11-19T11:00:10
 ---
 
 # library.py
@@ -51,7 +53,9 @@ A folder holds MARK when team-workflow wrote it; any other folder with the same 
 ### Upstream
 - [[skills-team-scripts-settings]]
 ### Downstream
+- [[skills-team-scripts-cortex]]
 - [[skills-team-scripts-doctor]]
+- [[skills-team-scripts-questions]]
 - [[skills-team-scripts-session_start]]
 - [[skills-team-scripts-tw]]
 - [[tests-test_scan_verify_catalog]]

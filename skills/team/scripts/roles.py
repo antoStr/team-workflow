@@ -139,7 +139,7 @@ def compose(meta, body):
     except ValueError:
         names = []
     blocks = []
-    for name in list(names) + ["team-talk", "untrusted-input"]:
+    for name in list(names) + ["team-talk", "untrusted-input", "vibecode-booster"]:
         path = os.path.join(ROLES_DIR, "_shared", name + ".md")
         if os.path.isfile(path):
             with open(path, encoding="utf-8") as f:

@@ -12,7 +12,7 @@ upstream:
 downstream:
 files: [tests/test_settings.py]
 status: active
-last_updated: 2026-11-11T22:06:53
+last_updated: 2026-11-19T11:00:10
 ---
 
 # test_settings.py
@@ -22,7 +22,7 @@ Offline tests for the settings, the no-model commands and the agy subagent files
 ## Contracts
 
 ### Classes
-- `SettingsTest` (methods: setUp, test_project_overrides_user_overrides_defaults, test_values_are_typed_and_checked)
+- `SettingsTest` (methods: setUp, test_project_overrides_user_overrides_defaults, test_values_are_typed_and_checked, test_old_hardware_status_is_reported_as_stale_not_critical)
 - `NoModelCommandTest` (methods: test_only_our_commands_are_intercepted, test_hook_answers_and_blocks_the_prompt, test_stop_check_setting_turns_the_reminder_off, test_session_context_carries_the_settings)
 - `FirstSessionTest` (methods: test_first_session_writes_agents_and_asks_for_a_restart)
 - `AgySubagentTest` (methods: setUp, test_every_role_becomes_a_valid_agy_agent, test_leaves_a_foreign_agent_alone)

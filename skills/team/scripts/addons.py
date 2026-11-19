@@ -150,6 +150,21 @@ CATALOG.update({
         "mcp": {"command": ["python", "-m", "ida_mcp"]},
         "license": "MIT", "about": "IDA Pro & Ghidra headless decompilation, AST recovery and disassembly MCP bridge",
     },
+    "repomix": {
+        "repo": "yamadashy/repomix", "claude": "mcp", "agy": "mcp", "opencode": "mcp",
+        "mcp": {"command": ["npx", "-y", "repomix", "--mcp"]},
+        "license": "MIT", "about": "packs and tree-sitter-compresses codebases into AI-friendly maps",
+    },
+    "task-master": {
+        "repo": "eyaltoledano/claude-task-master", "claude": "mcp", "agy": "mcp", "opencode": "mcp",
+        "mcp": {"command": ["npx", "-y", "task-master-ai"]},
+        "license": "MIT", "about": "lazy vibecoding PRD-to-task decomposition and autonomous task runner",
+    },
+    "magic-21st": {
+        "repo": "21st-dev/magic-mcp", "claude": "mcp", "agy": "mcp", "opencode": "mcp",
+        "mcp": {"command": ["npx", "-y", "@21st-dev/magic@latest"]},
+        "license": "MIT", "about": "instant polished 21st.dev React/Tailwind UI components for frontend vibecoding",
+    },
 })
 BUNDLES = {
     "frontend": ("impeccable", "taste", "frontend-design", "solar-icons", "cloudflare"),
@@ -159,6 +174,8 @@ BUNDLES = {
                 "context7"),
     "security": ("strix", "cloudflare", "cloudflare-security-audit"),
     "reverse-engineering": ("strix", "cloudflare-security-audit", "ida-mcp"),
+    "vibecoding": ("caveman", "ponytail", "context-mode", "serena", "context7", "karpathy",
+                   "superpowers", "repomix", "taste", "impeccable"),
 }
 APPS = ("claude", "agy", "opencode", "codex")
 
