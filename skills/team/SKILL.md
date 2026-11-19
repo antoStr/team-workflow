@@ -78,7 +78,7 @@ When you receive `/team $ARGUMENTS`:
    - Roles, models or a number of agents named in the request ("2 sonnet agents", "tester and
      pentester") do not skip the setup: they become the first, "(Recommended)" option of the
      matching questions.
-   - Skip it only when the user says "defaults" or "skip setup", when the request is a plain
+   - Skip it only when the user says "skip setup" or answers just "defaults", when the request is a plain
      question that launches no agent, or when it already ran in this conversation.
 5. Only then brief and launch the agents.
 

@@ -3,6 +3,7 @@
 orchestrator; changed with `tw.py settings set <key> <value>` or by editing the files."""
 import json
 import os
+import re
 import time
 
 DEFAULTS = {
@@ -102,6 +103,23 @@ ROLE_TABLES = ("models", "effort", "type", "packs", "enabled", "library")  # any
 
 def home_dir():
     return os.path.join(os.path.expanduser("~"), ".team-workflow")
+
+
+def setup_state_file(root):
+    """Where `tw.py questions --task` leaves the headers it printed, for the setup gate hook."""
+    key = re.sub(r"[^\w.-]+", "_", os.path.normcase(os.path.abspath(root or ".")))[-150:]  # no hashlib: 0.6s cold
+    return os.path.join(home_dir(), "setup", key + ".json")
+
+
+def save_setup_headers(root, headers):
+    # shortcut: one file per repository, so two sessions in one repo share it; key it by session if that bites
+    path = setup_state_file(root)
+    try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump({"time": time.time(), "headers": list(headers)}, f)
+    except OSError:
+        pass
 
 
 def hardware_dir():

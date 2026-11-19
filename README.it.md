@@ -7,7 +7,7 @@
 **Un team autonomo di agenti esperti dentro il tuo assistente di programmazione.**<br>
 Memoria Brain Graph persistente · Verifica reale runtime "Zero Fake-Solved" · Auto-learning & Vaccini preventivi · Team avversario con canale condiviso · Report trasparente a fine lavoro.
 
-[![Release](https://img.shields.io/badge/release-v2.5.0-2ea44f)](https://github.com/antoStr/team-workflow/releases)
+[![Release](https://img.shields.io/badge/release-v2.5.1-2ea44f)](https://github.com/antoStr/team-workflow/releases)
 [![Tests](https://github.com/antoStr/team-workflow/actions/workflows/tests.yml/badge.svg)](https://github.com/antoStr/team-workflow/actions/workflows/tests.yml)
 [![License: MIT](https://img.shields.io/github/license/antoStr/team-workflow?label=licenza)](LICENSE)
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-supportato-d97757)
@@ -364,6 +364,12 @@ No! L'orchestratore sceglie solo 1 o 2 agenti strettamente necessari per il tuo 
 </details>
 
 <details>
+<summary><b>Posso saltare il setup di sessione?</b></summary>
+
+In Claude Code un hook (`setup_gate.py`) blocca ogni agente del team finché le domande del setup non sono state fatte, anche quando il modello prova a lanciare subito gli agenti. Scrivi "skip setup" nella richiesta, o rispondi solo "defaults", per lanciarli con le impostazioni attuali. `TEAM_WORKFLOW_SETUP_GATE=0` o `session_wizard=false` disattiva il gate.
+</details>
+
+<details>
 <summary><b>Come fa a gestire sessioni lunghe settimane o mesi?</b></summary>
 
 Grazie al motore Brain Graph (`docs/brain/`): le sessioni passate vengono riassunte in journal settimanali tramite `tw.py brain rollover`, mantenendo snello il contesto attivo senza perdere la memoria storica del progetto.
@@ -393,5 +399,5 @@ No. Modifica solo i file inerenti al compito assegnato. Tutte le altre proposte 
 Distribuito con licenza **MIT** (vedi [LICENSE](LICENSE)). I contenuti di terze parti importati nella libreria e nei ruoli mantengono le rispettive licenze d'origine ([NOTICE](skills/team/library/NOTICE.md)).
 
 <div align="center">
-<sub>Sviluppato con dedizione per programmatori e team aumentati da AI · <b>team-workflow v2.5.0</b></sub>
+<sub>Sviluppato con dedizione per programmatori e team aumentati da AI · <b>team-workflow v2.5.1</b></sub>
 </div>

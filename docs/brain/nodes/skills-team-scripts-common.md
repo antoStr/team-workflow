@@ -8,7 +8,7 @@ upstream:
 downstream:
 files: [skills/team/scripts/common.py]
 status: active
-last_updated: 2026-11-11T22:06:53
+last_updated: 2026-11-19T14:00:03
 ---
 
 # common.py

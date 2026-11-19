@@ -29,7 +29,7 @@ downstream:
   - "[[tests-test_setup_library_talk]]"
 files: [skills/team/scripts/settings.py]
 status: active
-last_updated: 2026-11-19T11:00:10
+last_updated: 2026-11-19T14:00:03
 ---
 
 # settings.py
@@ -43,6 +43,8 @@ orchestrator; changed with `tw.py settings set <key> <value>` or by editing the 
 
 ### Functions
 - `home_dir()`
+- `setup_state_file(root)`
+- `save_setup_headers(root, headers)`
 - `hardware_dir()`
 - `hardware_status()`
 - `user_file()`
@@ -55,8 +57,7 @@ orchestrator; changed with `tw.py settings set <key> <value>` or by editing the 
 - `save(key, value, root)`
 - `default_of(key)`
 - `apply_profile(name, root)`
-- `flatten(data, prefix)`
-- `summary(data)`
+- ... and 2 more functions
 
 ## Dependencies
 ### Upstream

@@ -8,7 +8,7 @@
           {
             "type": "command",
             "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/run-py.cmd\" session_start.py",
-            "timeout": 10
+            "timeout": 30
           }
         ]
       }
@@ -20,7 +20,7 @@
           {
             "type": "command",
             "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/run-py.cmd\" setup_gate.py",
-            "timeout": 10
+            "timeout": 30
           }
         ]
       }

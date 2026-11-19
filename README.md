@@ -7,7 +7,7 @@
 **An autonomous team of specialist AI agents inside your coding assistant.**<br>
 Persistent Brain Graph Memory · "Zero Fake-Solved" Live Runtime Verification · Auto-learning & Preventive Vaccines · Adversarial Shared Channel · Transparent End-of-Task Report.
 
-[![Release](https://img.shields.io/badge/release-v2.5.0-2ea44f)](https://github.com/antoStr/team-workflow/releases)
+[![Release](https://img.shields.io/badge/release-v2.5.1-2ea44f)](https://github.com/antoStr/team-workflow/releases)
 [![Tests](https://github.com/antoStr/team-workflow/actions/workflows/tests.yml/badge.svg)](https://github.com/antoStr/team-workflow/actions/workflows/tests.yml)
 [![License: MIT](https://img.shields.io/github/license/antoStr/team-workflow?label=license)](LICENSE)
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-supported-d97757)
@@ -364,6 +364,12 @@ The Live Smoke Test gate executes the actual command (`tw.py smoke "<cmd>"`) to 
 </details>
 
 <details>
+<summary><b>Can I skip the session setup?</b></summary>
+
+In Claude Code a hook (`setup_gate.py`) holds every team agent until the setup questions were asked, even when a model tries to jump straight to the agents. Write "skip setup" in the request, or answer just "defaults", to launch the agents with your current settings. `TEAM_WORKFLOW_SETUP_GATE=0` or `session_wizard=false` turns the gate off.
+</details>
+
+<details>
 <summary><b>How does it sustain long sessions over weeks or months?</b></summary>
 
 Through the Brain Graph engine (`docs/brain/`): past activities are archived into weekly journals with `tw.py brain rollover`, keeping active context clean and responsive.
@@ -394,5 +400,5 @@ No. It only touches files directly relevant to your assigned task. All other pro
 Distributed under the **MIT License** (see [LICENSE](LICENSE)). Imported third-party resources retain their original licenses ([NOTICE](skills/team/library/NOTICE.md)).
 
 <div align="center">
-<sub>Built with precision for software engineers and AI-augmented teams · <b>team-workflow v2.5.0</b></sub>
+<sub>Built with precision for software engineers and AI-augmented teams · <b>team-workflow v2.5.1</b></sub>
 </div>
