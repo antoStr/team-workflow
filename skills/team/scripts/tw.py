@@ -546,7 +546,7 @@ def cmd_questions(args):
     payload = {
         "app": app, "unknown_roles": unknown,
         "required_headers": [q["header"] for c in out for q in c["questions"]
-                             if not args.roles and q["header"].startswith(("Scope", "Preset", "Roles"))
+                             if not args.roles and q["header"].startswith(("Scope", "Preset", "Roles", "Skills"))
                              or args.roles],
         "calls": out,
         "how": "Ask every call in order with the question tool, options as printed, none skipped "
@@ -558,6 +558,8 @@ def cmd_questions(args):
     }
     if cortex_boost is not None:
         payload["cortex_boost"] = cortex_boost
+    if not args.roles:
+        settings.save_setup_headers(root, [q["header"] for c in out for q in c["questions"]])
     print(json.dumps(payload, indent=1, ensure_ascii=False))
 
 

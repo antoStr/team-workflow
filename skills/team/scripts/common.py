@@ -2,10 +2,8 @@
 import json
 import os
 import re
-import shutil
 import subprocess
 import sys
-import tempfile
 
 MEMORY_DIR = "docs/memory"
 BRAIN_DIR = "docs/brain"
@@ -13,6 +11,8 @@ BRAIN_DIR = "docs/brain"
 
 def python_executable():
     """Return a reliable path/command for the Python interpreter, avoiding Windows Store stubs."""
+    import shutil  # lazy: it loads bz2 and lzma, about a second on a cold Windows hook
+
     candidates = []
     if sys.executable:
         candidates.append(sys.executable)
@@ -112,4 +112,6 @@ def dirty_paths(root):
 def snapshot_path(session_id):
     """Where the SessionStart hook leaves the repository state for the Stop hook."""
     safe = re.sub(r"[^A-Za-z0-9_-]", "", str(session_id or "")) or "default"
+    import tempfile  # lazy: it imports shutil, which loads bz2 and lzma
+
     return os.path.join(tempfile.gettempdir(), f"team-workflow-{safe}.json")

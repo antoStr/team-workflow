@@ -2,12 +2,12 @@
 id: project-genome
 title: Project Architectural Genome
 type: genome
-updated: "2026-11-19T11:43:19.731288+00:00"
+updated: "2026-11-19T13:01:52.753950+00:00"
 ---
 
 # Project Architectural Genome
 
-Assimilated from codebase AST/regex contracts, `70` git commits, and `3` active vaccines.
+Assimilated from codebase AST/regex contracts, `69` git commits, and `3` active vaccines.
 
 ## Stack & Verification Commands
 - Languages: Python
@@ -39,7 +39,7 @@ Assimilated from codebase AST/regex contracts, `70` git commits, and `3` active 
 - `docs/CATALOG.md` <-> `docs/memory/STATE.md` (8 co-changes, conf=0.53)
 - `README.it.md` <-> `docs/CATALOG.it.md` (7 co-changes, conf=1.00)
 - `README.it.md` <-> `docs/CATALOG.md` (7 co-changes, conf=0.47)
-- `README.it.md` <-> `docs/memory/STATE.md` (7 co-changes, conf=0.54)
+- `README.it.md` <-> `docs/memory/STATE.md` (7 co-changes, conf=0.58)
 
 ## Fragility Hotspots (Fix/Revert Density)
 - `.claude-plugin/plugin.json` (15 fix/revert commits)

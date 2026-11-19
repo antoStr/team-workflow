@@ -12,13 +12,16 @@ which may be translated. Built-in agents (Explore, general-purpose...) are never
 import json
 import os
 import re
+import sys
+from datetime import datetime
 
 import roles
 import settings
 from common import is_agy, read_hook_input, repo_root, utf8_output
-from session_start import tw_cmd
 
-SKIP = re.compile(r"\b(defaults|skip setup)\b", re.IGNORECASE)
+# "skip setup" anywhere; "defaults" only as the whole answer ("defaults", "use defaults"), so a
+# request such as "reset the parser to its defaults" keeps the setup.
+SKIP = re.compile(r"\bskip setup\b|\A\W*(?:ok,? )?(?:use )?(?:the )?defaults\W*\Z", re.IGNORECASE)
 TW = r"tw\.py\"?\s+"
 OPTIONS = re.compile(TW + r"options\b")
 QUESTIONS = re.compile(TW + r"questions\b")
@@ -29,9 +32,11 @@ def entries(path):
         with open(path, encoding="utf-8", errors="replace") as f:
             for line in f:
                 try:
-                    yield json.loads(line)
+                    entry = json.loads(line)
                 except ValueError:
                     continue
+                if isinstance(entry, dict):
+                    yield entry
     except OSError:
         return
 
@@ -52,8 +57,12 @@ GROUP = re.compile(r"(Roles|Skills) \d+/(\d+)$")
 FIXED = {"Scope", "Preset", "Add-ons", "Team talk", "Start"}
 
 
-def setup_missing(headers):
-    """Printed headers not asked yet: Scope, Preset, every "Roles i/N" and "Skills i/N"."""
+def setup_missing(headers, printed=None):
+    """Printed headers not asked yet: Scope, Preset, every "Roles i/N" and "Skills i/N". `printed` are
+    the headers the last `tw.py questions --task` printed (no "Skills" group when it found under 2
+    skills); without them the groups are guessed from the asked headers."""
+    if printed is not None:
+        return sorted({h for h in printed if h in ("Scope", "Preset") or GROUP.match(h)} - headers)
     need = {"Scope", "Preset"}
     for kind in ("Roles", "Skills"):
         totals = {int(m.group(2)) for h in headers for m in [GROUP.match(h)] if m and m.group(1) == kind}
@@ -61,38 +70,66 @@ def setup_missing(headers):
     return sorted(need - headers)
 
 
+def epoch(stamp):
+    try:
+        return datetime.fromisoformat(str(stamp).replace("Z", "+00:00")).timestamp()
+    except ValueError:
+        return None
+
+
+def printed_headers(root, since):
+    """Headers of the `tw.py questions --task` run that the transcript shows at `since`, or None."""
+    if since is None:
+        return None
+    try:
+        with open(settings.setup_state_file(root), encoding="utf-8") as f:
+            state = json.load(f)
+        if float(state["time"]) >= since - 2:  # written by that run, not by an older one
+            return {str(h) for h in state["headers"]}
+    except (OSError, ValueError, KeyError, TypeError):
+        pass
+    return None
+
+
 def scan(path):
-    """(opted out, `options` ran, `questions` ran, headers asked) from the transcript."""
+    """(opted out, `options` ran, `questions` ran, headers asked, time of the last `questions --task`)."""
     shown = listed = False
-    headers = set()
+    headers, since = set(), None
     for entry in entries(path):
         if SKIP.search(user_text(entry)):
-            return True, shown, listed, headers
-        if entry.get("type") != "assistant":
+            return True, shown, listed, headers, since
+        message = entry.get("message")
+        if entry.get("type") != "assistant" or not isinstance(message, dict):
             continue
-        for block in (entry.get("message") or {}).get("content") or []:
+        content = message.get("content")
+        for block in content if isinstance(content, list) else []:
             if not isinstance(block, dict) or block.get("type") != "tool_use":
                 continue
-            inp = block.get("input") or {}
+            inp = block.get("input") if isinstance(block.get("input"), dict) else {}
             command = str(inp.get("command", "")) if block.get("name") in ("Bash", "PowerShell") else ""
             shown |= bool(OPTIONS.search(command))
-            listed |= bool(QUESTIONS.search(command))
+            if QUESTIONS.search(command):
+                listed = True
+                if "--roles" not in command:
+                    since = epoch(entry.get("timestamp"))
             if block.get("name") == "AskUserQuestion":
-                headers |= {str(q.get("header", "")) for q in inp.get("questions") or []}
-    return False, shown, listed, headers
+                qs = inp.get("questions")
+                headers |= {str(q.get("header", "")) for q in qs if isinstance(q, dict)} if isinstance(qs, list) else set()
+    return False, shown, listed, headers, since
 
 
-def missing_step(path, role):
+def missing_step(path, role, root=None):
     """None when the setup is done for this role (or the user opted out), else what is missing.
     It checks what was asked, not the order, so a retry asks only the gaps. A question the model
     makes up has none of the printed headers, so it does not count."""
-    skipped, shown, listed, headers = scan(path)
+    skipped, shown, listed, headers, since = scan(path)
     if skipped:
         return None
+    left = setup_missing(headers, printed_headers(root, since))
     missing = [] if shown else ["show the whole `tw.py options` output to the user"]
     missing += [] if listed else ["run `tw.py questions --app claude --task <words>`"]
-    if setup_missing(headers):
-        missing.append("ask these printed headers, only these: " + ", ".join(setup_missing(headers)))
+    if left:
+        missing.append("ask these printed headers, only these: " + ", ".join(left))
     if role[:12] not in headers:
         missing.append(f"ask the model and effort questions of `tw.py questions --app claude --roles {role},...` "
                        f"(header \"{role[:12]}\")")
@@ -103,16 +140,17 @@ def check_question(path, questions, root):
     """While the setup runs (after `tw.py questions`, before every role and skill group was asked),
     a question must carry a printed header, and model questions wait for the groups: a made-up or
     early question is refused before the user sees it. None lets it through."""
-    skipped, _, listed, headers = scan(path)
-    if skipped or not listed or not setup_missing(headers):
+    skipped, _, listed, headers, since = scan(path)
+    printed = printed_headers(root, since)
+    if skipped or not listed or not setup_missing(headers, printed):
         return None
     role_heads = {r[:12] for r in roles.catalog(root)}
-    asked = [str(q.get("header", "")) for q in questions or []]
+    asked = [str(q.get("header", "")) for q in questions if isinstance(q, dict)] if isinstance(questions, list) else []
     made_up = [h for h in asked if h not in FIXED and not GROUP.match(h) and h not in role_heads]
     if made_up:
         return (f"headers {made_up} are not from `tw.py questions`: ask the printed calls as printed (text may "
                 "be translated, headers and options stay)")
-    left = setup_missing(headers | set(asked))
+    left = setup_missing(headers | set(asked), printed)
     if any(h in role_heads for h in asked) and left:
         return "model and effort questions come after every group: ask first " + ", ".join(left)
     return None
@@ -138,17 +176,19 @@ def decide(data):
     role = str(tool_input.get("subagent_type") or "").split(":")[-1]
     if role not in roles.catalog(root):
         return None
-    missing = missing_step(data["transcript_path"], role)
+    missing = missing_step(data["transcript_path"], role, root)
     if not missing:
         return None
+    # session_start.tw_cmd, inlined: importing session_start costs about half a second on Windows
+    tw = f'"{sys.executable}" "{os.path.join(os.path.dirname(os.path.abspath(__file__)), "tw.py")}"'.replace(os.sep, "/")
     return deny(f"team-workflow: the session setup comes before the first team agent, as in agy. Next: {missing}. "
                 "Ask the printed questions themselves, not a summary or a confirmation of your own; the text "
                 "may be in the user's language, the headers stay as printed. "
-                f"The whole setup: run `{tw_cmd()} options --app claude` and show its whole output in a code "
+                f"The whole setup: run `{tw} options --app claude` and show its whole output in a code "
                 "block (cut by context-mode? save it to a file and read it in parts of 40 lines), then ask "
-                f"with AskUserQuestion every call of `{tw_cmd()} questions --app claude --task <words>` "
+                f"with AskUserQuestion every call of `{tw} questions --app claude --task <words>` "
                 "(scope, preset, every role, library skills, add-ons, team talk), then every call of "
-                f"`{tw_cmd()} questions --app claude --roles <chosen>` (model and effort per role), then the "
+                f"`{tw} questions --app claude --roles <chosen>` (model and effort per role), then the "
                 "recap and \"Start\" (WIZARD.md, \"Session setup\"). Roles or models named in the request are "
                 "the \"(Recommended)\" answers, not a reason to skip. Without AskUserQuestion, ask in text "
                 "and stop. Launch the agents after the user answers.")
@@ -156,7 +196,11 @@ def decide(data):
 
 def main():
     utf8_output()
-    verdict = decide(read_hook_input())
+    try:
+        verdict = decide(read_hook_input())
+    except Exception as e:  # noqa: BLE001 - a crash would let the call through without a word
+        print(f"team-workflow setup gate: {type(e).__name__}: {e}", file=sys.stderr)
+        return
     if verdict:
         print(json.dumps(verdict))
 

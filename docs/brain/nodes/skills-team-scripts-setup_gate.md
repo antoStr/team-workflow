@@ -10,7 +10,7 @@ upstream:
 downstream:
 files: [skills/team/scripts/setup_gate.py]
 status: active
-last_updated: 2026-11-19T11:00:10
+last_updated: 2026-11-19T14:00:03
 ---
 
 # setup_gate.py
@@ -32,9 +32,11 @@ which may be translated. Built-in agents (Explore, general-purpose...) are never
 ### Functions
 - `entries(path)`
 - `user_text(entry)`
-- `setup_missing(headers)`
+- `setup_missing(headers, printed)`
+- `epoch(stamp)`
+- `printed_headers(root, since)`
 - `scan(path)`
-- `missing_step(path, role)`
+- `missing_step(path, role, root)`
 - `check_question(path, questions, root)`
 - `deny(reason)`
 - `decide(data)`

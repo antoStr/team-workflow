@@ -1,37 +1,36 @@
 # Project state
 
-## Current version: v2.5.0 (released)
+## Current version: v2.5.1 (released)
 
-### Unreleased
-- **Omniscient & Neuro-Symbolic Cortex v3 (`skills/team/scripts/cortex.py`, `skills/team/scripts/omniscience.py`, `tests/test_cortex.py`)**:
-  resource-aware neural routing, AST skeleton + caveman/ponytail/karpathy/context-mode booster (`skills/team/roles/_shared/vibecode-booster.md`),
-  safe `.env`/ports/conflicts sensor (`sense`), Shadow Spec invariants (`spec`), Anti-Tamper shield (`shield`), AST contract diff (`contracts`),
-  MAST loop circuit-breaker (`circuit`), Darwin-Godel TextGrad role mutations (`mutate`), and Zero-Entropy schema hooked into
-  `skills/team/scripts/scan.py`, `questions.py`, `skills/team/scripts/session_start.py`, `skills/team/scripts/prompt_command.py`, `skills/team/scripts/stop_check.py`, `skills/cortex/SKILL.md`, and `skills/team/scripts/addons.py` (`vibecoding` bundle).
-- Synced & verified across Claude Code cache/marketplace, agy, OpenCode, Codex, and global CLI (`tw`/`team`): `tw.py cortex shield` (0 violations), `verify-docs --strict`, `memcheck --strict`, `brain check --strict`.
+### v2.5.1
+- Setup gate: a `claude -p "/team ..."` test showed Sonnet and Haiku skipping the setup, and under
+  load the hooks timed out (SessionStart ~12 s, PreToolUse:Agent 13-17 s, limit 10 s), so Claude
+  Code dropped them and let the agents start. Fixes:
+  - `hooks/hooks.json`: `session_start.py` and `setup_gate.py` timeouts 10 -> 30 s.
+  - `setup_gate.py` imports in 0.02 s (was 0.9 s): lazy `shutil`/`tempfile` in `common.py`,
+    `tw_cmd` inlined; a crash prints to stderr.
+  - The gate asks for the groups the last `tw.py questions --task` printed
+    (`settings.save_setup_headers`, `~/.team-workflow/setup/`): no endless deny without a "Skills"
+    group, no stale "Skills i/N" after a second run.
+  - "defaults" opts out only as the whole answer; "skip setup" anywhere. Malformed transcript
+    lines no longer crash the hook (`tests/test_setup_gate.py`, 5 new tests).
+- Retested with Sonnet and Haiku (also two sessions at once): no team agent without the setup;
+  with "skip setup" both launch code-reviewer and tester.
 
 ### Released highlights (full notes in git tags / GitHub Releases)
-- **v2.4.7**: `setup_gate.py`, a Claude Code PreToolUse hook on `Agent|Task`, denies team roles until
-  the transcript shows `tw.py options` then `AskUserQuestion` (or the user said "defaults" / "skip
-  setup"); tested with Sonnet and Haiku, which skipped the setup with the SKILL.md text alone.
-  Off with `TEAM_WORKFLOW_SETUP_GATE=0` or `session_wizard=false`.
-- **v2.4.6**: `skills/team/SKILL.md` section 2 makes the session setup a numbered, mandatory step before any
-  agent (scan, brain, library, `tw.py options`, questions, recap), the same in every app as agy's
-  `rules/AGENTS.md`; roles or models named in the request pre-fill the answers, never skip them.
-- **v2.4.5**: the SessionStart hook gives the model a runnable `tw.py` (the Python that runs the hook
-  plus the absolute script path), because `tw.py` is on no PATH and the model skipped the scan.
-- **v2.4.4**: session setup line is imperative in every app (first project reply: `tw.py scan`, then
-  `WIZARD.md` by absolute path; repos without memory get a Brain-init question); `update_plugin`
-  uses `safe_rmtree` on Windows for OpenCode and Codex updates.
-- **v2.4.3** (`e63d0a3`): Windows hook wrapper `hooks/run-py.cmd` (skips Store `python3` alias),
-  `talk` challenge verdict & duplicate `join` checks, OpenCode leftover-session note in `WIZARD.md`.
-- **v2.4.2**: `update_plugin` uses OpenCode/Codex `payload_dir()` and updates any behind app.
-- **v2.4.1**: `talk.for_role` shares all messages; Claude 5.5 aliases; per-launch effort;
-  `auto_update`; Codex read-only `.git` fallback; agy tool names & tiers (`flash_lite`).
-- **v2.4.0**: English-first docs + `*.it.md`; `pm` & `project-management` packs (137 agents,
-  533 library entries); `team` naming everywhere; `~/.team-workflow/hardware`; CI hardening.
-- **v2.3.0**: `preview`, `patch`, `component`, `visual-check`, `talk close`, `scan`, `verify-docs`,
-  `frontend-components` pack, zero-ghosting & dynamic agent catalog.
+- **v2.5.0**: Cortex v3 (`cortex.py`, `omniscience.py`): neural routing, vibecode booster
+  (`roles/_shared/vibecode-booster.md`), `sense`, `spec`, `shield`, `contracts`, `circuit`,
+  `mutate`; hooked into `scan.py`, `questions.py`, the hooks and `addons.py` (`vibecoding`).
+- **v2.4.7**: `setup_gate.py`, PreToolUse hook on `Agent|Task`, holds team roles until the setup
+  ran; off with `TEAM_WORKFLOW_SETUP_GATE=0` or `session_wizard=false`.
+- **v2.4.6**: `SKILL.md` section 2: the session setup is a numbered, mandatory step before any
+  agent; roles or models named in the request pre-fill the answers, never skip them.
+- **v2.4.5**: the SessionStart hook gives the model a runnable `tw.py` (absolute paths).
+- **v2.4.4**: imperative setup line in every app; `update_plugin` `safe_rmtree` on Windows.
+- **v2.4.3**: Windows hook wrapper `hooks/run-py.cmd`; `talk` verdict and `join` checks.
+- **v2.4.0-2.4.2**: English-first docs + `*.it.md`; `pm` packs (137 agents, 533 library
+  entries); `auto_update`; Claude 5.5 aliases; OpenCode/Codex `payload_dir()` updates.
+- **v2.3.0**: `preview`, `patch`, `component`, `visual-check`, `scan`, `verify-docs`.
 
 ### Verify
 - `python -m unittest discover -s tests` (Python 3.10+).
@@ -39,8 +38,6 @@
 - `python skills/team/scripts/memcheck.py --root . --strict`, `tw.py brain check --strict`.
 
 ### Where to resume
-- `v2.4.7` is released (`06f57d8`); next work starts from `main`. The setup gate is untested in an
-  interactive Claude Code session: check `/team` there first.
+- `v2.5.1` is released; next work starts from `main`. The setup gate is tested headless
+  (`claude -p`); the interactive AskUserQuestion path is covered by unit tests only.
 - `main` is protected on GitHub (`main protection` ruleset: PR + green `test` checks).
-
-- 2026-11-17: committed team skill/hooks/setup gate/questions.py locally; push to main rejected by repo rules (PR, checks, signed commits). Not pushed.
