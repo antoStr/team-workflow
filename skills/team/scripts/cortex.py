@@ -23,7 +23,6 @@ from datetime import datetime, timezone
 import json
 import os
 import re
-import shutil
 import subprocess
 
 import autolearn

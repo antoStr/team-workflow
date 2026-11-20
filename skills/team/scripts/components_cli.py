@@ -11,7 +11,6 @@ Provides direct scaffolding (`tw.py component add <name>`) for modern UI compone
  - dot-grid (Clean editorial background dot grid)
 """
 import os
-import sys
 
 TEMPLATES = {
     "cmdk": {

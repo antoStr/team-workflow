@@ -53,6 +53,7 @@ import os
 import shutil
 import subprocess
 import sys
+import time
 
 import addons
 import audit
@@ -71,7 +72,7 @@ import autolearn
 import gate
 import smoke
 import update_plugin
-from common import python_executable, utf8_output
+from common import utf8_output
 from usage import load_pricing
 
 EFFORTS = ("low", "medium", "high", "xhigh", "max")
@@ -493,6 +494,7 @@ def cmd_options(args):
     root = repo_root()
     apps = roles.APPS if app == "all" else (app,)
     every = [app_options(a, root) for a in apps]
+    settings.update_setup_state(root, options=time.time())
     if args.json:
         print(json.dumps(every if app == "all" else every[0], indent=1))
         return
@@ -610,16 +612,35 @@ def cmd_learn(args):
     if action == "record":
         if not args.title:
             raise SystemExit("usage: tw.py learn record --title TITLE --trigger TRIGGER --anti-pattern AVOID --solution REQUIRE [--applies-to ROLES/FILES]")
-        item = autolearn.record_learning(
-            root=root,
-            title=args.title,
-            trigger=args.trigger or "",
-            anti_pattern=args.anti_pattern or "",
-            solution=args.solution or "",
-            applies_to=args.applies_to or "*",
-            category=args.category or "bug"
-        )
-        print(f"Recorded learning [{item['id']}]: {item['title']}")
+        try:
+            item = autolearn.record_learning(
+                root=root,
+                title=args.title,
+                trigger=args.trigger or "",
+                anti_pattern=args.anti_pattern or "",
+                solution=args.solution or "",
+                applies_to=args.applies_to or "*",
+                category=args.category or "bug",
+                check={"pattern": args.check_pattern, "glob": args.check_glob} if args.check_pattern else None,
+            )
+        except ValueError as e:
+            raise SystemExit(f"tw.py learn record: {e}") from None
+        print(f"Recorded learning [{item['id']}]: {item['title']}"
+              + (" (enforced by a check on every edit)" if item.get("check") else ""))
+    elif action == "check":
+        paths = args.paths
+        if not paths:
+            try:
+                ls = subprocess.run(["git", "-C", root, "ls-files", "-z"], capture_output=True)
+            except OSError as e:
+                raise SystemExit(f"tw.py learn check: git not found ({e}); pass the files to check") from None
+            if ls.returncode:
+                raise SystemExit("tw.py learn check: not a git repository; pass the files to check")
+            paths = [p for p in ls.stdout.decode("utf-8", errors="replace").split("\0") if p]
+        found = autolearn.check_violations(root, paths)
+        print("\n".join(found) if found else f"No check failed ({len(autolearn.load_checks(root))} checks).")
+        if found:
+            raise SystemExit(1)
     elif action == "vaccine":
         vaccines = autolearn.get_vaccines(root=root, file_path=args.file, role=args.role)
         if args.json:
@@ -1506,13 +1527,17 @@ def main(argv=None):
     un = sub.add_parser("uninstall", help="remove what team-workflow wrote outside the plugins")
     un.add_argument("--all", action="store_true", help="also ~/.team-workflow (settings, ledger)")
     le = sub.add_parser("learn", help="habits, auto-learning, and preventive vaccines")
-    le.add_argument("action", nargs="?", default=None, choices=("record", "vaccine", "auto", "list"))
+    le.add_argument("action", nargs="?", default=None, choices=("record", "vaccine", "auto", "list", "check"))
+    le.add_argument("paths", nargs="*", help="check: files to check (default: every tracked file)")
     le.add_argument("--title", help="record: learning title")
     le.add_argument("--trigger", help="record: what failed or prompted the learning")
     le.add_argument("--anti-pattern", dest="anti_pattern", help="record: anti-pattern to avoid")
     le.add_argument("--solution", help="record: required solution or pattern")
     le.add_argument("--applies-to", dest="applies_to", help="record: comma-separated roles or file globs")
     le.add_argument("--category", choices=("bug", "security", "performance", "architecture", "process"), default="bug")
+    le.add_argument("--check-pattern", dest="check_pattern",
+                    help="record: regex that finds the anti-pattern; makes the learning a check, enforced on every edit")
+    le.add_argument("--check-glob", dest="check_glob", help="record: files the check applies to (default: *)")
     le.add_argument("--file", help="vaccine: target file path")
     le.add_argument("--role", help="vaccine: target role")
     le.add_argument("--topic", help="auto: talk topic to learn from")

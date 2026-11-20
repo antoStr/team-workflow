@@ -7,7 +7,7 @@
 **Un team autonomo di agenti esperti dentro il tuo assistente di programmazione.**<br>
 Memoria Brain Graph persistente · Verifica reale runtime "Zero Fake-Solved" · Auto-learning & Vaccini preventivi · Team avversario con canale condiviso · Report trasparente a fine lavoro.
 
-[![Release](https://img.shields.io/badge/release-v2.5.1-2ea44f)](https://github.com/antoStr/team-workflow/releases)
+[![Release](https://img.shields.io/badge/release-v2.5.2-2ea44f)](https://github.com/antoStr/team-workflow/releases)
 [![Tests](https://github.com/antoStr/team-workflow/actions/workflows/tests.yml/badge.svg)](https://github.com/antoStr/team-workflow/actions/workflows/tests.yml)
 [![License: MIT](https://img.shields.io/github/license/antoStr/team-workflow?label=licenza)](LICENSE)
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-supportato-d97757)
@@ -220,8 +220,9 @@ python tw.py smoke "<comando di avvio>" --timeout 5 [--strict]
 Ad ogni sessione, gli agenti diventano più intelligenti:
 
 1. **Rilevamento**: quando un bug viene risolto o un test avversario intercetta un errore sottile, il team estrae l'anti-pattern.
-2. **Registrazione**: `tw.py learn record --pattern "..." --fix "..." --reason "..."` crea un nodo in `docs/brain/learnings/`.
-3. **Vaccinazione**: a ogni nuovo avvio (`session_start.py`), i vaccini pertinenti vengono iniettati nel contesto iniziale degli agenti, impedendo la regressione su errori già affrontati.
+2. **Registrazione**: `tw.py learn record --title "..." --anti-pattern "..." --solution "..."` crea un nodo in `docs/brain/learnings/`.
+3. **Check, quando una regex lo trova**: aggiungi `--check-pattern REGEX --check-glob "*.ts"`. Il learning diventa un controllo, non una descrizione: un hook lo esegue a ogni modifica, lo Stop hook sui file cambiati nella sessione e `tw.py learn check` in CI (exit 1 se trova qualcosa).
+4. **Vaccinazione**: i learning senza check vengono iniettati come prosa nel contesto degli agenti, impedendo la regressione su errori già affrontati.
 
 ---
 
@@ -399,5 +400,5 @@ No. Modifica solo i file inerenti al compito assegnato. Tutte le altre proposte 
 Distribuito con licenza **MIT** (vedi [LICENSE](LICENSE)). I contenuti di terze parti importati nella libreria e nei ruoli mantengono le rispettive licenze d'origine ([NOTICE](skills/team/library/NOTICE.md)).
 
 <div align="center">
-<sub>Sviluppato con dedizione per programmatori e team aumentati da AI · <b>team-workflow v2.5.1</b></sub>
+<sub>Sviluppato con dedizione per programmatori e team aumentati da AI · <b>team-workflow v2.5.2</b></sub>
 </div>

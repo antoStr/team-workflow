@@ -19,7 +19,7 @@ downstream:
   - "[[tests-test_cortex]]"
 files: [skills/team/scripts/cortex.py]
 status: active
-last_updated: 2026-11-19T12:01:44
+last_updated: 2026-11-20T11:45:45
 ---
 
 # cortex.py

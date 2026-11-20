@@ -12,12 +12,11 @@ upstream:
   - "[[skills-team-scripts-scan]]"
   - "[[skills-team-scripts-settings]]"
   - "[[skills-team-scripts-talk]]"
-  - "[[skills-team-scripts-tw]]"
   - "[[tests-isolate_home]]"
 downstream:
 files: [tests/test_cortex.py]
 status: active
-last_updated: 2026-11-19T12:01:44
+last_updated: 2026-11-20T11:45:45
 ---
 
 # test_cortex.py
@@ -38,7 +37,6 @@ Offline tests for the Neural Cortex Router, Project Genome Assimilation & Meta-S
 - [[skills-team-scripts-scan]]
 - [[skills-team-scripts-settings]]
 - [[skills-team-scripts-talk]]
-- [[skills-team-scripts-tw]]
 - [[tests-isolate_home]]
 ### Downstream
 - None

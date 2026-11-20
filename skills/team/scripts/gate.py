@@ -12,7 +12,6 @@ from datetime import datetime, timezone
 import json
 import os
 import re
-import sys
 
 VAULT_DIR = "docs/brain"
 GATES_DIR = os.path.join(VAULT_DIR, "gates")

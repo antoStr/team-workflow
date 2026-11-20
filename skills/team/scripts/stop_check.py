@@ -110,6 +110,23 @@ def decide(data):
     work = [p for p in changed if not p.startswith(MEMORY_DIR + "/") and not p.startswith("docs/brain/")]
     if not work:
         return None
+    import autolearn  # lazy, as in _auto_evolve_session
+    failed = autolearn.check_violations(root, sorted(work))
+    checks_mark = snapshot_path(session_id(data)) + ".checks"
+    try:
+        with open(checks_mark, encoding="utf-8") as f:
+            seen = f.read() == "\n".join(failed)
+    except OSError:
+        seen = False
+    if failed and not seen:  # once per set of failures, so a match the user keeps does not block every turn
+        try:
+            with open(checks_mark, "w", encoding="utf-8") as f:
+                f.write("\n".join(failed))
+        except OSError:
+            pass
+        return {"decision": "continue" if is_agy(data) else "block",
+                "reason": "team-workflow: changed files fail recorded checks: " + "; ".join(failed[:5])
+                          + ". Fix the root cause before stopping."}
     _auto_evolve_session(root, work)
     newest = newest_mtime(root, work)
     if state_rel in changed and os.path.getmtime(state_full) >= newest:

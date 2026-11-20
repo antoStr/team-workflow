@@ -8,11 +8,17 @@ Preset, every "Roles i/N" and "Skills i/N") and the model question of the role b
 setup". During the setup it also refuses a question with a made-up header, or a model question
 before every role and skill group, before the user sees it. Headers are checked, not the text,
 which may be translated. Built-in agents (Explore, general-purpose...) are never blocked.
+
+Code Mode runs the shell from a REPL script and logs only some of those calls in the transcript, so
+the steps also come from the setup state (`settings.update_setup_state`): `tw.py options` and
+`questions` record their run, this hook the headers it let through. Only records made after the
+transcript's first entry count.
 """
 import json
 import os
 import re
 import sys
+import time
 from datetime import datetime
 
 import roles
@@ -22,7 +28,7 @@ from common import is_agy, read_hook_input, repo_root, utf8_output
 # "skip setup" anywhere; "defaults" only as the whole answer ("defaults", "use defaults"), so a
 # request such as "reset the parser to its defaults" keeps the setup.
 SKIP = re.compile(r"\bskip setup\b|\A\W*(?:ok,? )?(?:use )?(?:the )?defaults\W*\Z", re.IGNORECASE)
-TW = r"tw\.py\"?\s+"
+TW = r"tw\.py[\"']?\s+"  # $ in a REPL script quotes its values with '
 OPTIONS = re.compile(TW + r"options\b")
 QUESTIONS = re.compile(TW + r"questions\b")
 
@@ -77,27 +83,51 @@ def epoch(stamp):
         return None
 
 
-def printed_headers(root, since):
-    """Headers of the `tw.py questions --task` run that the transcript shows at `since`, or None."""
-    if since is None:
-        return None
-    try:
-        with open(settings.setup_state_file(root), encoding="utf-8") as f:
-            state = json.load(f)
-        if float(state["time"]) >= since - 2:  # written by that run, not by an older one
-            return {str(h) for h in state["headers"]}
-    except (OSError, ValueError, KeyError, TypeError):
-        pass
-    return None
+def recorded(root, start, session=None):
+    """What the setup state shows since `start` (the session's first entry): (`options` ran,
+    `questions --task` ran, the headers it printed or None, headers this session asked)."""
+    if start is None or root is None:
+        return False, False, None, set()
+    state = settings.load_setup_state(root)
+
+    def fresh(t):
+        try:
+            return float(t) >= start - 2
+        except (TypeError, ValueError):
+            return False
+    listed = fresh(state.get("time"))
+    headers = state.get("headers")
+    printed = {str(h) for h in headers} if listed and isinstance(headers, list) else None
+    # per session: another session's answers in the same repository do not complete this one's setup
+    by_session = state.get("asked") if isinstance(state.get("asked"), dict) else {}
+    asked = by_session.get(str(session)) if session else None
+    asked = asked if isinstance(asked, dict) else {}
+    return fresh(state.get("options")), listed, printed, {h for h, t in asked.items() if fresh(t)}
 
 
-def scan(path):
-    """(opted out, `options` ran, `questions` ran, headers asked, time of the last `questions --task`)."""
+def record_asked(root, session, questions):
+    """Remember the headers of a question the gate let through: the transcript may not show it."""
+    heads = [str(q.get("header", "")) for q in questions if isinstance(q, dict)] if isinstance(questions, list) else []
+    if root and session and heads:
+        asked = settings.load_setup_state(root).get("asked")
+        asked = asked if isinstance(asked, dict) else {}
+        mine = asked.get(str(session)) if isinstance(asked.get(str(session)), dict) else {}
+        mine.update(dict.fromkeys(heads, time.time()))
+        asked[str(session)] = mine
+        settings.update_setup_state(root, asked=asked)
+
+
+def scan(path, root=None, session=None):
+    """(opted out, `options` ran, `questions` ran, headers asked, headers `questions --task` printed
+    or None), from the transcript and the setup state."""
     shown = listed = False
-    headers, since = set(), None
+    headers, start = set(), None
     for entry in entries(path):
         if SKIP.search(user_text(entry)):
-            return True, shown, listed, headers, since
+            return True, shown, listed, headers, None
+        stamp = epoch(entry.get("timestamp")) if entry.get("timestamp") else None
+        if stamp is not None and (start is None or stamp < start):
+            start = stamp
         message = entry.get("message")
         if entry.get("type") != "assistant" or not isinstance(message, dict):
             continue
@@ -106,26 +136,25 @@ def scan(path):
             if not isinstance(block, dict) or block.get("type") != "tool_use":
                 continue
             inp = block.get("input") if isinstance(block.get("input"), dict) else {}
-            command = str(inp.get("command", "")) if block.get("name") in ("Bash", "PowerShell") else ""
+            command = str(inp.get("command", "") if block.get("name") in ("Bash", "PowerShell")
+                          else inp.get("code", "") if block.get("name") == "REPL" else "")
             shown |= bool(OPTIONS.search(command))
-            if QUESTIONS.search(command):
-                listed = True
-                if "--roles" not in command:
-                    since = epoch(entry.get("timestamp"))
+            listed |= bool(QUESTIONS.search(command))
             if block.get("name") == "AskUserQuestion":
                 qs = inp.get("questions")
                 headers |= {str(q.get("header", "")) for q in qs if isinstance(q, dict)} if isinstance(qs, list) else set()
-    return False, shown, listed, headers, since
+    was_shown, was_listed, printed, asked = recorded(root, start, session)
+    return False, shown or was_shown, listed or was_listed, headers | asked, printed
 
 
-def missing_step(path, role, root=None):
+def missing_step(path, role, root=None, session=None):
     """None when the setup is done for this role (or the user opted out), else what is missing.
     It checks what was asked, not the order, so a retry asks only the gaps. A question the model
     makes up has none of the printed headers, so it does not count."""
-    skipped, shown, listed, headers, since = scan(path)
+    skipped, shown, listed, headers, printed = scan(path, root, session)
     if skipped:
         return None
-    left = setup_missing(headers, printed_headers(root, since))
+    left = setup_missing(headers, printed)
     missing = [] if shown else ["show the whole `tw.py options` output to the user"]
     missing += [] if listed else ["run `tw.py questions --app claude --task <words>`"]
     if left:
@@ -136,12 +165,11 @@ def missing_step(path, role, root=None):
     return "; ".join(missing) or None
 
 
-def check_question(path, questions, root):
+def check_question(path, questions, root, session=None):
     """While the setup runs (after `tw.py questions`, before every role and skill group was asked),
     a question must carry a printed header, and model questions wait for the groups: a made-up or
     early question is refused before the user sees it. None lets it through."""
-    skipped, _, listed, headers, since = scan(path)
-    printed = printed_headers(root, since)
+    skipped, _, listed, headers, printed = scan(path, root, session)
     if skipped or not listed or not setup_missing(headers, printed):
         return None
     role_heads = {r[:12] for r in roles.catalog(root)}
@@ -171,12 +199,15 @@ def decide(data):
         return None
     tool_input = data.get("tool_input") or {}
     if data.get("tool_name") == "AskUserQuestion":
-        wrong = check_question(data["transcript_path"], tool_input.get("questions"), root)
-        return deny(f"team-workflow session setup: {wrong}.") if wrong else None
+        wrong = check_question(data["transcript_path"], tool_input.get("questions"), root, data.get("session_id"))
+        if wrong:
+            return deny(f"team-workflow session setup: {wrong}.")
+        record_asked(root, data.get("session_id"), tool_input.get("questions"))
+        return None
     role = str(tool_input.get("subagent_type") or "").split(":")[-1]
     if role not in roles.catalog(root):
         return None
-    missing = missing_step(data["transcript_path"], role, root)
+    missing = missing_step(data["transcript_path"], role, root, data.get("session_id"))
     if not missing:
         return None
     # session_start.tw_cmd, inlined: importing session_start costs about half a second on Windows

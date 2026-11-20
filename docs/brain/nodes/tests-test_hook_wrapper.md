@@ -9,7 +9,7 @@ upstream:
 downstream:
 files: [tests/test_hook_wrapper.py]
 status: active
-last_updated: 2026-11-19T11:00:10
+last_updated: 2026-11-20T11:45:45
 ---
 
 # test_hook_wrapper.py

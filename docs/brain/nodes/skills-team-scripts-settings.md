@@ -13,14 +13,12 @@ downstream:
   - "[[skills-team-scripts-doctor]]"
   - "[[skills-team-scripts-library]]"
   - "[[skills-team-scripts-roles]]"
-  - "[[skills-team-scripts-scan]]"
   - "[[skills-team-scripts-session_start]]"
   - "[[skills-team-scripts-setup_gate]]"
   - "[[skills-team-scripts-stop_check]]"
   - "[[skills-team-scripts-talk]]"
   - "[[skills-team-scripts-tw]]"
   - "[[tests-test_addons]]"
-  - "[[tests-test_brain]]"
   - "[[tests-test_cortex]]"
   - "[[tests-test_opencode]]"
   - "[[tests-test_pro]]"
@@ -29,7 +27,7 @@ downstream:
   - "[[tests-test_setup_library_talk]]"
 files: [skills/team/scripts/settings.py]
 status: active
-last_updated: 2026-11-19T14:00:03
+last_updated: 2026-11-20T11:45:45
 ---
 
 # settings.py
@@ -44,6 +42,8 @@ orchestrator; changed with `tw.py settings set <key> <value>` or by editing the 
 ### Functions
 - `home_dir()`
 - `setup_state_file(root)`
+- `load_setup_state(root)`
+- `update_setup_state(root)`
 - `save_setup_headers(root, headers)`
 - `hardware_dir()`
 - `hardware_status()`
@@ -55,9 +55,7 @@ orchestrator; changed with `tw.py settings set <key> <value>` or by editing the 
 - `role_value(data, section, role, app)`
 - `parse_value(key, text)`
 - `save(key, value, root)`
-- `default_of(key)`
-- `apply_profile(name, root)`
-- ... and 2 more functions
+- ... and 4 more functions
 
 ## Dependencies
 ### Upstream
@@ -70,14 +68,12 @@ orchestrator; changed with `tw.py settings set <key> <value>` or by editing the 
 - [[skills-team-scripts-doctor]]
 - [[skills-team-scripts-library]]
 - [[skills-team-scripts-roles]]
-- [[skills-team-scripts-scan]]
 - [[skills-team-scripts-session_start]]
 - [[skills-team-scripts-setup_gate]]
 - [[skills-team-scripts-stop_check]]
 - [[skills-team-scripts-talk]]
 - [[skills-team-scripts-tw]]
 - [[tests-test_addons]]
-- [[tests-test_brain]]
 - [[tests-test_cortex]]
 - [[tests-test_opencode]]
 - [[tests-test_pro]]

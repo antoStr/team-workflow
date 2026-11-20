@@ -3,6 +3,7 @@ import glob
 import json
 import os
 import unittest
+from datetime import datetime, timezone
 
 from test_scripts import ScriptTest
 
@@ -18,11 +19,11 @@ def tool(name, **inp):
 class SetupGateTest(ScriptTest):
     """The PreToolUse hook holds team roles until the whole session setup ran."""
 
-    def gate(self, transcript, role="code-reviewer", env=None, ask=None):
+    def gate(self, transcript, role="code-reviewer", env=None, ask=None, session="s1"):
         path = os.path.join(self.tmp, "t.jsonl")
         with open(path, "w", encoding="utf-8") as f:
             f.writelines(json.dumps(e) + "\n" for e in transcript)
-        hook = {"cwd": self.root, "session_id": "s1", "transcript_path": path, "tool_name": "Agent",
+        hook = {"cwd": self.root, "session_id": session, "transcript_path": path, "tool_name": "Agent",
                 "tool_input": {"subagent_type": role, "prompt": "review"}}
         if ask is not None:  # the hook on AskUserQuestion instead
             hook.update(tool_name="AskUserQuestion",
@@ -116,6 +117,31 @@ class SetupGateTest(ScriptTest):
         ask = tool("AskUserQuestion", questions=[{"header": h, "question": "?"} for h in
                                                  ("Scope", "Preset", "Roles 1/1", "Team talk", "tester")])
         t = [user("/team review"), tool("Bash", command='"py" "C:/x/tw.py" options --app claude'), run, ask]
+        self.assertIsNone(self.gate(t, role="tester"))
+
+    def test_code_mode_counts_the_recorded_steps(self):
+        """Code Mode logs the REPL script, not every shell call in it: tw.py and the gate record the steps."""
+        start = user("/team review", timestamp=datetime.now(timezone.utc).isoformat())
+        t = [start, tool("REPL", code="const tw = '...'; await $`${tw} setup steps`")]  # no tw.py text
+        for args in (("options", "--app", "claude"), ("questions", "--app", "claude", "--task", "review")):
+            out = self.run_script("tw.py", *args, cwd=self.root)
+            self.assertEqual(out.returncode, 0, out.stderr)
+        printed = [q["header"] for c in json.loads(out.stdout)["calls"] for q in c["questions"]]
+        self.assertEqual(self.gate(t, role="tester"), "deny")
+        self.assertIsNone(self.gate(t, ask=printed[:4]))  # let through, so recorded
+        self.assertIsNone(self.gate(t, ask=printed[4:] or ["Team talk"]))
+        self.assertEqual(self.gate(t, role="tester"), "deny")  # no model question yet
+        self.assertIsNone(self.gate(t, ask=["tester", "tester"]))
+        self.assertIsNone(self.gate(t, role="tester"))
+        old = user("/team review", timestamp="2100-01-01T00:00:00+00:00")  # a later session: old records
+        self.assertEqual(self.gate([old], role="tester"), "deny")
+        other = [user("/team fix", timestamp="2000-01-01T00:00:00+00:00")]  # started earlier, asked nothing
+        self.assertEqual(self.gate(other, role="tester", session="s2"), "deny")
+
+    def test_single_quoted_tw_command_counts(self):
+        t = self.setup()
+        t[1] = tool("Bash", command="'py' 'C:/x/tw.py' options --app claude")  # how $ quotes a value
+        t[2] = tool("Bash", command="'py' 'C:/x/tw.py' questions --app claude --task review")
         self.assertIsNone(self.gate(t, role="tester"))
 
     def test_defaults_inside_a_request_keeps_the_setup(self):

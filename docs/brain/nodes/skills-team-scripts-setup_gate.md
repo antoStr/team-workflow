@@ -10,7 +10,7 @@ upstream:
 downstream:
 files: [skills/team/scripts/setup_gate.py]
 status: active
-last_updated: 2026-11-19T14:00:03
+last_updated: 2026-11-20T11:45:45
 ---
 
 # setup_gate.py
@@ -26,6 +26,11 @@ setup". During the setup it also refuses a question with a made-up header, or a 
 before every role and skill group, before the user sees it. Headers are checked, not the text,
 which may be translated. Built-in agents (Explore, general-purpose...) are never blocked.
 
+Code Mode runs the shell from a REPL script and logs only some of those calls in the transcript, so
+the steps also come from the setup state (`settings.update_setup_state`): `tw.py options` and
+`questions` record their run, this hook the headers it let through. Only records made after the
+transcript's first entry count.
+
 ## Contracts
 
 
@@ -34,10 +39,11 @@ which may be translated. Built-in agents (Explore, general-purpose...) are never
 - `user_text(entry)`
 - `setup_missing(headers, printed)`
 - `epoch(stamp)`
-- `printed_headers(root, since)`
-- `scan(path)`
-- `missing_step(path, role, root)`
-- `check_question(path, questions, root)`
+- `recorded(root, start, session)`
+- `record_asked(root, session, questions)`
+- `scan(path, root, session)`
+- `missing_step(path, role, root, session)`
+- `check_question(path, questions, root, session)`
 - `deny(reason)`
 - `decide(data)`
 - `main()`

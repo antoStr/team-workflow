@@ -150,10 +150,15 @@ def stop_preview(root=None):
     if pid:
         try:
             if sys.platform == "win32":
-                subprocess.run(["taskkill", "/F", "/T", "/PID", str(pid)],
-                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                done = subprocess.run(["taskkill", "/F", "/T", "/PID", str(pid)],
+                                      stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                if done.returncode not in (0, 128):  # 128: no such process, already gone
+                    raise OSError(f"taskkill exit {done.returncode}")
             else:
-                os.kill(pid, signal.SIGTERM)
+                try:
+                    os.kill(pid, signal.SIGTERM)
+                except ProcessLookupError:  # already gone
+                    pass
                 time.sleep(0.2)
                 try:
                     os.kill(pid, signal.SIGKILL)
@@ -170,9 +175,10 @@ def stop_preview(root=None):
 
     return {
         "ok": True,
-        "status": "STOPPED",
+        "status": "STOPPED" if stopped or not pid else "KILL_FAILED",
         "pid": pid,
-        "message": f"Preview server on port {state.get('port')} (PID {pid}) stopped."
+        "message": f"Preview server on port {state.get('port')} (PID {pid}) "
+                   + ("stopped." if stopped or not pid else "could not be stopped; stop it by hand.")
     }
 
 
