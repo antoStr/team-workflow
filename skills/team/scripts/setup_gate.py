@@ -5,7 +5,8 @@ the scan straight to the agents. This hook denies the launch of a team role unti
 shows `tw.py options`, `tw.py questions`, AskUserQuestion calls with all its headers (Scope,
 Preset, every "Roles i/N" and "Skills i/N") and the model question of the role being launched
 (header = role[:12], from `tw.py questions --roles`), or the user said "defaults" or "skip
-setup". During the setup it also refuses a question with a made-up header, or a model question
+setup", or answered the first question, "Mode", with Auto or Skip setup (recorded by
+`tw.py questions --mode auto|skip` once "Mode" was asked). During the setup it also refuses a question with a made-up header, or a model question
 before every role and skill group, before the user sees it. Headers are checked, not the text,
 which may be translated. Built-in agents (Explore, general-purpose...) are never blocked.
 
@@ -15,6 +16,7 @@ the steps also come from the setup state (`settings.update_setup_state`): `tw.py
 transcript's first entry count.
 """
 import json
+import math
 import os
 import re
 import sys
@@ -60,7 +62,7 @@ def user_text(entry):
 
 
 GROUP = re.compile(r"(Roles|Skills) \d+/(\d+)$")
-FIXED = {"Scope", "Preset", "Add-ons", "Team talk", "Start"}
+FIXED = {"Mode", "Scope", "Preset", "Add-ons", "Team talk", "Start"}
 
 
 def setup_missing(headers, printed=None):
@@ -68,7 +70,7 @@ def setup_missing(headers, printed=None):
     the headers the last `tw.py questions --task` printed (no "Skills" group when it found under 2
     skills); without them the groups are guessed from the asked headers."""
     if printed is not None:
-        return sorted({h for h in printed if h in ("Scope", "Preset") or GROUP.match(h)} - headers)
+        return sorted({h for h in printed if h in ("Mode", "Scope", "Preset") or GROUP.match(h)} - headers)
     need = {"Scope", "Preset"}
     for kind in ("Roles", "Skills"):
         totals = {int(m.group(2)) for h in headers for m in [GROUP.match(h)] if m and m.group(1) == kind}
@@ -85,9 +87,10 @@ def epoch(stamp):
 
 def recorded(root, start, session=None):
     """What the setup state shows since `start` (the session's first entry): (`options` ran,
-    `questions --task` ran, the headers it printed or None, headers this session asked)."""
+    `questions --task` ran, the headers it printed or None, headers this session asked, the Mode
+    answer `tw.py questions --mode` recorded or None)."""
     if start is None or root is None:
-        return False, False, None, set()
+        return False, False, None, set(), None
     state = settings.load_setup_state(root)
 
     def fresh(t):
@@ -102,7 +105,16 @@ def recorded(root, start, session=None):
     by_session = state.get("asked") if isinstance(state.get("asked"), dict) else {}
     asked = by_session.get(str(session)) if session else None
     asked = asked if isinstance(asked, dict) else {}
-    return fresh(state.get("options")), listed, printed, {h for h, t in asked.items() if fresh(t)}
+    asked = {h: float(t) for h, t in asked.items() if fresh(t)}
+    # the answer counts only when recorded after this session asked "Mode": another session's is older.
+    # shortcut: one state file per repo, so a session answering after this one asked still counts; key by session if that bites
+    mode = state.get("mode")
+    try:
+        mode = mode[0] if (isinstance(mode, list) and len(mode) == 2 and mode[0] in ("auto", "skip")
+                           and math.isfinite(float(mode[1])) and float(mode[1]) >= asked.get("Mode", math.inf)) else None
+    except (TypeError, ValueError):
+        mode = None
+    return fresh(state.get("options")), listed, printed, set(asked), mode
 
 
 def record_asked(root, session, questions):
@@ -119,7 +131,8 @@ def record_asked(root, session, questions):
 
 def scan(path, root=None, session=None):
     """(opted out, `options` ran, `questions` ran, headers asked, headers `questions --task` printed
-    or None), from the transcript and the setup state."""
+    or None), from the transcript and the setup state. Opted out: "skip setup" or "defaults" typed,
+    or "Mode" asked and answered Auto or Skip setup."""
     shown = listed = False
     headers, start = set(), None
     for entry in entries(path):
@@ -143,8 +156,9 @@ def scan(path, root=None, session=None):
             if block.get("name") == "AskUserQuestion":
                 qs = inp.get("questions")
                 headers |= {str(q.get("header", "")) for q in qs if isinstance(q, dict)} if isinstance(qs, list) else set()
-    was_shown, was_listed, printed, asked = recorded(root, start, session)
-    return False, shown or was_shown, listed or was_listed, headers | asked, printed
+    was_shown, was_listed, printed, asked, mode = recorded(root, start, session)
+    headers |= asked
+    return bool(mode and "Mode" in headers), shown or was_shown, listed or was_listed, headers, printed
 
 
 def missing_step(path, role, root=None, session=None):

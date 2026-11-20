@@ -526,6 +526,22 @@ def cmd_questions(args):
     app = args.app or os.environ.get("TEAM_WORKFLOW_APP") or "claude"
     root = repo_root()
     data = app_options(app, root)
+    if args.mode:  # the user's answer to "Mode": the gate lets the agents go, nothing more to ask
+        settings.update_setup_state(root, mode=[args.mode, time.time()])
+        payload = {"app": app, "mode": args.mode}
+        if args.mode == "auto":
+            boost = cortex.vibecode_boost(" ".join(args.task or []), root=root or ".", app=app)
+            payload["plan"] = [{"role": n["role"], "model": n["model"], "effort": n["effort"],
+                                "skills": [s["id"] for s in n["bound_skills"]]}
+                               for n in boost["route"]["activated_neurons"]]
+            payload["how"] = ("Pick the roles, model, effort and skills the task needs: start from `plan`, add "
+                              "or drop roles, search more skills with `tw.py library search WORDS`. Show the "
+                              "user a one-line recap per role, then launch. No more setup questions.")
+            payload["prompt_block"] = boost["agent_booster"]["prompt_block"]
+        else:
+            payload["how"] = "Use the saved settings (`tw.py options`) as they are. No more setup questions."
+        print(json.dumps(payload, indent=1, ensure_ascii=False))
+        return
     if args.roles:
         chosen = [r.strip() for r in args.roles.split(",") if r.strip()]
         unknown = [r for r in chosen if r not in data["roles"]]
@@ -548,10 +564,12 @@ def cmd_questions(args):
     payload = {
         "app": app, "unknown_roles": unknown,
         "required_headers": [q["header"] for c in out for q in c["questions"]
-                             if not args.roles and q["header"].startswith(("Scope", "Preset", "Roles", "Skills"))
+                             if not args.roles and q["header"].startswith(("Mode", "Scope", "Preset", "Roles", "Skills"))
                              or args.roles],
         "calls": out,
-        "how": "Ask every call in order with the question tool, options as printed, none skipped "
+        "how": "Ask the Mode call first. Auto or Skip setup: run `tw.py questions --mode auto|skip --task <words>` "
+               "and ask nothing more. I choose: "
+               "ask every call in order with the question tool, options as printed, none skipped "
                "(Claude Code's setup hook blocks the agents until every required header "
                "was asked); the text "
                "may be translated to the user's language, the headers stay as printed; add "
@@ -1551,6 +1569,9 @@ def main(argv=None):
     qu.add_argument("--app", choices=roles.APPS)
     qu.add_argument("--task", nargs="*", help="words of the task: they rank roles and pick library skills")
     qu.add_argument("--roles", help="chosen roles, comma separated: model and effort questions")
+    qu.add_argument("--mode", choices=("auto", "skip"),
+                    help="the user's Mode answer: auto prints the orchestrator's plan, skip keeps the settings; "
+                         "the setup gate then lets the agents go")
     io = sub.add_parser("install-opencode", help="install team-workflow into OpenCode")
     io.add_argument("--workspace", help="this repository only (.opencode)")
     ix = sub.add_parser("install-codex", help="install team-workflow into Codex (also behind opencodex)")

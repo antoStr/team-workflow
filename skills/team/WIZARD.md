@@ -21,6 +21,9 @@ When the setting `session_wizard` is true (the default), before the first agent 
 conversation is launched, agree with the user which agents this conversation uses and how,
 among what the app offers right now. Do it once; later tasks in the same conversation reuse
 it and go straight to the board. Skip it when the user says "skip setup" or answers just "defaults".
+The first question, **Mode**, decides the rest: **Auto** (run `tw.py questions --mode auto --task <words>`,
+adapt its `plan` of roles, models, efforts and library skills, show a one-line recap per role, launch),
+**Skip setup** (`--mode skip`: saved settings) or **I choose** (every call below). The setup hook follows it.
 
 1. Run `python3 <skill>/scripts/tw.py options --app <claude|agy|opencode|codex>` for the app you
    run in and show its output to the user as it is, in a code block: the models and efforts

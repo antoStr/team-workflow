@@ -41,9 +41,19 @@ def role_text(role, root):
     return re.sub(r"^Use this agent (to|when|for)\s+", "", short(meta.get("description", ""), 300))
 
 
+# Auto or Skip setup: the model runs `tw.py questions --mode auto|skip` and the gate lets the agents go
+MODE_QUESTION = {
+    "question": "How do we set up the team?", "header": "Mode", "multiSelect": False,
+    "options": [{"label": "Auto", "description": "The orchestrator picks roles, library skills, model and effort "
+                                                 "for the task; no more questions (Recommended)"},
+                {"label": "I choose", "description": "Preset, every role, the skills, model and effort per role"},
+                {"label": "Skip setup", "description": "Saved settings as they are, no more questions"}]}
+
+
 def setup_calls(data, task_words, config, root):
-    """Scope and preset, every enabled role, the skills for the task, add-ons and team talk."""
-    out = [{"step": "scope and preset", "questions": [
+    """Mode first (the gate follows it), then scope and preset, every enabled role, the skills for
+    the task, add-ons and team talk."""
+    out = [{"step": "mode", "questions": [MODE_QUESTION]}, {"step": "scope and preset", "questions": [
         {"question": "Where do the choices of this setup go?", "header": "Scope", "multiSelect": False,
          "options": [{"label": "This conversation only", "description": "Nothing is saved (Recommended)"},
                      {"label": "My defaults", "description": f"User file {data['scope']['user_file']}"}]
