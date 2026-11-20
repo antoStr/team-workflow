@@ -5,16 +5,13 @@ layer: skills
 tags: [code, py]
 aliases: [skills/team/scripts/scan.py, scan.py]
 upstream:
-  - "[[skills-team-scripts-brain]]"
-  - "[[skills-team-scripts-roles]]"
-  - "[[skills-team-scripts-settings]]"
 downstream:
   - "[[skills-team-scripts-cortex]]"
   - "[[tests-test_cortex]]"
   - "[[tests-test_scan_verify_catalog]]"
 files: [skills/team/scripts/scan.py]
 status: active
-last_updated: 2026-11-19T12:05:00
+last_updated: 2026-11-20T11:45:45
 ---
 
 # scan.py
@@ -38,9 +35,7 @@ frontend UI components stack, and project documentation/memory health.
 
 ## Dependencies
 ### Upstream
-- [[skills-team-scripts-brain]]
-- [[skills-team-scripts-roles]]
-- [[skills-team-scripts-settings]]
+- None
 ### Downstream
 - [[skills-team-scripts-cortex]]
 - [[tests-test_cortex]]

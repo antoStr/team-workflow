@@ -15,7 +15,6 @@ import roles  # noqa: E402
 import scan  # noqa: E402
 import settings  # noqa: E402
 import talk  # noqa: E402
-import tw  # noqa: E402
 
 
 class CortexTest(ScriptTest):

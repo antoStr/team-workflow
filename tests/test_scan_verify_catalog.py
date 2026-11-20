@@ -1,7 +1,6 @@
 """Tests for repo scan, verify-docs, agents catalog, and frontend component skills."""
 import isolate_home  # noqa: F401
 import json
-import os
 import sys
 import unittest
 

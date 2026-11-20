@@ -9,7 +9,7 @@ upstream:
 downstream:
 files: [skills/team/scripts/stop_check.py]
 status: active
-last_updated: 2026-11-19T12:05:00
+last_updated: 2026-11-20T11:45:45
 ---
 
 # stop_check.py

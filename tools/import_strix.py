@@ -4,7 +4,6 @@ import hashlib
 import json
 import os
 import re
-import shutil
 
 STRIX_REPO = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "..", "strix_repo"))
 LIBRARY_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "skills", "team-workflow", "library"))

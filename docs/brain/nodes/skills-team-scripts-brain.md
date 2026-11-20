@@ -7,13 +7,12 @@ aliases: [skills/team/scripts/brain.py, brain.py]
 upstream:
 downstream:
   - "[[skills-team-scripts-cortex]]"
-  - "[[skills-team-scripts-scan]]"
   - "[[skills-team-scripts-tw]]"
   - "[[skills-team-scripts-verify_docs]]"
   - "[[tests-test_brain]]"
 files: [skills/team/scripts/brain.py]
 status: active
-last_updated: 2026-11-19T11:00:10
+last_updated: 2026-11-20T11:45:45
 ---
 
 # brain.py
@@ -46,7 +45,6 @@ AST-based repository mapping, fast BFS-expanded context queries, and vault healt
 - None
 ### Downstream
 - [[skills-team-scripts-cortex]]
-- [[skills-team-scripts-scan]]
 - [[skills-team-scripts-tw]]
 - [[skills-team-scripts-verify_docs]]
 - [[tests-test_brain]]

@@ -9,7 +9,7 @@ downstream:
   - "[[tests-test_v230_features]]"
 files: [skills/team/scripts/visual_check.py]
 status: active
-last_updated: 2026-11-11T22:06:53
+last_updated: 2026-11-20T11:45:45
 ---
 
 # visual_check.py

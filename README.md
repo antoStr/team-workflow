@@ -7,7 +7,7 @@
 **An autonomous team of specialist AI agents inside your coding assistant.**<br>
 Persistent Brain Graph Memory · "Zero Fake-Solved" Live Runtime Verification · Auto-learning & Preventive Vaccines · Adversarial Shared Channel · Transparent End-of-Task Report.
 
-[![Release](https://img.shields.io/badge/release-v2.5.1-2ea44f)](https://github.com/antoStr/team-workflow/releases)
+[![Release](https://img.shields.io/badge/release-v2.5.2-2ea44f)](https://github.com/antoStr/team-workflow/releases)
 [![Tests](https://github.com/antoStr/team-workflow/actions/workflows/tests.yml/badge.svg)](https://github.com/antoStr/team-workflow/actions/workflows/tests.yml)
 [![License: MIT](https://img.shields.io/github/license/antoStr/team-workflow?label=license)](LICENSE)
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-supported-d97757)
@@ -220,8 +220,9 @@ python tw.py smoke "<launch command>" --timeout 5 [--strict]
 With each task, your team grows more capable:
 
 1. **Detection**: when a bug is fixed or an adversarial challenge catches an edge case, the team identifies the root anti-pattern.
-2. **Recording**: `tw.py learn record --pattern "..." --fix "..." --reason "..."` writes an anti-pattern node into `docs/brain/learnings/`.
-3. **Vaccination**: on every session startup (`session_start.py`), active vaccines are injected into agent contexts, preventing recurring regressions.
+2. **Recording**: `tw.py learn record --title "..." --anti-pattern "..." --solution "..."` writes an anti-pattern node into `docs/brain/learnings/`.
+3. **Check, when a regex can find it**: add `--check-pattern REGEX --check-glob "*.ts"`. The learning is then enforced, not described: a hook runs it on every edit, the Stop hook on the session's changed files and `tw.py learn check` in CI (exit 1 on a match).
+4. **Vaccination**: the learnings without a check are injected into agent contexts as prose, preventing recurring regressions.
 
 ---
 
@@ -400,5 +401,5 @@ No. It only touches files directly relevant to your assigned task. All other pro
 Distributed under the **MIT License** (see [LICENSE](LICENSE)). Imported third-party resources retain their original licenses ([NOTICE](skills/team/library/NOTICE.md)).
 
 <div align="center">
-<sub>Built with precision for software engineers and AI-augmented teams · <b>team-workflow v2.5.1</b></sub>
+<sub>Built with precision for software engineers and AI-augmented teams · <b>team-workflow v2.5.2</b></sub>
 </div>

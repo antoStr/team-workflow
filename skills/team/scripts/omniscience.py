@@ -499,6 +499,9 @@ def record_attempt_and_check_circuit(root=".", command="", error_text="", reset=
     return state
 
 
+MAX_MUTATIONS = 10  # prose budget: older lessons drop off; one that must always hold belongs in a check
+
+
 def mutate_role_agent(root=".", role="", lesson="", trigger="", anti_pattern="", solution=""):
     """Engine 6: Darwin-Godel project-local TextGrad mutation in .team-workflow/agents/<role>.md."""
     role = (role or "").strip()
@@ -531,7 +534,10 @@ def mutate_role_agent(root=".", role="", lesson="", trigger="", anti_pattern="",
     bullet = f"- **{summary}** (Trigger: `{trig_s}` | Avoid: `{avoid_s}` | Require: `{req_s}`)"
 
     if bullet not in text:
-        text = text.rstrip() + f"\n{bullet}\n"
+        head, _, tail = text.partition(heading)
+        section, nxt, rest = tail.partition("\n## ")  # keep any later section as it is
+        kept = [ln for ln in section.splitlines() if ln.strip().startswith("- ")][-(MAX_MUTATIONS - 1):]
+        text = head + heading + "\n" + "\n".join(kept + [bullet]) + "\n" + (("\n## " + rest) if nxt else "")
         with open(target_path, "w", encoding="utf-8") as f:
             f.write(text)
 

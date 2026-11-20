@@ -7,7 +7,6 @@ crashes, unhandled exceptions, stderr errors, or immediate aborts.
 
 Returns empirical proof of whether an application or game truly boots and runs.
 """
-from datetime import datetime, timezone
 import os
 import re
 import subprocess

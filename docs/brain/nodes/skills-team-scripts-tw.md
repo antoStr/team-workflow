@@ -23,10 +23,9 @@ upstream:
   - "[[skills-team-scripts-talk]]"
   - "[[skills-team-scripts-update_plugin]]"
 downstream:
-  - "[[tests-test_cortex]]"
 files: [skills/team/scripts/tw.py]
 status: active
-last_updated: 2026-11-19T14:00:03
+last_updated: 2026-11-20T11:45:45
 ---
 
 # tw.py
@@ -120,4 +119,4 @@ tokens. In agy, use its bash mode: !team-workflow <command>.
 - [[skills-team-scripts-talk]]
 - [[skills-team-scripts-update_plugin]]
 ### Downstream
-- [[tests-test_cortex]]
+- None

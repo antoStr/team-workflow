@@ -133,17 +133,13 @@ On Windows, **WSL** is available:
 ### 5. Adversarial gate, neural plasticity, and self-evolving skills
 
 - Have the tester or pentester challenge the change, so edge cases do not break the app.
-- Record every mistake found and avoided in the brain, so later tasks are vaccinated:
-  `tw.py learn record --title "..." --trigger "..." --anti-pattern "..." --solution "..."`
-- **Project Genome Assimilation**: extract architectural hubs, git co-change coupling rules,
-  fragility hotspots, and verification commands into `.team-workflow/project_knowledge.json` and
-  `docs/brain/PROJECT_GENOME.md`:
-  `tw.py cortex assimilate`
-- **Hebbian Feedback & Meta-Skill Evolution**: reinforce or dampen synaptic weights from the
-  outcome, and synthesize reusable project & meta-orchestration skills (`team-meta-cortex` +
-  domain guard skills in `.team-workflow/skills/`):
-  `tw.py cortex feedback --outcome pass|fail|blocked --roles "<r1,r2>" --skills "<s1,s2>"`
-  `tw.py cortex evolve`
+- Record every mistake found and avoided in the brain. When a regex can find the mistake in a file,
+  add `--check-pattern` (and `--check-glob`): the learning becomes a check that the hooks run on every
+  edit and at Stop, instead of a line of prose agents can skip; `tw.py learn check` runs them in CI:
+  `tw.py learn record --title "..." --trigger "..." --anti-pattern "..." --solution "..." [--check-pattern REGEX --check-glob "*.ts"]`
+- The Stop hook runs `cortex assimilate` and `cortex evolve` and records a pass after a session
+  with changes. Only a failed or blocked task needs a call:
+  `tw.py cortex feedback --outcome fail|blocked --roles "<r1,r2>" --skills "<s1,s2>"`
 
 ### 6. Documentation gate
 

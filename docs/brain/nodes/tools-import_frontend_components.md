@@ -8,7 +8,7 @@ upstream:
 downstream:
 files: [tools/import_frontend_components.py]
 status: active
-last_updated: 2026-11-11T22:06:53
+last_updated: 2026-11-20T11:45:45
 ---
 
 # import_frontend_components.py

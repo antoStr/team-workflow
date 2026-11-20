@@ -8,13 +8,16 @@ Extracts anti-patterns, bug fixes, performance optimizations, and security lesso
 
 Saves learnings into docs/brain/learnings/ as Obsidian graph nodes, mirrors them into
 docs/memory/LEARNINGS.md, and injects 'vaccines' (preventive constraints) into agent prompts.
+
+A learning with a `check` (a regex and a file glob) is enforced instead: the check hook runs it on every
+edit, the Stop hook on the session's changed files and `tw.py learn check` in CI, and it is no longer
+sent to the agents as prose. A deterministic check beats one more line of rules that agents can skip.
 """
 from datetime import datetime, timezone
 import fnmatch
 import json
 import os
 import re
-import sys
 
 VAULT_DIR = "docs/brain"
 LEARNINGS_DIR = os.path.join(VAULT_DIR, "learnings")
@@ -63,11 +66,21 @@ def record_learning(
     applies_to=None,
     category="bug",
     confidence=1,
-    source="manual"
+    source="manual",
+    check=None,
 ):
-    """Save a new learning node and update the active vaccine index."""
+    """Save a new learning node and update the active vaccine index. `check`: {"pattern": regex,
+    "glob": file glob} that finds the anti-pattern in a file."""
     if not title:
         raise ValueError("Learning requires a title.")
+    if check is not None:
+        if not isinstance(check, dict) or not check.get("pattern"):
+            raise ValueError("A check needs a pattern.")
+        try:
+            re.compile(check["pattern"], re.MULTILINE)
+        except re.error as e:
+            raise ValueError(f"Invalid check pattern: {e}") from e
+        check = {"pattern": check["pattern"], "glob": check.get("glob") or "*"}
 
     lp = learnings_path(root)
     _ensure_dir(lp)
@@ -95,6 +108,8 @@ def record_learning(
         "source": source,
         "created_at": now_iso
     }
+    if check:
+        item["check"] = check
 
     # 1. Write Obsidian node in docs/brain/learnings/<item_id>.md
     clean_title = title.replace("\n", " ").replace('"', '\\"')
@@ -189,6 +204,8 @@ def get_vaccines(root=".", file_path=None, role=None, limit=5):
     clean_file = os.path.normpath(file_path).replace("\\", "/") if file_path else ""
 
     for item in idx.get("learnings", []):
+        if item.get("check"):  # enforced by the check hook: no prose needed
+            continue
         scopes = item.get("applies_to", [])
         is_match = False
 
@@ -210,6 +227,54 @@ def get_vaccines(root=".", file_path=None, role=None, limit=5):
 
     matched.sort(key=lambda x: x.get("confidence", 1), reverse=True)
     return matched[:limit]
+
+
+CHECK_MAX_BYTES = 1_000_000
+
+
+def load_checks(root="."):
+    """[(learning, compiled regex, glob)] for every learning with a valid check."""
+    out = []
+    for item in load_index(root).get("learnings", []):
+        chk = item.get("check")
+        if not isinstance(chk, dict) or not chk.get("pattern"):
+            continue
+        try:
+            out.append((item, re.compile(chk["pattern"], re.MULTILINE), chk.get("glob") or "*"))
+        except re.error:
+            continue
+    return out
+
+
+def check_violations(root=".", paths=(), checks=None):
+    """"path:line: title: required pattern [id]" for every check whose pattern a file matches.
+    `paths` are relative to `root`; missing or unreadable files are skipped."""
+    checks = load_checks(root) if checks is None else checks
+    found = []
+    for rel in paths:
+        rel = rel.replace("\\", "/")
+        if rel.startswith((VAULT_DIR + "/", "docs/memory/")):  # the learnings quote their own anti-patterns
+            continue
+        hits = [(item, rx) for item, rx, glob in checks if fnmatch.fnmatch(rel, glob)]
+        if not hits:
+            continue
+        full = os.path.join(root, rel)
+        try:
+            if os.path.getsize(full) > CHECK_MAX_BYTES:  # a slow regex on a huge file outlives the hook timeout
+                continue
+            with open(full, "rb") as f:
+                data = f.read()
+        except OSError:
+            continue
+        if b"\0" in data:  # binary
+            continue
+        text = data.decode("utf-8", errors="replace")
+        for item, rx in hits:
+            m = rx.search(text)
+            if m:
+                line = text.count("\n", 0, m.start()) + 1
+                found.append(f"{rel}:{line}: {item['title']}: {item.get('solution') or 'fix the root cause'} [{item['id']}]")
+    return found
 
 
 def format_vaccine_prompt(vaccines):

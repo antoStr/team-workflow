@@ -8,7 +8,6 @@ repositories without requiring raw multi-file edit permissions.
 import os
 import re
 import subprocess
-import sys
 
 
 def extract_diff_from_text(text):

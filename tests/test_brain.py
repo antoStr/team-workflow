@@ -1,16 +1,12 @@
 """Unit tests for the Brain (Obsidian vault) engine and Talk Digest."""
 import isolate_home  # noqa: F401
-import json
 import os
-import shutil
-import tempfile
 import unittest
 
 from test_scripts import SCRIPTS, ScriptTest
 import sys
 sys.path.insert(0, SCRIPTS)
 import brain
-import settings
 import talk
 
 

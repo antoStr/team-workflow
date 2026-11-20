@@ -10,9 +10,10 @@ downstream:
   - "[[skills-team-scripts-cortex]]"
   - "[[skills-team-scripts-tw]]"
   - "[[tests-test_cortex]]"
+  - "[[tests-test_prose_budget]]"
 files: [skills/team/scripts/omniscience.py]
 status: active
-last_updated: 2026-11-19T12:01:44
+last_updated: 2026-11-20T11:45:45
 ---
 
 # omniscience.py
@@ -56,3 +57,4 @@ Addresses the 2025-2026 documented failure modes of coding agents:
 - [[skills-team-scripts-cortex]]
 - [[skills-team-scripts-tw]]
 - [[tests-test_cortex]]
+- [[tests-test_prose_budget]]

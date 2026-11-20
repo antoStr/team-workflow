@@ -106,20 +106,38 @@ def home_dir():
 
 
 def setup_state_file(root):
-    """Where `tw.py questions --task` leaves the headers it printed, for the setup gate hook."""
+    """Where `tw.py options`/`questions` and the setup gate record the setup steps, for the gate hook."""
     key = re.sub(r"[^\w.-]+", "_", os.path.normcase(os.path.abspath(root or ".")))[-150:]  # no hashlib: 0.6s cold
     return os.path.join(home_dir(), "setup", key + ".json")
 
 
-def save_setup_headers(root, headers):
+def load_setup_state(root):
+    try:
+        with open(setup_state_file(root), encoding="utf-8") as f:
+            state = json.load(f)
+    except (OSError, ValueError):
+        return {}
+    return state if isinstance(state, dict) else {}
+
+
+def update_setup_state(root, **fields):
+    """Merge `fields` into the setup state. `tw.py` and the setup gate record each step here because a
+    transcript does not show every call: Code Mode logs only some of the shell calls a script makes."""
     # shortcut: one file per repository, so two sessions in one repo share it; key it by session if that bites
     path = setup_state_file(root)
+    state = load_setup_state(root)
+    state.update(fields)
     try:
         os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump({"time": time.time(), "headers": list(headers)}, f)
+        with open(path + ".tmp", "w", encoding="utf-8") as f:
+            json.dump(state, f)
+        os.replace(path + ".tmp", path)  # a reader never sees half a file
     except OSError:
         pass
+
+
+def save_setup_headers(root, headers):
+    update_setup_state(root, time=time.time(), headers=list(headers))
 
 
 def hardware_dir():

@@ -1,0 +1,5 @@
+# Pyflakes only (F): real mistakes, no style. skills/team/library is imported third-party content.
+extend-exclude = ["skills/team/library", "archive"]
+
+[lint]
+select = ["F"]

@@ -9,10 +9,8 @@ Audits web templates for responsive layout integrity:
  5. Heading hierarchy (single <h1> per view)
  6. Motion safety (@media (prefers-reduced-motion))
 """
-import json
 import os
 import re
-import sys
 
 
 def audit_html_files(root):
@@ -93,7 +91,6 @@ def audit_css_files(root):
                 css_files.append(os.path.join(dirpath, f))
 
     has_reduced_motion = False
-    has_mobile_query = False
 
     for path in css_files:
         rel = os.path.relpath(path, root)
@@ -105,9 +102,6 @@ def audit_css_files(root):
 
         if "prefers-reduced-motion" in content:
             has_reduced_motion = True
-
-        if re.search(r"@media\s*\([^)]*max-width:\s*(?:768|1024|480)px", content):
-            has_mobile_query = True
 
         # Check for wide fixed widths without max-width
         for m in re.finditer(r"(?<!max-)(?<!min-)width:\s*([4-9]\d{2}|[1-9]\d{3,})px", content):

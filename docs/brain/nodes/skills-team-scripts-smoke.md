@@ -10,7 +10,7 @@ downstream:
   - "[[tests-test_autolearn_gate_smoke]]"
 files: [skills/team/scripts/smoke.py]
 status: active
-last_updated: 2026-11-11T22:06:53
+last_updated: 2026-11-20T11:45:45
 ---
 
 # smoke.py
