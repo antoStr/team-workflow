@@ -7,6 +7,7 @@
   so a pull no longer asks for a STATE.md that came in the same commit; `_auto_evolve_session` runs
   once per set of changes (one cortex "pass", not one per turn); `brain.map_repo` and the genome skip
   a rewrite that would change only the date (`tests/test_stop_noise.py`).
+- README (EN/IT) rewritten: problem/fix table, 30-second install, demo, "why it does not fake it".
 
 ### v2.5.2 (from the "All Code Is Slop" talk review: checks over prose)
 - Setup gate in Code Mode: the transcript logs only some shell calls of a REPL script, so

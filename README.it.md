@@ -1,142 +1,60 @@
 <div align="center">
 
-[English](README.md) | [Italiano](README.it.md)
+[English](README.md) · [Italiano](README.it.md)
 
 # 🧭 team-workflow
 
-**Un team autonomo di agenti esperti dentro il tuo assistente di programmazione.**<br>
-Memoria Brain Graph persistente · Verifica reale runtime "Zero Fake-Solved" · Auto-learning & Vaccini preventivi · Team avversario con canale condiviso · Report trasparente a fine lavoro.
+### Il tuo assistente AI per il codice, trasformato in un team che controlla il proprio lavoro.
+
+Scrivi `/team <compito>`. Un agente capo sceglie gli specialisti giusti, loro costruiscono e si mettono alla prova a vicenda,<br>
+e niente viene dichiarato "fatto" finché l'app non è stata davvero avviata.
 
 [![Release](https://img.shields.io/badge/release-v2.5.3-2ea44f)](https://github.com/antoStr/team-workflow/releases)
 [![Tests](https://github.com/antoStr/team-workflow/actions/workflows/tests.yml/badge.svg)](https://github.com/antoStr/team-workflow/actions/workflows/tests.yml)
-[![License: MIT](https://img.shields.io/github/license/antoStr/team-workflow?label=licenza)](LICENSE)
-![Claude Code](https://img.shields.io/badge/Claude%20Code-supportato-d97757)
-![agy](https://img.shields.io/badge/agy%20(Antigravity)-supportato-4285f4)
-![OpenCode](https://img.shields.io/badge/OpenCode-supportato-6e40c9)
-![Codex](https://img.shields.io/badge/Codex%20%2F%20opencodex-supportato-10a37f)
+[![License: MIT](https://img.shields.io/github/license/antoStr/team-workflow?label=license)](LICENSE)
+[![Stars](https://img.shields.io/github/stars/antoStr/team-workflow?style=flat&label=stars)](https://github.com/antoStr/team-workflow/stargazers)
+<br>
+![Claude Code](https://img.shields.io/badge/Claude%20Code-supported-d97757)
+![agy](https://img.shields.io/badge/agy%20(Antigravity)-supported-4285f4)
+![OpenCode](https://img.shields.io/badge/OpenCode-supported-6e40c9)
+![Codex](https://img.shields.io/badge/Codex%20%2F%20opencodex-supported-10a37f)
+
+**[Installa in 30 secondi](#-installa-in-30-secondi)** · **[Guardalo lavorare](#-guardalo-lavorare)** · **[Perché non finge](#-perché-non-finge)** · **[FAQ](#-faq)**
 
 </div>
 
 ---
 
-## 📑 Indice
+## 🤔 Il problema
 
-1. [Cos'è, in due parole](#-cosè-in-due-parole)
-2. [Perché usarlo](#-perché-usarlo)
-3. [Le novità di v2.3 e v2.0](#-le-novità-di-v23-e-v20)
-4. [Come funziona](#️-come-funziona)
-5. [Installazione](#-installazione)
-6. [Il comando universale `/team` e i primi 5 minuti](#-il-comando-universale-team-e-i-primi-5-minuti)
-7. [Zero Fake-Solved: Live Smoke Test](#-zero-fake-solved-live-smoke-test)
-8. [Auto-Learning & Vaccini Preventivi](#-auto-learning--vaccini-preventivi)
-9. [Memoria di Progetto & Brain Graph](#-memoria-di-progetto--brain-graph)
-10. [Gli agenti](#-gli-agenti)
-11. [Project management](#-project-management)
-12. [Agenti che parlano tra loro & Gate Avversario](#-agenti-che-parlano-tra-loro--gate-avversario)
-13. [La libreria di skill](#-la-libreria-di-skill)
-14. [Cybersecurity, Reversing & Malware Intel](#️-cybersecurity-reversing--malware-intel)
-15. [Add-on e server MCP](#-add-on-e-server-mcp)
-16. [Aggiornamenti a Zero Token](#-aggiornamenti-a-zero-token)
-17. [Costi e consumi](#-costi-e-consumi)
-18. [Domande frequenti](#-domande-frequenti)
-19. [Per saperne di più](#-per-saperne-di-più)
-20. [Licenza](#-licenza)
+Un assistente AI lavora da solo. Scrive il codice, si approva da solo, dice *"Risolto!"* senza avviare
+l'app e il giorno dopo ha dimenticato il tuo progetto.
 
----
+## ✅ La soluzione
 
-## 💡 Cos'è, in due parole
+**team-workflow** dà all'assistente un team e regole che non può aggirare a parole:
 
-**team-workflow** è un plugin universale per **Claude Code**, **agy (Antigravity)**, **OpenCode** e **Codex** (incluso **opencodex**).
-
-Di solito parli con un unico modello generalista che fa tutto da solo, spesso sostiene di aver risolto i problemi senza aver mai avviato l'applicazione e dimentica il contesto tra una sessione e l'altra.
-
-Con **team-workflow**, l'assistente diventa il **responsabile tecnico di un team**:
-- Comprende l'obiettivo e seleziona gli **specialisti dedicati** (frontend, backend, pentester, reverse engineer, tester, reviewer, architect...).
-- Mantiene la memoria di progetto con un **Brain Knowledge Graph** compatibile con Obsidian.
-- **Verifica realmente a runtime** che l'applicazione o il gioco compili, si avvii e resti stabile senza crash (**Zero Fake-Solved**).
-- **Impara automaticamente** dagli errori del team e inietta **vaccini anti-pattern** nelle sessioni future.
-- Ti consegna un **report chiaro** con prove oggettive e ti chiede il permesso prima di qualsiasi modifica irreversibile.
-- **Risponde nella tua lingua**: usa la lingua in cui scrivi (inglese se non è chiaro), mentre codice, commit e documentazione del repository restano nella lingua del progetto.
-
-> [!TIP]
-> **Tutto in un solo comando**: ora basta usare `/team <il tuo compito>` per avviare il team completo senza dover memorizzare decine di comandi lunghi.
-
----
-
-## ✨ Perché usarlo
-
-| | Assistente Standard | Con team-workflow v2.0 |
+| | Un assistente | Con team-workflow |
 |---|---|---|
-| 🧠 **Memoria** | Ogni sessione riparte da zero | Knowledge Graph in `docs/brain/` persistente e compattazione settimanale |
-| 👥 **Competenze** | Un solo modello generalista | **137 specialisti**: core, linguaggi, framework, sicurezza offensiva, reversing e malware analysis |
-| 🎮 **Verifica Reale** | "Ho corretto il codice!" (senza avviare) | **Zero Fake-Solved**: smoke test runtime su processo reale, log e stabilità d'avvio |
-| 🛡️ **Auto-Apprendimento** | Ripete gli stessi bug col tempo | Registra anti-pattern e inietta **vaccini comportamentali** ad ogni prompt |
-| ⚔️ **Controllo Qualità** | Chi scrive approva se stesso | Gate avversario: costruttore contro verificatore su canale condiviso |
-| ⚡ **Semplicità d'Uso** | 25 comandi diversi da ricordare | **Comando universale `/team`** per qualsiasi operazione |
-| 🔄 **Aggiornamenti** | Manuali o con consumo token | `/team upgrade` a **zero token** tramite script nativo locale |
-| 💰 **Costi & Budget** | Consumi opachi e imprevisti | Stima prima del task, split costi per modello/agente, dashboard integrata |
+| 👥 **Chi lavora** | un generalista | gli specialisti giusti tra **137** (backend, frontend, tester, reviewer, pentester...) |
+| 🎮 **"Funziona"** | un'affermazione | l'app viene **avviata e controllata** (processo, exit code, log) |
+| ⚔️ **Review** | l'autore si approva da solo | serve la firma di un verificatore indipendente |
+| 🧠 **Memoria** | riparte da zero a ogni sessione | memoria di progetto e **brain graph** compatibile con Obsidian |
+| 🛡️ **Errori** | ripetuti | registrati una volta, poi **bloccati da un controllo** a ogni modifica |
+| 💰 **Costi** | una sorpresa | stima prima di iniziare, modelli economici per il lavoro di routine, report dei consumi |
 
 ---
 
-## 🚀 Le novità di v2.3 e v2.0
+## 🚀 Installa in 30 secondi
 
-### v2.3
-- 🎨 **Pack rontend-components**: 13 skill (shadcn/ui, Base UI, Radix, Sonner, Vaul, cmdk, NumberFlow, pick-ui-library, Beautiful UI, RareUI, Magic UI, Aceternity UI, 21st.dev) e il ruolo design-engineer.
-- 🧩 **`tw.py component add <nome>`**: genera subito cmdk, sonner, number-flow, vaul, spotlight, marquee e dot-grid, con codice accessibile.
-- 👀 **`tw.py preview`**: avvia, controlla e ferma il server di sviluppo del progetto (HTML statico, Node, Django) su una porta libera.
-- 🩹 **`tw.py patch`**: applica un diff unificato in modo atomico, con `--dry-run`, utile per i subagent senza permessi di scrittura.
-- 📱 **`tw.py visual-check`**: controlla viewport, rischi di overflow, `prefers-reduced-motion` e struttura degli `<h1>`.
-- 💬 **`tw.py talk close`**: chiude un canale risolvendo i thread aperti e registrando la decisione finale.
-- 🧭 **`tw.py scan` e `tw.py verify-docs`**: scan del repository a ogni `/team` e gate sulla documentazione a fine lavoro.
-- 🎛️ **Scelta agenti dinamica e zero-ghosting**: catalogo completo dei ruoli senza limite a 4 scelte, e ogni domanda intercalata nel testo riceve risposta.
-
-### v2.0
-
-- 🎯 **Comando Universale `/team`**: basta `/team aggiungi login`, `/team correggi crash del menu` o `/team audit sicurezza`. Tutti i vecchi comandi lunghi restano supportati come alias retrocompatibili.
-- 🚦 **Zero Fake-Solved Gate**: fine delle allucinazioni in cui l'AI dice "Risolto!" ma il gioco o l'app non parte nemmeno. Il motore lancia `tw.py smoke "<cmd>"` con timeout di sicurezza e valida l'avvio reale.
-- 💉 **Continuous Auto-Learning & Vaccini**: ogni volta che un bug viene corretto o un gate avversario supera una contestazione, `tw.py learn` registra l'anti-pattern e lo inietta come vaccino nelle istruzioni del team.
-- 🧠 **Brain Knowledge Graph**: archivio in `docs/brain/` con nodi Markdown, frontmatter YAML, wikilink bidirezionali e supporto ai grafi Obsidian, con `tw.py brain rollover` per compattazione settimanale automatica.
-- 🛡️ **Cybersecurity Suite (Strix, Cloudflare & Malware Intel)**: 100 playbook avanzati di sicurezza offensiva, difensiva e analisi malware (42 Strix + 15 Cloudflare + 43 Malware Analysis & URL Threat Hunting) per un totale di **512 voci di libreria**.
-- 🔬 **Ruoli Pentester, Reverse Engineer & Malware Analyst**: audit di binari compilati, firmware, API e triage di sample malware con supporto a IDA Pro, Ghidra, x64dbg, Cutter, YARA, Sigma e URLScan.io.
-- 💸 **Zero-Token Self-Update**: notifica automatica di nuovi rilasci all'avvio sessione e aggiornamento immediato con `/team upgrade`.
-
----
-
-## ⚙️ Come funziona
-
-```mermaid
-flowchart TD
-    A([🙋 Tu chiedi: /team ...]) --> B[🧠 Orchestratore legge il Brain Graph]
-    B --> C{Complessità del compito}
-    C -- Semplice / Rapido --> D[Risolve direttamente]
-    C -- Medio / Complesso --> E[👥 Spawna specialisti su canale condiviso]
-    E --> F[⚔️ Builder implementa]
-    F --> G[🔬 Verifier & Pentester contestano]
-    G --> H[🚦 Live Smoke Test: avvio reale processo]
-    H -- Fallito --> F
-    H -- Superato --> I[💉 Auto-Learning: registra vaccino preventivo]
-    I --> J[🧾 Report finale con prove d'avvio]
-    D --> J
-    J --> K[(🧠 Brain Graph & Memoria aggiornati)]
-```
-
----
-
-## 📦 Installazione
-
-**Requisiti:** `git`, **Python 3** e una delle quattro app supportate.
-
-<details open>
-<summary><b>Claude Code</b> (consigliato)</summary>
+**Ti serve:** `git`, **Python 3** e una delle app supportate.
 
 ```bash
 claude plugin marketplace add antoStr/team-workflow
 claude plugin install team@team
 ```
 
-Riavvia Claude Code. Fatto!
-
-</details>
+Riavvia Claude Code e scrivi `/team <quello che vuoi>`. Fine.
 
 <details>
 <summary><b>agy (Antigravity)</b></summary>
@@ -146,8 +64,7 @@ agy plugin install https://github.com/antoStr/team-workflow
 python ~/.gemini/config/plugins/team-workflow/skills/team/scripts/tw.py install-cli
 ```
 
-Riavvia agy. Fatto!
-
+Riavvia agy.
 </details>
 
 <details>
@@ -158,8 +75,7 @@ git clone https://github.com/antoStr/team-workflow
 python team-workflow/skills/team/scripts/install_opencode.py
 ```
 
-Riavvia OpenCode. I comandi sono disponibili come `/team` o `/team-workflow/<nome>`.
-
+Riavvia OpenCode. Comandi: `/team` oppure `/team-workflow/<nome>`.
 </details>
 
 <details>
@@ -170,235 +86,220 @@ git clone https://github.com/antoStr/team-workflow
 python team-workflow/skills/team/scripts/tw.py install-codex
 ```
 
-Riavvia Codex. I comandi sono registrati come `$team` o `$team-workflow-<nome>`.
-
+Riavvia Codex. Comandi: `$team` oppure `$team-workflow-<nome>`.
 </details>
 
 ---
 
-## ⚡ Il comando universale `/team` e i primi 5 minuti
+## 🎬 Guardalo lavorare
 
-Non c'è più bisogno di ricordare decine di comandi. Usa semplicemente `/team`:
-
-| Cosa vuoi fare | Comando | Cosa fa |
-|---|---|---|
-| **Avviare un task** | `/team crea autenticazione OAuth` | Wizard automatico, team di specialisti, implementazione e test |
-| **Risolvere un bug reale** | `/team il gioco va in crash al livello 3` | Riproduzione, fix, live smoke test reale e verifica che non crashi |
-| **Audit di sicurezza** | `/team controlla vulnerabilità e binari` | Pentester e security reviewer analizzano API, codice e dipendenze |
-| **Aggiornare il plugin** | `/team upgrade` | Scarica e aggiorna l'ultima versione a **zero token** |
-| **Leggere la memoria** | `/team status` o `/team memory` | Mostra stato, grafi della conoscenza e vaccini attivi |
-
-I comandi dettagliati e le utility a costo zero token sono integrati in `/team`:
-- `/team start [compito]` (o `/team fix-bug <bug>`)
-- `/team doctor` (healthcheck del plugin, harness e ruoli con auto-fix: `doctor --fix`)
-- `/team audit` (audit di sicurezza e conformità configurazioni)
-- `/team review-changes` (revisione approfondita del diff)
-- `/team call-team <ruoli>` (convocazione manuale di specifici specialisti)
-- `/team release [versione]` (gestione versionamento e rilascio)
-- `agy plugin update team-workflow` (aggiornamento trasparente da terminale Windows, macOS e Linux)
-
----
-
-## 🚦 Zero Fake-Solved: Live Smoke Test
-
-Uno dei problemi più frustranti nello sviluppo con LLM è l'agente che dichiara: *"Problema risolto con successo!"*, ma poi l'applicazione non compila, fallisce all'avvio o crasha silenziosamente.
-
-team-workflow integra il motore **Live Smoke Test**:
-```bash
-python tw.py smoke "<comando di avvio>" --timeout 5 [--strict]
-```
-
-- Lancia il vero processo del gioco o dell'applicazione in un sandbox controllato.
-- Monitora l'avvio, il codice di uscita, gli errori su `stderr` e la stabilità dopo 5 o 10 secondi di esecuzione.
-- **Regola Zero Fake-Solved**: l'orchestratore ha il divieto tassativo di dichiarare un task completato finché lo smoke test non produce evidenza tangibile di corretta esecuzione.
-- **WSL Bridge nativo**: su sistemi Windows, aggiungi il flag `--wsl` (`tw.py smoke "<cmd>" --wsl`) per eseguire smoke test e verifiche dentro l'ambiente Linux WSL2 reale (ad esempio per daemon di rete, ELF binari o test su `/proc`).
-
----
-
-## 💉 Auto-Learning & Vaccini Preventivi
-
-Ad ogni sessione, gli agenti diventano più intelligenti:
-
-1. **Rilevamento**: quando un bug viene risolto o un test avversario intercetta un errore sottile, il team estrae l'anti-pattern.
-2. **Registrazione**: `tw.py learn record --title "..." --anti-pattern "..." --solution "..."` crea un nodo in `docs/brain/learnings/`.
-3. **Check, quando una regex lo trova**: aggiungi `--check-pattern REGEX --check-glob "*.ts"`. Il learning diventa un controllo, non una descrizione: un hook lo esegue a ogni modifica, lo Stop hook sui file cambiati nella sessione e `tw.py learn check` in CI (exit 1 se trova qualcosa).
-4. **Vaccinazione**: i learning senza check vengono iniettati come prosa nel contesto degli agenti, impedendo la regressione su errori già affrontati.
-
----
-
-## 🧠 Memoria di Progetto & Brain Graph
-
-Il sistema di memoria supporta sia la modalità classica (`docs/memory/`) sia il nuovo **Brain Graph** (`docs/brain/`), compatibile nativamente con Obsidian:
-
-- **Nodi strutturati**: architettura, moduli, decisioni (ADR), convenzioni, log settimanali e vaccini.
-- **Wikilink bidirezionali**: navigazione immediata delle dipendenze ad 1-hop senza dover scansionare l'intera codebase con grep.
-- **Compattazione automatica**: `tw.py brain rollover` archivia lo stato delle settimane precedenti in journal di riepilogo (`docs/brain/journal/week-YYYY-WXX.md`), consentendo di lavorare per mesi senza saturare la finestra di contesto.
-- **Verifica di coerenza**: `tw.py brain check --strict` valida link orfani o nodi rotti.
-
----
-
-## 👥 Gli agenti
-
-team-workflow include **137 specialisti**:
-- **20 nel core**: `architect`, `backend-dev`, `frontend-dev`, `tester`, `code-reviewer`, `security-reviewer`, `database-engineer`, `devops-engineer`, `performance-engineer`, `ui-ux-designer`, `product-manager`, `doc-keeper`, `e2e-tester`, `data-analyst`, `market-researcher`, `marketing-strategist`, `refactor-specialist`, `release-manager`, `technical-writer`, `accessibility-specialist`.
-- **Pack linguaggi (26 agenti)**: Python, TypeScript, Go, Rust, Java, C++, C#, Kotlin, Swift, PHP, Ruby, Dart/Flutter, F#.
-- **Pack qualità, sicurezza & reversing**: `pentester`, `reverse-engineer`, `malware-analyst`, `silent-failure-hunter`, `type-design-reviewer`, e molti altri.
-- **Pack project management (`pm`)**: `project-manager`, `project-scheduler`, `project-controller`, `risk-manager`, `stakeholder-manager`, `agile-coach` (vedi [Project management](#-project-management)).
-- **Pack alternativi (`alt-`)**: versioni per una seconda opinione indipendente.
-
-📋 Consulta il **[Catalogo Completo](docs/CATALOG.it.md)** per le schede di tutti i 137 ruoli.
-
----
-
-## 📊 Project management
-
-Non tutto è codice. Il pack di agenti `pm` e il pack di libreria `project-management` portano la
-gestione di progetto nello stesso team, secondo la ISO 21502 e le pratiche IPMA/PMI e agili:
-
-| Agente | Cosa fa |
-|---|---|
-| `project-manager` | charter, piano integrato e baseline, controllo delle modifiche, report di stato, chiusura e lezioni apprese |
-| `project-scheduler` | attività e legami, percorso critico e float, Gantt, livellamento risorse, crashing e fast tracking |
-| `project-controller` | budget e riserve, misura dell'avanzamento, earned value (CPI, SPI, EAC, TCPI), previsioni |
-| `risk-manager` | minacce e opportunità, probabilità e impatto, risposte e responsabili, registro dei rischi |
-| `stakeholder-manager` | analisi degli stakeholder, piano di comunicazione, RACI, riunioni, conflitti e negoziazione |
-| `agile-coach` | scelta del ciclo di vita, Scrum e Kanban, backlog e user story, stime e piano dei rilasci |
+Una sessione d'esempio (accorciata):
 
 ```text
-/team:agents enable pm                         ← accende il pack
-/team:library enable project-management        ← installa le sue otto skill (pm-lifecycle, pm-schedule, pm-control...)
+tu     /team il gioco va in crash sul boss del livello 3
+
+team   setup    poche domande rapide: ambito, quali specialisti, quali modelli
+       piano    backend-dev corregge, tester verifica, code-reviewer rivede
+       talk     #1 backend-dev → tester   [fix]       sprite del boss nullo dopo il reload
+                #2 tester → backend-dev   [challenge] crasha ancora al secondo tentativo
+                #3 backend-dev → tester   [fix]       sprite ricaricato a ogni tentativo
+                #4 tester                 [verdict]   12 test passano, il gioco parte e arriva al livello 3
+       smoke    tw.py smoke "npm run start" → processo vivo dopo 10 s, nessun errore
+       learn    "ricarica gli asset a ogni tentativo" salvato come controllo per la prossima volta
+       report   cosa è cambiato, le prove, e cosa aspetta ancora il tuo OK
+```
+
+**Un solo comando per tutto:**
+
+| Vuoi... | Scrivi |
+|---|---|
+| Creare una funzione | `/team aggiungi il login OAuth2` |
+| Correggere un bug | `/team il totale del carrello va in negativo con il coupon SAVE5` |
+| Fare un audit di sicurezza | `/team audit degli endpoint API` |
+| Rivedere le tue modifiche | `/team:review-changes` |
+| Chiamare specialisti precisi | `/team:call-team tester e security-reviewer: controllate l'upload` |
+| Controllare l'installazione | `/team doctor` |
+| Aggiornare il plugin (zero token) | `/team upgrade` |
+
+Il team risponde nella tua lingua. Codice, commit e documentazione del repository restano nella lingua del progetto.
+
+---
+
+## 🔍 Perché non finge
+
+La maggior parte degli strumenti AI si affida a istruzioni che il modello può saltare. team-workflow mette
+le regole importanti in **codice che gira da solo**:
+
+1. **Zero Fake-Solved.** Un bug non è risolto finché `tw.py smoke "<comando di avvio>"` non avvia l'app vera
+   e questa resta in piedi (exit code, stderr, qualche secondo di esecuzione). Su Windows, `--wsl` la avvia in Linux.
+2. **Niente auto-approvazione.** Gli agenti lavorano su un canale condiviso (`tw.py talk`). Con il gate avversario
+   (`tw.py gate`) l'autore non può approvare il proprio lavoro: deve farlo un verificatore.
+3. **Gli errori diventano controlli.** Una lezione si salva con `tw.py learn record`. Se una regex può trovare
+   l'errore, aggiungi `--check-pattern`. Da lì in poi un hook blocca quell'errore **a ogni modifica**, a fine sessione
+   e in CI (`tw.py learn check`). Le lezioni senza controllo arrivano agli agenti come promemoria.
+4. **Il setup non si salta per sbaglio.** In Claude Code un hook ferma gli agenti del team finché non hai risposto
+   alle domande del setup (o non scrivi "skip setup").
+5. **Chiede prima di qualsiasi cosa irreversibile.** Le modifiche fuori dal compito finiscono nel report finale e
+   aspettano il tuo consenso.
+
+> [!NOTE]
+> La regola 3 segue la lezione di *"All Code Is Slop (Except Mine)"* (Lauren Tan, AI Engineer 2026): ogni correzione
+> deve diventare un controllo deterministico, non un'altra riga di istruzioni.
+
+---
+
+## 🧩 Cosa c'è dentro
+
+<details>
+<summary><b>👥 137 agenti specialisti</b></summary>
+
+- **20 ruoli base**: `architect`, `backend-dev`, `frontend-dev`, `tester`, `code-reviewer`, `security-reviewer`,
+  `database-engineer`, `devops-engineer`, `performance-engineer`, `ui-ux-designer`, `product-manager`, `doc-keeper`,
+  `e2e-tester`, `data-analyst`, `market-researcher`, `marketing-strategist`, `refactor-specialist`,
+  `release-manager`, `technical-writer`, `accessibility-specialist`.
+- **Pack di linguaggi (26 ruoli)**: Python, TypeScript, Go, Rust, Java, C++, C#, Kotlin, Swift, PHP, Ruby, Dart/Flutter, F#.
+- **Qualità, sicurezza e reversing**: `pentester`, `reverse-engineer`, `malware-analyst`, `silent-failure-hunter`, `type-design-reviewer` e altri.
+- **Project management (`pm`)**: `project-manager`, `project-scheduler`, `project-controller`, `risk-manager`, `stakeholder-manager`, `agile-coach`.
+- **Seconde opinioni (`alt-`)**: versioni alternative di ruoli esistenti.
+
+L'agente capo sceglie solo gli specialisti che servono al compito. I compiti piccoli li fa da solo.
+Elenco completo: **[catalogo](docs/CATALOG.it.md)**.
+</details>
+
+<details>
+<summary><b>📚 533 voci di libreria</b> (417 skill, 94 comandi, 22 set di regole)</summary>
+
+Pattern agentici e valutazione, TDD, migrazioni di database reversibili, refactoring sicuro, risparmio di token
+(Caveman, Ponytail, Context Mode), componenti frontend (shadcn/ui, Radix, Magic UI...), project management.
+Cerca con `tw.py library search <parole>`, attiva con `/team:library enable <voce o pack>`.
+</details>
+
+<details>
+<summary><b>🛡️ Sicurezza, reversing e analisi malware</b></summary>
+
+- **Pentesting Strix (42 playbook)**: OWASP Top 10, IDOR, SSRF, injection, race condition, JWT, prompt injection.
+  Il `pentester` deve riprodurre ogni problema con un proof of concept.
+- **Audit di sicurezza Cloudflare (15 playbook)**: memory safety, protocolli web e autenticazione, API, deploy cloud.
+- **Reverse engineering**: IDA Pro, Ghidra, x64dbg, Cutter e server MCP di decompilazione.
+- **Analisi malware (43 playbook)**: triage, unpacking, memory forensics, analisi C2, YARA, Sigma, STIX 2.1,
+  analisi di URL e phishing.
+</details>
+
+<details>
+<summary><b>🧠 Una memoria che dura mesi</b></summary>
+
+- `docs/memory/`: stato del progetto, mappa, decisioni e playbook, controllati da `memcheck`.
+- `docs/brain/`: un grafo compatibile con Obsidian di moduli, decisioni e lezioni, con wikilink.
+  `tw.py brain query <modulo>` dà a un agente il modulo e i suoi vicini invece di un grep di tutto il repo.
+- `tw.py brain rollover` compatta la storia vecchia in diari settimanali, così i progetti lunghi non riempiono il contesto.
+</details>
+
+<details>
+<summary><b>📊 Project management</b></summary>
+
+Il pack `pm` pianifica e controlla i progetti (ISO 21502, pratiche IPMA/PMI e agile): charter, cronoprogramma con
+percorso critico, budget ed earned value, rischi, stakeholder. I numeri arrivano da calcolatori testati
+(`cpm.py`, `evm.py`), non dal modello.
+
+```text
+/team:agents enable pm
+/team:library enable project-management
 /team pianifica il trasloco dell'ufficio: charter, WBS, cronoprogramma con percorso critico, budget e rischi
 ```
+</details>
 
-I numeri non li calcola il modello: `pm-schedule` include un calcolatore del percorso critico
-(`cpm.py`, con stime PERT e Gantt Mermaid) e `pm-control` uno dell'earned value (`evm.py`),
-entrambi testati. I documenti finiscono in `docs/project/`, nella lingua che chiedi.
-
----
-
-## 💬 Agenti che parlano tra loro & Gate Avversario
-
-Per i compiti complessi, gli agenti comunicano su un canale condiviso (`tw.py talk`):
-
-```text
-#1 backend-dev → tester     [finding]   Corretto il calcolo del carrello in cart.py
-#2 tester → backend-dev     [challenge] Test fallito: con coupon SAVE5 il totale diventa negativo (-3.00 €)
-#3 backend-dev → tester     [fix]       Aggiunto vincolo min_total = 0.00 €
-#4 tester                   [verdict]   Verificato e approvato: 12 test su 12 passano
-```
-
-Grazie al **Gate Avversario** (`tw.py gate`), il builder non può mai approvare il proprio codice: un verificatore indipendente deve validare la modifica prima che venga accettata.
-
----
-
-## 📚 La libreria di skill
-
-La libreria integrata comprende **533 voci** (417 skill, 94 comandi, 22 set di regole):
-- Ingegneria agentica, cicli autonomi e harness di valutazione.
-- Ottimizzazione token e caching (Caveman, Ponytail, Context Mode).
-- Testing TDD, migrazioni reversibili, refactoring sicuro.
-- Ricerca istantanea con `tw.py library search <parole>`.
-
----
-
-## 🛡️ Cybersecurity, Reversing & Malware Intel
-
-La suite di sicurezza include quattro grandi pack specializzati:
-
-1. **Strix Autonomous Pentesting** (42 playbooks):
-   - OWASP Top 10, IDOR, SSRF, SQL Injection, NoSQL Injection, Race Conditions, Prototype Pollution, JWT broken authentication, LLM Prompt Injection e Agentic Security.
-   - Ruolo `pentester`: richiede sempre PoC funzionante, controprove e calibrazione CVSS prima di dichiarare un rischio.
-
-2. **Cloudflare Security Audit** (15 playbooks):
-   - Memory safety per codice compilato (C/C++, Rust, Go), Web protocol & auth, client-side, API/RPC messaging, cloud deployment e data lifecycle.
-
-3. **Reverse Engineering & Decompilazione**:
-   - Ruolo `reverse-engineer`: supporto per **IDA Pro**, **Ghidra**, **x64dbg**, **Cutter** e server MCP di decompilazione. Analisi di binari ELF/PE, ricostruzione strutture dati, firma delle funzioni e verifica di buffer overflow.
-
-4. **Malware Analysis & Threat Intel URL/Richieste** (43 playbooks):
-   - Ruolo `malware-analyst`: triage PE/ELF, unpacking, memory forensics, dissezione protocolli C2, YARA, Sigma, STIX 2.1.
-   - Audit link e richieste: scansione URLScan.io, ispezione header phishing, domain fronting hunting, tracking infrastrutture avversarie e analisi traffico di rete (Zeek, TShark).
-
----
-
-## 🔌 Add-on e server MCP
-
-Installa strumenti e capacità aggiuntive in tutte le app supportate con un solo comando:
+<details>
+<summary><b>🔌 Add-on e server MCP</b></summary>
 
 ```bash
 tw.py addons add popular       # Superpowers, skill Anthropic, ui-ux, context7
-tw.py addons add mcp           # Playwright (browser reale), Context7, Serena
+tw.py addons add mcp           # Playwright (browser vero), Context7, Serena
 tw.py addons add token-saving  # Caveman, Ponytail, Context-mode
+```
+</details>
+
+<details>
+<summary><b>💰 Costi</b></summary>
+
+- Il setup mostra una stima prima che partano gli agenti.
+- Il lavoro di routine va ai modelli leggeri (`haiku`, `flash`), architettura e sicurezza ai più forti.
+- `tw.py usage` (o `/team:usage-costs`) divide la spesa per ruolo, modello e sessione.
+- `/team upgrade` aggiorna il plugin con uno script locale: zero token.
+</details>
+
+---
+
+## ⚙️ Come funziona
+
+```mermaid
+flowchart LR
+    A(["/team compito"]) --> B[Setup: ambito, specialisti, modelli]
+    B --> C[Gli specialisti costruiscono]
+    C --> D[Il verificatore mette alla prova]
+    D -- fallisce --> C
+    D -- passa --> E[Smoke test: l'app gira davvero]
+    E -- crasha --> C
+    E -- stabile --> F[Lezioni salvate come controlli]
+    F --> G([Report con le prove])
 ```
 
 ---
 
-## 🔄 Aggiornamenti a Zero Token
-
-Non consumare token preziosi per aggiornare il plugin:
-
-- **Notifica automatica**: all'apertura di una sessione, un controllo locale non invasivo ti segnala se è disponibile una nuova versione.
-- **Aggiornamento istantaneo**: digita `/team upgrade` (o da terminale `tw.py upgrade`). Lo script esegue il pull locale da git, riallinea i file e rigenera i cataloghi senza effettuare chiamate LLM.
-
----
-
-## 💰 Costi e consumi
-
-- **Stima preventiva**: il wizard calcola il costo previsto in base ai token e ai modelli assegnati a ciascun ruolo.
-- **Ottimizzazione intelligente**: i ruoli secondari possono usare modelli rapidi ed economici (`haiku`, `flash`), riservando i modelli di punta (`sonnet`, `opus`, `pro`) ai compiti critici di architettura e sicurezza.
-- **Trasparenza**: il comando `tw.py usage` (o `/team:usage-costs`) mostra i consumi esatti divisi per agente, modello e sessione.
-
----
-
-## ❓ Domande frequenti
+## ❓ FAQ
 
 <details>
 <summary><b>Devo usare tutti i 137 agenti?</b></summary>
 
-No! L'orchestratore sceglie solo 1 o 2 agenti strettamente necessari per il tuo compito specifico. Per compiti piccoli, l'assistente lavora da solo.
+No. L'agente capo sceglie solo gli specialisti che servono e lavora da solo sui compiti piccoli.
 </details>
 
 <details>
-<summary><b>Come evito che l'agente dica di aver risolto senza testare?</b></summary>
+<summary><b>Come impedisce agli agenti di dichiarare risolto ciò che non lo è?</b></summary>
 
-È integrato il sistema Zero Fake-Solved: l'agente ha la regola vincolante di eseguire `tw.py smoke "<comando>"` per verificare l'avvio reale del processo prima di considerare concluso il compito.
+La correzione è accettata solo dopo che `tw.py smoke` ha avviato il comando vero e il processo è rimasto sano,
+e dopo la firma di un verificatore indipendente.
 </details>
 
 <details>
-<summary><b>Posso saltare il setup di sessione?</b></summary>
+<summary><b>Posso saltare il setup della sessione?</b></summary>
 
-In Claude Code un hook (`setup_gate.py`) blocca ogni agente del team finché le domande del setup non sono state fatte, anche quando il modello prova a lanciare subito gli agenti. Scrivi "skip setup" nella richiesta, o rispondi solo "defaults", per lanciarli con le impostazioni attuali. `TEAM_WORKFLOW_SETUP_GATE=0` o `session_wizard=false` disattiva il gate.
+Sì. Scrivi "skip setup" nella richiesta, oppure rispondi solo "defaults", per partire con le impostazioni attuali.
+`TEAM_WORKFLOW_SETUP_GATE=0` o `session_wizard=false` disattivano il gate del setup.
 </details>
 
 <details>
-<summary><b>Come fa a gestire sessioni lunghe settimane o mesi?</b></summary>
+<summary><b>Può modificare file senza chiedere?</b></summary>
 
-Grazie al motore Brain Graph (`docs/brain/`): le sessioni passate vengono riassunte in journal settimanali tramite `tw.py brain rollover`, mantenendo snello il contesto attivo senza perdere la memoria storica del progetto.
+No. Tocca solo i file del tuo compito. Tutto il resto viene proposto nel report finale e aspetta il tuo OK.
 </details>
 
 <details>
-<summary><b>Il plugin può modificare file non richiesti?</b></summary>
+<summary><b>Funziona su progetti lunghi?</b></summary>
 
-No. Modifica solo i file inerenti al compito assegnato. Tutte le altre proposte vengono inserite nel report finale e richiedono la tua autorizzazione esplicita.
+Sì. La memoria e il brain graph conservano lo stato del progetto tra le sessioni, e `tw.py brain rollover`
+archivia la storia vecchia in diari settimanali.
 </details>
 
 ---
 
 ## 📖 Per saperne di più
 
-- 📋 [Catalogo Completo (137 agenti, 533 voci di libreria)](docs/CATALOG.it.md)
-- 👥 [Guida agli agenti e creazione ruoli](docs/AGENTS.it.md)
-- 📘 [Manuale di riferimento comandi e configurazione](docs/REFERENCE.it.md)
-- 💬 [Team Talk e protocollo di conversazione](skills/team/TALK.md)
-- 🧠 [Brain Knowledge Graph & Struttura nodi](docs/brain/INDEX.md)
+- 📋 [Catalogo completo: 137 agenti, 533 voci di libreria](docs/CATALOG.it.md)
+- 👥 [Guida agli agenti: usare, cambiare o crearne di nuovi](docs/AGENTS.it.md)
+- 📘 [Manuale di riferimento: ogni comando e impostazione](docs/REFERENCE.it.md)
+- 💬 [Come parlano tra loro gli agenti](skills/team/TALK.md)
+- 🧠 [Struttura del brain graph](docs/brain/INDEX.md)
 - 📜 [Note di rilascio](https://github.com/antoStr/team-workflow/releases)
+- 🇬🇧 In inglese: [README](README.md) · [catalog](docs/CATALOG.md) · [agent guide](docs/AGENTS.md) · [manual](docs/REFERENCE.md)
 
 ---
 
-## 📄 Licenza
-
-Distribuito con licenza **MIT** (vedi [LICENSE](LICENSE)). I contenuti di terze parti importati nella libreria e nei ruoli mantengono le rispettive licenze d'origine ([NOTICE](skills/team/library/NOTICE.md)).
-
 <div align="center">
-<sub>Sviluppato con dedizione per programmatori e team aumentati da AI · <b>team-workflow v2.5.3</b></sub>
+
+**Se team-workflow ti ha evitato un "risolto!" che non era risolto, ⭐ metti una stella al repo così lo trovano anche altri.**
+
+Licenza MIT ([LICENSE](LICENSE)). Le risorse di terze parti importate mantengono le loro licenze ([NOTICE](skills/team/library/NOTICE.md)).
+
+<sub><b>team-workflow v2.5.3</b></sub>
+
 </div>
