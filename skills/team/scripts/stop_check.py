@@ -38,9 +38,43 @@ def changed_this_session(root, snap):
     return changed
 
 
-def newest_mtime(root, paths):
-    full = (os.path.join(root, p) for p in paths)
-    return max((os.path.getmtime(p) for p in full if os.path.exists(p)), default=0.0)
+def change_times(root, paths, head):
+    """{path: when it last changed}: the time of its newest commit since `head` for a committed file
+    without local edits, else its mtime. A pull writes files in any order, so mtimes alone would say
+    STATE.md is older than the code it came with."""
+    committed, stamp = {}, 0
+    for line in (git(root, "log", "--format=@%ct", "--name-only", f"{head}..HEAD") or "").splitlines() if head else []:
+        if line.startswith("@"):
+            stamp = int(line[1:])
+        elif line.strip():
+            committed.setdefault(line.strip(), stamp)  # newest commit first
+    # shortcut: commit times have 1 s resolution, so code committed in the same second as STATE.md counts
+    # as covered by it; compare commit order instead if that ever matters
+    dirty = dirty_paths(root)
+    times = {}
+    for p in paths:
+        full = os.path.join(root, p)
+        if p in committed and p not in dirty:
+            times[p] = float(committed[p])
+        elif os.path.exists(full):
+            times[p] = os.path.getmtime(full)
+    return times
+
+
+def read_mark(path):
+    try:
+        with open(path, encoding="utf-8") as f:
+            return f.read()
+    except OSError:
+        return None
+
+
+def write_mark(path, text):
+    try:
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(text)
+    except OSError:
+        pass
 
 
 def _auto_evolve_session(root, work):
@@ -113,37 +147,26 @@ def decide(data):
     import autolearn  # lazy, as in _auto_evolve_session
     failed = autolearn.check_violations(root, sorted(work))
     checks_mark = snapshot_path(session_id(data)) + ".checks"
-    try:
-        with open(checks_mark, encoding="utf-8") as f:
-            seen = f.read() == "\n".join(failed)
-    except OSError:
-        seen = False
-    if failed and not seen:  # once per set of failures, so a match the user keeps does not block every turn
-        try:
-            with open(checks_mark, "w", encoding="utf-8") as f:
-                f.write("\n".join(failed))
-        except OSError:
-            pass
+    if failed and read_mark(checks_mark) != "\n".join(failed):  # once per set of failures, not every turn
+        write_mark(checks_mark, "\n".join(failed))
         return {"decision": "continue" if is_agy(data) else "block",
                 "reason": "team-workflow: changed files fail recorded checks: " + "; ".join(failed[:5])
                           + ". Fix the root cause before stopping."}
-    _auto_evolve_session(root, work)
-    newest = newest_mtime(root, work)
-    if state_rel in changed and os.path.getmtime(state_full) >= newest:
+    times = change_times(root, work + [state_rel], snap.get("head"))
+    newest = max((times[p] for p in work if p in times), default=0.0)
+    fingerprint = f"{sorted(work)}|{newest}"
+    # Once per state of the files: every turn would add a "pass" to the cortex and rewrite the brain.
+    evolved = snapshot_path(session_id(data)) + ".evolved"
+    if read_mark(evolved) != fingerprint:
+        _auto_evolve_session(root, work)
+        write_mark(evolved, fingerprint)
+    if state_rel in changed and times.get(state_rel, 0.0) >= newest:
         return None
     # Ask once per state of the files, whatever the tool's own loop counter does.
-    mark, fingerprint = snapshot_path(session_id(data)) + ".asked", f"{sorted(work)}|{newest}"
-    try:
-        with open(mark, encoding="utf-8") as f:
-            if f.read() == fingerprint:
-                return None
-    except OSError:
-        pass
-    try:
-        with open(mark, "w", encoding="utf-8") as f:
-            f.write(fingerprint)
-    except OSError:
-        pass
+    mark = snapshot_path(session_id(data)) + ".asked"
+    if read_mark(mark) == fingerprint:
+        return None
+    write_mark(mark, fingerprint)
     return {"decision": "continue" if is_agy(data) else "block", "reason": REASON}
 
 

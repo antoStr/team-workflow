@@ -1,21 +1,21 @@
 # Project state
 
-## Current version: v2.5.2 (released)
+## Current version: v2.5.3 (released)
+
+### v2.5.3
+- Stop hook without noise: committed files are dated by their commit (`stop_check.change_times`),
+  so a pull no longer asks for a STATE.md that came in the same commit; `_auto_evolve_session` runs
+  once per set of changes (one cortex "pass", not one per turn); `brain.map_repo` and the genome skip
+  a rewrite that would change only the date (`tests/test_stop_noise.py`).
 
 ### v2.5.2 (from the "All Code Is Slop" talk review: checks over prose)
-- Setup gate in Code Mode: the transcript logs only some shell calls of a REPL script, timed at
-  their end, so the gate missed `tw.py options`/`questions` and denied team agents until "skip
-  setup". `tw.py options`/`questions --task` and the gate now record the steps in the setup state
-  (`settings.update_setup_state`), valid after the transcript's first entry; REPL `code` and
-  single-quoted tw.py commands count too.
+- Setup gate in Code Mode: the transcript logs only some shell calls of a REPL script, so
+  `tw.py options`/`questions --task` and the gate record the steps in the setup state
+  (`settings.update_setup_state`, asked headers keyed by session id, atomic write).
 - Learnings as checks: `tw.py learn record --check-pattern REGEX --check-glob GLOB`; PostToolUse
-  hook `check_hook.py` blocks a matching edit, the Stop hook a matching changed file,
-  `tw.py learn check` exits 1 in CI. Checked learnings are no longer prose vaccines.
-- Prose budget: `tests/test_prose_budget.py`; `mutate_role_agent` keeps 10 lessons per role;
-  SKILL.md/AGENTS.md no longer ask for `cortex assimilate`/`evolve` (the Stop hook runs them).
-- `ruff.toml` (pyflakes) + CI step (ruff 0.17.6); `preview.stop` reports `KILL_FAILED`.
-- Review fixes: `asked` headers keyed by session id; atomic state write; checks skip docs/brain,
-  docs/memory, files over 1 MB and binaries; Stop asks once per set of failures.
+  hook `check_hook.py`, the Stop hook and `tw.py learn check` (CI) enforce them; checked learnings
+  are no longer prose vaccines. Checks skip docs/brain, docs/memory, files over 1 MB and binaries.
+- Prose budget test; `mutate_role_agent` keeps 10 lessons; ruff (pyflakes) in CI.
 - Untested live: AskUserQuestion inside a Code Mode script (unit tests only).
 
 ### Released highlights (full notes in git tags / GitHub Releases)
@@ -41,5 +41,5 @@
 - `python skills/team/scripts/memcheck.py --root . --strict`, `tw.py brain check --strict`.
 
 ### Where to resume
-- `v2.5.2` is released; next work starts from `main`. Check live: the setup in a Code Mode session.
+- `v2.5.3` is released; next work starts from `main`. Check live: the setup in a Code Mode session.
 - `main` is protected on GitHub (`main protection` ruleset: PR + green `test` checks).

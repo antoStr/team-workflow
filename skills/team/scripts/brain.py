@@ -163,6 +163,9 @@ def _extract_regex_contracts(filepath, ext):
     return contracts
 
 
+STAMP = re.compile(r"^last_updated: .*$", re.MULTILINE)
+
+
 def map_repo(root=".", vault_dir=VAULT_DIR, incremental=False):
     """Scan the codebase, extract contracts, and generate/update nodes in vault_dir/nodes."""
     vault_path = _validate_vault_path(root, vault_dir)
@@ -288,8 +291,16 @@ def map_repo(root=".", vault_dir=VAULT_DIR, incremental=False):
         else:
             content.append("- None")
 
+        text = "\n".join(content) + "\n"
+        try:
+            with open(node_file, encoding="utf-8") as f:
+                old = f.read()
+        except OSError:
+            old = None
+        if old is not None and STAMP.sub("", old) == STAMP.sub("", text):
+            continue  # only last_updated would change: no churn in git
         with open(node_file, "w", encoding="utf-8") as f:
-            f.write("\n".join(content) + "\n")
+            f.write(text)
         written += 1
 
     return {"files_scanned": len(code_files), "nodes_written": written, "vault": nodes_dir}

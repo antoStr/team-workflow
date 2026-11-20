@@ -1257,8 +1257,16 @@ def assimilate_project_knowledge(root=".", write_genome_md=True, scan_report=Non
         else:
             lines.append("- No fix hotspots detected in git history.")
 
-        with open(genome_path, "w", encoding="utf-8") as f:
-            f.write("\n".join(lines) + "\n")
+        text = "\n".join(lines) + "\n"
+        stamp = re.compile(r'^updated: ".*"$', re.MULTILINE)
+        try:
+            with open(genome_path, encoding="utf-8") as f:
+                same = stamp.sub("", f.read()) == stamp.sub("", text)
+        except OSError:
+            same = False
+        if not same:  # only the date would change: no churn in git
+            with open(genome_path, "w", encoding="utf-8") as f:
+                f.write(text)
 
     knowledge["genome_md"] = genome_path
     knowledge["knowledge_json"] = _knowledge_path(root)
