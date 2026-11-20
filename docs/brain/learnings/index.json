@@ -44,6 +44,20 @@
       "confidence": 1,
       "source": "manual",
       "created_at": "2026-11-16T01:08:25.509754+00:00"
+    },
+    {
+      "id": "learn-concurrent-plugin-updates-break-each-other",
+      "title": "Concurrent plugin updates break each other",
+      "category": "bug",
+      "trigger": "auto update at session start while the user runs tw.py update",
+      "anti_pattern": "two update_plugin runs share ~/.team-workflow/*-update and the Claude marketplace clone",
+      "solution": "update_plugin.hold_lock: one run at a time, the second waits then rereads versions",
+      "applies_to": [
+        "*"
+      ],
+      "confidence": 1,
+      "source": "manual",
+      "created_at": "2026-11-20T12:06:35.059496+00:00"
     }
   ]
 }

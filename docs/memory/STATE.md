@@ -1,6 +1,12 @@
 # Project state
 
-## Current version: v2.5.3 (released)
+## Current version: v2.5.4 (released)
+
+### v2.5.4
+- Setup "Mode" first (Auto / I choose / Skip setup): `tw.py questions --mode auto|skip` records it, prints
+  the plan; `setup_gate.py` lets the agents go once "Mode" was asked, and only for an answer recorded after it.
+- `update_plugin.hold_lock`: one update at a time; auto update + `tw.py update` raced on 2026-11-20 (EBUSY).
+- `site/` (EN, IT) deployed by `.github/workflows/pages.yml`; needs Pages source "GitHub Actions".
 
 ### v2.5.3
 - Stop hook without noise: committed files are dated by their commit (`stop_check.change_times`),
@@ -31,10 +37,8 @@
   agent; roles or models named in the request pre-fill the answers, never skip them.
 - **v2.4.5**: the SessionStart hook gives the model a runnable `tw.py` (absolute paths).
 - **v2.4.4**: imperative setup line in every app; `update_plugin` `safe_rmtree` on Windows.
-- **v2.4.3**: Windows hook wrapper `hooks/run-py.cmd`; `talk` verdict and `join` checks.
 - **v2.4.0-2.4.2**: English-first docs + `*.it.md`; `pm` packs (137 agents, 533 library
   entries); `auto_update`; Claude 5.5 aliases; OpenCode/Codex `payload_dir()` updates.
-- **v2.3.0**: `preview`, `patch`, `component`, `visual-check`, `scan`, `verify-docs`.
 
 ### Verify
 - `python -m unittest discover -s tests` (Python 3.10+); `python -m ruff check .`.
@@ -42,5 +46,5 @@
 - `python skills/team/scripts/memcheck.py --root . --strict`, `tw.py brain check --strict`.
 
 ### Where to resume
-- `v2.5.3` is released; next work starts from `main`. Check live: the setup in a Code Mode session.
+- `v2.5.4` is released; site live at https://antostr.github.io/team-workflow/. Check live: Mode Auto in a new session.
 - `main` is protected on GitHub (`main protection` ruleset: PR + green `test` checks).

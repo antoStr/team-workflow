@@ -9,10 +9,11 @@
 Type `/team <task>`. A lead agent picks the right specialists, they build and challenge each other,<br>
 and nothing is called "done" until the app has actually run.
 
-[![Release](https://img.shields.io/badge/release-v2.5.3-2ea44f)](https://github.com/antoStr/team-workflow/releases)
+[![Release](https://img.shields.io/badge/release-v2.5.4-2ea44f)](https://github.com/antoStr/team-workflow/releases)
 [![Tests](https://github.com/antoStr/team-workflow/actions/workflows/tests.yml/badge.svg)](https://github.com/antoStr/team-workflow/actions/workflows/tests.yml)
 [![License: MIT](https://img.shields.io/github/license/antoStr/team-workflow?label=license)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/antoStr/team-workflow?style=flat&label=stars)](https://github.com/antoStr/team-workflow/stargazers)
+[![Website](https://img.shields.io/badge/website-antostr.github.io-6f42c1)](https://antostr.github.io/team-workflow/)
 <br>
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-supported-d97757)
 ![agy](https://img.shields.io/badge/agy%20(Antigravity)-supported-4285f4)
@@ -138,7 +139,8 @@ Most AI tools rely on instructions the model can skip. team-workflow puts the im
    add `--check-pattern`. From then on a hook blocks the mistake on **every edit**, at the end of the
    session and in CI (`tw.py learn check`). Lessons without a check are passed to the agents as reminders.
 4. **The setup cannot be skipped by accident.** In Claude Code a hook holds the team agents until the setup
-   questions are answered (or you say "skip setup").
+   questions are answered. The first question, **Mode**, offers **Auto** (the orchestrator picks roles, skills,
+   models and efforts for the task) and **Skip setup**.
 5. **It asks before anything irreversible.** Changes outside the task are listed in the final report and
    wait for your consent.
 
@@ -263,7 +265,9 @@ an independent verifier signs off.
 <details>
 <summary><b>Can I skip the session setup?</b></summary>
 
-Yes. Write "skip setup" in the request, or answer just "defaults", to start with your current settings.
+Yes. Answer the first question, **Mode**, with **Skip setup** (your current settings) or **Auto** (the orchestrator
+picks roles, skills, models and efforts for the task). Writing "skip setup" in the request, or answering just
+"defaults", also works.
 `TEAM_WORKFLOW_SETUP_GATE=0` or `session_wizard=false` turns the setup gate off.
 </details>
 
@@ -300,6 +304,6 @@ archives old history into weekly journals.
 
 MIT License ([LICENSE](LICENSE)). Imported third-party resources keep their own licenses ([NOTICE](skills/team/library/NOTICE.md)).
 
-<sub><b>team-workflow v2.5.3</b></sub>
+<sub><b>team-workflow v2.5.4</b></sub>
 
 </div>

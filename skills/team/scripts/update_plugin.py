@@ -367,6 +367,33 @@ def agy_update(names=None):
     return ok_all, "\n".join(log)
 
 
+def hold_lock(path=None, wait=600, stale=900):
+    """One update at a time: the auto update of a new session and `tw.py update` ran together and broke
+    each other (`claude plugin marketplace update`: EBUSY on its staging clone; Codex lost its temp
+    folder; agy read as not installed). Waits for the other run; the lock path when it is ours, else None."""
+    path = path or os.path.join(os.path.expanduser("~"), ".team-workflow", "update.running")
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    end, told = time.time() + wait, False
+    while True:
+        try:
+            os.close(os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY))
+            return path
+        except FileExistsError:
+            pass
+        try:
+            if time.time() - os.path.getmtime(path) > stale:  # left by a run that crashed
+                os.remove(path)
+                continue
+        except OSError:
+            continue  # the other run just ended: try again
+        if time.time() >= end:
+            return None
+        if not told:
+            print("another update is running: waiting for it to finish", flush=True)
+            told = True
+        time.sleep(2)
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Check and update the installed team-workflow plugin.")
     ap.add_argument("--check", action="store_true", help="only show installed and latest versions")
@@ -374,7 +401,23 @@ def main(argv=None):
     ap.add_argument("--harness", choices=("claude", "agy", "opencode", "codex", "all"), default="all")
     ap.add_argument("--source", default=REPO, help="what agy installs from (default: GitHub)")
     args = ap.parse_args(argv)
+    lock = None if args.check else hold_lock()
+    if not args.check and not lock:
+        print("another update is still running after 10 minutes (~/.team-workflow/update.running): nothing changed")
+        raise SystemExit(1)
+    try:
+        failed = _update(args)
+    finally:
+        if lock:
+            try:
+                os.remove(lock)
+            except OSError:
+                pass
+    raise SystemExit(1 if failed else 0)
 
+
+def _update(args):
+    """Versions after the lock: a run that waited sees what the other one installed."""
     latest = fetch_latest()
     print(f"latest: {latest or 'unknown (no network?)'}")
     failed = False
@@ -393,7 +436,7 @@ def main(argv=None):
         failed |= not ok
     if not args.check:
         print("Restart the session to load the new version.")
-    raise SystemExit(1 if failed else 0)
+    return failed
 
 
 if __name__ == "__main__":

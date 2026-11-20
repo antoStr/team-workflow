@@ -10,7 +10,7 @@ upstream:
 downstream:
 files: [skills/team/scripts/setup_gate.py]
 status: active
-last_updated: 2026-11-20T11:45:45
+last_updated: 2026-11-20T13:06:59
 ---
 
 # setup_gate.py
@@ -22,7 +22,8 @@ the scan straight to the agents. This hook denies the launch of a team role unti
 shows `tw.py options`, `tw.py questions`, AskUserQuestion calls with all its headers (Scope,
 Preset, every "Roles i/N" and "Skills i/N") and the model question of the role being launched
 (header = role[:12], from `tw.py questions --roles`), or the user said "defaults" or "skip
-setup". During the setup it also refuses a question with a made-up header, or a model question
+setup", or answered the first question, "Mode", with Auto or Skip setup (recorded by
+`tw.py questions --mode auto|skip` once "Mode" was asked). During the setup it also refuses a question with a made-up header, or a model question
 before every role and skill group, before the user sees it. Headers are checked, not the text,
 which may be translated. Built-in agents (Explore, general-purpose...) are never blocked.
 

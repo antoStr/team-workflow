@@ -111,3 +111,30 @@ class AutoUpdateTest(unittest.TestCase):
             self.assertTrue(ok, out)
             self.assertEqual(run_mock.call_count, 2)
             self.assertFalse(os.path.exists(tmp))
+
+
+class UpdateLockTest(unittest.TestCase):
+    """The auto update and `tw.py update` ran together and broke each other: one run at a time."""
+
+    def test_one_update_at_a_time(self):
+        import tempfile
+        import time
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "update.running")
+            self.assertEqual(update_plugin.hold_lock(path, wait=0), path)
+            self.assertIsNone(update_plugin.hold_lock(path, wait=0))  # held: the second run gives up
+            old = time.time() - 3600
+            os.utime(path, (old, old))  # a run that crashed an hour ago
+            self.assertEqual(update_plugin.hold_lock(path, wait=0), path)
+
+    def test_main_releases_the_lock(self):
+        import tempfile
+        from unittest import mock
+        with tempfile.TemporaryDirectory() as home:
+            with mock.patch("os.path.expanduser", return_value=home), \
+                    mock.patch.object(update_plugin, "fetch_latest", return_value="9.9.9"), \
+                    mock.patch.object(update_plugin, "installed", return_value=None):
+                with self.assertRaises(SystemExit) as done:
+                    update_plugin.main(["--harness", "claude"])
+            self.assertEqual(done.exception.code, 0)
+            self.assertFalse(os.path.exists(os.path.join(home, ".team-workflow", "update.running")))

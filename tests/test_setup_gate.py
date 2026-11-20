@@ -103,7 +103,7 @@ class SetupGateTest(ScriptTest):
 
     def test_gate_follows_the_headers_questions_printed(self):
         run, printed, _ = self.printed_setup()
-        groups = [h for h in printed if h in ("Scope", "Preset") or h.startswith(("Roles ", "Skills "))]
+        groups = [h for h in printed if h in ("Mode", "Scope", "Preset") or h.startswith(("Roles ", "Skills "))]
         ask = lambda hs: tool("AskUserQuestion", questions=[{"header": h, "question": "?"} for h in hs])
         base = [user("/team review"), tool("Bash", command='"py" "C:/x/tw.py" options --app claude'), run]
         model = ask(["tester", "tester"])
@@ -161,6 +161,52 @@ class SetupGateTest(ScriptTest):
         self.assertIsNone(self.gate([user("/team review")]))
 
 
+    def test_mode_answer_decides_the_rest(self):
+        """Mode asked and answered Auto or Skip setup: the agents go, no more questions."""
+        start = user("/team review", timestamp=datetime.now(timezone.utc).isoformat())
+        t = [start, tool("REPL", code="await $`${tw} setup`")]
+        for args in (("options", "--app", "claude"), ("questions", "--app", "claude", "--task", "review")):
+            self.assertEqual(self.run_script("tw.py", *args, cwd=self.root).returncode, 0)
+        self.assertIsNone(self.gate(t, ask=["Mode"]))  # first printed question, recorded
+        self.assertEqual(self.gate(t, role="tester"), "deny")  # "I choose" so far: the rest is missing
+        out = self.run_script("tw.py", "questions", "--app", "claude", "--mode", "auto", "--task", "review",
+                              cwd=self.root)
+        self.assertEqual(out.returncode, 0, out.stderr)
+        data = json.loads(out.stdout)
+        self.assertEqual(data["mode"], "auto")
+        self.assertIsInstance(data["plan"], list)
+        self.assertIsNone(self.gate(t, role="tester"))
+        self.assertIsNone(self.gate(t, role="code-reviewer"))  # any role: the orchestrator picks
+        self.assertEqual(self.gate(t, role="tester", session="s2"), "deny")  # Mode never asked there
+
+    def test_mode_skip(self):
+        start = user("/team review", timestamp=datetime.now(timezone.utc).isoformat())
+        t = [start]
+        self.assertEqual(self.run_script("tw.py", "questions", "--app", "claude", "--mode", "skip",
+                                         cwd=self.root).returncode, 0)
+        self.assertEqual(self.gate(t, role="tester"), "deny")  # recorded, but Mode was not asked
+        self.assertIsNone(self.gate(t, ask=["Mode"]))
+        self.assertEqual(self.gate(t, role="tester"), "deny")  # the answer came before the question
+        self.assertEqual(self.run_script("tw.py", "questions", "--app", "claude", "--mode", "skip",
+                                         cwd=self.root).returncode, 0)
+        self.assertIsNone(self.gate(t, role="tester"))
+
+    def test_mode_of_another_session_or_a_bad_record_keeps_the_gate(self):
+        start = user("/team review", timestamp="2000-01-01T00:00:00+00:00")
+        self.assertEqual(self.run_script("tw.py", "questions", "--app", "claude", "--mode", "auto",
+                                         cwd=self.root).returncode, 0)  # session s1 answered Auto
+        self.assertIsNone(self.gate([start], ask=["Mode"], session="s2"))  # s2 asks Mode afterwards
+        self.assertEqual(self.gate([start], role="tester", session="s2"), "deny")
+        state = glob.glob(os.path.join(self.tmp, ".team-workflow", "setup", "*.json"))[0]
+        for bad in (["i choose", 4102444800], ["auto", "inf"], ["auto"], "auto"):
+            with open(state, encoding="utf-8") as f:
+                data = json.load(f)
+            data["mode"] = bad
+            with open(state, "w", encoding="utf-8") as f:
+                json.dump(data, f)
+            self.assertEqual(self.gate([start], role="tester", session="s2"), "deny", bad)
+
+
 class QuestionsTest(ScriptTest):
     """`tw.py questions`: every enabled role, AskUserQuestion's limits, model and effort per role."""
 
@@ -181,6 +227,11 @@ class QuestionsTest(ScriptTest):
             for q in c["questions"]:
                 self.assertTrue(2 <= len(q["options"]) <= 4, q)
                 self.assertLessEqual(len(q["header"]), 12, q)
+
+    def test_mode_comes_first(self):
+        data = self.questions("--task", "review")
+        self.assertEqual(data["calls"][0]["questions"][0]["header"], "Mode")
+        self.assertEqual(data["required_headers"][0], "Mode")
 
     def test_model_and_effort_for_every_chosen_role(self):
         data = self.questions("--roles", "tester,code-reviewer,nope")

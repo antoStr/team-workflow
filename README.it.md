@@ -9,10 +9,11 @@
 Scrivi `/team <compito>`. Un agente capo sceglie gli specialisti giusti, loro costruiscono e si mettono alla prova a vicenda,<br>
 e niente viene dichiarato "fatto" finché l'app non è stata davvero avviata.
 
-[![Release](https://img.shields.io/badge/release-v2.5.3-2ea44f)](https://github.com/antoStr/team-workflow/releases)
+[![Release](https://img.shields.io/badge/release-v2.5.4-2ea44f)](https://github.com/antoStr/team-workflow/releases)
 [![Tests](https://github.com/antoStr/team-workflow/actions/workflows/tests.yml/badge.svg)](https://github.com/antoStr/team-workflow/actions/workflows/tests.yml)
 [![License: MIT](https://img.shields.io/github/license/antoStr/team-workflow?label=license)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/antoStr/team-workflow?style=flat&label=stars)](https://github.com/antoStr/team-workflow/stargazers)
+[![Website](https://img.shields.io/badge/website-antostr.github.io-6f42c1)](https://antostr.github.io/team-workflow/it/)
 <br>
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-supported-d97757)
 ![agy](https://img.shields.io/badge/agy%20(Antigravity)-supported-4285f4)
@@ -138,7 +139,8 @@ le regole importanti in **codice che gira da solo**:
    l'errore, aggiungi `--check-pattern`. Da lì in poi un hook blocca quell'errore **a ogni modifica**, a fine sessione
    e in CI (`tw.py learn check`). Le lezioni senza controllo arrivano agli agenti come promemoria.
 4. **Il setup non si salta per sbaglio.** In Claude Code un hook ferma gli agenti del team finché non hai risposto
-   alle domande del setup (o non scrivi "skip setup").
+   alle domande del setup. La prima domanda, **Mode**, offre **Auto** (l'orchestratore sceglie ruoli, skill,
+   modelli ed effort per il compito) e **Skip setup**.
 5. **Chiede prima di qualsiasi cosa irreversibile.** Le modifiche fuori dal compito finiscono nel report finale e
    aspettano il tuo consenso.
 
@@ -263,7 +265,9 @@ e dopo la firma di un verificatore indipendente.
 <details>
 <summary><b>Posso saltare il setup della sessione?</b></summary>
 
-Sì. Scrivi "skip setup" nella richiesta, oppure rispondi solo "defaults", per partire con le impostazioni attuali.
+Sì. Rispondi alla prima domanda, **Mode**, con **Skip setup** (le impostazioni attuali) o **Auto** (l'orchestratore
+sceglie ruoli, skill, modelli ed effort per il compito). Funziona anche scrivere "skip setup" nella richiesta, o
+rispondere solo "defaults".
 `TEAM_WORKFLOW_SETUP_GATE=0` o `session_wizard=false` disattivano il gate del setup.
 </details>
 
@@ -300,6 +304,6 @@ archivia la storia vecchia in diari settimanali.
 
 Licenza MIT ([LICENSE](LICENSE)). Le risorse di terze parti importate mantengono le loro licenze ([NOTICE](skills/team/library/NOTICE.md)).
 
-<sub><b>team-workflow v2.5.3</b></sub>
+<sub><b>team-workflow v2.5.4</b></sub>
 
 </div>

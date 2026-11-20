@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>team-workflow: a team of agents that check each other</title>
+<meta name="description" content="team-workflow turns your AI coding assistant into a team of specialist agents that check each other. Type /team &lt;task&gt;. Works with Claude Code, agy, OpenCode and Codex.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="wrap top">
+<a class="brand" href="./"><img src="assets/favicon.svg" alt="" width="28" height="28">team-workflow</a>
+<nav aria-label="Main"><ul>
+<li><a href="#problem">The problem</a></li>
+<li><a href="#install">Install</a></li>
+<li><a href="#demo">See it work</a></li>
+<li><a href="#why">Why it does not fake it</a></li>
+<li><a href="#catalog">Catalog</a></li>
+<li><a href="#faq">FAQ</a></li>
+<li><a href="https://github.com/antoStr/team-workflow">GitHub</a></li>
+<li><a href="it/" hreflang="it" lang="it" aria-label="Leggi in italiano">Italiano</a></li>
+</ul></nav>
+</header>
+<main id="main">
+<div class="wrap hero">
+<h1>A team of agents that check each other.</h1>
+<p class="lead">A lead agent picks the right specialists, they build and challenge each other, and nothing is called "done" until the app has actually run.</p>
+<p><code class="cmd">/team &lt;task&gt;</code></p>
+<div class="cta"><a class="btn" href="#install">Install in 30 seconds</a><a class="btn alt" href="https://github.com/antoStr/team-workflow">View on GitHub</a></div>
+<ul class="badges" aria-label="Supported apps"><li>Claude Code</li><li>agy (Antigravity)</li><li>OpenCode</li><li>Codex / opencodex</li></ul>
+</div>
+<div class="wrap">
+<section id="problem" aria-labelledby="h-problem">
+<h2 id="h-problem">The problem and the fix</h2>
+<p>A single AI assistant works alone. It writes the code, approves its own code, says <em>"Fixed!"</em> without starting the app, and forgets your project the next day. <strong>team-workflow</strong> gives the assistant a team and a set of rules it cannot talk its way around.</p>
+<table class="cmp">
+<caption class="sr">One assistant compared with team-workflow</caption>
+<thead><tr><th scope="col"><span class="sr">Aspect</span></th><th scope="col">One assistant</th><th scope="col">With team-workflow</th></tr></thead>
+<tbody>
+<tr><th scope="row">Who works</th><td data-label="One assistant">one generalist</td><td data-label="With team-workflow">the right specialists out of <strong>137</strong> (backend, frontend, tester, reviewer, pentester...)</td></tr>
+<tr><th scope="row">"It works"</th><td data-label="One assistant">a claim</td><td data-label="With team-workflow">the app is <strong>started and checked</strong> (process, exit code, logs)</td></tr>
+<tr><th scope="row">Review</th><td data-label="One assistant">the author approves itself</td><td data-label="With team-workflow">an independent verifier must sign off</td></tr>
+<tr><th scope="row">Memory</th><td data-label="One assistant">starts from zero each session</td><td data-label="With team-workflow">project memory and an Obsidian-compatible <strong>brain graph</strong></td></tr>
+<tr><th scope="row">Mistakes</th><td data-label="One assistant">repeated</td><td data-label="With team-workflow">recorded once, then <strong>enforced by a check</strong> on every edit</td></tr>
+<tr><th scope="row">Cost</th><td data-label="One assistant">a surprise</td><td data-label="With team-workflow">estimate up front, cheap models for routine work, usage report</td></tr>
+</tbody></table>
+</section>
+<section id="install" aria-labelledby="h-install">
+<h2 id="h-install">Install in 30 seconds</h2>
+<p><strong>You need:</strong> <code>git</code>, <strong>Python 3</strong> and one of the supported apps.</p>
+<div class="grid">
+<div class="card"><h3>Claude Code</h3><pre tabindex="0"><code>claude plugin marketplace add antoStr/team-workflow
+claude plugin install team@team</code></pre><p>Restart Claude Code, then type <code>/team &lt;what you want&gt;</code>. That is all.</p></div>
+<div class="card"><h3>agy (Antigravity)</h3><pre tabindex="0"><code>agy plugin install https://github.com/antoStr/team-workflow
+python ~/.gemini/config/plugins/team-workflow/skills/team/scripts/tw.py install-cli</code></pre><p>Restart agy.</p></div>
+<div class="card"><h3>OpenCode <span class="muted">(CLI or desktop app)</span></h3><pre tabindex="0"><code>git clone https://github.com/antoStr/team-workflow
+python team-workflow/skills/team/scripts/install_opencode.py</code></pre><p>Restart OpenCode. Commands: <code>/team</code> or <code>/team-workflow/&lt;name&gt;</code>.</p></div>
+<div class="card"><h3>Codex / opencodex</h3><pre tabindex="0"><code>git clone https://github.com/antoStr/team-workflow
+python team-workflow/skills/team/scripts/tw.py install-codex</code></pre><p>Restart Codex. Commands: <code>$team</code> or <code>$team-workflow-&lt;name&gt;</code>.</p></div>
+</div>
+</section>
+<section id="demo" aria-labelledby="h-demo">
+<h2 id="h-demo">See it work</h2>
+<p>An example session (shortened):</p>
+<pre tabindex="0" aria-label="Example session"><code>you    /team the game crashes on the stage 3 boss
+
+team   setup    a few quick questions: scope, which specialists, which models
+       plan     backend-dev fixes, tester verifies, code-reviewer reviews
+       talk     #1 backend-dev → tester   [fix]       null boss sprite after reload
+                #2 tester → backend-dev   [challenge] still crashes on a second retry
+                #3 backend-dev → tester   [fix]       sprite reloaded on every retry
+                #4 tester                 [verdict]   12 tests pass, game boots and runs stage 3
+       smoke    tw.py smoke "npm run start" → process alive after 10 s, no errors
+       learn    "reload assets on retry" saved as a check for the next time
+       report   what changed, the proof, and anything that still needs your OK</code></pre>
+<h3>One command for everything</h3>
+<table class="cmp">
+<thead><tr><th scope="col">You want to...</th><th scope="col">Type</th></tr></thead>
+<tbody>
+<tr><th scope="row">Build a feature</th><td data-label="Type"><code>/team add OAuth2 login</code></td></tr>
+<tr><th scope="row">Fix a bug</th><td data-label="Type"><code>/team the cart total goes negative with coupon SAVE5</code></td></tr>
+<tr><th scope="row">Audit security</th><td data-label="Type"><code>/team audit the API endpoints</code></td></tr>
+<tr><th scope="row">Review your changes</th><td data-label="Type"><code>/team:review-changes</code></td></tr>
+<tr><th scope="row">Call specific specialists</th><td data-label="Type"><code>/team:call-team tester and security-reviewer: check the upload</code></td></tr>
+<tr><th scope="row">Check the installation</th><td data-label="Type"><code>/team doctor</code></td></tr>
+<tr><th scope="row">Update the plugin (no tokens used)</th><td data-label="Type"><code>/team upgrade</code></td></tr>
+</tbody></table>
+<p>The team answers in your language. Code, commits and repository docs keep the project's language.</p>
+</section>
+<section id="why" aria-labelledby="h-why">
+<h2 id="h-why">Why it does not fake it</h2>
+<p>Most AI tools rely on instructions the model can skip. team-workflow puts the important rules in <strong>code that runs on its own</strong>:</p>
+<ol class="rules">
+<li><strong>Zero Fake-Solved.</strong> A bug is not fixed until <code>tw.py smoke "&lt;launch command&gt;"</code> starts the real app and it stays up (exit code, stderr, a few seconds of runtime). On Windows, <code>--wsl</code> runs it in Linux.</li>
+<li><strong>No self-approval.</strong> Agents work on a shared channel (<code>tw.py talk</code>). Under the adversarial gate (<code>tw.py gate</code>) the author cannot approve its own work: a verifier has to.</li>
+<li><strong>Mistakes become checks.</strong> A lesson is saved with <code>tw.py learn record</code>. If a regex can find the mistake, add <code>--check-pattern</code>. From then on a hook blocks the mistake on <strong>every edit</strong>, at the end of the session and in CI (<code>tw.py learn check</code>). Lessons without a check are passed to the agents as reminders.</li>
+<li><strong>The setup cannot be skipped by accident.</strong> In Claude Code a hook holds the team agents until the setup questions are answered (or you say "skip setup").</li>
+<li><strong>It asks before anything irreversible.</strong> Changes outside the task are listed in the final report and wait for your consent.</li>
+</ol>
+<p>Documentation is checked too: <code>tw.py verify-docs</code> is part of the closing steps, and the final report includes its result next to the smoke-test output.</p>
+<p class="muted">Rule 3 follows the lesson of <em>"All Code Is Slop (Except Mine)"</em> (Lauren Tan, AI Engineer 2026): every correction should become a deterministic check, not one more line of instructions.</p>
+</section>
+<section id="catalog" aria-labelledby="h-catalog">
+<h2 id="h-catalog">Agent catalog</h2>
+<p>The lead agent picks only the specialists a task needs. Small tasks it does alone.</p>
+<ul class="stats" style="list-style:none;padding:0" aria-label="Catalog in numbers"><li class="stat"><b>137</b>specialist agents</li><li class="stat"><b>20</b>core roles</li><li class="stat"><b>26</b>language-pack roles</li><li class="stat"><b>533</b>library entries</li></ul>
+<ul class="plain">
+<li><strong>Core (20):</strong> <code>architect</code>, <code>backend-dev</code>, <code>frontend-dev</code>, <code>tester</code>, <code>code-reviewer</code>, <code>security-reviewer</code> and 14 more.</li>
+<li><strong>Language packs (26 roles):</strong> Python, TypeScript, Go, Rust, Java, C++, C#, Kotlin, Swift, PHP, Ruby, Dart/Flutter, F#.</li>
+<li><strong>Quality, security and reversing:</strong> <code>pentester</code>, <code>reverse-engineer</code>, <code>malware-analyst</code>, <code>silent-failure-hunter</code>, <code>type-design-reviewer</code> and more.</li>
+<li><strong>Project management (<code>pm</code>):</strong> <code>project-manager</code>, <code>project-scheduler</code>, <code>project-controller</code>, <code>risk-manager</code>, <code>stakeholder-manager</code>, <code>agile-coach</code>.</li>
+<li><strong>Second opinions (<code>alt-</code>):</strong> alternative versions of existing roles.</li>
+<li><strong>Library: 533 entries</strong> (417 skills, 94 commands, 22 rule sets). Security playbooks: Strix pentesting (42), Cloudflare security audit (15), malware analysis (43).</li>
+</ul>
+<div class="cta" style="justify-content:flex-start"><a class="btn" href="https://github.com/antoStr/team-workflow/blob/main/docs/CATALOG.md">Full catalog on GitHub</a><a class="btn alt" href="https://github.com/antoStr/team-workflow/blob/main/docs/AGENTS.md">Agent guide</a></div>
+</section>
+<section id="faq" aria-labelledby="h-faq">
+<h2 id="h-faq">FAQ</h2>
+<details><summary>Is it alpha?</summary><div><p>The alpha testing guide (<a href="https://github.com/antoStr/team-workflow/blob/main/ALPHA_TESTING.md">ALPHA_TESTING.md</a>) covers <code>v2.0.0-alpha.1</code>: the Brain engine, the Dual Loader, the Rolling Digest in talk channels and Windows portability. The current release is <strong>v2.5.4</strong>. To report an anomaly, open an issue or share the output of <code>tw.py doctor</code>.</p></div></details>
+<details><summary>Does it work on Windows?</summary><div><p>Windows is handled in the code: <code>tw.py smoke --wsl</code> runs the launch command in Linux, and <code>python_executable()</code> skips the 0-byte Microsoft Store Python placeholders. The CI workflow runs on <code>ubuntu-latest</code> (Python 3.10 and 3.15), so there is no Windows CI run.</p></div></details>
+<details><summary>Is it free?</summary><div><p>Yes. It is under the MIT License, which grants permission "free of charge" to use the software. Imported third-party resources keep their own licenses (<a href="https://github.com/antoStr/team-workflow/blob/main/skills/team/library/NOTICE.md">NOTICE</a>). <code>/team upgrade</code> updates the plugin with a local script, so it uses no tokens.</p></div></details>
+<details><summary>Do I have to use all 137 agents?</summary><div><p>No. The lead agent picks only the specialists the task needs, and works alone on small tasks.</p></div></details>
+<details><summary>How does it stop the agents from claiming a fix that does not work?</summary><div><p>The fix is accepted only after <code>tw.py smoke</code> starts the real command and the process stays healthy, and after an independent verifier signs off.</p></div></details>
+<details><summary>Can I skip the session setup?</summary><div><p>Yes. Write "skip setup" in the request, or answer just "defaults", to start with your current settings. <code>TEAM_WORKFLOW_SETUP_GATE=0</code> or <code>session_wizard=false</code> turns the setup gate off.</p></div></details>
+<details><summary>Can it change files without asking?</summary><div><p>No. It only touches files that belong to your task. Anything else is proposed in the final report and waits for your OK.</p></div></details>
+<details><summary>Does it work on long projects?</summary><div><p>Yes. The memory and the brain graph keep the project's state across sessions, and <code>tw.py brain rollover</code> archives old history into weekly journals.</p></div></details>
+</section>
+</div>
+</main>
+<footer><div class="wrap">
+<h2 class="sr">Learn more</h2>
+<ul>
+<li><a href="https://github.com/antoStr/team-workflow/blob/main/docs/REFERENCE.md">Reference manual</a></li>
+<li><a href="https://github.com/antoStr/team-workflow/blob/main/skills/team/TALK.md">How agents talk</a></li>
+<li><a href="https://github.com/antoStr/team-workflow/blob/main/docs/brain/INDEX.md">Brain graph layout</a></li>
+<li><a href="https://github.com/antoStr/team-workflow/releases">Release notes</a></li>
+<li><a href="https://github.com/antoStr/team-workflow">Repository</a></li>
+</ul>
+<p>If team-workflow saves you a "fixed!" that was not fixed, star the repo so others find it.</p>
+<p>MIT License (<a href="https://github.com/antoStr/team-workflow/blob/main/LICENSE">LICENSE</a>), copyright 2026 antoStr. team-workflow v2.5.4</p>
+</div></footer>
+</body>
+</html>
