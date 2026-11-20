@@ -17,9 +17,10 @@ downstream:
   - "[[skills-team-scripts-questions]]"
   - "[[skills-team-scripts-tw]]"
   - "[[tests-test_cortex]]"
+  - "[[tests-test_stop_noise]]"
 files: [skills/team/scripts/cortex.py]
 status: active
-last_updated: 2026-11-20T11:45:45
+last_updated: 2026-11-20T12:09:10
 ---
 
 # cortex.py
@@ -77,3 +78,4 @@ resource-aware neural routing & self-evolving system:
 - [[skills-team-scripts-questions]]
 - [[skills-team-scripts-tw]]
 - [[tests-test_cortex]]
+- [[tests-test_stop_noise]]

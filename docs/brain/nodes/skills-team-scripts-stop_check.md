@@ -9,7 +9,7 @@ upstream:
 downstream:
 files: [skills/team/scripts/stop_check.py]
 status: active
-last_updated: 2026-11-20T11:45:45
+last_updated: 2026-11-20T12:09:10
 ---
 
 # stop_check.py
@@ -26,7 +26,9 @@ never blocks twice in a row (stop_hook_active) and is off with the setting stop_
 ### Functions
 - `locate_state(root)`
 - `changed_this_session(root, snap)`
-- `newest_mtime(root, paths)`
+- `change_times(root, paths, head)`
+- `read_mark(path)`
+- `write_mark(path, text)`
 - `_auto_evolve_session(root, work)`
 - `decide(data)`
 - `main()`

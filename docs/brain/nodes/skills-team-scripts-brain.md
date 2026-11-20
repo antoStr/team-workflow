@@ -10,9 +10,10 @@ downstream:
   - "[[skills-team-scripts-tw]]"
   - "[[skills-team-scripts-verify_docs]]"
   - "[[tests-test_brain]]"
+  - "[[tests-test_stop_noise]]"
 files: [skills/team/scripts/brain.py]
 status: active
-last_updated: 2026-11-20T11:45:45
+last_updated: 2026-11-20T12:09:10
 ---
 
 # brain.py
@@ -48,3 +49,4 @@ AST-based repository mapping, fast BFS-expanded context queries, and vault healt
 - [[skills-team-scripts-tw]]
 - [[skills-team-scripts-verify_docs]]
 - [[tests-test_brain]]
+- [[tests-test_stop_noise]]
